@@ -34,7 +34,10 @@ shadow_enabled = true
 [node name="GameManager" parent="." instance=ExtResource("1_1c2mv")]
 
 [node name="SpawnPoint" parent="." instance=ExtResource("2_f7g2b")]
-transform = Transform3D(0.68870896, 0, 0.7250379, 0, 1, 0, -0.7250379, 0, 0.68870896, 4.079609, 1.3157029, -15.109871)
+transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 4.079609, 1.3157029, -20.762333)
+
+[node name="SpawnPoint" parent="SpawnPoint" instance=ExtResource("2_f7g2b")]
+transform = Transform3D(-0.9917632, 0, 0.12808594, 0, 1, 0, -0.12808594, 0, -0.9917632, 0.5123465, 1.3157029, -31.075033)
 
 [node name="Player" parent="." instance=ExtResource("3_f7g2b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6006985, 0)

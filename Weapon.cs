@@ -3,7 +3,7 @@ using System;
 
 public partial class Weapon : Node3D
 {
-    [Export] public float FireRate = 1.0f;
+    [Export] public float PrimaryFireCooldown = 0.5f;
     protected float _cooldown = 0.0f;
 
     [Export] PackedScene _projectileScene;
@@ -21,7 +21,7 @@ public partial class Weapon : Node3D
         if (_cooldown <= 0f)
         {
             PrimaryFire(origin, direction);
-            _cooldown = 1f / FireRate;
+            _cooldown = PrimaryFireCooldown;
         }
         else
         {
