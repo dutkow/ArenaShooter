@@ -10,6 +10,7 @@ public partial class Projectile : Node3D
     private float _timeAlive = 0f;
 
     // Call this immediately after instancing the projectile
+
     public void Initialize(Vector3 direction)
     {
         _velocity = direction.Normalized() * Speed;
