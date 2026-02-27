@@ -1,0 +1,41 @@
+# Unnecessary visual studio files
+.vs/
+
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Godot Engine generated folders
+.import/
+.export/
+
+# Editor user settings (local to your machine)
+.editor/
+
+# Godot editor logs and crash dumps
+*.log
+*.dmp
+
+# Ignore build folders (if you create any)
+bin/
+.build/
+
+Sprites/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+/tools/assets
+/tools/renders
+
+<<<<<<< Updated upstream
+
+MedievalKingdomUI/
+Rexard/
+Poneti/
+=======
+MedievalKingdomUI/
+
+strategygameicons/
+>>>>>>> Stashed changes
+

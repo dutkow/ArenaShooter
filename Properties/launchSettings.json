@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "ArenaShooter": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Dev\\Godot\\Godot_v4.6.1-stable_mono_win64\\Godot_v4.6.1-stable_mono_win64\\Godot_v4.6.1-stable_mono_win64.exe"
+    },
+    "RunGodot": {
+      "commandName": "Executable",
+      "commandLineArgs": "",
+      "executablePath": "C:\\Dev\\Godot\\Godot_v4.6.1-stable_mono_win64\\Godot_v4.6.1-stable_mono_win64\\Godot_v4.6.1-stable_mono_win64.exe",
+      "workingDirectory": ".",
+      "nativeDebugging": true
+    }
+  }
+}
