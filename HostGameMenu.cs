@@ -12,6 +12,7 @@ public partial class HostGameMenu : Control
         base._Ready();
 
         _hostGameButton.Pressed += OnHostGameButtonPressed;
+        NetworkHandler.Instance.OnServerStarted += OnServerStarted;
     }
 
     public void Open()
@@ -20,6 +21,11 @@ public partial class HostGameMenu : Control
     }
 
     public void OnHostGameButtonPressed()
+    {
+        NetworkHandler.Instance.StartServer();
+    }
+
+    public void OnServerStarted()
     {
         GetTree().ChangeSceneToPacked(_testLevel);
     }

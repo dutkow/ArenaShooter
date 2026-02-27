@@ -8,9 +8,12 @@ using System.Collections.Generic;
 /// </summary>
 public partial class NetworkHandler : Node
 {
+    public static NetworkHandler Instance;
+
     // ----------------------
     // Server events
     // ----------------------
+    public Action? OnServerStarted;
     public Action<int>? OnPeerConnected;
     public Action<int>? OnPeerDisconnected;
     public Action<int, byte[]>? OnServerPacket;
@@ -43,7 +46,16 @@ public partial class NetworkHandler : Node
     {
         // Initialize available peer IDs 255 -> 0
         for (int i = 255; i >= 0; i--)
+        {
             availablePeerIds.Add(i);
+        }
+    }
+
+    public override void _Ready()
+    {
+        base._Ready();
+
+        Instance = this;
     }
 
     public override void _Process(double delta)
@@ -118,6 +130,8 @@ public partial class NetworkHandler : Node
 
         GD.Print("Server started");
         isServer = true;
+
+        OnServerStarted?.Invoke();
     }
 
     private void PeerConnected(ENetPacketPeer peer)

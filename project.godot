@@ -15,6 +15,10 @@ run/main_scene="uid://ci8rl3endmnqc"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+NetworkHandler="*res://src/net/NetworkHandler.cs"
+
 [display]
 
 window/size/viewport_width=800
