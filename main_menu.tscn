@@ -1,0 +1,54 @@
+[gd_scene load_steps=3 format=3 uid="uid://ci8rl3endmnqc"]
+
+[ext_resource type="PackedScene" uid="uid://dpeblvinig3d3" path="res://host_game_menu.tscn" id="1_06t4h"]
+[ext_resource type="Script" uid="uid://bu1pxpyefq2b0" path="res://MainMenu.cs" id="1_7vrkn"]
+
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("_hostGameButton", "_hostGameMenu")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7vrkn")
+_hostGameButton = NodePath("VBoxContainer/HostGameButton")
+_hostGameMenu = NodePath("HostGameMenu")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.24477637, 0.2447764, 0.24477637, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -48.5
+offset_top = -33.0
+offset_right = 48.5
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HostGameButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Host Game"
+
+[node name="JoinGameButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Join Game"
+
+[node name="ExitGameButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Exit Game"
+
+[node name="HostGameMenu" parent="." instance=ExtResource("1_06t4h")]
+visible = false
+layout_mode = 1

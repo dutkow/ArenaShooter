@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="ArenaShooter"
-run/main_scene="uid://byrsxq2i83b2a"
+run/main_scene="uid://ci8rl3endmnqc"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
