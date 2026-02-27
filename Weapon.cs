@@ -39,17 +39,8 @@ public partial class Weapon : Node3D
     public void SpawnProjectile(Vector3 origin, Vector3 direction)
     {
         var newProjectile = (Projectile)_projectileScene.Instantiate();
-        newProjectile.GlobalPosition = origin;
-
-        // make the projectile face the direction
-        newProjectile.LookAt(origin + direction, Vector3.Up);
-        // add to scene root (or a proper container)
-
-        newProjectile.Initialize(direction);
-
-
+        newProjectile.Initialize(origin, direction);
         GetTree().Root.AddChild(newProjectile);
-
     }
 
 }

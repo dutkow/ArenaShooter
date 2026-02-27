@@ -41,6 +41,11 @@ public partial class Player : CharacterBody3D
         {
             _cameraInput = mouseEvent.Relative;
         }
+
+        if (Input.IsActionPressed("primary_fire"))
+        {
+            TryPrimaryFire();
+        }
     }
 
     public override void _Process(double delta)
@@ -146,17 +151,6 @@ public partial class Player : CharacterBody3D
             }
         }
     }
-
-    public override void _UnhandledInput(InputEvent @event)
-    {
-        base._UnhandledInput(@event);
-
-        if (Input.IsActionPressed("primary_fire"))
-        {
-            TryPrimaryFire();
-        }
-    }
-
     public void TryPrimaryFire()
     {
         Vector3 fireDirection = -Camera.GlobalTransform.Basis.Z; // camera forward
