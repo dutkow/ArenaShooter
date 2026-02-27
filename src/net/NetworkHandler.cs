@@ -42,6 +42,23 @@ public partial class NetworkHandler : Node
     private ENetConnection connection;
     private bool isServer = false;
 
+    // ----------------------
+    // LAN discovery
+    // ----------------------
+    private PacketPeerUdp lanBroadcastPeer;
+    private PacketPeerUdp lanListenPeer;
+
+    private bool isListeningForLan = false;
+    private double lanListenTimer = 0.0;
+
+    private double lanBroadcastTimer = 0.0;
+
+    private const int LanBroadcastPort = 42070;
+
+    public Action<ServerInfo>? OnLanServerDiscovered;
+
+    private Dictionary<string, ServerInfo> _discoveredLanServers = new();
+
     public NetworkHandler()
     {
         // Initialize available peer IDs 255 -> 0
@@ -197,5 +214,19 @@ public partial class NetworkHandler : Node
         GD.Print("Disconnected from server!");
         OnDisconnectedFromServer?.Invoke();
         connection = null;
+    }
+
+    // ----------------------
+    // Server discovery functions
+    // ----------------------
+    public void RefreshLanServers(double listenSeconds = 2.0)
+    {
+        _discoveredLanServers.Clear();
+
+        lanListenPeer = new PacketPeerUdp();
+        lanListenPeer.Bind(LanBroadcastPort);
+
+        isListeningForLan = true;
+        lanListenTimer = listenSeconds;
     }
 }
