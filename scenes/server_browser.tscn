@@ -1,12 +1,27 @@
-[gd_scene format=3 uid="uid://dmvq5swhuqelu"]
+[gd_scene load_steps=3 format=3 uid="uid://dmvq5swhuqelu"]
 
-[node name="ServerBrowser" type="Control"]
+[ext_resource type="Script" uid="uid://ch7hcn0bc2af1" path="res://scenes/ServerBrowser.cs" id="1_j2g02"]
+[ext_resource type="PackedScene" uid="uid://bxcaafo6blio2" path="res://server_result_entry.tscn" id="2_oyqsf"]
+
+[node name="ServerBrowser" type="Control" node_paths=PackedStringArray("_serverResultsContainer", "_serverRefreshLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_j2g02")
+_serverResultsContainer = NodePath("VBoxContainer/Control/ScrollContainer/ServerResultsContainer")
+_serverRefreshLabel = NodePath("VBoxContainer/Control/ServerRefreshLabel")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.16206557, 0.1620656, 0.16206557, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -48,9 +63,42 @@ size_flags_horizontal = 3
 text = "Ping"
 horizontal_alignment = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+[node name="Control" type="Control" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ServerList" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/Control"]
+layout_mode = 0
+offset_top = 4.0
+offset_right = 800.0
+offset_bottom = 546.0
+size_flags_vertical = 3
+
+[node name="ServerResultsContainer" type="VBoxContainer" parent="VBoxContainer/Control/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ServerResultEntry" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" instance=ExtResource("2_oyqsf")]
+layout_mode = 2
+
+[node name="ServerResultEntry2" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" instance=ExtResource("2_oyqsf")]
+layout_mode = 2
+
+[node name="ServerResultEntry3" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" instance=ExtResource("2_oyqsf")]
+layout_mode = 2
+
+[node name="ServerResultEntry4" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" instance=ExtResource("2_oyqsf")]
+layout_mode = 2
+
+[node name="ServerRefreshLabel" type="Label" parent="VBoxContainer/Control"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Refreshing servers..."
+horizontal_alignment = 1
+vertical_alignment = 1

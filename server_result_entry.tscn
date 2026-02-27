@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxcaafo6blio2"]
+
+[ext_resource type="Script" uid="uid://cxib41chpk27k" path="res://ServerResultEntry.cs" id="1_p5soc"]
+
+[node name="ServerResultEntry" type="Control"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -46.0
+offset_bottom = -555.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_p5soc")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ServerNameLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "[Server Name]"
+
+[node name="MapLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "[Map]"
+
+[node name="PlayerCountLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "[1/16]"
+
+[node name="PingLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "256"
