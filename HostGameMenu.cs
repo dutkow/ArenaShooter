@@ -22,7 +22,9 @@ public partial class HostGameMenu : Control
 
     public void OnHostGameButtonPressed()
     {
-        NetworkHandler.Instance.StartServer();
+        ServerInfo serverInfo = new();
+        serverInfo.Name = "Test Server";
+        NetworkSession.Instance.HostLanServer(serverInfo);
     }
 
     public void OnServerStarted()

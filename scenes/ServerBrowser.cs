@@ -6,6 +6,8 @@ public partial class ServerBrowser : Control
     [Export] VBoxContainer _serverResultsContainer;
     [Export] Label _serverRefreshLabel;
 
+    [Export] PackedScene _serverResultEntryScene;
+
     public void Open()
     {
         Show();
@@ -17,7 +19,6 @@ public partial class ServerBrowser : Control
         ClearServerResults();
 
         _serverRefreshLabel.Show();
-
 
     }
 
@@ -32,6 +33,12 @@ public partial class ServerBrowser : Control
     public void PopulateServerResults()
     {
 
+    }
+
+    public void AddServerResult(ServerInfo serverInfo)
+    {
+        var serverResultEntry = (ServerResultEntry)_serverResultEntryScene.Instantiate();
+        _serverResultsContainer.AddChild(serverResultEntry);
     }
 
 }

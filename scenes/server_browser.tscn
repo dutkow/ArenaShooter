@@ -13,6 +13,7 @@ grow_vertical = 2
 script = ExtResource("1_j2g02")
 _serverResultsContainer = NodePath("VBoxContainer/Control/ScrollContainer/ServerResultsContainer")
 _serverRefreshLabel = NodePath("VBoxContainer/Control/ServerRefreshLabel")
+_serverResultEntryScene = ExtResource("2_oyqsf")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
