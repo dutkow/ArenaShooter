@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://dpeblvinig3d3"]
 
 [ext_resource type="Script" uid="uid://bgkwfgy123qgs" path="res://HostGameMenu.cs" id="1_n5th5"]
-[ext_resource type="PackedScene" uid="uid://byrsxq2i83b2a" path="res://test_level.tscn" id="2_gskxa"]
+[ext_resource type="PackedScene" uid="uid://byrsxq2i83b2a" path="res://scenes/maps/test_map_1/test_map_1.tscn" id="2_gskxa"]
 
 [node name="HostGameMenu" type="Control" node_paths=PackedStringArray("_hostGameButton")]
 layout_mode = 3

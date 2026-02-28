@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+GameData="*res://src/GameData.cs"
 NetworkHandler="*res://src/net/NetworkHandler.cs"
 NetworkSession="*res://src/net/NetworkSession.cs"
 MatchState="*res://MatchState.cs"

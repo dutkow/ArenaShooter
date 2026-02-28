@@ -1,0 +1,12 @@
+{
+  "Maps": [
+    {
+      "ID": "test_map_1",
+      "Name": "Test Map 1"
+    },
+    {
+      "ID": "test_map_2",
+      "Name": "Test Map 2"
+    }
+  ]
+}
