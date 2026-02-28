@@ -23,6 +23,7 @@ public partial class NetworkSession : Node
     public Action<List<ServerInfo>>? OnServerRefreshFinished;
     public Action? OnConnectedToServer;
     public Action? OnFailedToConnect;
+    public Action? OnDisconnectedFromServer;
 
     public NetworkSession()
     {
@@ -34,17 +35,19 @@ public partial class NetworkSession : Node
         base._Ready();
         
         _networkHandler = NetworkHandler.Instance;
+
+        _networkHandler.OnServerStarted += HandleServerStarted;
+        _networkHandler.OnPeerConnected += HandlePeerConnected;
+        _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
+
+        _networkHandler.OnConnectedToServer += HandleConnectedToServer;
+        _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
     }
 
     public void HostLanServer(ServerInfo info)
     {
         ServerInfo = info;
         info.MapID = GameData.Instance.MapCollection.Maps[0].ID; // generic default map testing
-
-
-        _networkHandler.OnServerStarted += HandleServerStarted;
-        _networkHandler.OnPeerConnected += HandlePeerConnected;
-        _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
 
         _networkHandler.StartServer(info.HostIP, info.Port);
 
@@ -86,8 +89,10 @@ public partial class NetworkSession : Node
     // ----------------------
     // Join server
     // ----------------------
-    public void JoinServer(ServerInfo server)
+    public void JoinServer(ServerInfo serverInfo)
     {
+        ServerInfo = serverInfo;
+
         GD.Print("Attempting to join server...");
         if (_isHosting)
         {
@@ -96,16 +101,13 @@ public partial class NetworkSession : Node
             return;
         }
 
-        _networkHandler.StartClient(server.HostIP, server.Port);
-        _networkHandler.OnConnectedToServer += HandleConnectedToServer;
-        _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
+        _networkHandler.StartClient(serverInfo.HostIP, serverInfo.Port);
     }
 
     private void HandleConnectedToServer()
     {
         GD.Print("Successfully connected to server");
-        _networkHandler.OnConnectedToServer -= HandleConnectedToServer;
-        _networkHandler.OnDisconnectedFromServer -= HandleFailedToConnect;
+
 
         OnConnectedToServer?.Invoke();
     }
@@ -114,10 +116,12 @@ public partial class NetworkSession : Node
     {
         GD.Print("Failed to connect to server");
 
-        _networkHandler.OnConnectedToServer -= HandleConnectedToServer;
-        _networkHandler.OnDisconnectedFromServer -= HandleFailedToConnect;
-
         OnFailedToConnect?.Invoke();
+    }
+
+    public void HandleDisconnectedFromServer()
+    {
+        OnDisconnectedFromServer?.Invoke();
     }
 
     // ----------------------

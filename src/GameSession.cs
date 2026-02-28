@@ -18,7 +18,7 @@ public partial class GameSession : Node
 
     private void OnConnectedToServer()
     {
-
+        LoadGame(NetworkSession.Instance.ServerInfo.MapID);
     }
 
     public void StartSinglePlayer(string mapId)
