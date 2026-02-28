@@ -10,6 +10,7 @@ public class ServerInfo
     public int Port;
     public int Players;
     public int MaxPlayers;
+    public string MapID;
 
     public ServerInfo(string name = "New Server", string ip = "127.0.0.1", int port = 42069, int players = 0, int maxPlayers = 8, string? serverID = null)
     {

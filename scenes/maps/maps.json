@@ -1,12 +1,16 @@
 {
-  "Maps": [
+  "maps": [
     {
-      "ID": "test_map_1",
-      "Name": "Test Map 1"
+      "id": "test_map_1",
+      "name": "Test Map 1",
+      "folder": "test_map_1",
+      "scene": "test_map_1"
     },
     {
-      "ID": "test_map_2",
-      "Name": "Test Map 2"
+      "id": "test_map_2",
+      "name": "Test Map 2",
+      "folder": "test_map_1",
+      "scene": "test_map_1"
     }
   ]
 }

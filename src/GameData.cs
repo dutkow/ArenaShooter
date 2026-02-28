@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System;
 using System.Text.Json;
 using static PascalToSnake;
@@ -6,7 +7,9 @@ using static PascalToSnake;
 public partial class GameData : Node
 {
     public static GameData Instance { get; private set; }
-    public MapCollection Maps { get; private set; }
+    public MapCollection MapCollection { get; private set; }
+
+    public System.Collections.Generic.Dictionary<string, MapInfo> MapsByID = new();
 
     public override void _Ready()
     {
@@ -33,18 +36,23 @@ public partial class GameData : Node
 
         var options = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = new SnakeToPascal(),
+            PropertyNamingPolicy = new PascalToSnake(),
             AllowTrailingCommas = true,
         };
 
-        Maps = JsonSerializer.Deserialize<MapCollection>(jsonText, options);
-        Maps.Initialize();
+        MapCollection = JsonSerializer.Deserialize<MapCollection>(jsonText, options);
+        MapCollection.Initialize();
 
-        GD.Print($"Loaded {Maps.Maps.Count} maps.");
+        foreach(var map in MapCollection.Maps)
+        {
+            MapsByID[map.ID] = map;
+        }
+
+        GD.Print($"Loaded {MapCollection.Maps.Count} maps.");
     }
 
     public MapInfo? GetMapByID(string id)
     {
-        return Maps.Maps.Find(m => m.ID == id);
+        return MapCollection.Maps.Find(m => m.ID == id);
     }
 }
