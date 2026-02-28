@@ -23,15 +23,10 @@ public partial class Weapon : Node3D
             PrimaryFire(origin, direction);
             _cooldown = PrimaryFireCooldown;
         }
-        else
-        {
-            GD.Print("cannot fire, cooldown active");
-        }
     }
 
     public void PrimaryFire(Vector3 origin, Vector3 direction)
     {
-        GD.Print("fire!");
         SpawnProjectile(origin, direction);
     }
 

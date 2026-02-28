@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public enum MatchPhase
 {
@@ -13,7 +14,9 @@ public partial class MatchState : Node
 {
     public static MatchState Instance { get; private set; }
 
-    // Current match phase
+    // ----------------------
+    // Match phase
+    // ----------------------
     private MatchPhase _matchPhase;
     public MatchPhase MatchPhase
     {
@@ -28,7 +31,6 @@ public partial class MatchState : Node
         }
     }
 
-    // Time remaining in seconds
     private int _timeRemaining;
     public int TimeRemaining
     {
@@ -47,20 +49,31 @@ public partial class MatchState : Node
     public event Action<MatchPhase>? MatchPhaseChanged;
     public event Action<int>? TimeRemainingChanged;
 
-    // Phase durations (seconds)
     [Export] public int WarmupDuration { get; set; } = 3;
     [Export] public int PreMatchDuration { get; set; } = 3;
     [Export] public int MatchDuration { get; set; } = 600;
     [Export] public int PostMatchDuration { get; set; } = 5;
 
-    // Accumulates delta until we hit 1 second
     private double _secondAccumulator = 0.0;
+
+    // ----------------------
+    // Player management
+    // ----------------------
+    private readonly Dictionary<int, PlayerState> _connectedPlayers = new(); // peerId -> PlayerState
+    public IReadOnlyDictionary<int, PlayerState> ConnectedPlayers => _connectedPlayers;
+
+    public event Action<int, PlayerState>? PlayerJoined;
+    public event Action<int, PlayerState>? PlayerLeft;
 
     public override void _Ready()
     {
         Instance = this;
 
         StartPhase(MatchPhase.WARMUP);
+
+        // Hook network events
+        NetworkHandler.Instance.OnPeerConnected += HandlePeerConnected;
+        NetworkHandler.Instance.OnPeerDisconnected += HandlePeerDisconnected;
     }
 
     public override void _Process(double delta)
@@ -80,14 +93,10 @@ public partial class MatchState : Node
     private void TickOneSecond()
     {
         if (TimeRemaining > 0)
-        {
             TimeRemaining--;
-        }
 
         if (TimeRemaining == 0)
-        {
             AdvanceToNextMatchPhase();
-        }
     }
 
     private bool IsPhaseTimed(MatchPhase phase)
@@ -103,11 +112,10 @@ public partial class MatchState : Node
         MatchPhase = phase;
         _secondAccumulator = 0.0;
 
-        switch(MatchPhase)
+        switch (MatchPhase)
         {
             case MatchPhase.WARMUP: StartWarmup(); return;
             case MatchPhase.PRE_MATCH: StartPreMatch(); return;
-
         }
 
         TimeRemaining = phase switch
@@ -119,16 +127,8 @@ public partial class MatchState : Node
         };
     }
 
-    public void StartWarmup()
-    {
-        TimeRemaining = WarmupDuration;
-
-    }
-
-    public void StartPreMatch()
-    {
-        TimeRemaining = PreMatchDuration;
-    }
+    public void StartWarmup() => TimeRemaining = WarmupDuration;
+    public void StartPreMatch() => TimeRemaining = PreMatchDuration;
 
     public void AdvanceToNextMatchPhase()
     {
@@ -143,4 +143,54 @@ public partial class MatchState : Node
 
         StartPhase(nextPhase);
     }
+
+    // ----------------------
+    // Player handling
+    // ----------------------
+    private void HandlePeerConnected(int peerId)
+    {
+        // Create a new PlayerState for this peer
+        var newPlayer = new PlayerState
+        {
+            PlayerName = $"Player{peerId}",
+            Score = 0,
+            Health = 100,
+            Shields = 100,
+            Ammo = 0,
+            TeamId = -1,
+            Pawn = null
+        };
+
+        _connectedPlayers[peerId] = newPlayer;
+
+        GD.Print($"Player joined: {peerId} ({newPlayer.PlayerName})");
+
+        PlayerJoined?.Invoke(peerId, newPlayer);
+
+        // TODO: Broadcast to other clients that this player exists
+        // NetworkHandler.Instance.BroadcastPlayerJoined(peerId, newPlayer);
+    }
+
+    private void HandlePeerDisconnected(int peerId)
+    {
+        if (_connectedPlayers.TryGetValue(peerId, out var player))
+        {
+            _connectedPlayers.Remove(peerId);
+
+            GD.Print($"Player left: {peerId} ({player.PlayerName})");
+
+            PlayerLeft?.Invoke(peerId, player);
+
+            // TODO: Broadcast to other clients that a player left
+            // NetworkHandler.Instance.BroadcastPlayerLeft(peerId);
+        }
+    }
+
+    // ----------------------
+    // Optional helpers
+    // ----------------------
+    public IReadOnlyList<PlayerState> GetAllPlayers() => new List<PlayerState>(_connectedPlayers.Values);
+
+    public IReadOnlyList<PlayerState> GetActivePlayers() =>
+        new List<PlayerState>(_connectedPlayers.Values).FindAll(p => p.Pawn != null);
 }
