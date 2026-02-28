@@ -64,9 +64,14 @@ public partial class GameMode : Node
     {
         GD.Print("Match started: unfreeze players");
 
-        foreach (var player in PlayerManager.Instance.GetActivePlayers())
+        foreach (var playerState in PlayerManager.Instance.GetActivePlayers())
         {
-
+            var playerCharacter = playerState.Pawn;
+            if (playerCharacter != null)
+            {
+                playerCharacter.SetInputEnabled(true);
+                playerCharacter.SetWeaponsEnabled(true);
+            }
         }
     }
 

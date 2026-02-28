@@ -48,7 +48,7 @@ public partial class MatchState : Node
     public event Action<int>? TimeRemainingChanged;
 
     // Phase durations (seconds)
-    [Export] public int WarmupDuration { get; set; } = 6;
+    [Export] public int WarmupDuration { get; set; } = 3;
     [Export] public int PreMatchDuration { get; set; } = 3;
     [Export] public int MatchDuration { get; set; } = 600;
     [Export] public int PostMatchDuration { get; set; } = 5;

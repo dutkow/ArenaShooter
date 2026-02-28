@@ -74,15 +74,24 @@ public partial class PlayerCharacter : CharacterBody3D
 
     public override void _Input(InputEvent @event)
     {
+        if(!_inputEnabled)
+        {
+            return;
+        }
+
         if (@event is InputEventMouseMotion mouseEvent && Input.MouseMode == Input.MouseModeEnum.Captured)
         {
             _cameraInput = mouseEvent.Relative;
         }
 
-        if (Input.IsActionPressed("primary_fire"))
+        if(_weaponsEnabled)
         {
-            TryPrimaryFire();
+            if (Input.IsActionPressed("primary_fire"))
+            {
+                TryPrimaryFire();
+            }
         }
+
 
         if (Input.IsActionJustPressed("toggle_cursor_lock"))
         {
@@ -100,6 +109,11 @@ public partial class PlayerCharacter : CharacterBody3D
 
     public void HandleMovement(double delta)
     {
+        if (!_inputEnabled)
+        {
+            return;
+        }
+
         var inputDir = Vector3.Zero;
 
         if (Input.IsActionPressed("move_right")) inputDir.X += 1.0f;

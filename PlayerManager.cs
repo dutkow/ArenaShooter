@@ -29,6 +29,6 @@ public partial class PlayerManager : Node
 
     public IReadOnlyList<PlayerState> GetActivePlayers()
     {
-        return _playerStates.FindAll(p => p.Status == PlayerStatus.ACTIVE);
+        return _playerStates.FindAll(p => p.Pawn != null);
     }
 }
