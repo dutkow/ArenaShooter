@@ -53,7 +53,7 @@ public partial class NetworkHandler : Node
 
     private double lanBroadcastTimer = 0.0;
 
-    private const int LanBroadcastPort = 42070;
+    public int LanBroadcastPort = 42070;
 
     public Action<ServerInfo>? OnLanServerDiscovered;
 

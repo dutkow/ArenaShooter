@@ -18,10 +18,10 @@ config/icon="res://icon.svg"
 [autoload]
 
 NetworkHandler="*res://src/net/NetworkHandler.cs"
+NetworkSession="*res://src/net/NetworkSession.cs"
 MatchState="*res://MatchState.cs"
 GameMode="*res://GameMode.cs"
 PlayerManager="*res://PlayerManager.cs"
-NetworkSession="*res://src/net/NetworkSession.cs"
 
 [display]
 

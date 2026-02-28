@@ -1,5 +1,9 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
 
 public partial class NetworkSession : Node
 {
@@ -25,11 +29,20 @@ public partial class NetworkSession : Node
     public Action<int>? OnPlayerJoined;
     public Action<int>? OnPlayerLeft;
 
+    // ----------------------
+    // Server discovery
+    // ----------------------
+    public Action<List<ServerInfo>>? OnServerRefreshFinished;
+
+    public NetworkSession()
+    {
+        Instance = this;
+    }
+
     public override void _Ready()
     {
         base._Ready();
 
-        Instance = this;
 
         _networkHandler = NetworkHandler.Instance;
     }
@@ -92,5 +105,40 @@ public partial class NetworkSession : Node
     {
         GD.Print($"Player left: {peerId}");
         OnPlayerLeft?.Invoke(peerId);
+    }
+
+    // ----------------------
+    // LAN Discovery
+    // ----------------------
+    public async void RefreshLanServers(float listenSeconds = 2f)
+    {
+        GD.Print("refresh lan servers ran");
+        var servers = await ListenForLanServersAsync(listenSeconds);
+        OnServerRefreshFinished?.Invoke(servers);
+        GD.Print($"Refresh lan servers finished. Servers found = {servers.Count}");
+    }
+
+    private async Task<List<ServerInfo>> ListenForLanServersAsync(float listenSeconds)
+    {
+        var discoveredServers = new List<ServerInfo>();
+        using var listener = new UdpClient(_networkHandler.LanBroadcastPort);
+        listener.EnableBroadcast = true;
+
+        var timeout = DateTime.Now.AddSeconds(listenSeconds);
+
+        while (DateTime.Now < timeout)
+        {
+            if (listener.Available > 0)
+            {
+                var result = await listener.ReceiveAsync();
+                var data = Encoding.UTF8.GetString(result.Buffer);
+                // convert broadcast string to ServerInfo
+                var serverInfo = ServerInfo.FromString(data);
+                discoveredServers.Add(serverInfo);
+            }
+            await Task.Delay(50);
+        }
+
+        return discoveredServers;
     }
 }
