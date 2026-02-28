@@ -10,16 +10,27 @@ public partial class MatchTimer : Control
     {
         base._Ready();
 
-        // fetch game state and time and init warmup label, timer, etc.
+        OnMatchPhaseChanged(MatchState.Instance.MatchPhase);
+        OnMatchTimeRemainingChanged(MatchState.Instance.TimeRemaining);
+
+        MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
+        MatchState.Instance.TimeRemainingChanged += OnMatchTimeRemainingChanged;
+
     }
-    public void OnWarmupStarted()
+    public void OnMatchPhaseChanged(MatchPhase matchPhase)
     {
-        _warmupLabel.Show();
+        if(matchPhase == MatchPhase.WARMUP)
+        {
+            _warmupLabel.Show();
+        }
+        else
+        {
+            _warmupLabel.Hide();
+        }
     }
 
     public void OnWarmupFinished()
     {
-        _warmupLabel.Hide();
     }
 
     public void OnMatchTimeRemainingChanged(int seconds)

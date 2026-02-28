@@ -27,6 +27,7 @@ public partial class HostGameMenu : Control
 
     public void OnServerStarted()
     {
+        MatchState.Instance.StartPhase(MatchPhase.WARMUP);
         GetTree().ChangeSceneToPacked(_testLevel);
     }
 }

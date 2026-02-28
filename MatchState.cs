@@ -47,16 +47,17 @@ public partial class MatchState : Node
     public event Action<MatchPhase>? MatchPhaseChanged;
     public event Action<int>? TimeRemainingChanged;
 
-    // Phase durations (seconds) — adjustable per project
+    // Phase durations (seconds)
     [Export] public int WarmupDuration { get; set; } = 5;
     [Export] public int PreMatchDuration { get; set; } = 3;
-    [Export] public int MatchDuration { get; set; } = 600; // 10 min
+    [Export] public int MatchDuration { get; set; } = 600;
     [Export] public int PostMatchDuration { get; set; } = 5;
+
+    // Accumulates delta until we hit 1 second
+    private double _secondAccumulator = 0.0;
 
     public override void _Ready()
     {
-        base._Ready();
-
         Instance = this;
 
         StartPhase(MatchPhase.WARMUP);
@@ -64,51 +65,52 @@ public partial class MatchState : Node
 
     public override void _Process(double delta)
     {
-        // Only decrement timer for active phases
-        if (MatchPhase == MatchPhase.WARMUP || MatchPhase == MatchPhase.PRE_MATCH || MatchPhase == MatchPhase.MATCH)
+        if (!IsPhaseTimed(MatchPhase))
+            return;
+
+        _secondAccumulator += delta;
+
+        while (_secondAccumulator >= 1.0)
         {
-            // Subtract time each second
-            if (TimeRemaining > 0)
-            {
-                TimeRemaining--;
-            }
-            else
-            {
-                AdvanceToNextMatchPhase();
-            }
+            _secondAccumulator -= 1.0;
+            TickOneSecond();
         }
+    }
+
+    private void TickOneSecond()
+    {
+        if (TimeRemaining > 0)
+        {
+            TimeRemaining--;
+        }
+
+        if (TimeRemaining == 0)
+        {
+            AdvanceToNextMatchPhase();
+        }
+    }
+
+    private bool IsPhaseTimed(MatchPhase phase)
+    {
+        return phase == MatchPhase.WARMUP
+            || phase == MatchPhase.PRE_MATCH
+            || phase == MatchPhase.MATCH
+            || phase == MatchPhase.POST_MATCH;
     }
 
     public void StartPhase(MatchPhase phase)
     {
         MatchPhase = phase;
-        switch (phase)
-        {
-            case MatchPhase.WARMUP:
-                TimeRemaining = WarmupDuration;
-                break;
-            case MatchPhase.PRE_MATCH:
-                TimeRemaining = PreMatchDuration;
-                break;
-            case MatchPhase.MATCH:
-                TimeRemaining = MatchDuration;
-                break;
-            case MatchPhase.POST_MATCH:
-                TimeRemaining = PostMatchDuration;
-                break;
-        }
-    }
+        _secondAccumulator = 0.0;
 
-    public void SetTimeRemaining(int secondsRemaining)
-    {
-        if (secondsRemaining <= 0)
+        TimeRemaining = phase switch
         {
-            AdvanceToNextMatchPhase();
-        }
-        else
-        {
-            TimeRemaining = secondsRemaining;
-        }
+            MatchPhase.WARMUP => WarmupDuration,
+            MatchPhase.PRE_MATCH => PreMatchDuration,
+            MatchPhase.MATCH => MatchDuration,
+            MatchPhase.POST_MATCH => PostMatchDuration,
+            _ => 0
+        };
     }
 
     public void AdvanceToNextMatchPhase()
@@ -119,7 +121,7 @@ public partial class MatchState : Node
             MatchPhase.PRE_MATCH => MatchPhase.MATCH,
             MatchPhase.MATCH => MatchPhase.POST_MATCH,
             MatchPhase.POST_MATCH => MatchPhase.WARMUP,
-            _ => MatchPhase.POST_MATCH
+            _ => MatchPhase.WARMUP
         };
 
         StartPhase(nextPhase);
