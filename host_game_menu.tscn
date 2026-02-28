@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bgkwfgy123qgs" path="res://HostGameMenu.cs" id="1_n5th5"]
 [ext_resource type="PackedScene" uid="uid://byrsxq2i83b2a" path="res://scenes/maps/test_map_1/test_map_1.tscn" id="2_gskxa"]
 
-[node name="HostGameMenu" type="Control" node_paths=PackedStringArray("_hostGameButton")]
+[node name="HostGameMenu" type="Control" node_paths=PackedStringArray("_hostGameButton", "_mapOptionButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,6 +13,7 @@ grow_vertical = 2
 script = ExtResource("1_n5th5")
 _testLevel = ExtResource("2_gskxa")
 _hostGameButton = NodePath("VBoxContainer/HostGameButton")
+_mapOptionButton = NodePath("VBoxContainer/HBoxContainer3/MapOptionButton")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -77,11 +78,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Map:"
 
-[node name="OptionButton" type="OptionButton" parent="VBoxContainer/HBoxContainer3"]
+[node name="MapOptionButton" type="OptionButton" parent="VBoxContainer/HBoxContainer3"]
 layout_mode = 2
 size_flags_horizontal = 3
-item_count = 1
-popup/item_0/id = 0
 
 [node name="HostGameButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2

@@ -14,6 +14,8 @@ public class ServerInfo
     public int MaxPlayers;
     public string MapID;
 
+    public int PingMs;
+
     public ServerInfo(
         string name = "New Server",
         string ip = "127.0.0.1",

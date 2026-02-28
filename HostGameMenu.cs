@@ -7,11 +7,21 @@ public partial class HostGameMenu : Control
 
     [Export] Button _hostGameButton;
 
+    [Export] OptionButton _mapOptionButton;
+
     public override void _Ready()
     {
         base._Ready();
 
         _hostGameButton.Pressed += OnHostGameButtonPressed;
+
+
+        for (int i = 0; i < GameData.Instance.MapCollection.Maps.Count; ++i)
+        {
+            var mapInfo = GameData.Instance.MapCollection.Maps[i];
+            _mapOptionButton.AddItem(mapInfo.Name);
+            _mapOptionButton.SetItemMetadata(i, mapInfo.ID);
+        }
     }
 
     public void Open()
@@ -23,6 +33,7 @@ public partial class HostGameMenu : Control
     {
         var serverInfo = new ServerInfo();
         serverInfo.Name = "Test Server";
+        serverInfo.MapID = (string)_mapOptionButton.GetItemMetadata(_mapOptionButton.Selected);
         NetworkSession.Instance.HostLanServer(serverInfo);
     }
 }

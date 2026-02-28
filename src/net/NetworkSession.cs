@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 public partial class NetworkSession : Node
 {
@@ -15,7 +16,7 @@ public partial class NetworkSession : Node
     public ServerInfo ServerInfo;
     private bool _isHosting = false;
 
-    public Action? OnSessionStarted;
+    public Action<ServerInfo> OnSessionStarted;
     public Action? OnSessionStopped;
     public Action<int>? OnPlayerJoined;
     public Action<int>? OnPlayerLeft;
@@ -47,7 +48,6 @@ public partial class NetworkSession : Node
     public void HostLanServer(ServerInfo info)
     {
         ServerInfo = info;
-        info.MapID = GameData.Instance.MapCollection.Maps[0].ID; // generic default map testing
 
         _networkHandler.StartServer(info.HostIP, info.Port);
 
@@ -73,7 +73,7 @@ public partial class NetworkSession : Node
 
     private void HandleServerStarted()
     {
-        OnSessionStarted?.Invoke();
+        OnSessionStarted?.Invoke(ServerInfo);
     }
 
     private void HandlePeerConnected(int peerId)
@@ -161,5 +161,36 @@ public partial class NetworkSession : Node
         }
 
         return discoveredServers;
+    }
+
+
+    private async Task<int> PingServerAsync(ServerInfo server, int timeoutMs = 1000)
+    {
+        try
+        {
+            using var udp = new UdpClient();
+            udp.Connect(server.HostIP, server.Port);
+
+            byte[] pingPacket = new byte[] { 0 }; // dummy ping
+            var stopwatch = Stopwatch.StartNew();
+
+            await udp.SendAsync(pingPacket, pingPacket.Length);
+
+            // wait for reply or timeout
+            var task = udp.ReceiveAsync();
+            if (await Task.WhenAny(task, Task.Delay(timeoutMs)) == task)
+            {
+                stopwatch.Stop();
+                return (int)stopwatch.ElapsedMilliseconds;
+            }
+            else
+            {
+                return -1; // timeout
+            }
+        }
+        catch
+        {
+            return -1; // error
+        }
     }
 }

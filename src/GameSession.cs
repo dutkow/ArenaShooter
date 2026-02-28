@@ -8,12 +8,12 @@ public partial class GameSession : Node
         NetworkSession.Instance.OnConnectedToServer += OnConnectedToServer;
     }
 
-    private void OnSessionStarted()
+    private void OnSessionStarted(ServerInfo serverInfo)
     {
         MatchState.Instance.StartPhase(MatchPhase.WARMUP);
         PlayerState playerState = new();
         PlayerManager.Instance.RegisterPlayer(playerState);
-        LoadGame(NetworkSession.Instance.ServerInfo.MapID);
+        LoadGame(serverInfo.MapID);
     }
 
     private void OnConnectedToServer()
@@ -21,10 +21,6 @@ public partial class GameSession : Node
         LoadGame(NetworkSession.Instance.ServerInfo.MapID);
     }
 
-    public void StartSinglePlayer(string mapId)
-    {
-        LoadGame(mapId);
-    }
 
     private void LoadGame(string mapID)
     {

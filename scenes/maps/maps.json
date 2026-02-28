@@ -9,8 +9,8 @@
     {
       "id": "test_map_2",
       "name": "Test Map 2",
-      "folder": "test_map_1",
-      "scene": "test_map_1"
+      "folder": "test_map_2",
+      "scene": "test_map_2"
     }
   ]
 }
