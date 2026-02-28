@@ -1,7 +1,8 @@
+using Godot;
 using System;
 
 [Serializable]
-public struct ServerInfo
+public class ServerInfo
 {
     public string ServerID;
     public string Name;
@@ -10,7 +11,7 @@ public struct ServerInfo
     public int Players;
     public int MaxPlayers;
 
-    public ServerInfo(string name, string ip, int port, int players = 0, int maxPlayers = 8, string? serverID = null)
+    public ServerInfo(string name = "New Server", string ip = "127.0.0.1", int port = 42069, int players = 0, int maxPlayers = 8, string? serverID = null)
     {
         ServerID = serverID ?? Guid.NewGuid().ToString();
         Name = name;
@@ -44,4 +45,9 @@ public struct ServerInfo
     }
 
     public override int GetHashCode() => ServerID.GetHashCode();
+
+    public void PrintInfo()
+    {
+        GD.Print($"ServerID: {ServerID}, Name: {Name}, HostIP: {HostIP}, Port: {Port}, Players: {Players}/{MaxPlayers}");
+    }
 }

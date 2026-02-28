@@ -136,6 +136,7 @@ public partial class NetworkHandler : Node
     // ----------------------
     public void StartServer(string ipAddress = "127.0.0.1", int port = 42069)
     {
+        GD.Print($"Attempting to start server. IP = {ipAddress}. Port = {port}.");
         connection = new ENetConnection();
         var error = connection.CreateHostBound(ipAddress, port);
         if (error != Error.Ok)
@@ -184,6 +185,12 @@ public partial class NetworkHandler : Node
     // ----------------------
     public void StartClient(string ipAddress = "127.0.0.1", int port = 42069)
     {
+        if (connection != null)
+        {
+            GD.Print("Client already running!");
+            return;
+        }
+
         connection = new ENetConnection();
         var error = connection.CreateHost(1); // 1 client
         if (error != Error.Ok)
@@ -193,18 +200,22 @@ public partial class NetworkHandler : Node
             return;
         }
 
-        GD.Print("Client started");
+        GD.Print($"Client started, connecting to {ipAddress}:{port}...");
         serverPeer = connection.ConnectToHost(ipAddress, port);
+
+        // Optional: reset flags to track connection
+        _hasFiredConnected = false;
     }
 
-    public void DisconnectClient()
-    {
-        if (isServer || serverPeer == null) return;
-        serverPeer.PeerDisconnect();
-    }
+    private bool _hasFiredConnected = false;
 
     private void ConnectedToServer()
     {
+        // Only fire once
+        if (_hasFiredConnected)
+            return;
+
+        _hasFiredConnected = true;
         GD.Print("Connected to server!");
         OnConnectedToServer?.Invoke();
     }
@@ -213,7 +224,11 @@ public partial class NetworkHandler : Node
     {
         GD.Print("Disconnected from server!");
         OnDisconnectedFromServer?.Invoke();
+
+        // Cleanup
         connection = null;
+        serverPeer = null;
+        _hasFiredConnected = false;
     }
 
     // ----------------------

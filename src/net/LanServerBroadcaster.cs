@@ -26,7 +26,7 @@ public partial class LanServerBroadcaster
         _timer.AutoReset = true;
         _timer.Start();
 
-        GD.Print("LAN broadcast timer started!");
+        GD.Print("LAN broadcast started!");
     }
 
     private void Broadcast()
@@ -37,7 +37,6 @@ public partial class LanServerBroadcaster
 
             byte[] data = Encoding.UTF8.GetBytes(_info.ToString());
             _udp.Send(data, data.Length, new IPEndPoint(IPAddress.Broadcast, BroadcastPort));
-            GD.Print("broadcasting!");
         }
         catch (Exception ex)
         {

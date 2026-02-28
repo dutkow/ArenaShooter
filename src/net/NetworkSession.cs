@@ -9,30 +9,20 @@ public partial class NetworkSession : Node
 {
     public static NetworkSession Instance { get; private set; }
 
-    // ----------------------
-    // Dependencies
-    // ----------------------
     [Export] private NetworkHandler _networkHandler;
     private LanServerBroadcaster _lanBroadcaster;
 
-    // ----------------------
-    // Session info
-    // ----------------------
     private ServerInfo _serverInfo;
     private bool _isHosting = false;
 
-    // ----------------------
-    // Session events
-    // ----------------------
     public Action? OnSessionStarted;
     public Action? OnSessionStopped;
     public Action<int>? OnPlayerJoined;
     public Action<int>? OnPlayerLeft;
 
-    // ----------------------
-    // Server discovery
-    // ----------------------
     public Action<List<ServerInfo>>? OnServerRefreshFinished;
+    public Action? OnConnectedToServer;
+    public Action? OnFailedToConnect;
 
     public NetworkSession()
     {
@@ -42,24 +32,15 @@ public partial class NetworkSession : Node
     public override void _Ready()
     {
         base._Ready();
-
-
         _networkHandler = NetworkHandler.Instance;
     }
-
-    // ----------------------
-    // Public API
-    // ----------------------
 
     public void HostLanServer(ServerInfo info)
     {
         _serverInfo = info;
+        _networkHandler.StartServer(info.HostIP, info.Port);
 
-        GD.Print("Starting LAN server...");
-
-        _networkHandler.StartServer();
-
-        if(_lanBroadcaster == null)
+        if (_lanBroadcaster == null)
         {
             _lanBroadcaster = new();
         }
@@ -73,38 +54,65 @@ public partial class NetworkSession : Node
         _isHosting = true;
     }
 
-
     public void StopHosting()
     {
         if (!_isHosting) return;
 
-        GD.Print("Stopping LAN session...");
-
         _lanBroadcaster = null;
-
         _isHosting = false;
         OnSessionStopped?.Invoke();
     }
 
-    // ----------------------
-    // Event handlers
-    // ----------------------
     private void HandleServerStarted()
     {
-        GD.Print("NetworkHandler reports server started!");
         OnSessionStarted?.Invoke();
     }
 
     private void HandlePeerConnected(int peerId)
     {
-        GD.Print($"Player joined: {peerId}");
         OnPlayerJoined?.Invoke(peerId);
     }
 
     private void HandlePeerDisconnected(int peerId)
     {
-        GD.Print($"Player left: {peerId}");
         OnPlayerLeft?.Invoke(peerId);
+    }
+
+    // ----------------------
+    // Join server
+    // ----------------------
+    public void JoinServer(ServerInfo server)
+    {
+        GD.Print("Attempting to join server...");
+        if (_isHosting)
+        {
+            GD.Print("Cannot join a server while hosting!");
+            OnFailedToConnect?.Invoke();
+            return;
+        }
+
+        _networkHandler.StartClient(server.HostIP, server.Port);
+        _networkHandler.OnConnectedToServer += HandleConnectedToServer;
+        _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
+    }
+
+    private void HandleConnectedToServer()
+    {
+        GD.Print("Successfully connected to server");
+        _networkHandler.OnConnectedToServer -= HandleConnectedToServer;
+        _networkHandler.OnDisconnectedFromServer -= HandleFailedToConnect;
+
+        OnConnectedToServer?.Invoke();
+    }
+
+    private void HandleFailedToConnect()
+    {
+        GD.Print("Failed to connect to server");
+
+        _networkHandler.OnConnectedToServer -= HandleConnectedToServer;
+        _networkHandler.OnDisconnectedFromServer -= HandleFailedToConnect;
+
+        OnFailedToConnect?.Invoke();
     }
 
     // ----------------------

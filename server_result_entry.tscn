@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cxib41chpk27k" path="res://ServerResultEntry.cs" id="1_p5soc"]
 
-[node name="ServerResultEntry" type="Control" node_paths=PackedStringArray("_serverNameLabel")]
+[node name="ServerResultEntry" type="Control" node_paths=PackedStringArray("_serverNameLabel", "_joinButton")]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 3
 anchors_preset = 15
@@ -14,6 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_p5soc")
 _serverNameLabel = NodePath("HBoxContainer/ServerNameLabel")
+_joinButton = NodePath("HBoxContainer/JoinButton")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -42,3 +43,7 @@ text = "[1/16]"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "256"
+
+[node name="JoinButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "JOIN"
