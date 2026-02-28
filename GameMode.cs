@@ -48,15 +48,11 @@ public partial class GameMode : Node
     {
         GD.Print("Pre-match: teleport and freeze players");
 
-        foreach (var playerState in PlayerManager.Instance.GetActivePlayers())
+        foreach (var playerCharacter in PlayerManager.Instance.GetPlayerCharacters())
         {
-            var playerCharacter = playerState.Pawn;
-            if(playerCharacter != null)
-            {
-                playerCharacter.TeleportTo(SpawnManager.Instance.GetSpawnPoint().Transform);
-                playerCharacter.SetInputEnabled(false);
-                playerCharacter.SetWeaponsEnabled(false);
-            }
+            playerCharacter.TeleportTo(SpawnManager.Instance.GetSpawnPoint().Transform);
+            playerCharacter.SetInputEnabled(false);
+            playerCharacter.SetWeaponsEnabled(false);
         }
     }
 
@@ -64,14 +60,10 @@ public partial class GameMode : Node
     {
         GD.Print("Match started: unfreeze players");
 
-        foreach (var playerState in PlayerManager.Instance.GetActivePlayers())
+        foreach (var playerCharacter in PlayerManager.Instance.GetPlayerCharacters())
         {
-            var playerCharacter = playerState.Pawn;
-            if (playerCharacter != null)
-            {
-                playerCharacter.SetInputEnabled(true);
-                playerCharacter.SetWeaponsEnabled(true);
-            }
+            playerCharacter.SetInputEnabled(true);
+            playerCharacter.SetWeaponsEnabled(true);
         }
     }
 

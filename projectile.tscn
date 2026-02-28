@@ -3,11 +3,12 @@
 [ext_resource type="Script" uid="uid://dhh7ttb2xt3an" path="res://Projectile.cs" id="1_a85iw"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_qxf0c"]
-radius = 0.25
-height = 0.5
+radius = 0.125
+height = 0.25
 
 [node name="Projectile" type="Node3D"]
 script = ExtResource("1_a85iw")
+Speed = 80.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("SphereMesh_qxf0c")

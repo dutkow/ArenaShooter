@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class PlayerManager : Node
 {
@@ -30,5 +31,10 @@ public partial class PlayerManager : Node
     public IReadOnlyList<PlayerState> GetActivePlayers()
     {
         return _playerStates.FindAll(p => p.Pawn != null);
+    }
+
+    public IReadOnlyList<PlayerCharacter> GetPlayerCharacters()
+    {
+        return _playerStates.Select(p => p.Pawn).OfType<PlayerCharacter>().ToList();
     }
 }
