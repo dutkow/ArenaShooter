@@ -61,38 +61,7 @@ public partial class Player : CharacterBody3D
         }
     }
 
-    public override void _Process(double delta)
-    {
-        // Toggle mouse capture
-        if (Input.IsActionJustPressed("ui_cancel"))
-        {
-            _isMouseCaptured = !_isMouseCaptured;
-            Input.MouseMode = _isMouseCaptured
-                ? Input.MouseModeEnum.Captured
-                : Input.MouseModeEnum.Visible;
-        }
-
-        // Smooth mouse look
-        _rotVelocity = _rotVelocity.Lerp(_cameraInput * MouseSens, (float)delta * MouseSmooth);
-
-        if (CameraPivot != null)
-        {
-            CameraPivot.RotateX(-Mathf.DegToRad(_rotVelocity.Y));
-            CameraPivot.Rotation = new Vector3(
-                Mathf.Clamp(CameraPivot.Rotation.X, -1.5f, 1.5f), // clamp vertical rotation
-                CameraPivot.Rotation.Y,
-                CameraPivot.Rotation.Z
-            );
-        }
-
-        // Rotate player horizontally
-        RotateY(-Mathf.DegToRad(_rotVelocity.X));
-
-        // Reset mouse input
-        _cameraInput = Vector2.Zero;
-    }
-
-    public override void _PhysicsProcess(double delta)
+    public void HandleMovement(double delta)
     {
         var inputDir = Vector3.Zero;
 
@@ -145,6 +114,39 @@ public partial class Player : CharacterBody3D
         // Move the character
         Velocity = _targetVelocity;
         MoveAndSlide();
+    }
+
+    public override void _Process(double delta)
+    {
+        // Toggle mouse capture
+        if (Input.IsActionJustPressed("ui_cancel"))
+        {
+            _isMouseCaptured = !_isMouseCaptured;
+            Input.MouseMode = _isMouseCaptured
+                ? Input.MouseModeEnum.Captured
+                : Input.MouseModeEnum.Visible;
+        }
+
+        // Smooth mouse look
+        _rotVelocity = _rotVelocity.Lerp(_cameraInput * MouseSens, (float)delta * MouseSmooth);
+
+        if (CameraPivot != null)
+        {
+            CameraPivot.RotateX(-Mathf.DegToRad(_rotVelocity.Y));
+            CameraPivot.Rotation = new Vector3(
+                Mathf.Clamp(CameraPivot.Rotation.X, -1.5f, 1.5f), // clamp vertical rotation
+                CameraPivot.Rotation.Y,
+                CameraPivot.Rotation.Z
+            );
+        }
+
+        // Rotate player horizontally
+        RotateY(-Mathf.DegToRad(_rotVelocity.X));
+
+        // Reset mouse input
+        _cameraInput = Vector2.Zero;
+
+        HandleMovement(delta);
     }
 
     public void UpdateMovementState()
