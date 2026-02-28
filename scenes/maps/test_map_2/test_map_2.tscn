@@ -1,9 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://byrsxq2i83b2a"]
+[gd_scene load_steps=11 format=3 uid="uid://yadqwtlxqbcp"]
 
-[ext_resource type="PackedScene" uid="uid://cc5hseasecjdw" path="res://game_manager.tscn" id="1_hqwce"]
-[ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://spawn_point.tscn" id="2_sspqv"]
-[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://player_character.tscn" id="3_qixqs"]
-[ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://hud.tscn" id="4_dvu0s"]
+[ext_resource type="PackedScene" uid="uid://cc5hseasecjdw" path="res://game_manager.tscn" id="1_lpq7u"]
+[ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://spawn_point.tscn" id="2_4vdgi"]
+[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://player_character.tscn" id="3_rh6ei"]
+[ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://hud.tscn" id="4_2bcf7"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hsoxx"]
 
@@ -29,17 +29,18 @@ environment = SubResource("Environment_1c2mv")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76057595, 0, 0, 0)
+light_color = Color(0.76899767, 0, 0.15294969, 1)
 shadow_enabled = true
 
-[node name="GameManager" parent="." instance=ExtResource("1_hqwce")]
+[node name="GameManager" parent="." instance=ExtResource("1_lpq7u")]
 
-[node name="SpawnPoint" parent="." instance=ExtResource("2_sspqv")]
+[node name="SpawnPoint" parent="." instance=ExtResource("2_4vdgi")]
 transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 4.079609, 1.3157029, -20.762333)
 
-[node name="SpawnPoint" parent="SpawnPoint" instance=ExtResource("2_sspqv")]
+[node name="SpawnPoint" parent="SpawnPoint" instance=ExtResource("2_4vdgi")]
 transform = Transform3D(-0.9917632, 0, 0.12808594, 0, 1, 0, -0.12808594, 0, -0.9917632, 0.5123465, 1.3157029, -31.075033)
 
-[node name="Player" parent="." instance=ExtResource("3_qixqs")]
+[node name="Player" parent="." instance=ExtResource("3_rh6ei")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6006985, 0)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
@@ -68,4 +69,4 @@ mesh = SubResource("BoxMesh_f7g2b")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Hud" parent="CanvasLayer" instance=ExtResource("4_dvu0s")]
+[node name="Hud" parent="CanvasLayer" instance=ExtResource("4_2bcf7")]
