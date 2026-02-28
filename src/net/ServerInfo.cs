@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Linq;
+using System.Reflection;
 
 [Serializable]
 public class ServerInfo
@@ -12,7 +14,15 @@ public class ServerInfo
     public int MaxPlayers;
     public string MapID;
 
-    public ServerInfo(string name = "New Server", string ip = "127.0.0.1", int port = 42069, int players = 0, int maxPlayers = 8, string? serverID = null)
+    public ServerInfo(
+        string name = "New Server",
+        string ip = "127.0.0.1",
+        int port = 42069,
+        int players = 0,
+        int maxPlayers = 8,
+        string? serverID = null,
+        string mapID = "test_map_1"
+    )
     {
         ServerID = serverID ?? Guid.NewGuid().ToString();
         Name = name;
@@ -20,24 +30,40 @@ public class ServerInfo
         Port = port;
         Players = players;
         MaxPlayers = maxPlayers;
+        MapID = mapID;
     }
 
     public override string ToString()
     {
-        return $"{ServerID}|{Name}|{HostIP}|{Port}|{Players}|{MaxPlayers}";
+        var fields = this.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+        return string.Join("|", fields.Select(f => f.GetValue(this)?.ToString() ?? ""));
     }
 
     public static ServerInfo FromString(string data)
     {
         string[] parts = data.Split('|');
-        return new ServerInfo(
-            parts[1],
-            parts[2],
-            int.Parse(parts[3]),
-            int.Parse(parts[4]),
-            int.Parse(parts[5]),
-            parts[0]
-        );
+        var fields = typeof(ServerInfo).GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+        var server = new ServerInfo();
+
+        for (int i = 0; i < fields.Length && i < parts.Length; i++)
+        {
+            var field = fields[i];
+            object? value = null;
+
+            if (field.FieldType == typeof(int))
+            {
+                value = int.Parse(parts[i]);
+            }
+            else
+            {
+                value = parts[i];
+            }
+
+            field.SetValue(server, value);
+        }
+
+        return server;
     }
 
     public override bool Equals(object? obj)
@@ -49,6 +75,6 @@ public class ServerInfo
 
     public void PrintInfo()
     {
-        GD.Print($"ServerID: {ServerID}, Name: {Name}, HostIP: {HostIP}, Port: {Port}, Players: {Players}/{MaxPlayers}");
+        GD.Print($"ServerID: {ServerID}, Name: {Name}, HostIP: {HostIP}, Port: {Port}, Players: {Players}/{MaxPlayers}, MapID: {MapID}");
     }
 }

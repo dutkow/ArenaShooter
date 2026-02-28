@@ -108,7 +108,6 @@ public partial class NetworkSession : Node
     {
         GD.Print("Successfully connected to server");
 
-
         OnConnectedToServer?.Invoke();
     }
 

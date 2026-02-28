@@ -33,7 +33,10 @@ public partial class LanServerBroadcaster
     {
         try
         {
-            if (_udp == null) return;
+            if (_udp == null)
+            {
+                return;
+            }
 
             byte[] data = Encoding.UTF8.GetBytes(_info.ToString());
             _udp.Send(data, data.Length, new IPEndPoint(IPAddress.Broadcast, BroadcastPort));
