@@ -7,7 +7,7 @@ public enum MovementState
     FALLING
 }
 
-public partial class Player : CharacterBody3D
+public partial class PlayerCharacter : CharacterBody3D
 {
     // Movement
     [Export] public int Speed { get; set; } = 14;                     // Ground speed
@@ -30,9 +30,46 @@ public partial class Player : CharacterBody3D
     private bool _canJump => IsOnFloor();
 
     [Export] private Weapon _equippedWeapon;
+
+    public PlayerState State { get; private set; }
+
+    private bool _inputEnabled = true;
+    private bool _weaponsEnabled = true;
+
+
+    public void Initialize(PlayerState state)
+    {
+        State = state;
+        State.Pawn = this;
+    }
+
+    public void TeleportTo(Transform3D t)
+    {
+        GlobalTransform = t;
+        Velocity = Vector3.Zero;
+    }
+
+    public void ResetMovement()
+    {
+        Velocity = Vector3.Zero;
+        // Reset any momentum, jump state, etc.
+    }
+
+    public void SetInputEnabled(bool enabled)
+    {
+        _inputEnabled = enabled;
+    }
+
+    public void SetWeaponsEnabled(bool enabled)
+    {
+        _weaponsEnabled = enabled;
+    }
     public override void _Ready()
     {
         Input.MouseMode = Input.MouseModeEnum.Captured;
+
+        State = PlayerManager.Instance.GetAllPlayers()[0]; // basic test item
+        State.Pawn = this;
     }
 
     public override void _Input(InputEvent @event)

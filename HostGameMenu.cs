@@ -28,6 +28,8 @@ public partial class HostGameMenu : Control
     public void OnServerStarted()
     {
         MatchState.Instance.StartPhase(MatchPhase.WARMUP);
+        PlayerState playerState = new();
+        PlayerManager.Instance.RegisterPlayer(playerState);
         GetTree().ChangeSceneToPacked(_testLevel);
     }
 }

@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cc5hseasecjdw" path="res://game_manager.tscn" id="1_1c2mv"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://spawn_point.tscn" id="2_f7g2b"]
-[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://player.tscn" id="3_f7g2b"]
+[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://player_character.tscn" id="3_f7g2b"]
 [ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://hud.tscn" id="4_4ptq8"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hsoxx"]

@@ -19,6 +19,8 @@ config/icon="res://icon.svg"
 
 NetworkHandler="*res://src/net/NetworkHandler.cs"
 MatchState="*res://MatchState.cs"
+GameMode="*res://GameMode.cs"
+PlayerManager="*res://PlayerManager.cs"
 
 [display]
 

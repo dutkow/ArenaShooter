@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://cc5hseasecjdw"]
+[gd_scene load_steps=3 format=3 uid="uid://cc5hseasecjdw"]
 
 [ext_resource type="Script" uid="uid://bxfll1lg6fpon" path="res://GameManager.cs" id="1_70yv6"]
-[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://player.tscn" id="2_smx3j"]
+[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://player_character.tscn" id="2_smx3j"]
 
-[node name="GameManager" type="Node" unique_id=1730584432]
+[node name="GameManager" type="Node"]
 script = ExtResource("1_70yv6")
 _playerScene = ExtResource("2_smx3j")

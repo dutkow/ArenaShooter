@@ -48,7 +48,7 @@ public partial class MatchState : Node
     public event Action<int>? TimeRemainingChanged;
 
     // Phase durations (seconds)
-    [Export] public int WarmupDuration { get; set; } = 5;
+    [Export] public int WarmupDuration { get; set; } = 6;
     [Export] public int PreMatchDuration { get; set; } = 3;
     [Export] public int MatchDuration { get; set; } = 600;
     [Export] public int PostMatchDuration { get; set; } = 5;
@@ -103,14 +103,31 @@ public partial class MatchState : Node
         MatchPhase = phase;
         _secondAccumulator = 0.0;
 
+        switch(MatchPhase)
+        {
+            case MatchPhase.WARMUP: StartWarmup(); return;
+            case MatchPhase.PRE_MATCH: StartPreMatch(); return;
+
+        }
+
         TimeRemaining = phase switch
         {
-            MatchPhase.WARMUP => WarmupDuration,
             MatchPhase.PRE_MATCH => PreMatchDuration,
             MatchPhase.MATCH => MatchDuration,
             MatchPhase.POST_MATCH => PostMatchDuration,
             _ => 0
         };
+    }
+
+    public void StartWarmup()
+    {
+        TimeRemaining = WarmupDuration;
+
+    }
+
+    public void StartPreMatch()
+    {
+        TimeRemaining = PreMatchDuration;
     }
 
     public void AdvanceToNextMatchPhase()
