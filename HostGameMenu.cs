@@ -12,7 +12,6 @@ public partial class HostGameMenu : Control
         base._Ready();
 
         _hostGameButton.Pressed += OnHostGameButtonPressed;
-        NetworkHandler.Instance.OnServerStarted += OnServerStarted;
     }
 
     public void Open()
@@ -25,13 +24,5 @@ public partial class HostGameMenu : Control
         var serverInfo = new ServerInfo();
         serverInfo.Name = "Test Server";
         NetworkSession.Instance.HostLanServer(serverInfo);
-    }
-
-    public void OnServerStarted()
-    {
-        MatchState.Instance.StartPhase(MatchPhase.WARMUP);
-        PlayerState playerState = new();
-        PlayerManager.Instance.RegisterPlayer(playerState);
-        GetTree().ChangeSceneToPacked(_testLevel);
     }
 }

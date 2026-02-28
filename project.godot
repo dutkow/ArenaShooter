@@ -23,6 +23,7 @@ NetworkSession="*res://src/net/NetworkSession.cs"
 MatchState="*res://MatchState.cs"
 GameMode="*res://GameMode.cs"
 PlayerManager="*res://PlayerManager.cs"
+GameSession="*res://src/GameSession.cs"
 
 [display]
 

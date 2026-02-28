@@ -12,7 +12,7 @@ public partial class NetworkSession : Node
     [Export] private NetworkHandler _networkHandler;
     private LanServerBroadcaster _lanBroadcaster;
 
-    private ServerInfo _serverInfo;
+    public ServerInfo ServerInfo;
     private bool _isHosting = false;
 
     public Action? OnSessionStarted;
@@ -32,12 +32,20 @@ public partial class NetworkSession : Node
     public override void _Ready()
     {
         base._Ready();
+        
         _networkHandler = NetworkHandler.Instance;
     }
 
     public void HostLanServer(ServerInfo info)
     {
-        _serverInfo = info;
+        ServerInfo = info;
+        info.MapID = GameData.Instance.MapCollection.Maps[0].ID; // generic default map testing
+
+
+        _networkHandler.OnServerStarted += HandleServerStarted;
+        _networkHandler.OnPeerConnected += HandlePeerConnected;
+        _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
+
         _networkHandler.StartServer(info.HostIP, info.Port);
 
         if (_lanBroadcaster == null)
@@ -47,9 +55,6 @@ public partial class NetworkSession : Node
 
         _lanBroadcaster.StartBroadcast(info);
 
-        _networkHandler.OnServerStarted += HandleServerStarted;
-        _networkHandler.OnPeerConnected += HandlePeerConnected;
-        _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
 
         _isHosting = true;
     }
