@@ -112,15 +112,15 @@ public partial class NetworkSession : Node
     // ----------------------
     public async void RefreshLanServers(float listenSeconds = 2f)
     {
-        GD.Print("refresh lan servers ran");
         var servers = await ListenForLanServersAsync(listenSeconds);
         OnServerRefreshFinished?.Invoke(servers);
-        GD.Print($"Refresh lan servers finished. Servers found = {servers.Count}");
     }
 
     private async Task<List<ServerInfo>> ListenForLanServersAsync(float listenSeconds)
     {
         var discoveredServers = new List<ServerInfo>();
+        var seenServerIDs = new HashSet<string>();
+
         using var listener = new UdpClient(_networkHandler.LanBroadcastPort);
         listener.EnableBroadcast = true;
 
@@ -132,10 +132,15 @@ public partial class NetworkSession : Node
             {
                 var result = await listener.ReceiveAsync();
                 var data = Encoding.UTF8.GetString(result.Buffer);
-                // convert broadcast string to ServerInfo
                 var serverInfo = ServerInfo.FromString(data);
-                discoveredServers.Add(serverInfo);
+
+                if (!seenServerIDs.Contains(serverInfo.ServerID))
+                {
+                    discoveredServers.Add(serverInfo);
+                    seenServerIDs.Add(serverInfo.ServerID);
+                }
             }
+
             await Task.Delay(50);
         }
 

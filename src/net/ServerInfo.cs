@@ -3,14 +3,16 @@ using System;
 [Serializable]
 public struct ServerInfo
 {
-    public string Name;       // server name
-    public string HostIP;     // IP address
-    public int Port;          // ENet game port
-    public int Players;       // optional: current player count
-    public int MaxPlayers;    // optional: max players
+    public string ServerID;
+    public string Name;
+    public string HostIP;
+    public int Port;
+    public int Players;
+    public int MaxPlayers;
 
-    public ServerInfo(string name, string ip, int port, int players = 0, int maxPlayers = 8)
+    public ServerInfo(string name, string ip, int port, int players = 0, int maxPlayers = 8, string? serverID = null)
     {
+        ServerID = serverID ?? Guid.NewGuid().ToString();
         Name = name;
         HostIP = ip;
         Port = port;
@@ -18,22 +20,28 @@ public struct ServerInfo
         MaxPlayers = maxPlayers;
     }
 
-    // Serialize to a simple string for UDP broadcast
     public override string ToString()
     {
-        return $"{Name}|{HostIP}|{Port}|{Players}|{MaxPlayers}";
+        return $"{ServerID}|{Name}|{HostIP}|{Port}|{Players}|{MaxPlayers}";
     }
 
-    // Deserialize from string received over LAN
     public static ServerInfo FromString(string data)
     {
         string[] parts = data.Split('|');
         return new ServerInfo(
-            parts[0],
             parts[1],
-            int.Parse(parts[2]),
+            parts[2],
             int.Parse(parts[3]),
-            int.Parse(parts[4])
+            int.Parse(parts[4]),
+            int.Parse(parts[5]),
+            parts[0]
         );
     }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is ServerInfo s && s.ServerID == ServerID;
+    }
+
+    public override int GetHashCode() => ServerID.GetHashCode();
 }
