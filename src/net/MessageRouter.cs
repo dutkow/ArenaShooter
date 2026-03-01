@@ -33,23 +33,23 @@ public class MessageRouter
     public void ReadMessageFromServer(byte[] data)
     {
         var type = Message.GetType(data);
-        _fromServerHandlers[(int)type]?.Invoke(data);
+        //_fromServerHandlers[(int)type]?.Invoke(data);
     }
 
     public void ReadMessageFromClient(ENetPacketPeer sender, byte[] data)
     {
         var type = Message.GetType(data);
-        _fromClientHandlers[(int)type]?.Invoke(sender, data);
+        //_fromClientHandlers[(int)type]?.Invoke(sender, data);
     }
 
     // ---------------- Registration ----------------
-    public void RegisterFromServer(ServerMsg type, FromServerHandler handler)
+    public void RegisterFromServer(Msg type, FromServerHandler handler)
     {
-        _fromServerHandlers[(int)type] = handler;
+        //_fromServerHandlers[(int)type] = handler;
     }
 
-    public void RegisterFromClient(ClientMsg type, FromClientHandler handler)
+    public void RegisterFromClient(Msg type, FromClientHandler handler)
     {
-        _fromClientHandlers[(int)type] = handler;
+        //_fromClientHandlers[(int)type] = handler;
     }
 }

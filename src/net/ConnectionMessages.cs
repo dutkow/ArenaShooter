@@ -274,23 +274,21 @@ public class ServerConnectionMessageHandler : MessageHandler
 
     public override void Initialize(NetRole role)
     {
-        if (role != NetRole.SERVER) return;
+        if (role != NetRole.SERVER)
+        {
+            return;
+        }
 
-        // Register handlers for messages coming from clients
-        Router.RegisterFromClient(ClientMsg.CONNECTION_REQUEST, HandleConnectionRequest);
-        Router.RegisterFromClient(ClientMsg.CLIENT_LOADED, HandleClientLoaded);
-        // Add more as needed:
-        // Router.RegisterFromClient(ClientMsg.PLAYER_INFO, HandlePlayerInfo);
+        Router.RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, HandleConnectionRequest);
+        Router.RegisterFromClient(Msg.C2S_CLIENT_LOADED, HandleClientLoaded);
     }
 
     private void HandleConnectionRequest(ENetPacketPeer sender, byte[] data)
     {
-        // Parse ConnectionRequest and handle new client
     }
 
     private void HandleClientLoaded(ENetPacketPeer sender, byte[] data)
     {
-        // Handle client signaling that it's loaded
     }
 }
 
@@ -300,12 +298,15 @@ public class ClientConnectionMessageHandler : MessageHandler
 
     public override void Initialize(NetRole role)
     {
-        if (role != NetRole.CLIENT) return;
+        if (role != NetRole.CLIENT)
+        {
+            return;
+        }
 
         // Register handlers for messages coming from server
-        Router.RegisterFromServer(ServerMsg.CONNECTION_ACCEPTED, HandleConnectionAccepted);
-        Router.RegisterFromServer(ServerMsg.CONNECTION_DENIED, HandleConnectionDenied);
-        Router.RegisterFromServer(ServerMsg.INITIAL_MATCH_STATE, HandleInitialMatchState);
+        Router.RegisterFromServer(Msg.S2C_CONNECTION_ACCEPTED, HandleConnectionAccepted);
+        Router.RegisterFromServer(Msg.S2C_CONNECTION_DENIED, HandleConnectionDenied);
+        Router.RegisterFromServer(Msg.S2C_INITIAL_MATCH_STATE, HandleInitialMatchState);
         // Add more as needed:
         // Router.RegisterFromServer(ServerMsg.PLAYER_JOINED, HandlePlayerJoined);
     }
