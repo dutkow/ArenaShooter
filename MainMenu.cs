@@ -10,12 +10,15 @@ public partial class MainMenu : Control
 
     [Export] ServerBrowser _serverBrowser;
 
+    [Export] LineEdit _playerNameLineEdit;
     public override void _Ready()
     {
         base._Ready();
 
         _hostGameButton.Pressed += OnHostGameButtonPressed;
         _joinGameButton.Pressed += OnJoinGameButtonPressed;
+
+        _playerNameLineEdit.Text = Settings.Instance.PlayerName;
     }
 
     public void OnHostGameButtonPressed()

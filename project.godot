@@ -24,6 +24,7 @@ MatchState="*res://MatchState.cs"
 GameMode="*res://GameMode.cs"
 PlayerManager="*res://PlayerManager.cs"
 GameSession="*res://src/GameSession.cs"
+Settings="*res://Settings.cs"
 
 [display]
 
