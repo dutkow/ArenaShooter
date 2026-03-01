@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Diagnostics.Metrics;
 
 /// <summary>
 /// Sent from Client → Server to request joining the game.
@@ -37,6 +38,8 @@ public class ConnectionRequest : Message
             PlayerName = playerName
         };
         NetworkSend.ToServer(msg);
+                GD.Print($"Sending connection request to server w/ player name: {Settings.Instance.PlayerName}");
+
     }
 }
 
@@ -265,51 +268,83 @@ public class InitialMatchState : Message
 
 public class ConnectionMessageHandler : MessageHandler
 {
-    public ConnectionMessageHandler(MessageRouter router) : base(router) { }
-
-    public override void Initialize(NetRole role)
+    public override void Initialize(MessageRouter router, NetRole role)
     {
+        GD.Print($"initializing connection message handler. Role = {role}");
+
         if (role == NetRole.SERVER)
         {
-            Router.RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, HandleConnectionRequest);
-            Router.RegisterFromClient(Msg.C2S_CLIENT_LOADED, HandleClientLoaded);
+            // Peer → Server messages
+            router.RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, HandleConnectionRequest);
+            router.RegisterFromClient(Msg.C2S_CLIENT_LOADED, HandleClientLoaded);
         }
         else if (role == NetRole.CLIENT)
         {
-            Router.RegisterFromServer(Msg.S2C_CONNECTION_ACCEPTED, HandleConnectionAccepted);
-            Router.RegisterFromServer(Msg.S2C_CONNECTION_DENIED, HandleConnectionDenied);
-            Router.RegisterFromServer(Msg.S2C_INITIAL_MATCH_STATE, HandleInitialMatchState);
+            // Server → Peer messages
+            router.RegisterFromServer(Msg.S2C_CONNECTION_ACCEPTED, HandleConnectionAccepted);
+            router.RegisterFromServer(Msg.S2C_CONNECTION_DENIED, HandleConnectionDenied);
+            router.RegisterFromServer(Msg.S2C_INITIAL_MATCH_STATE, HandleInitialMatchState);
         }
-
     }
+
+    // ----------------------------
+    // Server-side handlers
+    // ----------------------------
 
     private void HandleConnectionRequest(ENetPacketPeer peer, byte[] data)
     {
-        if(NetworkSession.Instance.IsServerFull)
-        {
-            ConnectionDenied.Send(peer, "DENIED");
-        }
-        else
-        {
-            string[] list = new string[data.Length];
-            ConnectionAccepted.Send(peer, 0);
-        }
+        var msg = new ConnectionRequest();
+        msg.ReadMessage(data);
+
+        NetworkSession.Instance.HandleConnectionRequest(peer, msg.PlayerName);
+
+        GD.Print("Server received client connection request");
     }
 
-    private void HandleClientLoaded(ENetPacketPeer sender, byte[] data)
+    private void HandleClientLoaded(ENetPacketPeer peer, byte[] data)
     {
+        var msg = new ClientLoaded();
+        msg.ReadMessage(data);
+        GD.Print($"Client loaded: PlayerID {msg.PlayerID}");
+
+        // Send initial match state to the client
+        //byte[] playerIDs = NetworkSession.Instance.GetAllPlayerIDs();
+        //Vector3[] positions = NetworkSession.Instance.GetAllPlayerPositions();
+        //int[] health = NetworkSession.Instance.GetAllPlayerHealth();
+
+        //InitialMatchState.Send(peer, playerIDs, positions, health);
     }
+
+    // ----------------------------
+    // Client-side handlers
+    // ----------------------------
 
     private void HandleConnectionAccepted(byte[] data)
     {
+        var msg = new ConnectionAccepted();
+        msg.ReadMessage(data);
+
+        GD.Print("Client received connection accepted from server");
+        // Save player ID locally
+        //Settings.Instance.PlayerID = msg.AssignedPlayerID;
     }
 
     private void HandleConnectionDenied(byte[] data)
     {
+        var msg = new ConnectionDenied();
+        msg.ReadMessage(data);
+
+        GD.Print("Client received connection denial from server");
     }
 
     private void HandleInitialMatchState(byte[] data)
     {
+        var msg = new InitialMatchState();
+        msg.ReadMessage(data);
+
+        GD.Print("Client received initial match state from server");
+
+        // Initialize local game state with received data
+        //GameSession.Instance.InitializeMatchState(msg.PlayerIDs, msg.Positions, msg.Health);
     }
 }
-

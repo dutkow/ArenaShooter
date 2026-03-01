@@ -1,6 +1,8 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Threading.Channels;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 /// <summary>
 /// NetworkSend handles all network sending logic in a centralized way.
@@ -20,6 +22,8 @@ public static class NetworkSend
             return;
         }
         serverPeer.Send(0, message.WriteMessage(), (int)message.Flags);
+        GD.Print($"Sending message to serverPeer. Message type: {message.MessageType}. Flags: {message.Flags}");
+
     }
 
     // ----------------------

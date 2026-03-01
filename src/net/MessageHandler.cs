@@ -1,14 +1,17 @@
 using Godot;
 using System;
 
-public abstract class MessageHandler
+public class MessageHandler
 {
-    protected MessageRouter Router;
+    public Msg Type;
+    public MessageRouter.FromServerHandler? ServerHandler;
+    public MessageRouter.FromClientHandler? ClientHandler;
 
-    public MessageHandler(MessageRouter router)
+
+    /// <summary>
+    /// Called when the role changes, could perform registration logic if needed.
+    /// </summary>
+    public virtual void Initialize(MessageRouter router, NetRole role)
     {
-        Router = router;
     }
-
-    public abstract void Initialize(NetRole role);
 }

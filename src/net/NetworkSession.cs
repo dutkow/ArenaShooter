@@ -23,10 +23,10 @@ public partial class NetworkSession : Node
     // Connected player info
     // ----------------------
     public int MaxPlayers { get; private set; } = 8;
-    private Dictionary<byte, PlayerState> _connectedPlayers = new();
-    private Dictionary<int, byte> _peerIDToPlayerID = new();
+    public Dictionary<byte, PlayerState> playerIDtoPlayerState = new();
+    public Dictionary<int, byte> peerIDtoPlayerID = new();
     private Queue<byte> _availablePlayerIDs = new();
-    public bool IsServerFull => _connectedPlayers.Count >= MaxPlayers;
+    public bool IsServerFull => playerIDtoPlayerState.Count >= MaxPlayers;
 
     private NetworkHandler _networkHandler;
     private MessageRouter _router;
@@ -60,6 +60,8 @@ public partial class NetworkSession : Node
     {
         Instance = this;
 
+        _router = new MessageRouter();
+
         // Fill the pool of available _playerIDs
         _availablePlayerIDs.Clear();
         for (byte i = 1; i <= MaxPlayers; i++)
@@ -83,6 +85,7 @@ public partial class NetworkSession : Node
         }
 
         Role = role;
+        _router.OnRoleChanged(role);
         OnRoleChanged?.Invoke(Role);
     }
 
@@ -91,10 +94,11 @@ public partial class NetworkSession : Node
     // ----------------------
     public void HostLanServer(ServerInfo info)
     {
+        SetRole(NetRole.SERVER);
+
         ServerInfo = info;
 
         _networkHandler.StartServer(info.HostIP, info.Port);
-        SetRole(NetRole.SERVER);
 
         if (_lanBroadcaster == null)
         {
@@ -108,12 +112,13 @@ public partial class NetworkSession : Node
 
     public void StopHosting()
     {
+        SetRole(NetRole.LOCAL);
+
         if (!_isHosting)
         {
             return;
         }
 
-        SetRole(NetRole.LOCAL);
 
         _lanBroadcaster = null;
         _isHosting = false;
@@ -134,8 +139,8 @@ public partial class NetworkSession : Node
         }
 
         byte _playerID = _availablePlayerIDs.Dequeue();
-        _peerIDToPlayerID[_peerID] = _playerID;
-        _connectedPlayers[_playerID] = new PlayerState(_playerID);
+        peerIDtoPlayerID[_peerID] = _playerID;
+        playerIDtoPlayerState[_playerID] = new PlayerState(_playerID);
 
         GD.Print($"Player connected: _peerID={_peerID}, _playerID={_playerID}");
         OnPlayerJoined?.Invoke(_playerID);
@@ -143,10 +148,10 @@ public partial class NetworkSession : Node
 
     private void HandlePeerDisconnected(int _peerID)
     {
-        if (_peerIDToPlayerID.TryGetValue(_peerID, out byte _playerID))
+        if (peerIDtoPlayerID.TryGetValue(_peerID, out byte _playerID))
         {
-            _peerIDToPlayerID.Remove(_peerID);
-            _connectedPlayers.Remove(_playerID);
+            peerIDtoPlayerID.Remove(_peerID);
+            playerIDtoPlayerState.Remove(_playerID);
             _availablePlayerIDs.Enqueue(_playerID);
 
             GD.Print($"Player disconnected: _peerID={_peerID}, _playerID={_playerID}");
@@ -163,6 +168,8 @@ public partial class NetworkSession : Node
     // ----------------------
     public void JoinServer(ServerInfo serverInfo)
     {
+        SetRole(NetRole.CLIENT);
+
         ServerInfo = serverInfo;
 
         GD.Print("Attempting to join server...");
@@ -198,7 +205,6 @@ public partial class NetworkSession : Node
         ServerPeer = peer;
 
         ConnectionRequest.Send(Settings.Instance.PlayerName);
-        GD.Print($"Sending connection request to server w/ player name: {Settings.Instance.PlayerName}");
     }
 
     // ----------------------
@@ -232,7 +238,7 @@ public partial class NetworkSession : Node
     // ----------------------
     // LAN Discovery
     // ----------------------
-    public async void RefreshLanServers(float listenSeconds = 2f)
+    public async void RefreshLanServers(float listenSeconds = 0.3f)
     {
         var servers = await ListenForLanServersAsync(listenSeconds);
         OnServerRefreshFinished?.Invoke(servers);
@@ -269,5 +275,30 @@ public partial class NetworkSession : Node
         }
 
         return discoveredServers;
+    }
+
+    public void HandleConnectionRequest(ENetPacketPeer peer, string playerName)
+    {
+        int peerID = (int)peer.GetMeta("id");
+
+        if (IsServerFull)
+        {
+            GD.Print($"Connection request from peer {peerID} denied: server full");
+            ConnectionDenied.Send(peer, "Server full");
+            return;
+        }
+
+        byte playerID = _availablePlayerIDs.Dequeue();
+        peerIDtoPlayerID[peerID] = playerID;
+        playerIDtoPlayerState[playerID] = new PlayerState(playerID)
+        {
+            PlayerName = playerName
+        };
+
+        GD.Print($"Connection request accepted: peerID={peerID}, playerID={playerID}, name={playerName}");
+        OnPlayerJoined?.Invoke(playerID);
+
+        // Send the acceptance message directly
+        ConnectionAccepted.Send(peer, playerID);
     }
 }

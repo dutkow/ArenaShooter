@@ -21,7 +21,7 @@ public partial class LanServerBroadcaster
         _udp.EnableBroadcast = true;
 
         // Setup C# timer
-        _timer = new System.Timers.Timer(1000); // fires every 1000ms = 1s
+        _timer = new System.Timers.Timer(250); // fires every 1000ms = 1s
         _timer.Elapsed += (sender, e) => Broadcast();
         _timer.AutoReset = true;
         _timer.Start();
