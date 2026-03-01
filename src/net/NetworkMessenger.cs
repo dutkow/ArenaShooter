@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// NetSend handles all network sending logic in a centralized way.
+/// NetworkMessenger handles all network sending logic in a centralized way.
 /// Supports Client → Server, Server → Client, and broadcasts.
 /// </summary>
-public static class NetSend
+public static class NetworkMessenger
 {
     // ----------------------
     // Client → Server

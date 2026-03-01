@@ -36,7 +36,7 @@ public class ConnectionRequest : Message
             ENetFlags = ENetPacketFlags.Reliable,
             PlayerName = playerName
         };
-        NetSend.ToServer(server, msg);
+        NetworkMessenger.ToServer(server, msg);
     }
 }
 
@@ -81,7 +81,7 @@ public class ConnectionAccepted : Message
             AssignedPlayerID = assignedID,
             PlayerNames = playerNames
         };
-        NetSend.ToClient(client, msg);
+        NetworkMessenger.ToClient(client, msg);
     }
 }
 
@@ -121,7 +121,7 @@ public class ConnectionDenied : Message
             ENetFlags = ENetPacketFlags.Reliable,
             Reason = reason
         };
-        NetSend.ToClient(client, msg);
+        NetworkMessenger.ToClient(client, msg);
     }
 }
 
@@ -160,7 +160,7 @@ public class ClientLoaded : Message
             ENetFlags = ENetPacketFlags.Reliable,
             PlayerID = playerID
         };
-        NetSend.ToServer(server, msg);
+        NetworkMessenger.ToServer(server, msg);
     }
 }
 
@@ -260,6 +260,31 @@ public class InitialMatchState : Message
             Positions = positions,
             Health = health
         };
-        NetSend.ToClient(client, msg);
+        NetworkMessenger.ToClient(client, msg);
+    }
+}
+
+/// <summary>
+/// Handler for all connection related messages.
+/// </summary>
+
+public class ConnectionMessageHandler : MessageHandler
+{
+    public ConnectionMessageHandler(MessageRouter router) : base(router) { }
+
+    public override void Initialize()
+    {
+        Router.RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, HandleConnectionRequest);
+        Router.RegisterFromClient(Msg.C2S_CLIENT_LOADED, HandleClientLoaded);
+    }
+
+    private void HandleConnectionRequest(ENetPacketPeer sender, byte[] data)
+    {
+        // TODO: parse data and handle a new connection request
+    }
+
+    private void HandleClientLoaded(ENetPacketPeer sender, byte[] data)
+    {
+        // TODO: handle client notifying server that it has loaded
     }
 }
