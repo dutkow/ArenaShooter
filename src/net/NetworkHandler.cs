@@ -10,6 +10,8 @@ public partial class NetworkHandler : Node
 {
     public static NetworkHandler Instance;
 
+    private NetworkSession _session;
+
     // ----------------------
     // Server events
     // ----------------------
@@ -61,6 +63,11 @@ public partial class NetworkHandler : Node
 
     public NetworkHandler()
     {
+        Instance = this;
+
+        _session = new();
+        _session.Initialize();
+
         // Initialize available peer IDs 255 -> 0
         for (int i = 255; i >= 0; i--)
         {
@@ -68,12 +75,6 @@ public partial class NetworkHandler : Node
         }
     }
 
-    public override void _Ready()
-    {
-        base._Ready();
-
-        Instance = this;
-    }
 
     public override void _Process(double delta)
     {
@@ -107,7 +108,7 @@ public partial class NetworkHandler : Node
                     }
                     else
                     {
-                        ConnectedToServer();
+                        ConnectedToServer(peer);
                     }
                     break;
 
@@ -219,9 +220,8 @@ public partial class NetworkHandler : Node
 
     private bool _hasFiredConnected = false;
 
-    private void ConnectedToServer()
+    private void ConnectedToServer(ENetPacketPeer peer)
     {
-        // Only fire once
         if (_hasFiredConnected)
         {
             return;
@@ -229,7 +229,9 @@ public partial class NetworkHandler : Node
 
         _hasFiredConnected = true;
         GD.Print("Connected to server!");
-        OnConnectedToServer?.Invoke();
+
+        _session.HandleConnectedToServer(peer);
+        //OnConnectedToServer?.Invoke();
     }
 
     private void DisconnectedFromServer()

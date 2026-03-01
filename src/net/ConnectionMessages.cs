@@ -268,19 +268,24 @@ public class InitialMatchState : Message
 /// Handler for all connection related messages.
 /// </summary>
 
-public class ServerConnectionMessageHandler : MessageHandler
+public class ConnectionMessageHandler : MessageHandler
 {
-    public ServerConnectionMessageHandler(MessageRouter router) : base(router) { }
+    public ConnectionMessageHandler(MessageRouter router) : base(router) { }
 
     public override void Initialize(NetRole role)
     {
-        if (role != NetRole.SERVER)
+        if (role == NetRole.SERVER)
         {
-            return;
+            Router.RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, HandleConnectionRequest);
+            Router.RegisterFromClient(Msg.C2S_CLIENT_LOADED, HandleClientLoaded);
+        }
+        else if (role == NetRole.CLIENT)
+        {
+            Router.RegisterFromServer(Msg.S2C_CONNECTION_ACCEPTED, HandleConnectionAccepted);
+            Router.RegisterFromServer(Msg.S2C_CONNECTION_DENIED, HandleConnectionDenied);
+            Router.RegisterFromServer(Msg.S2C_INITIAL_MATCH_STATE, HandleInitialMatchState);
         }
 
-        Router.RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, HandleConnectionRequest);
-        Router.RegisterFromClient(Msg.C2S_CLIENT_LOADED, HandleClientLoaded);
     }
 
     private void HandleConnectionRequest(ENetPacketPeer sender, byte[] data)
@@ -290,39 +295,17 @@ public class ServerConnectionMessageHandler : MessageHandler
     private void HandleClientLoaded(ENetPacketPeer sender, byte[] data)
     {
     }
-}
-
-public class ClientConnectionMessageHandler : MessageHandler
-{
-    public ClientConnectionMessageHandler(MessageRouter router) : base(router) { }
-
-    public override void Initialize(NetRole role)
-    {
-        if (role != NetRole.CLIENT)
-        {
-            return;
-        }
-
-        // Register handlers for messages coming from server
-        Router.RegisterFromServer(Msg.S2C_CONNECTION_ACCEPTED, HandleConnectionAccepted);
-        Router.RegisterFromServer(Msg.S2C_CONNECTION_DENIED, HandleConnectionDenied);
-        Router.RegisterFromServer(Msg.S2C_INITIAL_MATCH_STATE, HandleInitialMatchState);
-        // Add more as needed:
-        // Router.RegisterFromServer(ServerMsg.PLAYER_JOINED, HandlePlayerJoined);
-    }
 
     private void HandleConnectionAccepted(byte[] data)
     {
-        // Parse and handle server accepting connection
     }
 
     private void HandleConnectionDenied(byte[] data)
     {
-        // Parse and handle server denying connection
     }
 
     private void HandleInitialMatchState(byte[] data)
     {
-        // Parse initial match state
     }
 }
+

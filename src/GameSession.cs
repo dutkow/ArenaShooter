@@ -4,6 +4,8 @@ public partial class GameSession : Node
 {
     public override void _Ready()
     {
+        base._Ready();
+
         NetworkSession.Instance.OnSessionStarted += OnSessionStarted;
         NetworkSession.Instance.OnConnectedToServer += OnConnectedToServer;
     }

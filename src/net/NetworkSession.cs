@@ -46,16 +46,13 @@ public partial class NetworkSession : Node
 
     public Action<NetRole> OnRoleChanged;
 
+    public static ENetPacketPeer ServerPeer;
 
-    public NetworkSession()
+
+    public void Initialize()
     {
         Instance = this;
-    }
 
-    public override void _Ready()
-    {
-        base._Ready();
-        
         _networkHandler = NetworkHandler.Instance;
 
         _messageRouter = new();
@@ -67,8 +64,6 @@ public partial class NetworkSession : Node
 
         _networkHandler.OnConnectedToServer += HandleConnectedToServer;
         _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
-
-
     }
 
     public void SetRole(NetRole role)
@@ -151,6 +146,7 @@ public partial class NetworkSession : Node
     {
         GD.Print("Successfully connected to server");
         SetRole(NetRole.CLIENT);
+
         OnConnectedToServer?.Invoke();
     }
 
@@ -237,5 +233,15 @@ public partial class NetworkSession : Node
         }
     }
 
- 
+    public void HandleConnectedToServer(ENetPacketPeer peer)
+    {
+        if(peer == null || ServerPeer == peer)
+        {
+            return;
+        }
+
+        GD.Print("set server peer ran");
+        ServerPeer = peer;
+        OnConnectedToServer?.Invoke();
+    } 
 }
