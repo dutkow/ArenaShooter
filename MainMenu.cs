@@ -19,6 +19,8 @@ public partial class MainMenu : Control
         _joinGameButton.Pressed += OnJoinGameButtonPressed;
 
         _playerNameLineEdit.Text = Settings.Instance.PlayerName;
+
+        _playerNameLineEdit.TextChanged += OnPlayerNameChanged;
     }
 
     public void OnHostGameButtonPressed()
@@ -29,5 +31,10 @@ public partial class MainMenu : Control
     public void OnJoinGameButtonPressed()
     {
         _serverBrowser.Open();
+    }
+
+    public void OnPlayerNameChanged(string newName)
+    {
+        Settings.Instance.SetPlayerName(newName);
     }
 }

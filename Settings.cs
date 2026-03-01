@@ -49,6 +49,11 @@ public partial class Settings : Node
 
     public void SetPlayerName(string newName)
     {
+        if(PlayerName == newName)
+        {
+            return;
+        }
+
         PlayerName = newName;
         SaveSettings();
     }
