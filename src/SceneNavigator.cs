@@ -1,10 +1,14 @@
 using Godot;
 
-public partial class GameSession : Node
+public partial class SceneNavigator : Node
 {
+    public static SceneNavigator Instance { get; private set; }
+
     public override void _Ready()
     {
         base._Ready();
+
+        Instance = this;
 
         NetworkSession.Instance.OnSessionStarted += OnSessionStarted;
         NetworkSession.Instance.OnConnectedToServer += OnConnectedToServer;
@@ -15,15 +19,15 @@ public partial class GameSession : Node
         MatchState.Instance.StartPhase(MatchPhase.WARMUP);
         PlayerState playerState = new(0);
         PlayerManager.Instance.RegisterPlayer(playerState);
-        LoadGame(serverInfo.MapID);
+        OpenLevel(serverInfo.MapID);
     }
 
     private void OnConnectedToServer()
     {
-        LoadGame(NetworkSession.Instance.ServerInfo.MapID);
+        OpenLevel(NetworkSession.Instance.ServerInfo.MapID);
     }
 
-    private void LoadGame(string mapID)
+    public void OpenLevel(string mapID)
     {
         PackedScene levelToLoad = GameData.Instance.MapsByID[mapID].Scene;
         if(levelToLoad == null)

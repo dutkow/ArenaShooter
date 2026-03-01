@@ -22,6 +22,7 @@ public partial class NetworkSession : Node
     // ----------------------
     // Connected player info
     // ----------------------
+    public byte LocalPlayerID = 0;
     public int MaxPlayers { get; private set; } = 8;
     public Dictionary<byte, PlayerState> playerIDtoPlayerState = new();
     public Dictionary<int, byte> peerIDtoPlayerID = new();
@@ -72,7 +73,7 @@ public partial class NetworkSession : Node
         _networkHandler = NetworkHandler.Instance;
 
         _networkHandler.OnServerStarted += HandleServerStarted;
-        _networkHandler.OnPeerConnected += HandlePeerConnected;
+        //_networkHandler.OnPeerConnected += HandlePeerConnected;
         _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
         _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
     }
@@ -82,6 +83,11 @@ public partial class NetworkSession : Node
         if (Role == role)
         {
             return;
+        }
+
+        if(Role == NetRole.SERVER)
+        {
+            LocalPlayerID = 0;
         }
 
         Role = role;
@@ -130,6 +136,7 @@ public partial class NetworkSession : Node
         OnSessionStarted?.Invoke(ServerInfo);
     }
 
+    /*
     private void HandlePeerConnected(int _peerID)
     {
         if (_availablePlayerIDs.Count == 0)
@@ -144,7 +151,7 @@ public partial class NetworkSession : Node
 
         GD.Print($"Player connected: _peerID={_peerID}, _playerID={_playerID}");
         OnPlayerJoined?.Invoke(_playerID);
-    }
+    }*/
 
     private void HandlePeerDisconnected(int _peerID)
     {

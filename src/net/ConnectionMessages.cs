@@ -324,9 +324,9 @@ public class ConnectionMessageHandler : MessageHandler
         var msg = new ConnectionAccepted();
         msg.ReadMessage(data);
 
-        GD.Print("Client received connection accepted from server");
-        // Save player ID locally
-        //Settings.Instance.PlayerID = msg.AssignedPlayerID;
+        GD.Print($"Client received connection accepted from server and was assigned ID: {msg.AssignedPlayerID}");
+        NetworkSession.Instance.LocalPlayerID = msg.AssignedPlayerID;
+        SceneNavigator.Instance.OpenLevel(NetworkSession.Instance.ServerInfo.MapID);
     }
 
     private void HandleConnectionDenied(byte[] data)
