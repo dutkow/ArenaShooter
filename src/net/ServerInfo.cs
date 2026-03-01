@@ -13,9 +13,13 @@ public class ServerInfo
     public int Players;
     public int MaxPlayers;
     public string MapID;
-
     public int PingMs;
+    public bool RequiresPassword;
 
+    [NonSerialized]
+    private string _password = "";
+
+    // Constructor
     public ServerInfo(
         string name = "New Server",
         string ip = "127.0.0.1",
@@ -23,7 +27,8 @@ public class ServerInfo
         int players = 0,
         int maxPlayers = 8,
         string? serverID = null,
-        string mapID = "test_map_1"
+        string mapID = "test_map_1",
+        string password = ""
     )
     {
         ServerID = serverID ?? Guid.NewGuid().ToString();
@@ -33,11 +38,26 @@ public class ServerInfo
         Players = players;
         MaxPlayers = maxPlayers;
         MapID = mapID;
+
+        _password = password;
+        RequiresPassword = !string.IsNullOrEmpty(password);
+    }
+
+    public string GetPassword()
+    {
+        return _password;
+    }
+
+    public void SetPassword(string password)
+    {
+        _password = password;
+        RequiresPassword = !string.IsNullOrEmpty(password);
     }
 
     public override string ToString()
     {
-        var fields = this.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+        var fields = this.GetType()
+            .GetFields(BindingFlags.Public | BindingFlags.Instance);
         return string.Join("|", fields.Select(f => f.GetValue(this)?.ToString() ?? ""));
     }
 
@@ -56,6 +76,10 @@ public class ServerInfo
             if (field.FieldType == typeof(int))
             {
                 value = int.Parse(parts[i]);
+            }
+            else if (field.FieldType == typeof(bool))
+            {
+                value = bool.Parse(parts[i]);
             }
             else
             {
@@ -77,6 +101,6 @@ public class ServerInfo
 
     public void PrintInfo()
     {
-        GD.Print($"ServerID: {ServerID}, Name: {Name}, HostIP: {HostIP}, Port: {Port}, Players: {Players}/{MaxPlayers}, MapID: {MapID}");
+        GD.Print($"ServerID: {ServerID}, Name: {Name}, HostIP: {HostIP}, Port: {Port}, Players: {Players}/{MaxPlayers}, MapID: {MapID}, RequiresPassword: {RequiresPassword}");
     }
 }

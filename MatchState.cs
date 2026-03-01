@@ -156,7 +156,7 @@ public partial class MatchState : Node
     private void HandlePeerConnected(int peerId)
     {
         // Create a new PlayerState for this peer
-        var newPlayer = new PlayerState
+        var newPlayer = new PlayerState(0)
         {
             PlayerName = $"Player{peerId}",
             Score = 0,

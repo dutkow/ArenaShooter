@@ -13,58 +13,71 @@ public enum NetRole : byte
     SERVER,
 }
 
-
 public partial class NetworkSession : Node
 {
-
     public static NetworkSession Instance { get; private set; }
 
     public NetRole Role { get; private set; } = NetRole.LOCAL;
 
+    // ----------------------
+    // Connected player info
+    // ----------------------
+    public int MaxPlayers { get; private set; } = 8;
+    private Dictionary<byte, PlayerState> _connectedPlayers = new();
+    private Dictionary<int, byte> _peerIDToPlayerID = new();
+    private Queue<byte> _availablePlayerIDs = new();
+    public bool IsServerFull => _connectedPlayers.Count >= MaxPlayers;
 
     private NetworkHandler _networkHandler;
     private MessageRouter _router;
-
-
     private LanServerBroadcaster _lanBroadcaster;
-
-
 
     public ServerInfo ServerInfo;
     private bool _isHosting = false;
 
+    // ----------------------
+    // Events
+    // ----------------------
     public Action<ServerInfo> OnSessionStarted;
     public Action? OnSessionStopped;
-    public Action<int>? OnPlayerJoined;
-    public Action<int>? OnPlayerLeft;
+    public Action<byte>? OnPlayerJoined;
+    public Action<byte>? OnPlayerLeft;
 
     public Action<List<ServerInfo>>? OnServerRefreshFinished;
     public Action? OnConnectedToServer;
     public Action? OnFailedToConnect;
     public Action? OnDisconnectedFromServer;
 
+    public Action? OnConnectionToServerAccepted;
     public Action<NetRole> OnRoleChanged;
 
     public ENetPacketPeer ServerPeer;
 
-
+    // ----------------------
+    // Initialization
+    // ----------------------
     public void Initialize()
     {
         Instance = this;
+
+        // Fill the pool of available _playerIDs
+        _availablePlayerIDs.Clear();
+        for (byte i = 1; i <= MaxPlayers; i++)
+        {
+            _availablePlayerIDs.Enqueue(i);
+        }
 
         _networkHandler = NetworkHandler.Instance;
 
         _networkHandler.OnServerStarted += HandleServerStarted;
         _networkHandler.OnPeerConnected += HandlePeerConnected;
         _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
-
-        //_networkHandler.OnConnectedToServer += HandleConnectedToServer;
         _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
     }
 
     public void SetRole(NetRole role)
     {
-        if(Role == role)
+        if (Role == role)
         {
             return;
         }
@@ -73,6 +86,9 @@ public partial class NetworkSession : Node
         OnRoleChanged?.Invoke(Role);
     }
 
+    // ----------------------
+    // Hosting / Server
+    // ----------------------
     public void HostLanServer(ServerInfo info)
     {
         ServerInfo = info;
@@ -86,7 +102,6 @@ public partial class NetworkSession : Node
         }
 
         _lanBroadcaster.StartBroadcast(info);
-
 
         _isHosting = true;
     }
@@ -110,18 +125,41 @@ public partial class NetworkSession : Node
         OnSessionStarted?.Invoke(ServerInfo);
     }
 
-    private void HandlePeerConnected(int peerId)
+    private void HandlePeerConnected(int _peerID)
     {
-        OnPlayerJoined?.Invoke(peerId);
+        if (_availablePlayerIDs.Count == 0)
+        {
+            GD.Print("Server full, cannot assign _playerID!");
+            return;
+        }
+
+        byte _playerID = _availablePlayerIDs.Dequeue();
+        _peerIDToPlayerID[_peerID] = _playerID;
+        _connectedPlayers[_playerID] = new PlayerState(_playerID);
+
+        GD.Print($"Player connected: _peerID={_peerID}, _playerID={_playerID}");
+        OnPlayerJoined?.Invoke(_playerID);
     }
 
-    private void HandlePeerDisconnected(int peerId)
+    private void HandlePeerDisconnected(int _peerID)
     {
-        OnPlayerLeft?.Invoke(peerId);
+        if (_peerIDToPlayerID.TryGetValue(_peerID, out byte _playerID))
+        {
+            _peerIDToPlayerID.Remove(_peerID);
+            _connectedPlayers.Remove(_playerID);
+            _availablePlayerIDs.Enqueue(_playerID);
+
+            GD.Print($"Player disconnected: _peerID={_peerID}, _playerID={_playerID}");
+            OnPlayerLeft?.Invoke(_playerID);
+        }
+        else
+        {
+            GD.PushError($"_peerID {_peerID} disconnected but no _playerID was assigned");
+        }
     }
 
     // ----------------------
-    // Join server
+    // Joining / Client
     // ----------------------
     public void JoinServer(ServerInfo serverInfo)
     {
@@ -141,13 +179,54 @@ public partial class NetworkSession : Node
     private void HandleFailedToConnect()
     {
         GD.Print("Failed to connect to server");
-
         OnFailedToConnect?.Invoke();
     }
 
     public void HandleDisconnectedFromServer()
     {
         OnDisconnectedFromServer?.Invoke();
+    }
+
+    public void HandleConnectedToServer(ENetPacketPeer peer)
+    {
+        if ((peer == null) || (ServerPeer == peer))
+        {
+            return;
+        }
+
+        GD.Print("Connected to server peer set");
+        ServerPeer = peer;
+
+        ConnectionRequest.Send(Settings.Instance.PlayerName);
+        GD.Print($"Sending connection request to server w/ player name: {Settings.Instance.PlayerName}");
+    }
+
+    // ----------------------
+    // Message Routing
+    // ----------------------
+    public void HandleReceivedMessage(ENetPacketPeer peer, byte[] data)
+    {
+        if (_router == null)
+        {
+            GD.PrintErr("No message router assigned!");
+            return;
+        }
+
+        switch (Role)
+        {
+            case NetRole.SERVER:
+                _router.ReadMessageFromClient(peer, data);
+                break;
+
+            case NetRole.CLIENT:
+                _router.ReadMessageFromServer(data);
+                break;
+        }
+    }
+
+    public void HandleConnectionToServerAccepted()
+    {
+        OnConnectionToServerAccepted?.Invoke();
     }
 
     // ----------------------
@@ -164,94 +243,31 @@ public partial class NetworkSession : Node
         var discoveredServers = new List<ServerInfo>();
         var seenServerIDs = new HashSet<string>();
 
-        using var listener = new UdpClient(_networkHandler.LanBroadcastPort);
-        listener.EnableBroadcast = true;
-
-        var timeout = DateTime.Now.AddSeconds(listenSeconds);
-
-        while (DateTime.Now < timeout)
+        using (var listener = new UdpClient(_networkHandler.LanBroadcastPort))
         {
-            if (listener.Available > 0)
+            listener.EnableBroadcast = true;
+
+            var timeout = DateTime.Now.AddSeconds(listenSeconds);
+
+            while (DateTime.Now < timeout)
             {
-                var result = await listener.ReceiveAsync();
-                var data = Encoding.UTF8.GetString(result.Buffer);
-                var serverInfo = ServerInfo.FromString(data);
-
-                if (!seenServerIDs.Contains(serverInfo.ServerID))
+                if (listener.Available > 0)
                 {
-                    discoveredServers.Add(serverInfo);
-                    seenServerIDs.Add(serverInfo.ServerID);
-                }
-            }
+                    var result = await listener.ReceiveAsync();
+                    var data = Encoding.UTF8.GetString(result.Buffer);
+                    var serverInfo = ServerInfo.FromString(data);
 
-            await Task.Delay(50);
+                    if (!seenServerIDs.Contains(serverInfo.ServerID))
+                    {
+                        discoveredServers.Add(serverInfo);
+                        seenServerIDs.Add(serverInfo.ServerID);
+                    }
+                }
+
+                await Task.Delay(50);
+            }
         }
 
         return discoveredServers;
-    }
-
-
-    private async Task<int> PingServerAsync(ServerInfo server, int timeoutMs = 1000)
-    {
-        try
-        {
-            using var udp = new UdpClient();
-            udp.Connect(server.HostIP, server.Port);
-
-            byte[] pingPacket = new byte[] { 0 }; // dummy ping
-            var stopwatch = Stopwatch.StartNew();
-
-            await udp.SendAsync(pingPacket, pingPacket.Length);
-
-            // wait for reply or timeout
-            var task = udp.ReceiveAsync();
-            if (await Task.WhenAny(task, Task.Delay(timeoutMs)) == task)
-            {
-                stopwatch.Stop();
-                return (int)stopwatch.ElapsedMilliseconds;
-            }
-            else
-            {
-                return -1; // timeout
-            }
-        }
-        catch
-        {
-            return -1; // error
-        }
-    }
-
-    public void HandleConnectedToServer(ENetPacketPeer peer)
-    {
-        if(peer == null || ServerPeer == peer)
-        {
-            return;
-        }
-
-        GD.Print("set server peer ran");
-        ServerPeer = peer;
-        //OnConnectedToServer?.Invoke();
-
-        ConnectionRequest.Send(Settings.Instance.PlayerName);
-    } 
-
-    public void HandleReceivedMessage(ENetPacketPeer sender, byte[] data)
-    {
-        if (_router == null)
-        {
-            GD.PrintErr("No message router assigned!");
-            return;
-        }
-
-        switch (Role)
-        {
-            case NetRole.SERVER:
-                _router.ReadMessageFromClient(sender, data);
-                break;
-
-            case NetRole.CLIENT:
-                _router.ReadMessageFromServer(data);
-                break;
-        }
     }
 }

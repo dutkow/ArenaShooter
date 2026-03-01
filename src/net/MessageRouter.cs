@@ -24,32 +24,24 @@ public class MessageRouter
     /// <summary>
     /// Initialize all handlers for the given role.
     /// </summary>
-    public void Initialize(NetRole role)
+    public void OnRoleChanged(NetRole role)
     {
 
     }
 
-    // ---------------- Dispatch ----------------
     public void ReadMessageFromServer(byte[] data)
     {
-        var type = Message.GetType(data);
-        //_fromServerHandlers[(int)type]?.Invoke(data);
     }
 
     public void ReadMessageFromClient(ENetPacketPeer sender, byte[] data)
     {
-        var type = Message.GetType(data);
-        //_fromClientHandlers[(int)type]?.Invoke(sender, data);
     }
 
-    // ---------------- Registration ----------------
     public void RegisterFromServer(Msg type, FromServerHandler handler)
     {
-        //_fromServerHandlers[(int)type] = handler;
     }
 
     public void RegisterFromClient(Msg type, FromClientHandler handler)
     {
-        //_fromClientHandlers[(int)type] = handler;
     }
 }

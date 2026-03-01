@@ -47,13 +47,11 @@ public class ConnectionRequest : Message
 public class ConnectionAccepted : Message
 {
     public byte AssignedPlayerID;
-    public string[] PlayerNames;
 
     protected override int BufferSize()
     {
         base.BufferSize();
         Add(AssignedPlayerID);
-        Add(PlayerNames);
         return _dataSize;
     }
 
@@ -61,7 +59,6 @@ public class ConnectionAccepted : Message
     {
         base.WriteMessage();
         Write(AssignedPlayerID);
-        Write(PlayerNames);
         return _data;
     }
 
@@ -69,17 +66,15 @@ public class ConnectionAccepted : Message
     {
         base.ReadMessage(data);
         Read(out AssignedPlayerID);
-        Read(out PlayerNames);
     }
 
-    public static void Send(ENetPacketPeer client, byte assignedID, string[] playerNames)
+    public static void Send(ENetPacketPeer client, byte assignedID)
     {
         var msg = new ConnectionAccepted
         {
             MessageType = Msg.S2C_CONNECTION_ACCEPTED,
             ENetFlags = ENetPacketFlags.Reliable,
             AssignedPlayerID = assignedID,
-            PlayerNames = playerNames
         };
         NetworkSend.ToClient(client, msg);
     }
@@ -288,8 +283,17 @@ public class ConnectionMessageHandler : MessageHandler
 
     }
 
-    private void HandleConnectionRequest(ENetPacketPeer sender, byte[] data)
+    private void HandleConnectionRequest(ENetPacketPeer peer, byte[] data)
     {
+        if(NetworkSession.Instance.IsServerFull)
+        {
+            ConnectionDenied.Send(peer, "DENIED");
+        }
+        else
+        {
+            string[] list = new string[data.Length];
+            ConnectionAccepted.Send(peer, 0);
+        }
     }
 
     private void HandleClientLoaded(ENetPacketPeer sender, byte[] data)

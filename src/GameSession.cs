@@ -13,7 +13,7 @@ public partial class GameSession : Node
     private void OnSessionStarted(ServerInfo serverInfo)
     {
         MatchState.Instance.StartPhase(MatchPhase.WARMUP);
-        PlayerState playerState = new();
+        PlayerState playerState = new(0);
         PlayerManager.Instance.RegisterPlayer(playerState);
         LoadGame(serverInfo.MapID);
     }
