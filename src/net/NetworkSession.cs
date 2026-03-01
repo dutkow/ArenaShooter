@@ -6,9 +6,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
+public enum NetRole : byte
+{
+    LOCAL,
+    CLIENT,
+    SERVER,
+}
+
+
 public partial class NetworkSession : Node
 {
+
     public static NetworkSession Instance { get; private set; }
+
+    public NetRole Role { get; private set; } = NetRole.LOCAL;
+
 
     [Export] private NetworkHandler _networkHandler;
     private LanServerBroadcaster _lanBroadcaster;
@@ -25,6 +37,9 @@ public partial class NetworkSession : Node
     public Action? OnConnectedToServer;
     public Action? OnFailedToConnect;
     public Action? OnDisconnectedFromServer;
+
+    public Action<NetRole> OnRoleChanged;
+
 
     public NetworkSession()
     {
@@ -45,11 +60,23 @@ public partial class NetworkSession : Node
         _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
     }
 
+    public void SetRole(NetRole role)
+    {
+        if(Role == role)
+        {
+            return;
+        }
+
+        Role = role;
+        OnRoleChanged?.Invoke(Role);
+    }
+
     public void HostLanServer(ServerInfo info)
     {
         ServerInfo = info;
 
         _networkHandler.StartServer(info.HostIP, info.Port);
+        Role = NetRole.SERVER;
 
         if (_lanBroadcaster == null)
         {
@@ -64,7 +91,12 @@ public partial class NetworkSession : Node
 
     public void StopHosting()
     {
-        if (!_isHosting) return;
+        if (!_isHosting)
+        {
+            return;
+        }
+
+        Role = NetRole.CLIENT;
 
         _lanBroadcaster = null;
         _isHosting = false;
