@@ -10,5 +10,5 @@ public abstract class MessageHandler
         Router = router;
     }
 
-    public abstract void Initialize();
+    public abstract void Initialize(NetRole role);
 }

@@ -268,23 +268,60 @@ public class InitialMatchState : Message
 /// Handler for all connection related messages.
 /// </summary>
 
-public class ConnectionMessageHandler : MessageHandler
+public class ServerConnectionMessageHandler : MessageHandler
 {
-    public ConnectionMessageHandler(MessageRouter router) : base(router) { }
+    public ServerConnectionMessageHandler(MessageRouter router) : base(router) { }
 
-    public override void Initialize()
+    public override void Initialize(NetRole role)
     {
-        Router.RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, HandleConnectionRequest);
-        Router.RegisterFromClient(Msg.C2S_CLIENT_LOADED, HandleClientLoaded);
+        if (role != NetRole.SERVER) return;
+
+        // Register handlers for messages coming from clients
+        Router.RegisterFromClient(ClientMsg.CONNECTION_REQUEST, HandleConnectionRequest);
+        Router.RegisterFromClient(ClientMsg.CLIENT_LOADED, HandleClientLoaded);
+        // Add more as needed:
+        // Router.RegisterFromClient(ClientMsg.PLAYER_INFO, HandlePlayerInfo);
     }
 
     private void HandleConnectionRequest(ENetPacketPeer sender, byte[] data)
     {
-        // TODO: parse data and handle a new connection request
+        // Parse ConnectionRequest and handle new client
     }
 
     private void HandleClientLoaded(ENetPacketPeer sender, byte[] data)
     {
-        // TODO: handle client notifying server that it has loaded
+        // Handle client signaling that it's loaded
+    }
+}
+
+public class ClientConnectionMessageHandler : MessageHandler
+{
+    public ClientConnectionMessageHandler(MessageRouter router) : base(router) { }
+
+    public override void Initialize(NetRole role)
+    {
+        if (role != NetRole.CLIENT) return;
+
+        // Register handlers for messages coming from server
+        Router.RegisterFromServer(ServerMsg.CONNECTION_ACCEPTED, HandleConnectionAccepted);
+        Router.RegisterFromServer(ServerMsg.CONNECTION_DENIED, HandleConnectionDenied);
+        Router.RegisterFromServer(ServerMsg.INITIAL_MATCH_STATE, HandleInitialMatchState);
+        // Add more as needed:
+        // Router.RegisterFromServer(ServerMsg.PLAYER_JOINED, HandlePlayerJoined);
+    }
+
+    private void HandleConnectionAccepted(byte[] data)
+    {
+        // Parse and handle server accepting connection
+    }
+
+    private void HandleConnectionDenied(byte[] data)
+    {
+        // Parse and handle server denying connection
+    }
+
+    private void HandleInitialMatchState(byte[] data)
+    {
+        // Parse initial match state
     }
 }

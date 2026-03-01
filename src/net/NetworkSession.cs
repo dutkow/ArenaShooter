@@ -23,7 +23,13 @@ public partial class NetworkSession : Node
 
 
     [Export] private NetworkHandler _networkHandler;
+
+    private MessageRouter _messageRouter;
+
+
     private LanServerBroadcaster _lanBroadcaster;
+
+
 
     public ServerInfo ServerInfo;
     private bool _isHosting = false;
@@ -52,12 +58,17 @@ public partial class NetworkSession : Node
         
         _networkHandler = NetworkHandler.Instance;
 
+        _messageRouter = new();
+        _messageRouter.Initialize(Role);
+
         _networkHandler.OnServerStarted += HandleServerStarted;
         _networkHandler.OnPeerConnected += HandlePeerConnected;
         _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
 
         _networkHandler.OnConnectedToServer += HandleConnectedToServer;
         _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
+
+
     }
 
     public void SetRole(NetRole role)
@@ -76,7 +87,7 @@ public partial class NetworkSession : Node
         ServerInfo = info;
 
         _networkHandler.StartServer(info.HostIP, info.Port);
-        Role = NetRole.SERVER;
+        SetRole(NetRole.SERVER);
 
         if (_lanBroadcaster == null)
         {
@@ -96,7 +107,7 @@ public partial class NetworkSession : Node
             return;
         }
 
-        Role = NetRole.CLIENT;
+        SetRole(NetRole.LOCAL);
 
         _lanBroadcaster = null;
         _isHosting = false;
@@ -139,7 +150,7 @@ public partial class NetworkSession : Node
     private void HandleConnectedToServer()
     {
         GD.Print("Successfully connected to server");
-
+        SetRole(NetRole.CLIENT);
         OnConnectedToServer?.Invoke();
     }
 
@@ -225,4 +236,6 @@ public partial class NetworkSession : Node
             return -1; // error
         }
     }
+
+ 
 }
