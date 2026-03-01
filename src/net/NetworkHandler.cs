@@ -102,14 +102,20 @@ public partial class NetworkHandler : Node
 
                 case ENetConnection.EventType.Connect:
                     if (isServer)
+                    {
                         PeerConnected(peer);
+                    }
                     else
+                    {
                         ConnectedToServer();
+                    }
                     break;
 
                 case ENetConnection.EventType.Disconnect:
                     if (isServer)
+                    {
                         PeerDisconnected(peer);
+                    }
                     else
                     {
                         DisconnectedFromServer();
@@ -119,9 +125,13 @@ public partial class NetworkHandler : Node
 
                 case ENetConnection.EventType.Receive:
                     if (isServer)
+                    {
                         OnServerPacket?.Invoke((int)peer.GetMeta("id"), peer.GetPacket());
+                    }
                     else
+                    {
                         OnClientPacket?.Invoke(peer.GetPacket());
+                    }
                     break;
             }
 
@@ -213,7 +223,9 @@ public partial class NetworkHandler : Node
     {
         // Only fire once
         if (_hasFiredConnected)
+        {
             return;
+        }
 
         _hasFiredConnected = true;
         GD.Print("Connected to server!");

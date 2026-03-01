@@ -79,7 +79,9 @@ public partial class MatchState : Node
     public override void _Process(double delta)
     {
         if (!IsPhaseTimed(MatchPhase))
+        {
             return;
+        }
 
         _secondAccumulator += delta;
 
@@ -93,10 +95,14 @@ public partial class MatchState : Node
     private void TickOneSecond()
     {
         if (TimeRemaining > 0)
+        {
             TimeRemaining--;
+        }
 
         if (TimeRemaining == 0)
+        {
             AdvanceToNextMatchPhase();
+        }
     }
 
     private bool IsPhaseTimed(MatchPhase phase)
