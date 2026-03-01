@@ -3,20 +3,23 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// NetworkMessenger handles all network sending logic in a centralized way.
+/// NetworkSend handles all network sending logic in a centralized way.
 /// Supports Client → Server, Server → Client, and broadcasts.
 /// </summary>
-public static class NetworkMessenger
+public static class NetworkSend
 {
     // ----------------------
     // Client → Server
     // ----------------------
-    public static void ToServer(ENetPacketPeer serverPeer, Message message)
+    public static void ToServer(Message message)
     {
-        if (serverPeer != null)
+        ENetPacketPeer serverPeer = NetworkSession.Instance.ServerPeer;
+        if (serverPeer == null)
         {
-            serverPeer.Send(0, message.WriteMessage(), (int)message.Flags);
+            GD.PushError("ServerPeer is null.");
+            return;
         }
+        serverPeer.Send(0, message.WriteMessage(), (int)message.Flags);
     }
 
     // ----------------------

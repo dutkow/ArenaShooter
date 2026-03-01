@@ -22,9 +22,8 @@ public partial class NetworkSession : Node
     public NetRole Role { get; private set; } = NetRole.LOCAL;
 
 
-    [Export] private NetworkHandler _networkHandler;
-
-    private MessageRouter _messageRouter;
+    private NetworkHandler _networkHandler;
+    private MessageRouter _router;
 
 
     private LanServerBroadcaster _lanBroadcaster;
@@ -46,7 +45,7 @@ public partial class NetworkSession : Node
 
     public Action<NetRole> OnRoleChanged;
 
-    public static ENetPacketPeer ServerPeer;
+    public ENetPacketPeer ServerPeer;
 
 
     public void Initialize()
@@ -55,14 +54,11 @@ public partial class NetworkSession : Node
 
         _networkHandler = NetworkHandler.Instance;
 
-        _messageRouter = new();
-        _messageRouter.Initialize(Role);
-
         _networkHandler.OnServerStarted += HandleServerStarted;
         _networkHandler.OnPeerConnected += HandlePeerConnected;
         _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
 
-        _networkHandler.OnConnectedToServer += HandleConnectedToServer;
+        //_networkHandler.OnConnectedToServer += HandleConnectedToServer;
         _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
     }
 
@@ -140,14 +136,6 @@ public partial class NetworkSession : Node
         }
 
         _networkHandler.StartClient(serverInfo.HostIP, serverInfo.Port);
-    }
-
-    private void HandleConnectedToServer()
-    {
-        GD.Print("Successfully connected to server");
-        SetRole(NetRole.CLIENT);
-
-        OnConnectedToServer?.Invoke();
     }
 
     private void HandleFailedToConnect()
@@ -242,6 +230,28 @@ public partial class NetworkSession : Node
 
         GD.Print("set server peer ran");
         ServerPeer = peer;
-        OnConnectedToServer?.Invoke();
+        //OnConnectedToServer?.Invoke();
+
+        ConnectionRequest.Send(Settings.Instance.PlayerName);
     } 
+
+    public void HandleReceivedMessage(ENetPacketPeer sender, byte[] data)
+    {
+        if (_router == null)
+        {
+            GD.PrintErr("No message router assigned!");
+            return;
+        }
+
+        switch (Role)
+        {
+            case NetRole.SERVER:
+                _router.ReadMessageFromClient(sender, data);
+                break;
+
+            case NetRole.CLIENT:
+                _router.ReadMessageFromServer(data);
+                break;
+        }
+    }
 }

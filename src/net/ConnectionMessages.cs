@@ -28,7 +28,7 @@ public class ConnectionRequest : Message
         Read(out PlayerName);
     }
 
-    public static void Send(ENetPacketPeer server, string playerName)
+    public static void Send(string playerName)
     {
         var msg = new ConnectionRequest
         {
@@ -36,7 +36,7 @@ public class ConnectionRequest : Message
             ENetFlags = ENetPacketFlags.Reliable,
             PlayerName = playerName
         };
-        NetworkMessenger.ToServer(server, msg);
+        NetworkSend.ToServer(msg);
     }
 }
 
@@ -81,7 +81,7 @@ public class ConnectionAccepted : Message
             AssignedPlayerID = assignedID,
             PlayerNames = playerNames
         };
-        NetworkMessenger.ToClient(client, msg);
+        NetworkSend.ToClient(client, msg);
     }
 }
 
@@ -121,7 +121,7 @@ public class ConnectionDenied : Message
             ENetFlags = ENetPacketFlags.Reliable,
             Reason = reason
         };
-        NetworkMessenger.ToClient(client, msg);
+        NetworkSend.ToClient(client, msg);
     }
 }
 
@@ -160,7 +160,7 @@ public class ClientLoaded : Message
             ENetFlags = ENetPacketFlags.Reliable,
             PlayerID = playerID
         };
-        NetworkMessenger.ToServer(server, msg);
+        NetworkSend.ToServer(msg);
     }
 }
 
@@ -260,7 +260,7 @@ public class InitialMatchState : Message
             Positions = positions,
             Health = health
         };
-        NetworkMessenger.ToClient(client, msg);
+        NetworkSend.ToClient(client, msg);
     }
 }
 

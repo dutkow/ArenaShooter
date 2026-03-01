@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 /// <summary>
 /// NetworkHandler handles low-level networking for both server and client.
@@ -120,19 +121,17 @@ public partial class NetworkHandler : Node
                     else
                     {
                         DisconnectedFromServer();
-                        return; // connection is now null
+                        return;
                     }
                     break;
 
                 case ENetConnection.EventType.Receive:
-                    if (isServer)
+                    if(_session == null)
                     {
-                        OnServerPacket?.Invoke((int)peer.GetMeta("id"), peer.GetPacket());
+                        GD.PushError("NetworkSession returned null.");
+                        return;
                     }
-                    else
-                    {
-                        OnClientPacket?.Invoke(peer.GetPacket());
-                    }
+                    _session.HandleReceivedMessage(peer, peer.GetPacket());
                     break;
             }
 

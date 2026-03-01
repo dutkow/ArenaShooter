@@ -23,7 +23,6 @@ public partial class GameSession : Node
         LoadGame(NetworkSession.Instance.ServerInfo.MapID);
     }
 
-
     private void LoadGame(string mapID)
     {
         PackedScene levelToLoad = GameData.Instance.MapsByID[mapID].Scene;
