@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://m4y05jbaa545"]
+[gd_scene load_steps=5 format=3 uid="uid://m4y05jbaa545"]
 
 [ext_resource type="Texture2D" uid="uid://uue7f6y3spks" path="res://crosshair.png" id="1_37p78"]
 [ext_resource type="PackedScene" uid="uid://btl1kctnuoavh" path="res://match_timer.tscn" id="2_64ctp"]
 [ext_resource type="PackedScene" uid="uid://djf0qbxcoq6xf" path="res://match_debug_panel.tscn" id="3_8sq4i"]
+[ext_resource type="PackedScene" uid="uid://doyibe8885wuq" path="res://connected_players_list.tscn" id="4_640wx"]
 
 [node name="Hud" type="Control"]
 layout_mode = 3
@@ -49,3 +50,10 @@ offset_right = 162.0
 offset_bottom = 52.0
 grow_horizontal = 1
 grow_vertical = 1
+
+[node name="ConnectedPlayersList" parent="." instance=ExtResource("4_640wx")]
+layout_mode = 1
+offset_left = 7.0
+offset_top = 63.0
+offset_right = -647.0
+offset_bottom = -398.0
