@@ -30,11 +30,11 @@ public partial class PlayerManager : Node
 
     public IReadOnlyList<PlayerState> GetActivePlayers()
     {
-        return _playerStates.FindAll(p => p.Pawn != null);
+        return _playerStates.FindAll(p => p.Character != null);
     }
 
     public IReadOnlyList<PlayerCharacter> GetPlayerCharacters()
     {
-        return _playerStates.Select(p => p.Pawn).OfType<PlayerCharacter>().ToList();
+        return _playerStates.Select(p => p.Character).OfType<PlayerCharacter>().ToList();
     }
 }

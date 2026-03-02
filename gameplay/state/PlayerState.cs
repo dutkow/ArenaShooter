@@ -11,5 +11,6 @@ public class PlayerState (int playerID)
     public int Shields;
     public int Ammo;
     public int TeamId;
-    public PlayerCharacter Pawn;
+    public PlayerCharacter Character;
+    public bool IsAlive => Character != null && Character.IsAlive;
 }

@@ -187,7 +187,7 @@ public partial class MatchState : Node
             Shields = 100,
             Ammo = 0,
             TeamId = -1,
-            Pawn = null
+            Character = null
         };
 
         _connectedPlayers[playerID] = player;
@@ -208,7 +208,7 @@ public partial class MatchState : Node
             Shields = 100,
             Ammo = 0,
             TeamId = -1,
-            Pawn = null
+            Character = null
         };
 
         _connectedPlayers[playerID] = newPlayer;
@@ -242,5 +242,5 @@ public partial class MatchState : Node
     public IReadOnlyList<PlayerState> GetAllPlayers() => new List<PlayerState>(_connectedPlayers.Values);
 
     public IReadOnlyList<PlayerState> GetActivePlayers() =>
-        new List<PlayerState>(_connectedPlayers.Values).FindAll(p => p.Pawn != null);
+        new List<PlayerState>(_connectedPlayers.Values).FindAll(p => p.Character != null);
 }

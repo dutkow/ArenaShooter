@@ -10,6 +10,7 @@ public enum MovementState
 public partial class PlayerCharacter : CharacterBody3D
 {
     // Movement
+    public bool IsAlive;
     [Export] public int Speed { get; set; } = 14;                     // Ground speed
     [Export] public int FallAcceleration { get; set; } = 50;          // Gravity
     private Vector3 _targetVelocity = Vector3.Zero;
@@ -40,7 +41,7 @@ public partial class PlayerCharacter : CharacterBody3D
     public void Initialize(PlayerState state)
     {
         State = state;
-        State.Pawn = this;
+        State.Character = this;
     }
 
     public void TeleportTo(Transform3D t)
@@ -69,7 +70,7 @@ public partial class PlayerCharacter : CharacterBody3D
         Input.MouseMode = Input.MouseModeEnum.Captured;
 
         State = PlayerManager.Instance.GetAllPlayers()[0]; // basic test item
-        State.Pawn = this;
+        State.Character = this;
     }
 
     public override void _Input(InputEvent @event)

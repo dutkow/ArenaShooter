@@ -1,35 +1,50 @@
 using Godot;
+using System;
 using System.Linq;
-
 
 /// <summary>
 /// Sent from Server → Client after receiving ClientLoaded to sync initial match state.
-/// Includes positions, health, and any other relevant starting state.
-/// </summary>
-// <summary>
-/// Server → Client: Initial full match state
-/// Includes player ID, name, position, rotation (Euler angles)
-/// Reliable because it must always arrive
+/// Includes positions, rotation, health, alive status, and other relevant starting state.
 /// </summary>
 public class InitialMatchState : Message
 {
     public byte[] PlayerIDs;
     public string[] PlayerNames;
+    public Vector3[] Positions;
+    public Vector3[] Rotations;
+    public bool[] IsAlive;
 
     protected override int BufferSize()
     {
         base.BufferSize();
 
         Add(PlayerIDs.Length);
-        foreach (var id in PlayerIDs)
+
+        for (int i = 0; i < PlayerIDs.Length; i++)
         {
-            Add(id);
+            Add(PlayerIDs[i]);
         }
 
         Add(PlayerNames.Length);
-        foreach (var name in PlayerNames)
+
+        for (int i = 0; i < PlayerNames.Length; i++)
         {
-            Add(name);
+            Add(PlayerNames[i]);
+        }
+
+        for (int i = 0; i < Positions.Length; i++)
+        {
+            Add(Positions[i]);
+        }
+
+        for (int i = 0; i < Rotations.Length; i++)
+        {
+            Add(Rotations[i]);
+        }
+
+        for (int i = 0; i < IsAlive.Length; i++)
+        {
+            Add(IsAlive[i]);
         }
 
         return _dataSize;
@@ -40,15 +55,32 @@ public class InitialMatchState : Message
         base.WriteMessage();
 
         Write(PlayerIDs.Length);
-        foreach (var id in PlayerIDs)
+
+        for (int i = 0; i < PlayerIDs.Length; i++)
         {
-            Write(id);
+            Write(PlayerIDs[i]);
         }
 
         Write(PlayerNames.Length);
-        foreach (var name in PlayerNames)
+
+        for (int i = 0; i < PlayerNames.Length; i++)
         {
-            Write(name);
+            Write(PlayerNames[i]);
+        }
+
+        for (int i = 0; i < Positions.Length; i++)
+        {
+            Write(Positions[i]);
+        }
+
+        for (int i = 0; i < Rotations.Length; i++)
+        {
+            Write(Rotations[i]);
+        }
+
+        for (int i = 0; i < IsAlive.Length; i++)
+        {
+            Write(IsAlive[i]);
         }
 
         return _data;
@@ -58,10 +90,11 @@ public class InitialMatchState : Message
     {
         base.ReadMessage(data);
 
-        int count;
+        int count = 0;
 
         Read(out count);
         PlayerIDs = new byte[count];
+
         for (int i = 0; i < count; i++)
         {
             Read(out PlayerIDs[i]);
@@ -69,42 +102,79 @@ public class InitialMatchState : Message
 
         Read(out count);
         PlayerNames = new string[count];
+
         for (int i = 0; i < count; i++)
         {
             Read(out PlayerNames[i]);
+        }
+
+        Positions = new Vector3[count];
+        for (int i = 0; i < count; i++)
+        {
+            Read(out Positions[i]);
+        }
+
+        Rotations = new Vector3[count];
+        for (int i = 0; i < count; i++)
+        {
+            Read(out Rotations[i]);
+        }
+
+        IsAlive = new bool[count];
+        for (int i = 0; i < count; i++)
+        {
+            Read(out IsAlive[i]);
         }
     }
 
     public static void Send(ENetPacketPeer client)
     {
         var players = MatchState.Instance.ConnectedPlayers;
-
         int count = players.Count;
 
         byte[] playerIDs = new byte[count];
         string[] playerNames = new string[count];
         Vector3[] positions = new Vector3[count];
         Vector3[] rotations = new Vector3[count];
+        bool[] isAlive = new bool[count];
 
         int i = 0;
-        foreach(var kvp in players)
+
+        foreach (var kvp in players)
         {
+            var player = kvp.Value;
+
             playerIDs[i] = kvp.Key;
-            playerNames[i] = kvp.Value.PlayerName;
+            playerNames[i] = player.PlayerName;
+
+            if (player.Character != null)
+            {
+                positions[i] = player.Character.GlobalPosition;
+                rotations[i] = player.Character.GlobalRotation;
+                isAlive[i] = player.IsAlive;
+            }
+            else
+            {
+                positions[i] = Vector3.Zero;
+                rotations[i] = Vector3.Zero;
+                isAlive[i] = false;
+            }
+
             i++;
         }
 
-        var msg = new InitialMatchState
+        var msg = new InitialMatchState()
         {
             MessageType = Msg.S2C_INITIAL_MATCH_STATE,
             ENetFlags = ENetPacketFlags.Reliable,
             PlayerIDs = playerIDs,
             PlayerNames = playerNames,
+            Positions = positions,
+            Rotations = rotations,
+            IsAlive = isAlive
         };
 
-
         NetworkSender.ToClient(client, msg);
-
         return;
     }
 }
