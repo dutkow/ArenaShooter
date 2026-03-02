@@ -39,7 +39,6 @@ public static class ClientConnectionService
         var msg = new PlayerJoined();
         msg.ReadMessage(data);
 
-        MatchState.Instance.AddPlayer(msg.PlayerID, msg.PlayerName);
-        GD.Print($"Client received: {msg.MessageType}");
+        PlayerJoined.Execute(msg.PlayerID, msg.PlayerName);
     }
 }

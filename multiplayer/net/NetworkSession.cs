@@ -286,14 +286,11 @@ public partial class NetworkSession : Node
             return;
         }
 
-        // Assign a PlayerID
         byte playerID = _availablePlayerIDs.Dequeue();
 
-        // --- Map peerID ↔ playerID ---
         peerIDtoPlayerID[peerID] = playerID;
         PlayerIDsToPeers[playerID] = peer;
 
-        // --- Store PlayerState ---
         playerIDtoPlayerState[playerID] = new PlayerState(playerID)
         {
             PlayerName = playerName
@@ -302,7 +299,6 @@ public partial class NetworkSession : Node
         GD.Print($"Connection request accepted: peerID={peerID}, playerID={playerID}, name={playerName}");
         OnPlayerJoined?.Invoke(playerID, playerName);
 
-        // --- Send acceptance message ---
         ConnectionAccepted.Send(peer, playerID);
     }
 

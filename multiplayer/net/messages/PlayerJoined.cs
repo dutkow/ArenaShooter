@@ -42,4 +42,9 @@ public class PlayerJoined : Message
         };
         NetworkSender.Broadcast(msg);
     }
+
+    public static void Execute(byte playerID, string playerName)
+    {
+        MatchState.Instance.AddPlayer(playerID, playerName);
+    }
 }

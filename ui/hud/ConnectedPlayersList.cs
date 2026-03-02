@@ -29,6 +29,7 @@ public partial class ConnectedPlayersList : Control
 
     public void OnPlayerJoined(PlayerState playerState)
     {
+        GD.Print("player joined ran on connected players list");
         Label playerLabel = new();
         playerLabel.Text = playerState.PlayerName;
         _playerListContainer.AddChild(playerLabel);

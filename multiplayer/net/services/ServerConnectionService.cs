@@ -29,7 +29,7 @@ public static class ServerConnectionService
 
         GD.Print("Server sending player joined");
 
-        ClientConnectionService.HandlePlayerJoined(data);
+        PlayerJoined.Execute(playerID, playerName);
         PlayerJoined.Send(playerID, playerName);
 
         GD.Print($"Server received: {msg.MessageType}");

@@ -181,7 +181,7 @@ public partial class MatchState : Node
 
         var player = new PlayerState(playerID)
         {
-            PlayerName = "ServerPlayer",
+            PlayerName = playerName,
             Score = 0,
             Health = 100,
             Shields = 100,
@@ -194,32 +194,16 @@ public partial class MatchState : Node
 
         GD.Print($"Player added. Player ID: {playerID}. PlayerName: ({player.PlayerName})");
 
-        PlayerJoined?.Invoke(player);
+        try
+        {
+            PlayerJoined?.Invoke(player);
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr("PlayerJoined event crashed: ", e);
+        }
     }
    
-    private void HandlePlayerJoined(byte playerID)
-    {
-        // Create a new PlayerState for this peer
-        var newPlayer = new PlayerState(0)
-        {
-            PlayerName = $"Player{playerID}",
-            Score = 0,
-            Health = 100,
-            Shields = 100,
-            Ammo = 0,
-            TeamId = -1,
-            Character = null
-        };
-
-        _connectedPlayers[playerID] = newPlayer;
-
-        GD.Print($"Player joined: {playerID} ({newPlayer.PlayerName})");
-
-        PlayerJoined?.Invoke(newPlayer);
-
-        // TODO: Broadcast to other clients that this player exists
-        // NetworkHandler.Instance.BroadcastPlayerJoined(peerId, newPlayer);
-    }
 
     private void HandlePeerDisconnected(byte peerId)
     {
