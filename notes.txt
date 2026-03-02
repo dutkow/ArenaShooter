@@ -1,0 +1,6 @@
+Short term goals
+
+- Need to fix connected player list. Client Loaded timing issues are causing connected players list to bug out
+- Add spawning of existing players (no replication). i.e., client sees server character
+- Add spawning of new players. i.e., server sees client that connected. Put at random spawn pt (no special spawn handling yet)
+- Add simple chat system (no team system yet - YAGNI for now)
