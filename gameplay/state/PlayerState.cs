@@ -2,9 +2,9 @@ using Godot;
 using System;
 
 
-public class PlayerState (int playerID)
+public class PlayerState (byte playerID)
 {
-    public int PlayerID = playerID;
+    public byte PlayerID = playerID;
     public string PlayerName;
     public int Score;
     public int Health;

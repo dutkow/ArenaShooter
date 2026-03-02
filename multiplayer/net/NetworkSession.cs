@@ -32,6 +32,7 @@ public partial class NetworkSession : Node
     public int MaxPlayers { get; private set; } = 8;
     public Dictionary<byte, PlayerState> playerIDtoPlayerState = new();
     public Dictionary<int, byte> peerIDtoPlayerID = new();
+    public Dictionary<byte, ENetPacketPeer> PlayerIDsToPeers = new();
     private Queue<byte> _availablePlayerIDs = new();
     public bool IsServerFull => playerIDtoPlayerState.Count >= MaxPlayers;
 
@@ -47,7 +48,7 @@ public partial class NetworkSession : Node
     // ----------------------
     public Action<ServerInfo> OnSessionStarted;
     public Action? OnSessionStopped;
-    public Action<byte>? OnPlayerJoined;
+    public Action<byte, string>? OnPlayerJoined;
     public Action<byte>? OnPlayerLeft;
 
     public Action<List<ServerInfo>>? OnServerRefreshFinished;
@@ -131,7 +132,6 @@ public partial class NetworkSession : Node
             return;
         }
 
-
         _lanBroadcaster = null;
         _isHosting = false;
         OnSessionStopped?.Invoke();
@@ -148,6 +148,8 @@ public partial class NetworkSession : Node
         {
             peerIDtoPlayerID.Remove(_peerID);
             playerIDtoPlayerState.Remove(_playerID);
+            PlayerIDsToPeers.Remove(_playerID);
+
             _availablePlayerIDs.Enqueue(_playerID);
 
             GD.Print($"Player disconnected: _peerID={_peerID}, _playerID={_playerID}");
@@ -192,7 +194,7 @@ public partial class NetworkSession : Node
 
     public void HandleConnectedToServer(ENetPacketPeer peer)
     {
-        if ((peer == null) || (ServerPeer == peer))
+        if (peer == null || ServerPeer == peer)
         {
             return;
         }
@@ -284,17 +286,28 @@ public partial class NetworkSession : Node
             return;
         }
 
+        // Assign a PlayerID
         byte playerID = _availablePlayerIDs.Dequeue();
+
+        // --- Map peerID ↔ playerID ---
         peerIDtoPlayerID[peerID] = playerID;
+        PlayerIDsToPeers[playerID] = peer;
+
+        // --- Store PlayerState ---
         playerIDtoPlayerState[playerID] = new PlayerState(playerID)
         {
             PlayerName = playerName
         };
 
         GD.Print($"Connection request accepted: peerID={peerID}, playerID={playerID}, name={playerName}");
-        OnPlayerJoined?.Invoke(playerID);
+        OnPlayerJoined?.Invoke(playerID, playerName);
 
-        // Send the acceptance message directly
+        // --- Send acceptance message ---
         ConnectionAccepted.Send(peer, playerID);
+    }
+
+    public void HandlePlayerJoined(byte playerID, string playerName)
+    {
+        OnPlayerJoined?.Invoke(playerID, playerName);
     }
 }

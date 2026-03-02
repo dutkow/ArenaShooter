@@ -40,15 +40,15 @@ public static class NetworkSender
     // ----------------------
     // Server → All Clients
     // ----------------------
-    public static void Broadcast(IEnumerable<ENetPacketPeer> clients, Message message)
+    public static void Broadcast(Message message)
     {
         byte[] data = message.WriteMessage();
 
-        foreach (var client in clients)
+        foreach (var peer in NetworkHandler.Instance.Connection.GetPeers())
         {
-            if (client != null)
+            if(peer != null)
             {
-                client.Send(0, data, (int)message.Flags);
+                peer.Send(0, data, (int)message.Flags);
             }
         }
     }
@@ -56,16 +56,20 @@ public static class NetworkSender
     // ----------------------
     // Server → All Clients Except One
     // ----------------------
-    public static void BroadcastExcept(IEnumerable<ENetPacketPeer> clients, ENetPacketPeer ignoredPeer, Message message)
+    public static void BroadcastExcept(byte excludedPlayerID, Message message)
     {
         byte[] data = message.WriteMessage();
 
-        foreach (var client in clients)
+        foreach (var kvp in NetworkSession.Instance.PlayerIDsToPeers)
         {
-            if (client != null && client != ignoredPeer)
+            byte playerID = kvp.Key;
+            ENetPacketPeer peer = kvp.Value;
+
+            if (playerID != excludedPlayerID)
             {
-                client.Send(0, data, (int)message.Flags);
+                peer.Send(0, data, (int)message.Flags);
             }
+
         }
     }
 

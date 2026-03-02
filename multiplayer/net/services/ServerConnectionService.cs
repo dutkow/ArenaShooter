@@ -21,9 +21,17 @@ public static class ServerConnectionService
         var msg = new ClientLoaded();
         msg.ReadMessage(data);
 
+        InitialMatchState.Send(peer);
+
+        int peerID = (int)peer.GetMeta("id");
+        byte playerID = NetworkSession.Instance.peerIDtoPlayerID[peerID];
+        string playerName = NetworkSession.Instance.playerIDtoPlayerState[playerID].PlayerName;
+
+        GD.Print("Server sending player joined");
+
+        ClientConnectionService.HandlePlayerJoined(data);
+        PlayerJoined.Send(playerID, playerName);
 
         GD.Print($"Server received: {msg.MessageType}");
-
-        InitialMatchState.Send(peer);
     }
 }

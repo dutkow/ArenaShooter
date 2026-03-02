@@ -33,4 +33,13 @@ public static class ClientConnectionService
         MatchState.Instance.OnReceivedInitialMatchState(msg);
         GD.Print($"Client received: {msg.MessageType}");
     }
+
+    public static void HandlePlayerJoined(byte[] data)
+    {
+        var msg = new PlayerJoined();
+        msg.ReadMessage(data);
+
+        MatchState.Instance.AddPlayer(msg.PlayerID, msg.PlayerName);
+        GD.Print($"Client received: {msg.MessageType}");
+    }
 }

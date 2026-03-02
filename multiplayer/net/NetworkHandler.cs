@@ -42,7 +42,7 @@ public partial class NetworkHandler : Node
     // ----------------------
     // General state
     // ----------------------
-    private ENetConnection connection;
+    public ENetConnection Connection;
     private bool isServer = false;
 
     // ----------------------
@@ -79,7 +79,7 @@ public partial class NetworkHandler : Node
 
     public override void _Process(double delta)
     {
-        if (connection == null) return;
+        if (Connection == null) return;
 
         HandleEvents();
     }
@@ -89,7 +89,7 @@ public partial class NetworkHandler : Node
     // ----------------------
     private void HandleEvents()
     {
-        var packetEvent = connection.Service();
+        var packetEvent = Connection.Service();
         ENetConnection.EventType eventType = (ENetConnection.EventType)(int)packetEvent[0];
 
         while (eventType != ENetConnection.EventType.None)
@@ -136,7 +136,7 @@ public partial class NetworkHandler : Node
             }
 
             // Service again to handle remaining packets in current frame
-            packetEvent = connection.Service();
+            packetEvent = Connection.Service();
             eventType = (ENetConnection.EventType)(int)packetEvent[0];
         }
     }
@@ -147,12 +147,12 @@ public partial class NetworkHandler : Node
     public void StartServer(string ipAddress = "127.0.0.1", int port = 42069)
     {
         GD.Print($"Attempting to start server. IP = {ipAddress}. Port = {port}.");
-        connection = new ENetConnection();
-        var error = connection.CreateHostBound(ipAddress, port);
+        Connection = new ENetConnection();
+        var error = Connection.CreateHostBound(ipAddress, port);
         if (error != Error.Ok)
         {
             GD.Print($"Server failed to start: {error}");
-            connection = null;
+            Connection = null;
             return;
         }
 
@@ -195,23 +195,23 @@ public partial class NetworkHandler : Node
     // ----------------------
     public void StartClient(string ipAddress = "127.0.0.1", int port = 42069)
     {
-        if (connection != null)
+        if (Connection != null)
         {
             GD.Print("Client already running!");
             return;
         }
 
-        connection = new ENetConnection();
-        var error = connection.CreateHost(1); // 1 client
+        Connection = new ENetConnection();
+        var error = Connection.CreateHost(1); // 1 client
         if (error != Error.Ok)
         {
             GD.Print($"Client failed to start: {error}");
-            connection = null;
+            Connection = null;
             return;
         }
 
         GD.Print($"Client started, connecting to {ipAddress}:{port}...");
-        serverPeer = connection.ConnectToHost(ipAddress, port);
+        serverPeer = Connection.ConnectToHost(ipAddress, port);
 
         // Optional: reset flags to track connection
         _hasFiredConnected = false;
@@ -239,7 +239,7 @@ public partial class NetworkHandler : Node
         OnDisconnectedFromServer?.Invoke();
 
         // Cleanup
-        connection = null;
+        Connection = null;
         serverPeer = null;
         _hasFiredConnected = false;
     }

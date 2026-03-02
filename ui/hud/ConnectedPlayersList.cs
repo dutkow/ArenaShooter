@@ -6,6 +6,8 @@ public partial class ConnectedPlayersList : Control
 {
     [Export] VBoxContainer _playerListContainer;
 
+
+
     public override void _Ready()
     {
         base._Ready();

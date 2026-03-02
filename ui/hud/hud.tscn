@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://uue7f6y3spks" path="res://assets/textures/crosshair.png" id="1_37p78"]
 [ext_resource type="PackedScene" uid="uid://btl1kctnuoavh" path="res://ui/match/match_timer.tscn" id="2_64ctp"]
 [ext_resource type="PackedScene" uid="uid://djf0qbxcoq6xf" path="res://ui/match/match_debug_panel.tscn" id="3_8sq4i"]
-[ext_resource type="PackedScene" uid="uid://doyibe8885wuq" path="res://scenes/ui/connected_players_list.tscn" id="4_640wx"]
+[ext_resource type="PackedScene" uid="uid://doyibe8885wuq" path="res://ui/hud/connected_players_list.tscn" id="4_640wx"]
 
 [node name="Hud" type="Control"]
 layout_mode = 3

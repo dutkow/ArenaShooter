@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://doyibe8885wuq"]
 
-[ext_resource type="Script" uid="uid://bwqk57jg0tw48" path="res://scenes/ui/ConnectedPlayersList.cs" id="1_gfymn"]
+[ext_resource type="Script" uid="uid://bwqk57jg0tw48" path="res://ui/hud/ConnectedPlayersList.cs" id="1_gfymn"]
 
 [node name="ConnectedPlayersList" type="Control" node_paths=PackedStringArray("_playerListContainer")]
 layout_mode = 3

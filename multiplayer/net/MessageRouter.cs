@@ -21,12 +21,14 @@ public class MessageRouter
         {
             RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, ServerConnectionService.HandleConnectionRequest);
             RegisterFromClient(Msg.C2S_CLIENT_LOADED, ServerConnectionService.HandleClientLoaded);
+
         }
         else if (role == NetRole.CLIENT)
         {
             RegisterFromServer(Msg.S2C_CONNECTION_ACCEPTED, ClientConnectionService.HandleConnectionAccepted);
             RegisterFromServer(Msg.S2C_CONNECTION_DENIED, ClientConnectionService.HandleConnectionDenied);
             RegisterFromServer(Msg.S2C_INITIAL_MATCH_STATE, ClientConnectionService.HandleInitialMatchState);
+            RegisterFromServer(Msg.S2C_PLAYER_JOINED, ClientConnectionService.HandlePlayerJoined);
         }
     }
 
