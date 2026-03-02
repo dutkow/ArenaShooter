@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bnufp106f826h"]
+
+[ext_resource type="Script" uid="uid://bc6q206h41ks8" path="res://autoload/UIRoot.cs" id="1_cwasx"]
+[ext_resource type="PackedScene" uid="uid://doianfimes2dl" path="res://ui/loading/loading_screen.tscn" id="2_i0hgf"]
+
+[node name="UIRoot" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cwasx")
+_loadingScreenScene = ExtResource("2_i0hgf")

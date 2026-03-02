@@ -25,6 +25,7 @@ PlayerManager="*res://core/PlayerManager.cs"
 GameSession="*res://src/SceneNavigator.cs"
 Settings="*res://autoload/Settings.cs"
 SceneNavigator="*res://src/SceneNavigator.cs"
+UIRoot="*res://autoload/ui_root.tscn"
 
 [display]
 
