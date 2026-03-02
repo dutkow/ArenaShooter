@@ -26,7 +26,7 @@ public partial class SceneNavigator : Node
 
     private void OnConnectedToServer()
     {
-        OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID, OnMapLoaded, 1.0f);
+        OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID, OnMapLoaded);
     }
 
     private void OnMapLoaded()
@@ -36,7 +36,7 @@ public partial class SceneNavigator : Node
     }
 
     // Added optional delay in seconds
-    public async void OpenMultiplayerMap(string mapID, Action onLoaded = null, float delayBeforeLoad = 0f)
+    public async void OpenMultiplayerMap(string mapID, Action onLoaded = null, float delayBeforeLoad = 0.5f)
     {
         if (!GameData.Instance.MultiplayerMapsByID.TryGetValue(mapID, out var mapInfo))
         {
