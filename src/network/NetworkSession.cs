@@ -91,7 +91,7 @@ public partial class NetworkSession : Node
         }
 
         Role = role;
-        _router.OnRoleChanged(role);
+        _router.Initialize(role);
         OnRoleChanged?.Invoke(Role);
     }
 
@@ -228,11 +228,11 @@ public partial class NetworkSession : Node
         switch (Role)
         {
             case NetRole.SERVER:
-                _router.ReadMessageFromClient(peer, data);
+                _router.RouteClientMessage(peer, data);
                 break;
 
             case NetRole.CLIENT:
-                _router.ReadMessageFromServer(data);
+                _router.RouteServerMessage(data);
                 break;
         }
     }

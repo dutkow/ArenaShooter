@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 /// NetworkSend handles all network sending logic in a centralized way.
 /// Supports Client → Server, Server → Client, and broadcasts.
 /// </summary>
-public static class NetworkSend
+public static class NetworkSender
 {
     // ----------------------
     // Client → Server

@@ -4,56 +4,48 @@ using System.Collections.Generic;
 
 public class MessageRouter
 {
-    public List<MessageHandler> _messageHandlers = new();
-
     public delegate void FromServerHandler(byte[] data);
     public delegate void FromClientHandler(ENetPacketPeer sender, byte[] data);
 
     private readonly Dictionary<Msg, FromServerHandler> _serverHandlers = new();
     private readonly Dictionary<Msg, FromClientHandler> _clientHandlers = new();
 
-    public MessageRouter()
-    {
-        ConnectionMessageHandler connectionMessageHandler = new();
-        _messageHandlers.Add(connectionMessageHandler);
 
 
-    }
-
-    public void OnRoleChanged(NetRole role)
+    public void Initialize(NetRole role)
     {
         _serverHandlers.Clear();
         _clientHandlers.Clear();
 
-        if(role == NetRole.LOCAL)
+        if(role == NetRole.SERVER)
         {
-            return;
+            RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, ServerConnectionService.HandleConnectionRequest);
+            RegisterFromClient(Msg.C2S_CLIENT_LOADED, ServerConnectionService.HandleClientLoaded);
         }
-
-        foreach(var handler in _messageHandlers)
+        else if (role == NetRole.CLIENT)
         {
-            handler.Initialize(this, role);
+            RegisterFromServer(Msg.S2C_CONNECTION_ACCEPTED, ClientConnectionService.HandleConnectionAccepted);
+            RegisterFromServer(Msg.S2C_CONNECTION_DENIED, ClientConnectionService.HandleConnectionDenied);
+            RegisterFromServer(Msg.S2C_INITIAL_MATCH_STATE, ClientConnectionService.HandleInitialMatchState);
         }
     }
 
     public void RegisterFromServer(Msg type, FromServerHandler handler)
     {
         _serverHandlers[type] = handler;
-        GD.Print($"Registered server handler for {type}");
     }
 
     public void RegisterFromClient(Msg type, FromClientHandler handler)
     {
         _clientHandlers[type] = handler;
-        GD.Print($"Registered client handler for {type}");
     }
 
-    public void ReadMessageFromServer(byte[] data)
+    public void RouteServerMessage(byte[] data)
     {
         var type = Message.GetType(data);
         if (_serverHandlers.TryGetValue(type, out var handler))
         {
-            GD.Print($"Dispatching server message {type}");
+            GD.Print($"Routing server message: {type}");
             handler?.Invoke(data);
         }
         else
@@ -62,12 +54,12 @@ public class MessageRouter
         }
     }
 
-    public void ReadMessageFromClient(ENetPacketPeer sender, byte[] data)
+    public void RouteClientMessage(ENetPacketPeer sender, byte[] data)
     {
         var type = Message.GetType(data);
         if (_clientHandlers.TryGetValue(type, out var handler))
         {
-            GD.Print($"Dispatching client message {type}");
+            GD.Print($"Routing client message: {type}");
             handler?.Invoke(sender, data);
         }
         else
