@@ -9,20 +9,7 @@ public enum GameModeType
     TEAM_SLAYER,
 }
 
-[Serializable]
-public class MapCollection
-{
-    public List<MapInfo> Maps { get; set; } = new List<MapInfo>();
-
-    public void Initialize()
-    {
-        foreach (var map in Maps)
-        {
-            map.Initialize();
-        }
-    }
-}
-
+// Base class for any map/level
 [Serializable]
 public class MapInfo
 {
@@ -38,15 +25,41 @@ public class MapInfo
     [JsonIgnore]
     public PackedScene Scene { get; set; }
 
-    public void Initialize()
+    // Base path is overridden in subclasses
+    public virtual void Initialize(string basePath = "res://levels/")
     {
-        var scenePath = $"res://scenes/maps/{Folder}/{SceneName}.tscn";
-
+        var scenePath = $"{basePath}{Folder}/{SceneName}.tscn";
         Scene = GD.Load<PackedScene>(scenePath);
 
         if (Scene == null)
+            GD.PushError($"Failed to load map/level scene: {scenePath}");
+    }
+}
+
+// Multiplayer map info
+[Serializable]
+public class MultiplayerMapInfo : MapInfo
+{
+    public GameModeType[] AllowedModes { get; set; }
+    public int MaxPlayers { get; set; }
+
+    public override void Initialize(string basePath = "res://levels/multiplayer_maps/")
+    {
+        base.Initialize(basePath);
+    }
+}
+
+
+[Serializable]
+public class MultiplayerMapCollection
+{
+    public List<MultiplayerMapInfo> Maps { get; set; } = new List<MultiplayerMapInfo>();
+
+    public void Initialize()
+    {
+        foreach (var map in Maps)
         {
-            GD.PushError($"Failed to load map scene: {scenePath}");
+            map.Initialize();
         }
     }
 }

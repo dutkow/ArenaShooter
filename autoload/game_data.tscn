@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://bgxcs8ukngnx7"]
+
+[ext_resource type="Script" uid="uid://cgdmj5uqfnu6l" path="res://autoload/GameData.cs" id="1_1vi4v"]
+[ext_resource type="JSON" path="res://levels/multiplayer_maps/multiplayer_maps.json" id="2_vabn7"]
+
+[node name="GameData" type="Node"]
+script = ExtResource("1_1vi4v")
+_multiplayerMapsJson = ExtResource("2_vabn7")

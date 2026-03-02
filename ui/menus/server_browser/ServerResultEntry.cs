@@ -27,7 +27,7 @@ public partial class ServerResultEntry : Control
         _serverInfo = serverInfo;
 
         _serverNameLabel.Text = _serverInfo.Name;
-        _mapLabel.Text = GameData.Instance.MapsByID[serverInfo.MapID].Name;
+        _mapLabel.Text = GameData.Instance.MultiplayerMapsByID[serverInfo.MapID].Name;
         _playerCountLabel.Text = $"{serverInfo.Players}/{serverInfo.MaxPlayers}";
         _pingLabel.Text = "999";
 

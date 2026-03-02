@@ -17,8 +17,8 @@ config/icon="res://assets/textures/icon.svg"
 
 [autoload]
 
+GameData="*res://autoload/game_data.tscn"
 NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
-GameData="*res://data/GameData.cs"
 MatchState="*res://gameplay/state/MatchState.cs"
 GameMode="*res://core/GameMode.cs"
 PlayerManager="*res://core/PlayerManager.cs"

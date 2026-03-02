@@ -19,17 +19,17 @@ public partial class SceneNavigator : Node
         MatchState.Instance.StartPhase(MatchPhase.WARMUP);
         PlayerState playerState = new(0);
         PlayerManager.Instance.RegisterPlayer(playerState);
-        OpenLevel(serverInfo.MapID);
+        OpenMultiplayerMap(serverInfo.MapID);
     }
 
     private void OnConnectedToServer()
     {
-        OpenLevel(NetworkSession.Instance.ServerInfo.MapID);
+        OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);
     }
 
-    public void OpenLevel(string mapID)
+    public void OpenMultiplayerMap(string mapID)
     {
-        PackedScene levelToLoad = GameData.Instance.MapsByID[mapID].Scene;
+        PackedScene levelToLoad = GameData.Instance.MultiplayerMapsByID[mapID].Scene;
         if(levelToLoad == null)
         {
             GD.PushError($"Attempted to load map ID: {mapID}. No corresponding scene was found");

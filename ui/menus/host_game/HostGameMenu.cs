@@ -16,9 +16,9 @@ public partial class HostGameMenu : Control
         _hostGameButton.Pressed += OnHostGameButtonPressed;
 
 
-        for (int i = 0; i < GameData.Instance.MapCollection.Maps.Count; ++i)
+        for (int i = 0; i < GameData.Instance.MultiplayerMaps.Maps.Count; ++i)
         {
-            var mapInfo = GameData.Instance.MapCollection.Maps[i];
+            var mapInfo = GameData.Instance.MultiplayerMaps.Maps[i];
             _mapOptionButton.AddItem(mapInfo.Name);
             _mapOptionButton.SetItemMetadata(i, mapInfo.ID);
         }
