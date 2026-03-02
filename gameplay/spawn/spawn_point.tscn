@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://c73km35fjx3wx"]
+
+[ext_resource type="Script" uid="uid://dshjycofsi4hk" path="res://gameplay/spawn/SpawnPoint.cs" id="1_00gca"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_00gca"]
+
+[sub_resource type="TorusMesh" id="TorusMesh_og4he"]
+
+[node name="SpawnPoint" type="Node3D" node_paths=PackedStringArray("_visualContainer")]
+script = ExtResource("1_00gca")
+_visualContainer = NodePath("VisualContainer")
+
+[node name="VisualContainer" type="Node3D" parent="."]
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, 0, 0, 0)
+
+[node name="Direction" type="MeshInstance3D" parent="VisualContainer"]
+transform = Transform3D(1.8592043, 0, 0, 0, 0.3098516, 0, 0, 0, 0.33889472, 1.6205207, 0, 0)
+mesh = SubResource("BoxMesh_00gca")
+
+[node name="Donut" type="MeshInstance3D" parent="VisualContainer"]
+mesh = SubResource("TorusMesh_og4he")

@@ -13,17 +13,17 @@ config_version=5
 config/name="ArenaShooter"
 run/main_scene="uid://ci8rl3endmnqc"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="res://assets/textures/icon.svg"
 
 [autoload]
 
-NetworkHandler="*res://src/network/NetworkHandler.cs"
-GameData="*res://src/GameData.cs"
-MatchState="*res://MatchState.cs"
-GameMode="*res://GameMode.cs"
-PlayerManager="*res://PlayerManager.cs"
+NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
+GameData="*res://data/GameData.cs"
+MatchState="*res://gameplay/state/MatchState.cs"
+GameMode="*res://core/GameMode.cs"
+PlayerManager="*res://core/PlayerManager.cs"
 GameSession="*res://src/SceneNavigator.cs"
-Settings="*res://Settings.cs"
+Settings="*res://autoload/Settings.cs"
 SceneNavigator="*res://src/SceneNavigator.cs"
 
 [display]
