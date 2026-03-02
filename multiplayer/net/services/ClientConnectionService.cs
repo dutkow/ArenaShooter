@@ -1,6 +1,9 @@
 using Godot;
 using System;
 
+/// <summary>
+/// Handles client-side logic when receiving connection-related messages from the server.
+/// </summary>
 public static class ClientConnectionService
 {
     public static void HandleConnectionAccepted(byte[] data)

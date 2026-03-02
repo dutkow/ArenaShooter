@@ -2,6 +2,9 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// Handles UI functionality of server browser.
+/// </summary>
 public partial class ServerBrowser : Control
 {
     [Export] VBoxContainer _serverResultsContainer;

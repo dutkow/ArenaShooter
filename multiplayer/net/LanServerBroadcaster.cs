@@ -5,6 +5,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Timers;
 
+/// <summary>
+/// Broadcasts server info over the LAN so clients can discover available servers.
+/// </summary>
 public partial class LanServerBroadcaster
 {
     private const int BroadcastPort = 42070;
