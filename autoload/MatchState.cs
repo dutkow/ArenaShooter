@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public enum MatchPhase
 {
@@ -59,21 +60,38 @@ public partial class MatchState : Node
     // ----------------------
     // Player management
     // ----------------------
-    private readonly Dictionary<int, PlayerState> _connectedPlayers = new(); // peerId -> PlayerState
-    public IReadOnlyDictionary<int, PlayerState> ConnectedPlayers => _connectedPlayers;
+    private readonly Dictionary<byte, PlayerState> _connectedPlayers = new(); // playerID -> PlayerState
+    public IReadOnlyDictionary<byte, PlayerState> ConnectedPlayers => _connectedPlayers;
 
-    public event Action<int, PlayerState>? PlayerJoined;
+    public event Action<PlayerState>? PlayerJoined;
     public event Action<int, PlayerState>? PlayerLeft;
 
     public override void _Ready()
     {
-        Instance = this;
+        base._Ready();
 
+        Instance = this;
+    }
+    public void Initialize()
+    {
         StartPhase(MatchPhase.WARMUP);
 
         // Hook network events
-        NetworkHandler.Instance.OnPeerConnected += HandlePeerConnected;
-        NetworkHandler.Instance.OnPeerDisconnected += HandlePeerDisconnected;
+        //NetworkHandler.Instance.OnPeerConnected += HandlePlayerJoined;
+        //NetworkHandler.Instance.OnPeerDisconnected += HandlePeerDisconnected;
+
+        if(NetworkSession.Instance.IsListenServer)
+        {
+            AddPlayer(NetworkSession.Instance.LocalPlayerID, Settings.Instance.PlayerName); // TODO: police server player name
+        }
+    }
+
+    public void OnReceivedInitialMatchState(InitialMatchState initialMatchState)
+    {
+        for(int i = 0; i < initialMatchState.PlayerIDs.Length; ++i)
+        {
+            AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
+        }
     }
 
     public override void _Process(double delta)
@@ -153,12 +171,17 @@ public partial class MatchState : Node
     // ----------------------
     // Player handling
     // ----------------------
-    private void HandlePeerConnected(int peerId)
+    
+    public void AddPlayer(byte playerID, string playerName)
     {
-        // Create a new PlayerState for this peer
-        var newPlayer = new PlayerState(0)
+        if (_connectedPlayers.ContainsKey(playerID))
         {
-            PlayerName = $"Player{peerId}",
+            return; // Already added
+        }
+
+        var player = new PlayerState(playerID)
+        {
+            PlayerName = "ServerPlayer",
             Score = 0,
             Health = 100,
             Shields = 100,
@@ -167,17 +190,38 @@ public partial class MatchState : Node
             Pawn = null
         };
 
-        _connectedPlayers[peerId] = newPlayer;
+        _connectedPlayers[playerID] = player;
 
-        GD.Print($"Player joined: {peerId} ({newPlayer.PlayerName})");
+        GD.Print($"Player added. Player ID: {playerID}. PlayerName: ({player.PlayerName})");
 
-        PlayerJoined?.Invoke(peerId, newPlayer);
+        PlayerJoined?.Invoke(player);
+    }
+   
+    private void HandlePlayerJoined(byte playerID)
+    {
+        // Create a new PlayerState for this peer
+        var newPlayer = new PlayerState(0)
+        {
+            PlayerName = $"Player{playerID}",
+            Score = 0,
+            Health = 100,
+            Shields = 100,
+            Ammo = 0,
+            TeamId = -1,
+            Pawn = null
+        };
+
+        _connectedPlayers[playerID] = newPlayer;
+
+        GD.Print($"Player joined: {playerID} ({newPlayer.PlayerName})");
+
+        PlayerJoined?.Invoke(newPlayer);
 
         // TODO: Broadcast to other clients that this player exists
         // NetworkHandler.Instance.BroadcastPlayerJoined(peerId, newPlayer);
     }
 
-    private void HandlePeerDisconnected(int peerId)
+    private void HandlePeerDisconnected(byte peerId)
     {
         if (_connectedPlayers.TryGetValue(peerId, out var player))
         {

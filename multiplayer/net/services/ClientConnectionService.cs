@@ -30,6 +30,7 @@ public static class ClientConnectionService
         var msg = new InitialMatchState();
         msg.ReadMessage(data);
 
+        MatchState.Instance.OnReceivedInitialMatchState(msg);
         GD.Print($"Client received: {msg.MessageType}");
     }
 }

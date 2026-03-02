@@ -21,22 +21,16 @@ public partial class SceneNavigator : Node
         PlayerState playerState = new(0);
         PlayerManager.Instance.RegisterPlayer(playerState);
 
-        OpenMultiplayerMap(serverInfo.MapID, OnMapLoaded, 1.0f); // optional 1-second delay
+        OpenMultiplayerMap(serverInfo.MapID, 1.0f); // optional 1-second delay
     }
 
     private void OnConnectedToServer()
     {
-        OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID, OnMapLoaded);
-    }
-
-    private void OnMapLoaded()
-    {
-        GD.Print("Multiplayer map fully loaded!");
-        // Any additional post-load setup here
+        OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);
     }
 
     // Added optional delay in seconds
-    public async void OpenMultiplayerMap(string mapID, Action onLoaded = null, float delayBeforeLoad = 0.5f)
+    public async void OpenMultiplayerMap(string mapID, float delayBeforeLoad = 0.5f)
     {
         if (!GameData.Instance.MultiplayerMapsByID.TryGetValue(mapID, out var mapInfo))
         {
@@ -74,8 +68,15 @@ public partial class SceneNavigator : Node
         // Hide loading screen
         UIRoot.Instance.HideLoadingScreen();
 
-        onLoaded?.Invoke();
+        GD.Print("Multiplayer map fully loaded!");
 
-        GD.Print("Level fully loaded");
+        if(NetworkSession.Instance.IsServer)
+        {
+            MatchState.Instance.Initialize();
+        }
+        else if (NetworkSession.Instance.IsClient)
+        {
+            ClientLoaded.Send();
+        }
     }
 }

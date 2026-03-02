@@ -10,7 +10,8 @@ public enum NetRole : byte
 {
     LOCAL,
     CLIENT,
-    SERVER,
+    LISTEN_SERVER,
+    DEDICATED_SERVER,
 }
 
 public partial class NetworkSession : Node
@@ -18,6 +19,11 @@ public partial class NetworkSession : Node
     public static NetworkSession Instance { get; private set; }
 
     public NetRole Role { get; private set; } = NetRole.LOCAL;
+    public bool IsClient => Role == NetRole.CLIENT;
+    public bool IsListenServer => Role == NetRole.LISTEN_SERVER;
+    public bool IsDedicatedServer => Role == NetRole.DEDICATED_SERVER;
+
+    public bool IsServer => IsListenServer || IsDedicatedServer;
 
     // ----------------------
     // Connected player info
@@ -85,7 +91,7 @@ public partial class NetworkSession : Node
             return;
         }
 
-        if(Role == NetRole.SERVER)
+        if(Role == NetRole.LISTEN_SERVER)
         {
             LocalPlayerID = 0;
         }
@@ -100,7 +106,7 @@ public partial class NetworkSession : Node
     // ----------------------
     public void HostLanServer(ServerInfo info)
     {
-        SetRole(NetRole.SERVER);
+        SetRole(NetRole.LISTEN_SERVER);
 
         ServerInfo = info;
 
@@ -135,23 +141,6 @@ public partial class NetworkSession : Node
     {
         OnSessionStarted?.Invoke(ServerInfo);
     }
-
-    /*
-    private void HandlePeerConnected(int _peerID)
-    {
-        if (_availablePlayerIDs.Count == 0)
-        {
-            GD.Print("Server full, cannot assign _playerID!");
-            return;
-        }
-
-        byte _playerID = _availablePlayerIDs.Dequeue();
-        peerIDtoPlayerID[_peerID] = _playerID;
-        playerIDtoPlayerState[_playerID] = new PlayerState(_playerID);
-
-        GD.Print($"Player connected: _peerID={_peerID}, _playerID={_playerID}");
-        OnPlayerJoined?.Invoke(_playerID);
-    }*/
 
     private void HandlePeerDisconnected(int _peerID)
     {
@@ -227,7 +216,7 @@ public partial class NetworkSession : Node
 
         switch (Role)
         {
-            case NetRole.SERVER:
+            case NetRole.LISTEN_SERVER:
                 _router.RouteClientMessage(peer, data);
                 break;
 

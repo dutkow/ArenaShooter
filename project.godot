@@ -19,7 +19,7 @@ config/icon="res://assets/textures/icon.svg"
 
 GameData="*res://autoload/game_data.tscn"
 NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
-MatchState="*res://gameplay/state/MatchState.cs"
+MatchState="*res://autoload/MatchState.cs"
 GameMode="*res://core/GameMode.cs"
 PlayerManager="*res://core/PlayerManager.cs"
 GameSession="*res://autoload/SceneNavigator.cs"

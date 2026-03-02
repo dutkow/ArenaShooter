@@ -17,7 +17,7 @@ public class MessageRouter
         _serverHandlers.Clear();
         _clientHandlers.Clear();
 
-        if(role == NetRole.SERVER)
+        if(role == NetRole.LISTEN_SERVER)
         {
             RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, ServerConnectionService.HandleConnectionRequest);
             RegisterFromClient(Msg.C2S_CLIENT_LOADED, ServerConnectionService.HandleClientLoaded);

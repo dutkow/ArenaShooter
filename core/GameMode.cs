@@ -3,15 +3,25 @@ using System;
 
 public partial class GameMode : Node
 {
+    public static GameMode Instance { get; private set; }
+
     public override void _Ready()
     {
+        base._Ready();
+
+        Instance = this;
+
         if (!Multiplayer.IsServer())
         {
             return;
         }
 
-        // Listen to match phase changes
         MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
+    }
+
+    public void Initialize()
+    {
+        MatchState.Instance.Initialize();
     }
 
     private void OnMatchPhaseChanged(MatchPhase phase)

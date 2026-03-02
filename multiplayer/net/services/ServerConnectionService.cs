@@ -21,8 +21,9 @@ public static class ServerConnectionService
         var msg = new ClientLoaded();
         msg.ReadMessage(data);
 
-        //InitialMatchState.Send(peer, ) -> TODO: send this data
 
         GD.Print($"Server received: {msg.MessageType}");
+
+        InitialMatchState.Send(peer);
     }
 }

@@ -22,7 +22,7 @@ public static class NetworkSender
             return;
         }
         serverPeer.Send(0, message.WriteMessage(), (int)message.Flags);
-        GD.Print($"Sending message to serverPeer. Message type: {message.MessageType}. Flags: {message.Flags}");
+        GD.Print($"Client sent: {message.MessageType}.");
 
     }
 
