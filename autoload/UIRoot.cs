@@ -7,44 +7,45 @@ public partial class UIRoot : Control
 
     // Scenes
     [Export] PackedScene _loadingScreenScene;
-    private LoadingScreen _loadingScreenInstance;
+    private LoadingScreen _loadingScreen;
+
+    [Export] PackedScene _mainMenuScene;
+    private MainMenu _mainMenu;
 
     public override void _Ready()
     {
         base._Ready();
+
         Instance = this;
 
-        if (_loadingScreenScene != null)
-        {
-            _loadingScreenInstance = (LoadingScreen)_loadingScreenScene.Instantiate();
-            AddChild(_loadingScreenInstance);
-            _loadingScreenInstance.Visible = false;
-        }
+        _mainMenu = (MainMenu)_mainMenuScene.Instantiate();
+        AddChild(_mainMenu);
 
-        GD.Print($"UIRoot is in tree? {IsInsideTree()} at path {GetPath()}");
-
+        _loadingScreen = (LoadingScreen)_loadingScreenScene.Instantiate();
+        AddChild(_loadingScreen);
+        _loadingScreen.Visible = false;
     }
 
     public void ShowLoadingScreen()
     {
-        if (_loadingScreenInstance != null)
+        if (_loadingScreen != null)
         {
-            _loadingScreenInstance.Visible = true;
-            _loadingScreenInstance.ShowLoading();
+            _loadingScreen.Visible = true;
+            _loadingScreen.ShowLoading();
         }
     }
 
     public void HideLoadingScreen()
     {
-        if (_loadingScreenInstance != null)
+        if (_loadingScreen != null)
         {
-            _loadingScreenInstance.Visible = false;
-            _loadingScreenInstance.HideLoading();
+            _loadingScreen.Visible = false;
+            _loadingScreen.HideLoading();
         }
     }
 
     public void SetProgress(float value)
     {
-        _loadingScreenInstance?.SetProgress(value);
+        _loadingScreen?.SetProgress(value);
     }
 }

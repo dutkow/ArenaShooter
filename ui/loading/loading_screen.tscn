@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cjctj6dgesxif" path="res://ui/loading/LoadingScreen.cs" id="1_mggpi"]
 
-[node name="LoadingScreen" type="Control"]
+[node name="LoadingScreen" type="Control" node_paths=PackedStringArray("_loadingProgressBar")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,6 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_mggpi")
+_loadingProgressBar = NodePath("LoadingProgressBar")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
