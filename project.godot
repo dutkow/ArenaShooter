@@ -22,9 +22,9 @@ NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
 MatchState="*res://gameplay/state/MatchState.cs"
 GameMode="*res://core/GameMode.cs"
 PlayerManager="*res://core/PlayerManager.cs"
-GameSession="*res://src/SceneNavigator.cs"
+GameSession="*res://autoload/SceneNavigator.cs"
 Settings="*res://autoload/Settings.cs"
-SceneNavigator="*res://src/SceneNavigator.cs"
+SceneNavigator="*res://autoload/SceneNavigator.cs"
 UIRoot="*res://autoload/ui_root.tscn"
 
 [display]
