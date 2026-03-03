@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=3 uid="uid://chotxihbm38dv"]
+
+[ext_resource type="Script" uid="uid://dejxjrbc1fo6q" path="res://gameplay/pawns/characters/ArenaCharacter.cs" id="1_60ybg"]
+[ext_resource type="Script" uid="uid://cyl8dsxv6iyjh" path="res://gameplay/weapons/Weapon.cs" id="2_xipnf"]
+[ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/projectile.tscn" id="3_48rxd"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4flbx"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_4flbx"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
+
+[node name="ArenaCharacter" type="Node3D" node_paths=PackedStringArray("_body", "Camera", "CameraPivot", "_equippedWeapon")]
+script = ExtResource("1_60ybg")
+_body = NodePath("CharacterBody3D")
+Camera = NodePath("CharacterBody3D/CameraPivot/Camera3D")
+CameraPivot = NodePath("CharacterBody3D/CameraPivot")
+_equippedWeapon = NodePath("CharacterBody3D/CameraPivot/Weapon")
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.017611, 0)
+shape = SubResource("CapsuleShape3D_4flbx")
+
+[node name="CameraPivot" type="Marker3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5744133, -0.26288366)
+
+[node name="Camera3D" type="Camera3D" parent="CharacterBody3D/CameraPivot"]
+
+[node name="Weapon" type="MeshInstance3D" parent="CharacterBody3D/CameraPivot"]
+transform = Transform3D(0.16136354, 0, 0, 0, 0.20816346, 0, 0, 0, 0.96933186, 0.31130004, -0.27251208, -0.10474706)
+mesh = SubResource("BoxMesh_4flbx")
+script = ExtResource("2_xipnf")
+_projectileScene = ExtResource("3_48rxd")
+
+[node name="CharacterBody" type="MeshInstance3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.017611, 0)
+mesh = SubResource("CapsuleMesh_4flbx")

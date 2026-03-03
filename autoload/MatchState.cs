@@ -82,7 +82,9 @@ public partial class MatchState : Node
 
         if(NetworkSession.Instance.IsListenServer)
         {
-            AddPlayer(NetworkSession.Instance.LocalPlayerID, Settings.Instance.PlayerName); // TODO: police server player name
+            byte localPlayerID = NetworkSession.Instance.LocalPlayerID;
+            GameMode.Instance.AddPlayerController(localPlayerID);
+            AddPlayer(localPlayerID, Settings.Instance.PlayerName);
         }
     }
 
@@ -205,7 +207,8 @@ public partial class MatchState : Node
 
         if(NetworkSession.Instance.IsServer)
         {
-            SpawnManager.Instance.SpawnPlayer(player);
+            PlayerController playerController = GameMode.Instance.PlayerControllers[playerID];
+            SpawnManager.Instance.SpawnPlayer(playerController);
         }
     }
 

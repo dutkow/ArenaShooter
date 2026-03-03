@@ -11,6 +11,6 @@ public class PlayerState (byte playerID)
     public int Shields;
     public int Ammo;
     public int TeamId;
-    public PlayerCharacter Character;
+    public ArenaCharacter Character;
     public bool IsAlive => Character != null && Character.IsAlive;
 }

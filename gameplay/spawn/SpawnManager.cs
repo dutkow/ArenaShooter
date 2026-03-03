@@ -30,14 +30,22 @@ public partial class SpawnManager : Node3D
     }
 
 
-    public void SpawnPlayer(PlayerState playerState)
+    public void SpawnPlayer(PlayerController playerController)
     {
-        var playerCharacter = (PlayerCharacter)GameMode.Instance.PlayerCharacterScene.Instantiate();
+        if(playerController == null)
+        {
+            GD.PushError("Attempted to spawn player but player controller is null");
+            return;
+        }
+
+        var playerCharacter = (ArenaCharacter)GameMode.Instance.PlayerCharacterScene.Instantiate();
         AddChild(playerCharacter);
 
         var spawnPoint = GetSpawnPoint();
         playerCharacter.GlobalPosition = spawnPoint.GlobalPosition;
         playerCharacter.GlobalRotation = spawnPoint.SpawnRotation;
+
+        playerController.Possess(playerCharacter);
 
         LevelUI.Instance.ShowPlayerHud();
     }

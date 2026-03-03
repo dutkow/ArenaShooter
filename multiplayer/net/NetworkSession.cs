@@ -296,6 +296,8 @@ public partial class NetworkSession : Node
             PlayerName = playerName
         };
 
+        GameMode.Instance.AddPlayerController(playerID);
+
         GD.Print($"Connection request accepted: peerID={peerID}, playerID={playerID}, name={playerName}");
         OnPlayerJoined?.Invoke(playerID, playerName);
 

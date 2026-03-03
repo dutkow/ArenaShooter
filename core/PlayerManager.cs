@@ -33,8 +33,8 @@ public partial class PlayerManager : Node
         return _playerStates.FindAll(p => p.Character != null);
     }
 
-    public IReadOnlyList<PlayerCharacter> GetPlayerCharacters()
+    public IReadOnlyList<ArenaCharacter> GetPlayerCharacters()
     {
-        return _playerStates.Select(p => p.Character).OfType<PlayerCharacter>().ToList();
+        return _playerStates.Select(p => p.Character).OfType<ArenaCharacter>().ToList();
     }
 }

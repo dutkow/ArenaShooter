@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cc5hseasecjdw" path="res://core/game_manager.tscn" id="1_p3bq8"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_ichdc"]
-[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://gameplay/characters/player_character.tscn" id="3_psdie"]
+[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://gameplay/pawns/characters/arena_character.tscn" id="3_psdie"]
 [ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/player_hud.tscn" id="4_v1juj"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hsoxx"]
@@ -42,6 +42,9 @@ transform = Transform3D(-0.9917632, 0, 0.12808594, 0, 1, 0, -0.12808594, 0, -0.9
 
 [node name="Player" parent="." instance=ExtResource("3_psdie")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6006985, 0)
+_airControlAcceleration = null
+MouseSens = null
+MouseSmooth = null
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 

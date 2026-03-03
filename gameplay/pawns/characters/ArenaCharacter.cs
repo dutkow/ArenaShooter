@@ -7,8 +7,10 @@ public enum MovementState
     FALLING
 }
 
-public partial class PlayerCharacter : CharacterBody3D
+public partial class ArenaCharacter : Pawn
 {
+    [Export] CharacterBody3D _body;
+
     // Movement
     public bool IsAlive;
     [Export] public int Speed { get; set; } = 14;                     // Ground speed
@@ -28,7 +30,7 @@ public partial class PlayerCharacter : CharacterBody3D
     private bool _isMouseCaptured = true;
 
     private MovementState _movementState;
-    private bool _canJump => IsOnFloor();
+    private bool _canJump => _body.IsOnFloor();
 
     [Export] private Weapon _equippedWeapon;
 
@@ -47,12 +49,12 @@ public partial class PlayerCharacter : CharacterBody3D
     public void TeleportTo(Transform3D t)
     {
         GlobalTransform = t;
-        Velocity = Vector3.Zero;
+        _body.Velocity = Vector3.Zero;
     }
 
     public void ResetMovement()
     {
-        Velocity = Vector3.Zero;
+        _body.Velocity = Vector3.Zero;
         // Reset any momentum, jump state, etc.
     }
 
@@ -72,7 +74,7 @@ public partial class PlayerCharacter : CharacterBody3D
 
     public override void _Input(InputEvent @event)
     {
-        if(!_inputEnabled)
+        if(!InputEnabled)
         {
             return;
         }
@@ -107,7 +109,7 @@ public partial class PlayerCharacter : CharacterBody3D
 
     public void HandleMovement(double delta)
     {
-        if (!_inputEnabled)
+        if (!InputEnabled)
         {
             return;
         }
@@ -150,7 +152,7 @@ public partial class PlayerCharacter : CharacterBody3D
         }
 
         // Gravity
-        if (!IsOnFloor())
+        if (!_body.IsOnFloor())
         {
             _targetVelocity.Y -= FallAcceleration * (float)delta;
         }
@@ -161,8 +163,8 @@ public partial class PlayerCharacter : CharacterBody3D
         }
 
         // Move the character
-        Velocity = _targetVelocity;
-        MoveAndSlide();
+        _body.Velocity = _targetVelocity;
+        _body.MoveAndSlide();
     }
 
     public override void _Process(double delta)
@@ -190,7 +192,7 @@ public partial class PlayerCharacter : CharacterBody3D
         }
 
         // Rotate player horizontally
-        RotateY(-Mathf.DegToRad(_rotVelocity.X));
+        _body.RotateY(-Mathf.DegToRad(_rotVelocity.X));
 
         // Reset mouse input
         _cameraInput = Vector2.Zero;
@@ -200,7 +202,7 @@ public partial class PlayerCharacter : CharacterBody3D
 
     public void UpdateMovementState()
     {
-        MovementState newMovementState = IsOnFloor() ? MovementState.GROUNDED : MovementState.FALLING;
+        MovementState newMovementState = _body.IsOnFloor() ? MovementState.GROUNDED : MovementState.FALLING;
 
         if (_movementState != newMovementState)
         {

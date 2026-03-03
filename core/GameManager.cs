@@ -21,7 +21,7 @@ public partial class GameManager : Node
 
     public void SpawnPlayer()
     {
-        PlayerCharacter spawnedPlayer = (PlayerCharacter)_playerScene.Instantiate();
+        ArenaCharacter spawnedPlayer = (ArenaCharacter)_playerScene.Instantiate();
         var spawnPoint = _spawnManager.GetSpawnPoint();
 
         GetTree().CurrentScene.AddChild(spawnedPlayer);

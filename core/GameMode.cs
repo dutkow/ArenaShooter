@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System;
 
 public partial class GameMode : Node
@@ -10,7 +11,8 @@ public partial class GameMode : Node
     [Export] public PackedScene MatchStateScene;
 
     [Export] public PackedScene LevelUIScene;
-    
+
+    public System.Collections.Generic.Dictionary<byte, PlayerController> PlayerControllers = new();
 
     public override void _EnterTree()
     {
@@ -91,5 +93,19 @@ public partial class GameMode : Node
         }
 
         // Optional: trigger scoreboard, announce winner, etc.
+    }
+
+    public void AddPlayerController(byte playerID)
+    {
+        if(!PlayerControllers.TryGetValue(playerID, out var controller))
+        {
+            PlayerController playerController = new();
+            playerController.PlayerID = playerID;
+            PlayerControllers[playerID] = playerController;
+        }
+        else
+        {
+            GD.PushError($"Attempted to add player controller with player ID: {playerID}, but a player controller with this player ID already exists.");
+        }
     }
 }
