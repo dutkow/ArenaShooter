@@ -1,8 +1,12 @@
-Short term goals
+Short term
 
-- need to make joining client see server player in correct position
+- fix the client side movement to work at least in a jagged manner. Need to rethink how it handles looking vs movement
+- once input is working w/ the frame rate lock, add some sort of interpolation and correction thresholds for snapping updates
+- add interpolation on the viewed units. consider whether the classes should be separated (i.e., ServerCharacter, LocalClientCharacter, OtherCharacters)
 
-- Add spawning of existing players (no replication). i.e., client sees server character
-- Add spawning of new players. i.e., server sees client that connected. Put at random spawn pt (no special spawn handling yet)
+
+
+Medium term
+
 - Add simple chat system (no team system yet - YAGNI for now)
 
