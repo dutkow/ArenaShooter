@@ -19,7 +19,7 @@ public partial class SceneNavigator : Node
     {
         MatchState.Instance.StartPhase(MatchPhase.WARMUP);
 
-        OpenMultiplayerMap(serverInfo.MapID, 1.0f); // optional 1-second delay
+        OpenMultiplayerMap(serverInfo.MapID);
     }
 
     private void OnConnectedToServer()
