@@ -58,11 +58,16 @@ public partial class GameMode : Node
     {
         GD.Print("Pre-match: teleport and freeze players");
 
-        foreach (var playerCharacter in PlayerManager.Instance.GetPlayerCharacters())
+        foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
-            playerCharacter.TeleportTo(SpawnManager.Instance.GetSpawnPoint().Transform);
-            playerCharacter.SetInputEnabled(false);
-            playerCharacter.SetWeaponsEnabled(false);
+            var playerCharacter = kvp.Value.Character;
+
+            if(playerCharacter != null)
+            {
+                playerCharacter.TeleportTo(SpawnManager.Instance.GetSpawnPoint().Transform);
+                playerCharacter.SetInputEnabled(false);
+                playerCharacter.SetWeaponsEnabled(false);
+            }
         }
     }
 

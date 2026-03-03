@@ -15,8 +15,8 @@ public partial class MatchTimer : Control
 
         MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
         MatchState.Instance.TimeRemainingChanged += OnMatchTimeRemainingChanged;
-
     }
+
     public void OnMatchPhaseChanged(MatchPhase matchPhase)
     {
         if(matchPhase == MatchPhase.WARMUP)

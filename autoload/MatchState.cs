@@ -60,7 +60,7 @@ public partial class MatchState : Node
     // ----------------------
     // Player management
     // ----------------------
-    private readonly Dictionary<byte, PlayerState> _connectedPlayers = new(); // playerID -> PlayerState
+    private readonly Dictionary<byte, PlayerState> _connectedPlayers = new();
     public IReadOnlyDictionary<byte, PlayerState> ConnectedPlayers => _connectedPlayers;
 
     public event Action<PlayerState>? PlayerJoined;
