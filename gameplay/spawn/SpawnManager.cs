@@ -29,23 +29,26 @@ public partial class SpawnManager : Node3D
         return ListUtils.RandomElement(_playerSpawnPoints);
     }
 
+    public ArenaCharacter ServerSpawnPlayer(byte playerID)
+    {
+        var spawnPoint = GetSpawnPoint();
+        LevelUI.Instance.ShowPlayerHud();
 
-    public ArenaCharacter SpawnPlayer(byte playerID)
+        ArenaCharacter spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
+        PlayerSpawned.Send(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
+
+        return spawnedPlayer;
+    }
+
+    public ArenaCharacter LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
     {
         var spawnedPlayer = (ArenaCharacter)GameMode.Instance.DefaultPawnScene.Instantiate();
         AddChild(spawnedPlayer);
 
-        var spawnPoint = GetSpawnPoint();
-        spawnedPlayer.GlobalPosition = spawnPoint.GlobalPosition;
-        spawnedPlayer.GlobalRotation = spawnPoint.SpawnRotation;
-
+        spawnedPlayer.GlobalPosition = spawnPosition;
+        spawnedPlayer.GlobalRotation = new Vector3(0.0f, yRotation, 0.0f);
 
         LevelUI.Instance.ShowPlayerHud();
-
-        if(NetworkSession.Instance.IsServer)
-        {
-            PlayerSpawned.Send(playerID, spawnedPlayer.GlobalPosition, spawnedPlayer.GlobalRotation.Y);
-        }
 
         return spawnedPlayer;
     }

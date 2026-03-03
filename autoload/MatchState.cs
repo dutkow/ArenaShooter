@@ -90,6 +90,8 @@ public partial class MatchState : Node
     {
         for(int i = 0; i < initialMatchState.PlayerIDs.Length; ++i)
         {
+
+            SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
         }
     }
@@ -203,10 +205,11 @@ public partial class MatchState : Node
             GD.PrintErr("PlayerJoined event crashed: ", e);
         }
 
+        
         if(NetworkSession.Instance.IsServer)
         {
             PlayerController playerController = GameMode.Instance.PlayerControllers[playerID];
-            Pawn spawnedPawn = SpawnManager.Instance.SpawnPlayer(playerID);
+            Pawn spawnedPawn = SpawnManager.Instance.ServerSpawnPlayer(playerID);
             playerController.Possess(spawnedPawn);
         }
     }

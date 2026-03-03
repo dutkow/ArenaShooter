@@ -56,7 +56,7 @@ public class PlayerSpawned : Message
         pawn.GlobalPosition = spawnPosition;
         pawn.GlobalRotation = new Vector3(0.0f, spawnRotationY, 0.0f);
 
-        var spawnedPlayer = SpawnManager.Instance.SpawnPlayer(playerID);
+        var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
 
         if(playerID == NetworkSession.Instance.LocalPlayerID)
         {
