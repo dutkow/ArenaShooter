@@ -6,10 +6,10 @@ public partial class Pawn : Node3D
 
     public bool IsPossessed => Controller != null;
 
-    private bool _inputLockedByServer = false;
+    private bool _inputEnabled = false;
 
     public bool IsPossessedLocally;
-    public bool InputEnabled => IsPossessedLocally && !_inputLockedByServer;
+    public bool InputActive => IsPossessedLocally && !_inputEnabled;
 
     public override void _Ready()
     {
@@ -40,8 +40,8 @@ public partial class Pawn : Node3D
         IsPossessedLocally = false;
     }
 
-    public void SetServerInputLock(bool locked)
+    public void SetInputEnabled(bool value)
     {
-        _inputLockedByServer = locked;
+        _inputEnabled = value;
     }
 }

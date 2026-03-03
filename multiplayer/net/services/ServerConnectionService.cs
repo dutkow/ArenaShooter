@@ -21,15 +21,20 @@ public static class ServerConnectionService
         var msg = new ClientLoaded();
         msg.ReadMessage(data);
 
-        InitialMatchState.Send(peer);
 
         int peerID = (int)peer.GetMeta("id");
         byte playerID = NetworkSession.Instance.peerIDtoPlayerID[peerID];
         string playerName = NetworkSession.Instance.playerIDtoPlayerState[playerID].PlayerName;
 
+
+
         GD.Print("Server sending player joined");
 
         PlayerJoined.Execute(playerID, playerName);
+        
+        
+        InitialMatchState.Send(peer); // NOTE: need to reconsider ordering, but match state should send loaded client in initial match state for now
+
         PlayerJoined.Send(playerID, playerName);
 
         GD.Print($"Server received: {msg.MessageType}");

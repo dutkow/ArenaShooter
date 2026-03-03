@@ -112,6 +112,8 @@ public partial class NetworkSession : Node
         ServerInfo = info;
 
         _networkHandler.StartServer(info.HostIP, info.Port);
+        ServerInfo.Players++;
+
 
         if (_lanBroadcaster == null)
         {
@@ -154,6 +156,8 @@ public partial class NetworkSession : Node
 
             GD.Print($"Player disconnected: _peerID={_peerID}, _playerID={_playerID}");
             OnPlayerLeft?.Invoke(_playerID);
+
+            ServerInfo.Players--;
         }
         else
         {
@@ -302,6 +306,8 @@ public partial class NetworkSession : Node
         OnPlayerJoined?.Invoke(playerID, playerName);
 
         ConnectionAccepted.Send(peer, playerID);
+
+        ServerInfo.Players++;
     }
 
     public void HandlePlayerJoined(byte playerID, string playerName)

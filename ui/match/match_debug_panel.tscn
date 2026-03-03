@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b3dh4pgweigmv" path="res://ui/match/MatchDebugPanel.cs" id="1_sr2eq"]
 
-[node name="MatchDebugPanel" type="Control" node_paths=PackedStringArray("_matchPhaseLabel")]
+[node name="MatchDebugPanel" type="Control" node_paths=PackedStringArray("_matchPhaseLabel", "_netRoleLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,13 +12,8 @@ offset_bottom = -498.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sr2eq")
-_matchPhaseLabel = NodePath("MatchPhaseLabel")
-
-[node name="MatchPhaseLabel" type="Label" parent="."]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-text = "[PHASE]"
+_matchPhaseLabel = NodePath("VBoxContainer/MatchPhaseLabel")
+_netRoleLabel = NodePath("VBoxContainer/NetRoleLabel")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -28,3 +23,19 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.16470589)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MatchPhaseLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "[PHASE]"
+
+[node name="NetRoleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "[Net Role]"

@@ -4,6 +4,7 @@ using System;
 public partial class MatchDebugPanel : Control
 {
     [Export] Label _matchPhaseLabel;
+    [Export] Label _netRoleLabel;
 
     public override void _Ready()
     {
@@ -12,6 +13,8 @@ public partial class MatchDebugPanel : Control
 
         OnMatchPhaseChanged(MatchState.Instance.MatchPhase);
         MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
+
+        _netRoleLabel.Text = NetworkSession.Instance.Role.ToString();
     }
 
     public void OnMatchPhaseChanged(MatchPhase matchPhase)

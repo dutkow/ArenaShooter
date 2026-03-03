@@ -45,6 +45,11 @@ public class PlayerJoined : Message
 
     public static void Execute(byte playerID, string playerName)
     {
+        if(playerID == NetworkSession.Instance.LocalPlayerID)
+        {
+            return; // Need to rethink ordering on init match state. But for now, just ensure we don't readd.
+        }
+
         MatchState.Instance.AddPlayer(playerID, playerName);
     }
 }

@@ -16,6 +16,8 @@ public class PlayerState (byte playerID)
 
     public void AssignCharacter(ArenaCharacter character)
     {
+        GD.Print($"Assigning player state to character");
+
         Character = character;
     }
 }

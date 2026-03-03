@@ -76,6 +76,8 @@ public class Message
     protected void Add(byte _) => _dataSize += 1;
     protected void Add(bool _) => _dataSize += 1;
     protected void Add(int _) => _dataSize += 4;
+    protected void Add(uint _) => _dataSize += 4;
+
     protected void Add(float _) => _dataSize += 4;
     protected void Add(ushort _) => _dataSize += 2;
     protected void Add(string s) => _dataSize += 1 + (s != null ? Encoding.UTF8.GetByteCount(s) : 0);
@@ -116,6 +118,8 @@ public class Message
     protected void Write(byte value) => _data[_dataPartIndex++] = value;
     protected void Write(bool value) => Write((byte)(value ? 1 : 0));
     protected void Write(int value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 4); _dataPartIndex += 4; }
+
+    protected void Write(uint value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 4); _dataPartIndex += 4; }
     protected void Write(float value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 4); _dataPartIndex += 4; }
     protected void Write(ushort value) { _data[_dataPartIndex++] = (byte)(value & 0xFF); _data[_dataPartIndex++] = (byte)((value >> 8) & 0xFF); }
     protected void Write(string value)
@@ -155,6 +159,8 @@ public class Message
     protected void Read(out byte value) => value = _data[_dataPartIndex++];
     protected void Read(out bool value) { byte b = _data[_dataPartIndex++]; value = b != 0; }
     protected void Read(out int value) { value = BitConverter.ToInt32(_data, _dataPartIndex); _dataPartIndex += 4; }
+    protected void Read(out uint value) { value = BitConverter.ToUInt32(_data, _dataPartIndex); _dataPartIndex += 4; }
+
     protected void Read(out float value) { value = BitConverter.ToSingle(_data, _dataPartIndex); _dataPartIndex += 4; }
     protected void Read(out ushort value) { value = (ushort)(_data[_dataPartIndex] | (_data[_dataPartIndex + 1] << 8)); _dataPartIndex += 2; }
     protected void Read(out string value)

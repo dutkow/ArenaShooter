@@ -9,49 +9,6 @@ public enum ENetPacketFlags : int
     UnreliableFragment = 8
 }
 
-// Server sees messages from clients
-public enum ClientMsg : byte
-{
-    CONNECTION_REQUEST,
-    CLIENT_LOADED,
-    PLAYER_INFO,
-    CHANGE_PLAYER_NAME,
-    CHANGE_PLAYER_NUMBER,
-    CHANGE_PLAYER_TEAM,
-    CHANGE_READY_STATUS,
-    SEND_CONNECTING_PLAYER_INFO,
-    CHAT_MESSAGE,
-    INPUT,
-}
-
-// Client sees messages from server
-public enum ServerMsg : byte
-{
-    CONNECTION_ACCEPTED,
-    CONNECTION_DENIED,
-    INITIAL_MATCH_STATE,
-    PLAYER_JOINED,
-    PLAYER_LEFT,
-    RECEIVED_PLAYER_INFO,
-    PLAYER_NAME_CHANGED,
-    PLAYER_NUMBER_CHANGED,
-    PLAYER_TEAM_CHANGED,
-    PLAYER_READY_STATUS_CHANGED,
-    SERVER_CLOSED,
-    RECEIVED_CONNECTING_PLAYER_INFO,
-    PLAYER_KICKED,
-    BACKUP_NOMINATION,
-    BACKUP_ASSIGNED,
-    PLAYER_RESIGNED,
-    ALL_PLAYERS_LOADED,
-    START_GAME_COUNTDOWN,
-    START_GAME,
-    GAME_FINISHED,
-    PLAYER_PING_UPDATE,
-    GAME_PHASE_CHANGED,
-    CHAT_MESSAGE,
-}
-
 public enum Msg : byte
 {
     // SHARED PACKETS / P2P
@@ -104,7 +61,7 @@ public enum Msg : byte
     C2S_CHAT_MESSAGE,
 
     // Game
-    C2S_INPUT,
+    C2S_CLIENT_COMMAND,
     // C2S_SHOOT?
 
     S2C_PLAYER_SPAWNED,

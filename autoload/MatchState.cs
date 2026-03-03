@@ -15,6 +15,13 @@ public partial class MatchState : Node
 {
     public static MatchState Instance { get; private set; }
 
+    public uint CurrentTick { get; private set; } = 0;
+
+    public void AdvanceTick()
+    {
+        CurrentTick++;
+    }
+
     // ----------------------
     // Match phase
     // ----------------------
@@ -106,11 +113,12 @@ public partial class MatchState : Node
     {
         for(int i = 0; i < initialMatchState.PlayerIDs.Length; ++i)
         {
-            GD.Print("spawning local player after receiving initial match state");
+            GD.Print($"Number of players in initial match state = {initialMatchState.PlayerIDs.Length}");
 
             byte playerID = initialMatchState.PlayerIDs[i];
             ConnectedPlayers[playerID] = new PlayerState(playerID);
 
+            GD.Print($"Adding connected player ID [{playerID}] to the connected players list. Role: {NetworkSession.Instance.Role}");
             SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
 
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);

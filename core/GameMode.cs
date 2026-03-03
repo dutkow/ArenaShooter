@@ -69,7 +69,7 @@ public partial class GameMode : Node
             if(playerCharacter != null)
             {
                 playerCharacter.TeleportTo(SpawnManager.Instance.GetSpawnPoint().Transform);
-                playerCharacter.SetInputEnabled(false);
+                playerCharacter.SetInputEnabled(true);
                 playerCharacter.SetWeaponsEnabled(false);
             }
         }
@@ -81,7 +81,7 @@ public partial class GameMode : Node
 
         foreach (var playerCharacter in PlayerManager.Instance.GetPlayerCharacters())
         {
-            playerCharacter.SetInputEnabled(true);
+            playerCharacter.SetInputEnabled(false);
             playerCharacter.SetWeaponsEnabled(true);
         }
     }
