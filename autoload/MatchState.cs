@@ -60,12 +60,13 @@ public partial class MatchState : Node
     // ----------------------
     // Player management
     // ----------------------
-    private readonly Dictionary<byte, PlayerState> _connectedPlayers = new();
-    public IReadOnlyDictionary<byte, PlayerState> ConnectedPlayers => _connectedPlayers;
+    public Dictionary<byte, PlayerState> ConnectedPlayers = new();
 
     public event Action<PlayerState>? PlayerJoined;
     public event Action<int, PlayerState>? PlayerLeft;
 
+    ServerTickManager _serverTickManager;
+    
     public override void _EnterTree()
     {
         base._EnterTree();
@@ -80,9 +81,24 @@ public partial class MatchState : Node
         //NetworkHandler.Instance.OnPeerConnected += HandlePlayerJoined;
         //NetworkHandler.Instance.OnPeerDisconnected += HandlePeerDisconnected;
 
-        if(NetworkSession.Instance.IsListenServer)
+        if (NetworkSession.Instance.IsServer)
         {
-            AddPlayer(NetworkSession.Instance.LocalPlayerID, Settings.Instance.PlayerName);
+            _serverTickManager = new();
+
+            if (NetworkSession.Instance.IsListenServer)
+            {
+                AddPlayer(NetworkSession.Instance.LocalPlayerID, Settings.Instance.PlayerName);
+            }
+        }
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        base._PhysicsProcess(delta);
+
+        if(_serverTickManager != null)
+        {
+            _serverTickManager.PhysicsTick(delta);
         }
     }
 
@@ -91,6 +107,10 @@ public partial class MatchState : Node
         for(int i = 0; i < initialMatchState.PlayerIDs.Length; ++i)
         {
             GD.Print("spawning local player after receiving initial match state");
+
+            byte playerID = initialMatchState.PlayerIDs[i];
+            ConnectedPlayers[playerID] = new PlayerState(playerID);
+
             SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
 
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
@@ -177,7 +197,7 @@ public partial class MatchState : Node
     
     public void AddPlayer(byte playerID, string playerName)
     {
-        if (_connectedPlayers.ContainsKey(playerID))
+        if (ConnectedPlayers.ContainsKey(playerID))
         {
             return; // Already added
         }
@@ -193,7 +213,7 @@ public partial class MatchState : Node
             Character = null
         };
 
-        _connectedPlayers[playerID] = player;
+        ConnectedPlayers[playerID] = player;
 
         GD.Print($"Player added. Player ID: {playerID}. PlayerName: ({player.PlayerName})");
 
@@ -216,9 +236,9 @@ public partial class MatchState : Node
 
     private void HandlePeerDisconnected(byte peerId)
     {
-        if (_connectedPlayers.TryGetValue(peerId, out var player))
+        if (ConnectedPlayers.TryGetValue(peerId, out var player))
         {
-            _connectedPlayers.Remove(peerId);
+            ConnectedPlayers.Remove(peerId);
 
             GD.Print($"Player left: {peerId} ({player.PlayerName})");
 
@@ -232,8 +252,8 @@ public partial class MatchState : Node
     // ----------------------
     // Optional helpers
     // ----------------------
-    public IReadOnlyList<PlayerState> GetAllPlayers() => new List<PlayerState>(_connectedPlayers.Values);
+    public IReadOnlyList<PlayerState> GetAllPlayers() => new List<PlayerState>(ConnectedPlayers.Values);
 
     public IReadOnlyList<PlayerState> GetActivePlayers() =>
-        new List<PlayerState>(_connectedPlayers.Values).FindAll(p => p.Character != null);
+        new List<PlayerState>(ConnectedPlayers.Values).FindAll(p => p.Character != null);
 }

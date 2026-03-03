@@ -34,6 +34,7 @@ public class MessageRouter
 
             // Gameplay
             RegisterFromServer(Msg.S2C_PLAYER_SPAWNED, ClientGameplayService.HandlePlayerSpawned);
+            RegisterFromServer(Msg.S2C_WORLD_SNAPSHOT, ClientGameplayService.HandleWorldSnapshot);
         }
     }
 
@@ -52,7 +53,6 @@ public class MessageRouter
         var type = Message.GetType(data);
         if (_serverHandlers.TryGetValue(type, out var handler))
         {
-            GD.Print($"Routing server message: {type}");
             handler?.Invoke(data);
         }
         else
@@ -66,7 +66,6 @@ public class MessageRouter
         var type = Message.GetType(data);
         if (_clientHandlers.TryGetValue(type, out var handler))
         {
-            GD.Print($"Routing client message: {type}");
             handler?.Invoke(sender, data);
         }
         else

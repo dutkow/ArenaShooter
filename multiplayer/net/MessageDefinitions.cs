@@ -108,4 +108,5 @@ public enum Msg : byte
     // C2S_SHOOT?
 
     S2C_PLAYER_SPAWNED,
+    S2C_WORLD_SNAPSHOT,
 }

@@ -39,6 +39,8 @@ public partial class ArenaCharacter : Pawn
     private bool _inputEnabled = true;
     private bool _weaponsEnabled = true;
 
+    public float Yaw => Body.GlobalRotation.Y;
+    public float AimPitch => CameraPivot.Rotation.X;
     public override void _Ready()
     {
         base._Ready();

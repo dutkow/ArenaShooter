@@ -53,8 +53,12 @@ public partial class SpawnManager : Node3D
         {
             playerState.AssignCharacter(spawnedPlayer);
         }
+        else
+        {
+            GD.PushError("Failed to assign character to player state because player state not found in connected players");
+        }
 
-        LevelUI.Instance.ShowPlayerHud();
+            LevelUI.Instance.ShowPlayerHud();
 
         if(playerID == NetworkSession.Instance.LocalPlayerID)
         {
