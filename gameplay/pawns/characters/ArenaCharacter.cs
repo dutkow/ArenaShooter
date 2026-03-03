@@ -9,7 +9,7 @@ public enum MovementState
 
 public partial class ArenaCharacter : Pawn
 {
-    [Export] CharacterBody3D _body;
+    [Export] public CharacterBody3D Body;
 
     // Movement
     public bool IsAlive;
@@ -30,7 +30,7 @@ public partial class ArenaCharacter : Pawn
     private bool _isMouseCaptured = true;
 
     private MovementState _movementState;
-    private bool _canJump => _body.IsOnFloor();
+    private bool _canJump => Body.IsOnFloor();
 
     [Export] private Weapon _equippedWeapon;
 
@@ -64,12 +64,12 @@ public partial class ArenaCharacter : Pawn
     public void TeleportTo(Transform3D t)
     {
         GlobalTransform = t;
-        _body.Velocity = Vector3.Zero;
+        Body.Velocity = Vector3.Zero;
     }
 
     public void ResetMovement()
     {
-        _body.Velocity = Vector3.Zero;
+        Body.Velocity = Vector3.Zero;
         // Reset any momentum, jump state, etc.
     }
 
@@ -163,7 +163,7 @@ public partial class ArenaCharacter : Pawn
         }
 
         // Gravity
-        if (!_body.IsOnFloor())
+        if (!Body.IsOnFloor())
         {
             _targetVelocity.Y -= FallAcceleration * (float)delta;
         }
@@ -174,8 +174,8 @@ public partial class ArenaCharacter : Pawn
         }
 
         // Move the character
-        _body.Velocity = _targetVelocity;
-        _body.MoveAndSlide();
+        Body.Velocity = _targetVelocity;
+        Body.MoveAndSlide();
     }
 
     public override void _Process(double delta)
@@ -203,7 +203,7 @@ public partial class ArenaCharacter : Pawn
         }
 
         // Rotate player horizontally
-        _body.RotateY(-Mathf.DegToRad(_rotVelocity.X));
+        Body.RotateY(-Mathf.DegToRad(_rotVelocity.X));
 
         // Reset mouse input
         _cameraInput = Vector2.Zero;
@@ -213,7 +213,7 @@ public partial class ArenaCharacter : Pawn
 
     public void UpdateMovementState()
     {
-        MovementState newMovementState = _body.IsOnFloor() ? MovementState.GROUNDED : MovementState.FALLING;
+        MovementState newMovementState = Body.IsOnFloor() ? MovementState.GROUNDED : MovementState.FALLING;
 
         if (_movementState != newMovementState)
         {

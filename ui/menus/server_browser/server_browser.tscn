@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ch7hcn0bc2af1" path="res://ui/menus/server_browser/ServerBrowser.cs" id="1_j2g02"]
 [ext_resource type="PackedScene" uid="uid://bxcaafo6blio2" path="res://ui/menus/server_browser/server_result_entry.tscn" id="2_oyqsf"]
 
-[node name="ServerBrowser" type="Control" node_paths=PackedStringArray("_serverResultsContainer", "_serverRefreshLabel")]
+[node name="ServerBrowser" type="Control" node_paths=PackedStringArray("_serverResultsContainer", "_serverRefreshLabel", "_backButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,6 +14,7 @@ script = ExtResource("1_j2g02")
 _serverResultsContainer = NodePath("VBoxContainer/Control/ScrollContainer/ServerResultsContainer")
 _serverRefreshLabel = NodePath("VBoxContainer/Control/ServerRefreshLabel")
 _serverResultEntryScene = ExtResource("2_oyqsf")
+_backButton = NodePath("VBoxContainer/BackButton")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -103,3 +104,7 @@ grow_vertical = 2
 text = "Refreshing servers..."
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="BackButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "BACK"

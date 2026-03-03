@@ -9,11 +9,14 @@ public partial class HostGameMenu : Control
 
     [Export] OptionButton _mapOptionButton;
 
+    [Export] Button _backButton;
+
     public override void _Ready()
     {
         base._Ready();
 
         _hostGameButton.Pressed += OnHostGameButtonPressed;
+        _backButton.Pressed += OnBackButtonPressed;
 
 
         for (int i = 0; i < GameData.Instance.MultiplayerMaps.Maps.Count; ++i)
@@ -26,7 +29,7 @@ public partial class HostGameMenu : Control
 
     public void Open()
     {
-        Visible = true;
+        Show();
     }
 
     public void OnHostGameButtonPressed()
@@ -35,5 +38,10 @@ public partial class HostGameMenu : Control
         serverInfo.Name = "Test Server";
         serverInfo.MapID = (string)_mapOptionButton.GetItemMetadata(_mapOptionButton.Selected);
         NetworkSession.Instance.HostLanServer(serverInfo);
+    }
+
+    public void OnBackButtonPressed()
+    {
+        Hide();
     }
 }

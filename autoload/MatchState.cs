@@ -90,8 +90,9 @@ public partial class MatchState : Node
     {
         for(int i = 0; i < initialMatchState.PlayerIDs.Length; ++i)
         {
-
+            GD.Print("spawning local player after receiving initial match state");
             SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
+
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
         }
     }

@@ -42,11 +42,17 @@ public partial class SpawnManager : Node3D
 
     public ArenaCharacter LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
     {
+        GD.Print($"Spawning player locally. PlayerID = {playerID}. Position = {spawnPosition}. Y rotation = {yRotation}");
         var spawnedPlayer = (ArenaCharacter)GameMode.Instance.DefaultPawnScene.Instantiate();
         AddChild(spawnedPlayer);
 
         spawnedPlayer.GlobalPosition = spawnPosition;
         spawnedPlayer.GlobalRotation = new Vector3(0.0f, yRotation, 0.0f);
+
+        if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
+        {
+            playerState.AssignCharacter(spawnedPlayer);
+        }
 
         LevelUI.Instance.ShowPlayerHud();
 

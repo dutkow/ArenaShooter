@@ -10,9 +10,9 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
 
-[node name="ArenaCharacter" type="Node3D" node_paths=PackedStringArray("_body", "Camera", "CameraPivot", "_equippedWeapon")]
+[node name="ArenaCharacter" type="Node3D" node_paths=PackedStringArray("Body", "Camera", "CameraPivot", "_equippedWeapon")]
 script = ExtResource("1_60ybg")
-_body = NodePath("CharacterBody3D")
+Body = NodePath("CharacterBody3D")
 Camera = NodePath("CharacterBody3D/CameraPivot/Camera3D")
 CameraPivot = NodePath("CharacterBody3D/CameraPivot")
 _equippedWeapon = NodePath("CharacterBody3D/CameraPivot/Weapon")

@@ -12,6 +12,8 @@ public partial class ServerBrowser : Control
 
     [Export] PackedScene _serverResultEntryScene;
 
+    [Export] Button _backButton;
+
     public override void _EnterTree()
     {
         base._EnterTree();
@@ -24,6 +26,13 @@ public partial class ServerBrowser : Control
         base._ExitTree();
 
         NetworkSession.Instance.OnServerRefreshFinished -= OnServerRefreshFinished;
+    }
+
+    public override void _Ready()
+    {
+        base._Ready();
+
+        _backButton.Pressed += OnBackButtonPressed;
     }
 
     public void Open()
@@ -73,6 +82,11 @@ public partial class ServerBrowser : Control
         var serverResultEntry = (ServerResultEntry)_serverResultEntryScene.Instantiate();
         serverResultEntry.Initialize(serverInfo);
         _serverResultsContainer.AddChild(serverResultEntry);
+    }
+
+    public void OnBackButtonPressed()
+    {
+        Hide();
     }
 
 }

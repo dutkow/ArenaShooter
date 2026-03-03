@@ -1,6 +1,6 @@
 Short term goals
 
-- Need to clean up the execution flow of synchronizing initial match state post-join and player spawning
+- need to make joining client see server player in correct position
 
 - Add spawning of existing players (no replication). i.e., client sees server character
 - Add spawning of new players. i.e., server sees client that connected. Put at random spawn pt (no special spawn handling yet)

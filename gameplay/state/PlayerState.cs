@@ -13,4 +13,9 @@ public class PlayerState (byte playerID)
     public int TeamId;
     public ArenaCharacter Character;
     public bool IsAlive => Character != null && Character.IsAlive;
+
+    public void AssignCharacter(ArenaCharacter character)
+    {
+        Character = character;
+    }
 }
