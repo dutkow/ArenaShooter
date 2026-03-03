@@ -19,13 +19,6 @@ public partial class LevelUI : CanvasLayer
         AddChild(_playerHud);
     }
 
-    public override void _ExitTree()
-    {
-        base._ExitTree();
-
-        Instance = null;
-    }
-
     public void ShowPlayerHud()
     {
         _playerHud.Show();

@@ -35,12 +35,9 @@ public partial class SpawnManager : Node3D
         var playerCharacter = (PlayerCharacter)GameMode.Instance.PlayerCharacterScene.Instantiate();
         AddChild(playerCharacter);
 
-        //var spawnPoint = GetSpawnPoint();
-        //playerCharacter.GlobalPosition = spawnPoint.GlobalPosition;
-        //playerCharacter.GlobalRotation = spawnPoint.SpawnRotation;
-
-        playerCharacter.GlobalPosition = Vector3.Zero;
-        playerCharacter.GlobalRotation = Vector3.Zero;
+        var spawnPoint = GetSpawnPoint();
+        playerCharacter.GlobalPosition = spawnPoint.GlobalPosition;
+        playerCharacter.GlobalRotation = spawnPoint.SpawnRotation;
 
         LevelUI.Instance.ShowPlayerHud();
     }

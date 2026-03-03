@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Security.Cryptography;
 
 public partial class Level : Node3D
 {
@@ -30,6 +31,11 @@ public partial class Level : Node3D
         var levelUI = (LevelUI)gameMode.LevelUIScene.Instantiate();
         AddChild(levelUI);
 
+        CallDeferred(nameof(PostInit));
+    }
+
+    public void PostInit()
+    {
         if (NetworkSession.Instance.IsServer)
         {
             MatchState.Instance.Initialize();

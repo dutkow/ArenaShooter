@@ -33,10 +33,16 @@ transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76
 shadow_enabled = true
 
 [node name="SpawnPoint" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 4.079609, 1.3157029, -20.762333)
+transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 21.680574, 1.3157029, -20.762333)
 
 [node name="SpawnPoint" parent="SpawnPoint" instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.9917632, 0, 0.12808594, 0, 1, 0, -0.12808594, 0, -0.9917632, 0.5123465, 1.3157029, -31.075033)
+transform = Transform3D(-0.9917633, 0, 0.128086, 0, 1, 0, -0.128086, 0, -0.9917633, 22.754257, 1.3157029, -58.60215)
+
+[node name="SpawnPoint3" parent="SpawnPoint" instance=ExtResource("2_j23ab")]
+transform = Transform3D(-0.65264106, 0, -0.75766766, 0, 1, 0, 0.75766766, 0, -0.65264106, -19.029917, 1.3157029, -44.148605)
+
+[node name="SpawnPoint2" parent="SpawnPoint" instance=ExtResource("2_j23ab")]
+transform = Transform3D(0.2506675, 0, 0.9680736, 0, 1, 0, -0.9680736, 0, 0.2506675, 36.4636, 1.3157029, -18.969452)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 
