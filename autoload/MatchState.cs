@@ -202,8 +202,12 @@ public partial class MatchState : Node
         {
             GD.PrintErr("PlayerJoined event crashed: ", e);
         }
+
+        if(NetworkSession.Instance.IsServer)
+        {
+            GameMode.Instance.SpawnPlayer(player);
+        }
     }
-   
 
     private void HandlePeerDisconnected(byte peerId)
     {

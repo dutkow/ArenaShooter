@@ -68,9 +68,6 @@ public partial class PlayerCharacter : CharacterBody3D
     public override void _Ready()
     {
         Input.MouseMode = Input.MouseModeEnum.Captured;
-
-        State = PlayerManager.Instance.GetAllPlayers()[0]; // basic test item
-        State.Character = this;
     }
 
     public override void _Input(InputEvent @event)

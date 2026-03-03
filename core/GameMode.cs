@@ -5,6 +5,9 @@ public partial class GameMode : Node
 {
     public static GameMode Instance { get; private set; }
 
+    [Export] PackedScene _playerCharacterScene;
+    SpawnManager _spawnManager;
+
     public override void _Ready()
     {
         base._Ready();
@@ -17,6 +20,9 @@ public partial class GameMode : Node
         }
 
         MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
+
+        _spawnManager = new();
+        AddChild(_spawnManager);
     }
 
     public void Initialize()
@@ -91,5 +97,10 @@ public partial class GameMode : Node
         }
 
         // Optional: trigger scoreboard, announce winner, etc.
+    }
+
+    public void SpawnPlayer(PlayerState playerState)
+    {
+        _spawnManager.SpawnPlayer(playerState, _playerCharacterScene);
     }
 }

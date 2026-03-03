@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class SpawnManager
+public partial class SpawnManager : Node3D
 {
     public static SpawnManager Instance;
 
@@ -28,4 +28,10 @@ public partial class SpawnManager
         return ListUtils.RandomElement(_playerSpawnPoints);
     }
 
+
+    public void SpawnPlayer(PlayerState playerState, PackedScene playerCharacterScene)
+    {
+        var playerCharacter = (PlayerCharacter)playerCharacterScene.Instantiate();
+        AddChild(playerCharacter);
+    }
 }
