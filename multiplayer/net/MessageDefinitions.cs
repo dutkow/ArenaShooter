@@ -106,4 +106,6 @@ public enum Msg : byte
     // Game
     C2S_INPUT,
     // C2S_SHOOT?
+
+    S2C_PLAYER_SPAWNED,
 }

@@ -7,6 +7,6 @@
 
 [node name="GameMode" type="Node"]
 script = ExtResource("1_2ollm")
-PlayerCharacterScene = ExtResource("2_ruqs1")
+DefaultPawnScene = ExtResource("2_ruqs1")
 MatchStateScene = ExtResource("3_xrwxx")
 LevelUIScene = ExtResource("3_61523")

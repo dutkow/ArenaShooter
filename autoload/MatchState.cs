@@ -206,7 +206,8 @@ public partial class MatchState : Node
         if(NetworkSession.Instance.IsServer)
         {
             PlayerController playerController = GameMode.Instance.PlayerControllers[playerID];
-            SpawnManager.Instance.SpawnPlayer(playerController);
+            Pawn spawnedPawn = SpawnManager.Instance.SpawnPlayer(playerID);
+            playerController.Possess(spawnedPawn);
         }
     }
 

@@ -33,16 +33,7 @@ transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76
 shadow_enabled = true
 
 [node name="SpawnPoint" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 21.680574, 1.3157029, -20.762333)
-
-[node name="SpawnPoint" parent="SpawnPoint" instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.9917633, 0, 0.128086, 0, 1, 0, -0.128086, 0, -0.9917633, 22.754257, 1.3157029, -58.60215)
-
-[node name="SpawnPoint3" parent="SpawnPoint" instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.65264106, 0, -0.75766766, 0, 1, 0, 0.75766766, 0, -0.65264106, -19.029917, 1.3157029, -44.148605)
-
-[node name="SpawnPoint2" parent="SpawnPoint" instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.2506675, 0, 0.9680736, 0, 1, 0, -0.9680736, 0, 0.2506675, 36.4636, 1.3157029, -18.969452)
+transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 9.879747, 1.3157029, -20.762333)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 
@@ -67,3 +58,12 @@ mesh = SubResource("BoxMesh_f7g2b")
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
 transform = Transform3D(19.558847, 0, 0, 0, 21.922266, 0, 0, 0, 3.4196804, -33.83906, 0, 5.0990143)
 mesh = SubResource("BoxMesh_f7g2b")
+
+[node name="SpawnPoint2" parent="." instance=ExtResource("2_j23ab")]
+transform = Transform3D(0.57391953, 0, -0.8189119, 0, 1, 0, 0.8189119, 0, 0.57391953, -18.980814, 2.6314058, 15.393024)
+
+[node name="SpawnPoint3" parent="." instance=ExtResource("2_j23ab")]
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 2.6314058, 16.797209)
+
+[node name="SpawnPoint4" parent="." instance=ExtResource("2_j23ab")]
+transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -18.980818, 2.6314058, -18.443748)

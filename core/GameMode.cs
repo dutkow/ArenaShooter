@@ -6,13 +6,15 @@ public partial class GameMode : Node
 {
     public static GameMode Instance { get; private set; }
 
-    [Export] public PackedScene PlayerCharacterScene;
+    [Export] public PackedScene DefaultPawnScene;
 
     [Export] public PackedScene MatchStateScene;
 
     [Export] public PackedScene LevelUIScene;
 
     public System.Collections.Generic.Dictionary<byte, PlayerController> PlayerControllers = new();
+
+    public PlayerController LocalPlayerController => PlayerControllers[NetworkSession.Instance.LocalPlayerID];
 
     public override void _EnterTree()
     {
