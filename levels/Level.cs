@@ -32,6 +32,12 @@ public partial class Level : Node3D
         AddChild(levelUI);
 
         CallDeferred(nameof(PostInit));
+
+        if (NetworkSession.Instance.IsListenServer)
+        {
+            byte localPlayerID = NetworkSession.Instance.LocalPlayerID;
+            GameMode.Instance.AddPlayerController(localPlayerID);
+        }
     }
 
     public void PostInit()

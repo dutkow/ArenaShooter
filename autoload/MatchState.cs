@@ -82,9 +82,7 @@ public partial class MatchState : Node
 
         if(NetworkSession.Instance.IsListenServer)
         {
-            byte localPlayerID = NetworkSession.Instance.LocalPlayerID;
-            GameMode.Instance.AddPlayerController(localPlayerID);
-            AddPlayer(localPlayerID, Settings.Instance.PlayerName);
+            AddPlayer(NetworkSession.Instance.LocalPlayerID, Settings.Instance.PlayerName);
         }
     }
 
