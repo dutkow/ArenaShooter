@@ -50,6 +50,11 @@ public partial class SpawnManager : Node3D
 
         LevelUI.Instance.ShowPlayerHud();
 
+        if(playerID == NetworkSession.Instance.LocalPlayerID)
+        {
+            GameMode.Instance.LocalPlayerController.Possess(spawnedPlayer);
+        }
+
         return spawnedPlayer;
     }
 }

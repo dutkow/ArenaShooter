@@ -39,6 +39,21 @@ public partial class ArenaCharacter : Pawn
     private bool _inputEnabled = true;
     private bool _weaponsEnabled = true;
 
+    public override void _Ready()
+    {
+        base._Ready();
+
+        Camera.Current = false;
+        Input.MouseMode = Input.MouseModeEnum.Captured;
+    }
+
+    public override void OnPossessed(Controller controller)
+    {
+        base.OnPossessed(controller);
+
+        Camera.Current = true;
+    }
+
 
     public void Initialize(PlayerState state)
     {
@@ -66,10 +81,6 @@ public partial class ArenaCharacter : Pawn
     public void SetWeaponsEnabled(bool enabled)
     {
         _weaponsEnabled = enabled;
-    }
-    public override void _Ready()
-    {
-        Input.MouseMode = Input.MouseModeEnum.Captured;
     }
 
     public override void _Input(InputEvent @event)
