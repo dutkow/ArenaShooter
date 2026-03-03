@@ -1,8 +1,8 @@
 [gd_scene load_steps=10 format=3 uid="uid://byrsxq2i83b2a"]
 
-[ext_resource type="PackedScene" uid="uid://cc5hseasecjdw" path="res://core/game_manager.tscn" id="1_h6y0w"]
+[ext_resource type="Script" uid="uid://cxmw8aq3awmhi" path="res://levels/Level.cs" id="1_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_j23ab"]
-[ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/hud.tscn" id="4_j45q0"]
+[ext_resource type="PackedScene" uid="uid://cm5541sq1kv43" path="res://core/game_mode.tscn" id="4_h6y0w"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hsoxx"]
 
@@ -22,6 +22,8 @@ size = Vector3(100, 1, 100)
 [sub_resource type="BoxMesh" id="BoxMesh_f7g2b"]
 
 [node name="TestLevel" type="Node3D"]
+script = ExtResource("1_m0y5v")
+_gameModeScene = ExtResource("4_h6y0w")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1c2mv")
@@ -29,8 +31,6 @@ environment = SubResource("Environment_1c2mv")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76057595, 0, 0, 0)
 shadow_enabled = true
-
-[node name="GameManager" parent="." instance=ExtResource("1_h6y0w")]
 
 [node name="SpawnPoint" parent="." instance=ExtResource("2_j23ab")]
 transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 4.079609, 1.3157029, -20.762333)
@@ -61,7 +61,3 @@ mesh = SubResource("BoxMesh_f7g2b")
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
 transform = Transform3D(19.558847, 0, 0, 0, 21.922266, 0, 0, 0, 3.4196804, -33.83906, 0, 5.0990143)
 mesh = SubResource("BoxMesh_f7g2b")
-
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="Hud" parent="CanvasLayer" instance=ExtResource("4_j45q0")]

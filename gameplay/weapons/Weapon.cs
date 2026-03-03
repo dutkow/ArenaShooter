@@ -34,8 +34,9 @@ public partial class Weapon : Node3D
     public void SpawnProjectile(Vector3 origin, Vector3 direction)
     {
         var newProjectile = (Projectile)_projectileScene.Instantiate();
+        Level.Instance.AddChild(newProjectile);
+
         newProjectile.Initialize(origin, direction);
-        GetTree().Root.AddChild(newProjectile);
     }
 
 }

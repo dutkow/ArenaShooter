@@ -7,9 +7,10 @@ public partial class SpawnManager : Node3D
     public static SpawnManager Instance;
 
     public List<SpawnPoint> _playerSpawnPoints = new();
-
-    public SpawnManager()
+    public override void _EnterTree()
     {
+        base._EnterTree();
+
         Instance = this;
     }
 
@@ -29,9 +30,18 @@ public partial class SpawnManager : Node3D
     }
 
 
-    public void SpawnPlayer(PlayerState playerState, PackedScene playerCharacterScene)
+    public void SpawnPlayer(PlayerState playerState)
     {
-        var playerCharacter = (PlayerCharacter)playerCharacterScene.Instantiate();
+        var playerCharacter = (PlayerCharacter)GameMode.Instance.PlayerCharacterScene.Instantiate();
         AddChild(playerCharacter);
+
+        //var spawnPoint = GetSpawnPoint();
+        //playerCharacter.GlobalPosition = spawnPoint.GlobalPosition;
+        //playerCharacter.GlobalRotation = spawnPoint.SpawnRotation;
+
+        playerCharacter.GlobalPosition = Vector3.Zero;
+        playerCharacter.GlobalRotation = Vector3.Zero;
+
+        LevelUI.Instance.ShowPlayerHud();
     }
 }

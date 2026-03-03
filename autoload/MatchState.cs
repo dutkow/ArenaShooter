@@ -66,9 +66,9 @@ public partial class MatchState : Node
     public event Action<PlayerState>? PlayerJoined;
     public event Action<int, PlayerState>? PlayerLeft;
 
-    public override void _Ready()
+    public override void _EnterTree()
     {
-        base._Ready();
+        base._EnterTree();
 
         Instance = this;
     }
@@ -205,7 +205,7 @@ public partial class MatchState : Node
 
         if(NetworkSession.Instance.IsServer)
         {
-            GameMode.Instance.SpawnPlayer(player);
+            SpawnManager.Instance.SpawnPlayer(player);
         }
     }
 

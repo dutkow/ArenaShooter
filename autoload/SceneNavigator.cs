@@ -17,8 +17,6 @@ public partial class SceneNavigator : Node
 
     private void OnSessionStarted(ServerInfo serverInfo)
     {
-        MatchState.Instance.StartPhase(MatchPhase.WARMUP);
-
         OpenMultiplayerMap(serverInfo.MapID);
     }
 
@@ -67,14 +65,5 @@ public partial class SceneNavigator : Node
         UIRoot.Instance.HideLoadingScreen();
 
         GD.Print("Multiplayer map fully loaded!");
-
-        if(NetworkSession.Instance.IsServer)
-        {
-            MatchState.Instance.Initialize();
-        }
-        else if (NetworkSession.Instance.IsClient)
-        {
-            ClientLoaded.Send();
-        }
     }
 }

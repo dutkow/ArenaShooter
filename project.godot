@@ -19,8 +19,6 @@ config/icon="res://assets/textures/icon.svg"
 
 GameData="*res://autoload/game_data.tscn"
 NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
-MatchState="*res://autoload/MatchState.cs"
-GameMode="*res://core/GameMode.cs"
 GameSession="*res://autoload/SceneNavigator.cs"
 Settings="*res://autoload/Settings.cs"
 SceneNavigator="*res://autoload/SceneNavigator.cs"

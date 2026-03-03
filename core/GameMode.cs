@@ -5,29 +5,24 @@ public partial class GameMode : Node
 {
     public static GameMode Instance { get; private set; }
 
-    [Export] PackedScene _playerCharacterScene;
-    SpawnManager _spawnManager;
+    [Export] public PackedScene PlayerCharacterScene;
 
-    public override void _Ready()
+    [Export] public PackedScene MatchStateScene;
+
+    [Export] public PackedScene LevelUIScene;
+    
+
+    public override void _EnterTree()
     {
-        base._Ready();
+        base._EnterTree();
 
         Instance = this;
-
-        if (!Multiplayer.IsServer())
-        {
-            return;
-        }
-
-        MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
-
-        _spawnManager = new();
-        AddChild(_spawnManager);
     }
 
     public void Initialize()
     {
         MatchState.Instance.Initialize();
+        MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
     }
 
     private void OnMatchPhaseChanged(MatchPhase phase)
@@ -57,7 +52,6 @@ public partial class GameMode : Node
     private void HandleWarmup()
     {
         GD.Print("Warmup started!");
-        // Optional: show countdown, play music, etc.
     }
 
     private void HandlePreMatch()
@@ -97,10 +91,5 @@ public partial class GameMode : Node
         }
 
         // Optional: trigger scoreboard, announce winner, etc.
-    }
-
-    public void SpawnPlayer(PlayerState playerState)
-    {
-        _spawnManager.SpawnPlayer(playerState, _playerCharacterScene);
     }
 }
