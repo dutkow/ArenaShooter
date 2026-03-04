@@ -21,7 +21,7 @@ public static class ServerGameplayService
                     character.LastInputCommand = cmd.InputButtons;
 
                     // Apply the input immediately on the server
-                    float delta = 1f / 60f; // Or your fixed server tick
+                    double delta = NetworkConstants.SERVER_TICK_INTERVAL; // Or your fixed server tick
                     character.ApplyClientCommand(cmd, delta);
 
                     // Create a snapshot for remote clients

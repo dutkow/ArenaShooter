@@ -283,6 +283,7 @@ public partial class ArenaCharacter : Pawn
             }
         }
 
+        CharacterBody.MoveAndSlide();
         HandleFallAcceleration(delta);
     }
 
@@ -338,7 +339,6 @@ public partial class ArenaCharacter : Pawn
         }
 
         CharacterBody.Velocity = _targetVelocity;
-        CharacterBody.MoveAndSlide();
     }
 
     public void HandleFallAcceleration(double delta)
