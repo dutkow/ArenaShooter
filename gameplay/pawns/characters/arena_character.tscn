@@ -1,14 +1,17 @@
-[gd_scene load_steps=7 format=3 uid="uid://chotxihbm38dv"]
+[gd_scene load_steps=9 format=3 uid="uid://chotxihbm38dv"]
 
 [ext_resource type="Script" uid="uid://dejxjrbc1fo6q" path="res://gameplay/pawns/characters/ArenaCharacter.cs" id="1_60ybg"]
 [ext_resource type="Script" uid="uid://cyl8dsxv6iyjh" path="res://gameplay/weapons/Weapon.cs" id="2_xipnf"]
 [ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/projectile.tscn" id="3_48rxd"]
+[ext_resource type="Material" uid="uid://5usfvqlgual7" path="res://assets/materials/gray_material.tres" id="4_xipnf"]
+[ext_resource type="Material" uid="uid://dfwluwkwpcsjl" path="res://assets/materials/orange_material.tres" id="5_48rxd"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4flbx"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_4flbx"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
+material = ExtResource("4_xipnf")
 
 [node name="ArenaCharacter" type="Node3D" node_paths=PackedStringArray("Body", "Camera", "CameraPivot", "_equippedWeapon")]
 script = ExtResource("1_60ybg")
@@ -30,10 +33,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5744133, -0.26288366)
 
 [node name="Weapon" type="MeshInstance3D" parent="CharacterBody3D/CameraPivot"]
 transform = Transform3D(0.16136354, 0, 0, 0, 0.20816346, 0, 0, 0, 0.96933186, 0.31130004, -0.27251208, -0.10474706)
+material_override = ExtResource("4_xipnf")
 mesh = SubResource("BoxMesh_4flbx")
 script = ExtResource("2_xipnf")
 _projectileScene = ExtResource("3_48rxd")
 
 [node name="CharacterBody" type="MeshInstance3D" parent="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.017611, 0)
+material_override = ExtResource("5_48rxd")
 mesh = SubResource("CapsuleMesh_4flbx")

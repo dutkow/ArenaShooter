@@ -1,10 +1,6 @@
 using Godot;
 using System;
 
-/// <summary>
-/// Sent from Client → Server each tick to tell the server what inputs were pressed.
-/// Includes movement buttons and mouse look changes.
-/// </summary>
 [Flags]
 public enum InputCommand : byte
 {
@@ -22,8 +18,9 @@ public class ClientCommand : Message
     public byte PlayerID;
     public uint TickNumber;
     public InputCommand Buttons;
-    public float YawDelta;
-    public float PitchDelta;
+
+    public float Yaw;
+    public float Pitch;
 
     protected override int BufferSize()
     {
@@ -31,8 +28,8 @@ public class ClientCommand : Message
         Add(PlayerID);
         Add(TickNumber);
         Add(Buttons);
-        Add(YawDelta);
-        Add(PitchDelta);
+        Add(Yaw);
+        Add(Pitch);
         return _dataSize;
     }
 
@@ -42,8 +39,8 @@ public class ClientCommand : Message
         Write(PlayerID);
         Write(TickNumber);
         Write((byte)Buttons);
-        Write(YawDelta);
-        Write(PitchDelta);
+        Write(Yaw);
+        Write(Pitch);
         return _data;
     }
 
@@ -52,17 +49,19 @@ public class ClientCommand : Message
         base.ReadMessage(data);
         Read(out PlayerID);
         Read(out TickNumber);
+
         byte buttonByte;
         Read(out buttonByte);
         Buttons = (InputCommand)buttonByte;
-        Read(out YawDelta);
-        Read(out PitchDelta);
+
+        Read(out Yaw);
+        Read(out Pitch);
     }
 
-    public static void Send(ClientCommand cmd, ENetPacketPeer serverPeer)
+    public static void Send(ClientCommand cmd)
     {
         cmd.MessageType = Msg.C2S_CLIENT_COMMAND;
-        cmd.ENetFlags = ENetPacketFlags.Reliable;
+        cmd.ENetFlags = ENetPacketFlags.UnreliableFragment;
         NetworkSender.ToServer(cmd);
     }
 }

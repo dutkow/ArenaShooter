@@ -1,8 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://byrsxq2i83b2a"]
+[gd_scene load_steps=13 format=3 uid="uid://byrsxq2i83b2a"]
 
 [ext_resource type="Script" uid="uid://cxmw8aq3awmhi" path="res://levels/Level.cs" id="1_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_j23ab"]
 [ext_resource type="PackedScene" uid="uid://cm5541sq1kv43" path="res://core/game_mode.tscn" id="4_h6y0w"]
+[ext_resource type="Material" uid="uid://cfigmojad6es6" path="res://assets/materials/black_material.tres" id="4_j23ab"]
+[ext_resource type="Material" uid="uid://cq4akbweyf2lw" path="res://assets/materials/green_material.tres" id="4_m0y5v"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hsoxx"]
 
@@ -17,6 +19,7 @@ sky = SubResource("Sky_gojnm")
 size = Vector3(100, 1, 100)
 
 [sub_resource type="BoxMesh" id="BoxMesh_4ptq8"]
+material = ExtResource("4_j23ab")
 size = Vector3(100, 1, 100)
 
 [sub_resource type="BoxMesh" id="BoxMesh_f7g2b"]
@@ -43,6 +46,7 @@ transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.
 shape = SubResource("BoxShape3D_f7g2b")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+material_override = ExtResource("4_m0y5v")
 mesh = SubResource("BoxMesh_4ptq8")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

@@ -236,15 +236,39 @@ public partial class ArenaCharacter : Pawn
             PlayerID = State.PlayerID,
             TickNumber = MatchState.Instance.CurrentTick,
             Buttons = buttons,
-            YawDelta = _rotVelocity.X,
-            PitchDelta = _rotVelocity.Y
+            Yaw = Body.GlobalRotation.Y,
+            Pitch = CameraPivot.GlobalRotation.X
         };
 
-        ClientCommand.Send(cmd, null);
+        ClientCommand.Send(cmd);
     }
 
     public void ApplyClientCommand(ClientCommand cmd, float delta)
     {
+        // ----------------------
+        // VIEW (remote players only)
+        // ----------------------
+        
+        /*
+        if (!IsPossessedLocally)
+        {
+            // Apply yaw
+            var rot = Body.Rotation;
+            rot.Y = cmd.Yaw;
+            Body.Rotation = rot;
+
+            // Apply pitch
+            if (CameraPivot != null)
+            {
+                var camRot = CameraPivot.Rotation;
+                camRot.X = Mathf.Clamp(cmd.Pitch, -1.5f, 1.5f);
+                CameraPivot.Rotation = camRot;
+            }
+        }*/
+
+        // ----------------------
+        // MOVEMENT (server / prediction)
+        // ----------------------
         Vector3 moveDir = Vector3.Zero;
 
         if (cmd.Buttons.HasFlag(InputCommand.MOVE_FORWARD)) moveDir.Z -= 1f;
@@ -252,23 +276,9 @@ public partial class ArenaCharacter : Pawn
         if (cmd.Buttons.HasFlag(InputCommand.MOVE_LEFT)) moveDir.X -= 1f;
         if (cmd.Buttons.HasFlag(InputCommand.MOVE_RIGHT)) moveDir.X += 1f;
 
-        // Apply camera rotation
+        if (moveDir != Vector3.Zero)
+            moveDir = moveDir.Normalized();
 
-        RotateY(-cmd.YawDelta);
-        if (CameraPivot != null)
-        {
-            CameraPivot.RotateX(-cmd.PitchDelta);
-            var r = CameraPivot.Rotation;
-            CameraPivot.Rotation = new Vector3(
-                Mathf.Clamp(r.X, -1.5f, 1.5f),
-                r.Y,
-                r.Z
-            );
-        }
-
-        if (moveDir != Vector3.Zero) moveDir = moveDir.Normalized();
-
-        // Movement
         if (_movementState == MovementState.GROUNDED)
         {
             _targetVelocity.X = moveDir.X * Speed;
@@ -280,14 +290,12 @@ public partial class ArenaCharacter : Pawn
             _targetVelocity.Z += moveDir.Z * _airControlAcceleration * delta;
         }
 
-        // Jump
         if (cmd.Buttons.HasFlag(InputCommand.JUMP) && _canJump)
         {
             _targetVelocity.Y = _jumpVelocity;
             _movementState = MovementState.FALLING;
         }
 
-        // Gravity
         if (!Body.IsOnFloor())
         {
             _targetVelocity.Y -= FallAcceleration * delta;
