@@ -69,8 +69,14 @@ public partial class ArenaCharacter : Pawn
     public List<ArenaCharacterSnapshot> SnapshotBuffer = new();
     public InputCommand LastInputCommand;
 
-    private double _inputSendAccumulator = 0f;
+    private double _tickAssumulator = 0f;
 
+    // ----------------------
+    // Position Correction (client only)
+    // ----------------------
+    [Export] public float SnapThreshold = 2f;          // units to snap instantly
+    [Export] public float CorrectionThreshold = 0.1f;  // small differences lerp
+    [Export] public float CorrectionSpeed = 10f;       // lerp speed per second
 
     // ----------------------
     // Initialization
@@ -176,6 +182,8 @@ public partial class ArenaCharacter : Pawn
     {
         if (snapshot == null) return;
 
+        LastSnapshot = snapshot;
+
         if (!IsLocal)
         {
             CharacterBody.GlobalPosition = snapshot.Position;
@@ -234,7 +242,13 @@ public partial class ArenaCharacter : Pawn
 
         if (!IsLocal && !IsAuthority)
         {
-            InterpolateSnapshots(delta);
+            InterpolateRemoteSnapshots(delta);
+        }
+
+        // Correct local position based on last server snapshot
+        if (IsLocal && LastSnapshot != null)
+        {
+            CorrectClientPosition(LastSnapshot, delta);
         }
     }
 
@@ -261,10 +275,10 @@ public partial class ArenaCharacter : Pawn
             // Apply input locally
             ApplyInput(cmd, delta);
 
-            _inputSendAccumulator += (float)delta;
-            if (_inputSendAccumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
+            _tickAssumulator += (float)delta;
+            if (_tickAssumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
             {
-                _inputSendAccumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
+                _tickAssumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
                 SendClientCommand(cmd);
             }
         }
@@ -339,7 +353,7 @@ public partial class ArenaCharacter : Pawn
         }
     }
 
-    private void InterpolateSnapshots(double delta)
+    private void InterpolateRemoteSnapshots(double delta)
     {
         if (SnapshotBuffer.Count < 2) return;
 
@@ -413,5 +427,28 @@ public partial class ArenaCharacter : Pawn
     public void SetWeaponsEnabled(bool enabled)
     {
         _weaponsEnabled = enabled;
+    }
+
+    public void CorrectClientPosition(ArenaCharacterSnapshot serverSnapshot, double delta)
+    {
+        if (!IsLocal) return; // only correct local player
+
+        Vector3 serverPos = serverSnapshot.Position;
+        Vector3 localPos = CharacterBody.GlobalPosition;
+        float distance = serverPos.DistanceTo(localPos);
+
+        if (distance >= SnapThreshold)
+        {
+            // Big difference? Snap immediately
+            CharacterBody.GlobalPosition = serverPos;
+        }
+        else if (distance >= CorrectionThreshold)
+        {
+            // Small difference? Smoothly lerp
+            CharacterBody.GlobalPosition = localPos.Lerp(
+                serverPos,
+                (float)(CorrectionSpeed * delta)
+            );
+        }
     }
 }
