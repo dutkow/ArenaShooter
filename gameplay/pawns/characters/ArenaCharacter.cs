@@ -48,7 +48,7 @@ public partial class ArenaCharacter : Pawn
     // ----------------------
     // State
     // ----------------------
-    public bool IsAlive;
+    public bool IsAlive = true;
     public PlayerState State { get; private set; }
 
     private MovementState _movementState;

@@ -94,7 +94,9 @@ public partial class MatchState : Node
 
             if (NetworkSession.Instance.IsListenServer)
             {
-                AddPlayer(NetworkSession.Instance.LocalPlayerID, Settings.Instance.PlayerName);
+                byte serverPlayerID = NetworkSession.Instance.LocalPlayerID;
+                AddPlayer(serverPlayerID, Settings.Instance.PlayerName);
+                Pawn spawnedPawn = SpawnManager.Instance.ServerSpawnPlayer(serverPlayerID);
             }
         }
     }
@@ -239,7 +241,6 @@ public partial class MatchState : Node
         if(NetworkSession.Instance.IsServer)
         {
             PlayerController playerController = GameMode.Instance.PlayerControllers[playerID];
-            Pawn spawnedPawn = SpawnManager.Instance.ServerSpawnPlayer(playerID);
         }
     }
 

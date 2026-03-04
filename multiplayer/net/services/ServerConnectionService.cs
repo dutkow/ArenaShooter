@@ -38,6 +38,8 @@ public static class ServerConnectionService
 
         PlayerJoined.Send(playerID, playerName);
 
+        Pawn spawnedPawn = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
+
         GD.Print($"Server received: {msg.MessageType}");
     }
 }
