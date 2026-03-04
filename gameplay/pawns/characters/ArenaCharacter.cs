@@ -153,6 +153,7 @@ public partial class ArenaCharacter : Pawn
         bodyRot.Y = cmd.Yaw;
         CharacterBody.Rotation = bodyRot;
 
+
         // --- Apply pitch to third-person weapon mesh (for now) ---
         if (ThirdPersonWeaponMesh != null)
         {
@@ -245,16 +246,24 @@ public partial class ArenaCharacter : Pawn
             ApplyInput(input, delta);
         }
 
+
         // Local client sends input to server
         if (IsLocal && !IsAuthority)
         {
+            InputCommand cmd = CaptureInput();
+
+            // Apply input locally
+            ApplyInput(cmd, delta);
+
             _inputSendAccumulator += (float)delta;
             if (_inputSendAccumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
             {
                 _inputSendAccumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
-                SendClientCommand();
+                SendClientCommand(cmd);
             }
         }
+
+        HandleFallAcceleration(delta);
     }
 
 
@@ -293,7 +302,9 @@ public partial class ArenaCharacter : Pawn
         UpdateMovementState();
 
         if (cmd.HasFlag(InputCommand.JUMP) && _canJump)
+        {
             TryJump();
+        }
 
         if (_movementState == MovementState.GROUNDED)
         {
@@ -306,13 +317,20 @@ public partial class ArenaCharacter : Pawn
             _targetVelocity.Z += moveDir.Z * AirControlAcceleration * (float)delta;
         }
 
-        if (!CharacterBody.IsOnFloor())
-            _targetVelocity.Y -= FallAcceleration * (float)delta;
-        else if (_targetVelocity.Y < 0)
-            _targetVelocity.Y = 0;
-
         CharacterBody.Velocity = _targetVelocity;
         CharacterBody.MoveAndSlide();
+    }
+
+    public void HandleFallAcceleration(double delta)
+    {
+        if (!CharacterBody.IsOnFloor())
+        {
+            _targetVelocity.Y -= FallAcceleration * (float)delta;
+        }
+        else if (_targetVelocity.Y < 0)
+        {
+            _targetVelocity.Y = 0;
+        }
     }
 
     private void InterpolateSnapshots(double delta)
@@ -328,10 +346,8 @@ public partial class ArenaCharacter : Pawn
         CharacterBody.Rotation = rot;
     }
 
-    private void SendClientCommand()
+    private void SendClientCommand(InputCommand cmd)
     {
-        InputCommand cmd = CaptureInput();
-
         var clientCmd = new ClientCommand()
         {
             PlayerID = State.PlayerID,
