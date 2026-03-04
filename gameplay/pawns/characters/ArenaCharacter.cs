@@ -190,6 +190,7 @@ public partial class ArenaCharacter : Pawn
 
     public override void _Process(double delta)
     {
+        // Camera smoothing
         _rotVelocity = _rotVelocity.Lerp(_cameraInput * MouseSens, (float)delta * MouseSmooth);
 
         if (CameraPivot != null)
@@ -205,11 +206,9 @@ public partial class ArenaCharacter : Pawn
         CharacterBody.RotateY(-Mathf.DegToRad(_rotVelocity.X));
         _cameraInput = Vector2.Zero;
 
-
+        // Interpolate remote players only
         if (!IsLocal && !IsAuthority)
-        {
             InterpolateSnapshots(delta);
-        }
     }
 
     // ----------------------
@@ -219,22 +218,27 @@ public partial class ArenaCharacter : Pawn
     {
         base._PhysicsProcess(delta);
 
-        // Authority (server) simulates movement
-        if (IsAuthority)
+        if (IsLocal)
         {
-            InputCommand input = IsLocal ? CaptureInput() : LastInputCommand;
+            InputCommand input = CaptureInput();
             ApplyInput(input, delta);
-        }
 
-        // Local client sends input to server
-        if (IsLocal && !IsAuthority)
-        {
-            _inputSendAccumulator += (float)delta;
+            _inputSendAccumulator += delta;
             if (_inputSendAccumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
             {
                 _inputSendAccumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
                 SendClientCommand();
             }
+        }
+
+        if (IsAuthority && !IsLocal)
+        {
+            ApplyInput(LastInputCommand, delta);
+        }
+
+        if (!IsLocal && !IsAuthority)
+        {
+            SnapshotBuffer.Add(GetSnapshot());
         }
     }
 
