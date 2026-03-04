@@ -34,7 +34,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5744133, -0.26288366)
 [node name="Camera3D" type="Camera3D" parent="CharacterBody3D/CameraPivot"]
 
 [node name="Weapon" parent="CharacterBody3D/CameraPivot" instance=ExtResource("2_cqiiu")]
-transform = Transform3D(-2.2610733e-08, 0, 0.59218806, 0, 1, 0, -0.5172733, 0, -2.5885361e-08, 0.11575675, -0.39121234, -0.61874425)
+transform = Transform3D(-1.684197e-08, 0, 0.59218806, 0, 1, 0, -0.38529935, 0, -2.5885361e-08, 0, -0.27359498, -0.34407926)
 _projectileScene = ExtResource("3_48rxd")
 
 [node name="CharacterMesh" type="MeshInstance3D" parent="CharacterBody3D"]
@@ -43,7 +43,7 @@ material_override = ExtResource("5_48rxd")
 mesh = SubResource("CapsuleMesh_4flbx")
 
 [node name="ThirdPersonWeapon" type="MeshInstance3D" parent="CharacterBody3D/CharacterMesh"]
-transform = Transform3D(0.16136354, 0, 0, 0, 0.20816346, 0, 0, 0, 0.96933186, 0.31130004, 0.2842902, -0.36763072)
+transform = Transform3D(0.16136354, 0, 0, 0, 0.20816346, 0, 0, 0, 0.96933186, 0, 0.31217718, -0.7440479)
 material_override = ExtResource("4_xipnf")
 mesh = SubResource("BoxMesh_4flbx")
 skeleton = NodePath("../../CameraPivot")

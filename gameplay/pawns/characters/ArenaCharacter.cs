@@ -146,6 +146,25 @@ public partial class ArenaCharacter : Pawn
         );
     }
 
+    public void ApplyClientCommand(ClientCommand cmd, double delta)
+    {
+        // --- Apply yaw to character body ---
+        var bodyRot = CharacterBody.Rotation;
+        bodyRot.Y = cmd.Yaw;
+        CharacterBody.Rotation = bodyRot;
+
+        // --- Apply pitch to third-person weapon mesh (for now) ---
+        if (ThirdPersonWeaponMesh != null)
+        {
+            var weaponRot = ThirdPersonWeaponMesh.Rotation;
+            weaponRot.X = Mathf.Clamp(cmd.Pitch, -1.5f, 1.5f);
+            ThirdPersonWeaponMesh.Rotation = weaponRot;
+        }
+
+        // --- Apply movement using your existing ApplyInput ---
+        ApplyInput(cmd.InputButtons, delta);
+    }
+
     public void ApplySnapshot(ArenaCharacterSnapshot snapshot)
     {
         if (snapshot == null) return;
@@ -190,7 +209,6 @@ public partial class ArenaCharacter : Pawn
 
     public override void _Process(double delta)
     {
-        // Camera smoothing
         _rotVelocity = _rotVelocity.Lerp(_cameraInput * MouseSens, (float)delta * MouseSmooth);
 
         if (CameraPivot != null)
@@ -206,9 +224,11 @@ public partial class ArenaCharacter : Pawn
         CharacterBody.RotateY(-Mathf.DegToRad(_rotVelocity.X));
         _cameraInput = Vector2.Zero;
 
-        // Interpolate remote players only
+
         if (!IsLocal && !IsAuthority)
+        {
             InterpolateSnapshots(delta);
+        }
     }
 
     // ----------------------
@@ -218,27 +238,22 @@ public partial class ArenaCharacter : Pawn
     {
         base._PhysicsProcess(delta);
 
-        if (IsLocal)
+        // Authority (server) simulates movement
+        if (IsAuthority)
         {
-            InputCommand input = CaptureInput();
+            InputCommand input = IsLocal ? CaptureInput() : LastInputCommand;
             ApplyInput(input, delta);
+        }
 
-            _inputSendAccumulator += delta;
+        // Local client sends input to server
+        if (IsLocal && !IsAuthority)
+        {
+            _inputSendAccumulator += (float)delta;
             if (_inputSendAccumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
             {
                 _inputSendAccumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
                 SendClientCommand();
             }
-        }
-
-        if (IsAuthority && !IsLocal)
-        {
-            ApplyInput(LastInputCommand, delta);
-        }
-
-        if (!IsLocal && !IsAuthority)
-        {
-            SnapshotBuffer.Add(GetSnapshot());
         }
     }
 
@@ -257,6 +272,7 @@ public partial class ArenaCharacter : Pawn
         LastInputCommand = cmd; // store locally for authority simulation
         return cmd;
     }
+
 
     public void ApplyInput(InputCommand cmd, double delta)
     {

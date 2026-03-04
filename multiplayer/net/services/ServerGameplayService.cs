@@ -22,7 +22,7 @@ public static class ServerGameplayService
 
                     // Apply the input immediately on the server
                     float delta = 1f / 60f; // Or your fixed server tick
-                    character.ApplyInput(cmd.InputButtons, delta);
+                    character.ApplyClientCommand(cmd, delta);
 
                     // Create a snapshot for remote clients
                     var snapshot = character.GetSnapshot();
