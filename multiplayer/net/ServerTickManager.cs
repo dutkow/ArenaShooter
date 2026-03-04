@@ -7,15 +7,14 @@ using System;
 public class ServerTickManager
 {
     private double _accumulator = 0f;
-    private const double TickInterval = 1f / 60f; // 60 Hz tick
 
     public void PhysicsTick(double delta)
     {
         _accumulator += delta;
 
-        while (_accumulator >= TickInterval)
+        while (_accumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
         {
-            _accumulator -= TickInterval;
+            _accumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
             TickServer();
         }
     }
