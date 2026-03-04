@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public enum MovementState
 {
@@ -7,20 +8,40 @@ public enum MovementState
     FALLING
 }
 
+public class ArenaCharacterSnapshot
+{
+    public byte PlayerID;
+    public Vector3 Position;
+    public float Yaw;
+    public float AimPitch;
+
+    public ArenaCharacterSnapshot() { }
+
+    public ArenaCharacterSnapshot(byte playerID, Vector3 pos, float yaw, float pitch)
+    {
+        PlayerID = playerID;
+        Position = pos;
+        Yaw = yaw;
+        AimPitch = pitch;
+    }
+}
+
 public partial class ArenaCharacter : Pawn
 {
     // ----------------------
     // Exports & Components
     // ----------------------
-    [Export] public CharacterBody3D Body;
+    [Export] public CharacterBody3D CharacterBody;
+    [Export] public MeshInstance3D CharacterMesh;
+    [Export] public Weapon Weapon;
+    [Export] public MeshInstance3D ThirdPersonWeaponMesh;
     [Export] public Camera3D Camera;
     [Export] public Marker3D CameraPivot;
-    [Export] private Weapon _equippedWeapon;
 
     [Export] public int Speed { get; set; } = 14;
     [Export] public int FallAcceleration { get; set; } = 50;
-    [Export] public float _jumpVelocity { get; set; } = 20f;
-    [Export] public float _airControlAcceleration { get; set; } = 6f;
+    [Export] public float JumpVelocity { get; set; } = 20f;
+    [Export] public float AirControlAcceleration { get; set; } = 6f;
     [Export] public float MouseSens = 0.09f;
     [Export] public float MouseSmooth = 50f;
 
@@ -32,15 +53,21 @@ public partial class ArenaCharacter : Pawn
 
     private MovementState _movementState;
     private bool _weaponsEnabled = true;
-    private bool _isMouseCaptured = true;
 
     private Vector3 _targetVelocity = Vector3.Zero;
     private Vector2 _cameraInput = Vector2.Zero;
     private Vector2 _rotVelocity = Vector2.Zero;
 
-    private bool _canJump => Body.IsOnFloor();
-    public float Yaw => Body.GlobalRotation.Y;
+    private bool _canJump => CharacterBody.IsOnFloor();
+    public float Yaw => CharacterBody.GlobalRotation.Y;
     public float AimPitch => CameraPivot.Rotation.X;
+
+    // ----------------------
+    // Networking
+    // ----------------------
+    public ArenaCharacterSnapshot LastSnapshot;
+    public List<ArenaCharacterSnapshot> SnapshotBuffer = new();
+    public InputCommand LastInputCommand;
 
     // ----------------------
     // Initialization
@@ -48,7 +75,6 @@ public partial class ArenaCharacter : Pawn
     public override void _Ready()
     {
         base._Ready();
-
         Camera.Current = false;
         Input.MouseMode = Input.MouseModeEnum.Captured;
     }
@@ -56,42 +82,89 @@ public partial class ArenaCharacter : Pawn
     public override void OnPossessed(Controller controller)
     {
         base.OnPossessed(controller);
+
+        // Assign authority/local/remote roles
+        IsAuthority = NetworkSession.Instance.IsServer;
+        if (controller is PlayerController pc && pc.PlayerID == NetworkSession.Instance.LocalPlayerID)
+        {
+            SetProcessInput(true);
+            Role = NetworkRole.LOCAL;
+        }
+        else
+        {
+            SetProcessInput(false);
+            Role = NetworkRole.REMOTE;
+        }
+
+        // Setup mesh visibility
+        if (IsLocal)
+        {
+            Weapon.FirstPersonWeaponMesh.Visible = true;
+            ThirdPersonWeaponMesh.Visible = false;
+            CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
+        }
+        else
+        {
+            Weapon.FirstPersonWeaponMesh.Visible = false;
+            ThirdPersonWeaponMesh.Visible = true;
+            CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
+        }
+
         Camera.Current = true;
     }
 
     public void Initialize(PlayerState state)
     {
-        if(state == null)
+        if (state == null)
         {
             GD.PushError("State was null on arena character initialization");
             return;
         }
+
         State = state;
         State.Character = this;
     }
 
-    public void TeleportTo(Transform3D t)
+    // ----------------------
+    // Replication
+    // ----------------------
+    public ArenaCharacterSnapshot GetSnapshot()
     {
-        GlobalTransform = t;
-        Body.Velocity = Vector3.Zero;
+        return new ArenaCharacterSnapshot(
+            State.PlayerID,
+            CharacterBody.GlobalPosition,
+            Yaw,
+            AimPitch
+        );
     }
 
-    public void ResetMovement()
+    public void ApplySnapshot(ArenaCharacterSnapshot snapshot)
     {
-        Body.Velocity = Vector3.Zero;
-    }
+        if (snapshot == null) return;
 
-    public void SetWeaponsEnabled(bool enabled) => _weaponsEnabled = enabled;
+        if (!IsLocal)
+        {
+            CharacterBody.GlobalPosition = snapshot.Position;
+
+            var rot = CharacterBody.Rotation;
+            rot.Y = snapshot.Yaw;
+            CharacterBody.Rotation = rot;
+
+            if (CameraPivot != null)
+            {
+                var camRot = CameraPivot.Rotation;
+                camRot.X = Mathf.Clamp(snapshot.AimPitch, -1.5f, 1.5f);
+                CameraPivot.Rotation = camRot;
+            }
+        }
+    }
 
     // ----------------------
     // Input & Mouse
     // ----------------------
     public override void _Input(InputEvent @event)
     {
-        if(!InputActive)
-        {
-            return;
-        }
+        if (!InputActive) return;
 
         if (@event is InputEventMouseMotion mouseEvent && Input.MouseMode == Input.MouseModeEnum.Captured)
             _cameraInput = mouseEvent.Relative;
@@ -109,7 +182,6 @@ public partial class ArenaCharacter : Pawn
 
     public override void _Process(double delta)
     {
-        // Mouse smoothing
         _rotVelocity = _rotVelocity.Lerp(_cameraInput * MouseSens, (float)delta * MouseSmooth);
 
         if (CameraPivot != null)
@@ -122,162 +194,72 @@ public partial class ArenaCharacter : Pawn
             );
         }
 
-        // Rotate horizontally
-        Body.RotateY(-Mathf.DegToRad(_rotVelocity.X));
-
-        // Reset mouse input for next frame
+        CharacterBody.RotateY(-Mathf.DegToRad(_rotVelocity.X));
         _cameraInput = Vector2.Zero;
     }
 
     // ----------------------
-    // Movement & Jumping
-    // ----------------------
-    public void HandleMovement(double delta)
-    {
-        if (!InputActive)
-        {
-            return;
-        }
-
-        Vector3 inputDir = Vector3.Zero;
-        inputDir.X = Input.GetActionStrength("move_right") - Input.GetActionStrength("move_left");
-        inputDir.Z = Input.GetActionStrength("move_back") - Input.GetActionStrength("move_forward");
-
-        if (inputDir != Vector3.Zero)
-        {
-            inputDir = inputDir.Normalized();
-            if (CameraPivot != null)
-                inputDir = inputDir.Rotated(Vector3.Up, CameraPivot.GlobalRotation.Y);
-        }
-
-        UpdateMovementState();
-
-        if (Input.IsActionJustPressed("jump"))
-            TryJump();
-
-        if (_movementState == MovementState.GROUNDED)
-        {
-            _targetVelocity.X = inputDir.X * Speed;
-            _targetVelocity.Z = inputDir.Z * Speed;
-        }
-        else
-        {
-            _targetVelocity.X += inputDir.X * _airControlAcceleration * (float)delta;
-            _targetVelocity.Z += inputDir.Z * _airControlAcceleration * (float)delta;
-        }
-
-        // Gravity
-        if (!Body.IsOnFloor())
-        {
-            _targetVelocity.Y -= FallAcceleration * (float)delta;
-        }
-        else if (_targetVelocity.Y < 0)
-        {
-            _targetVelocity.Y = 0;
-        }
-
-        // Apply movement
-        Body.Velocity = _targetVelocity;
-        Body.MoveAndSlide();
-    }
-
-    public void UpdateMovementState()
-    {
-        MovementState newState = Body.IsOnFloor() ? MovementState.GROUNDED : MovementState.FALLING;
-        if (_movementState != newState)
-        {
-            _movementState = newState;
-        }
-    }
-
-    public void TryPrimaryFire()
-    {
-        if (_equippedWeapon == null) return;
-        Vector3 dir = -Camera.GlobalTransform.Basis.Z;
-        _equippedWeapon.TryPrimaryFire(Camera.GlobalPosition, dir);
-    }
-
-    public void TryJump()
-    {
-        if (!_canJump) return;
-        _targetVelocity.Y = _jumpVelocity;
-        _movementState = MovementState.FALLING;
-    }
-
-    // ----------------------
-    // Client Command Sending
+    // Physics & Movement
     // ----------------------
     public override void _PhysicsProcess(double delta)
     {
         base._PhysicsProcess(delta);
 
-        HandleMovement(delta);
-        SendClientCommand();
-    }
-
-    private void SendClientCommand()
-    {
-        if (!IsPossessedLocally || !NetworkSession.Instance.IsClient)
+        // Authority (server) simulates movement
+        if (IsAuthority)
         {
-            return;
+            InputCommand input = IsLocal ? CaptureInput() : LastInputCommand;
+            ApplyInput(input, delta);
         }
 
-        InputCommand buttons = InputCommand.NONE;
-
-        if (Input.IsActionPressed("move_forward")) buttons |= InputCommand.MOVE_FORWARD;
-        if (Input.IsActionPressed("move_back")) buttons |= InputCommand.MOVE_BACK;
-        if (Input.IsActionPressed("move_left")) buttons |= InputCommand.MOVE_LEFT;
-        if (Input.IsActionPressed("move_right")) buttons |= InputCommand.MOVE_RIGHT;
-        if (Input.IsActionJustPressed("jump")) buttons |= InputCommand.JUMP;
-        if (Input.IsActionPressed("primary_fire")) buttons |= InputCommand.FIRE_PRIMARY;
-
-        var cmd = new ClientCommand()
+        // Local client sends input to server
+        if (IsLocal && !IsAuthority)
         {
-            PlayerID = State.PlayerID,
-            TickNumber = MatchState.Instance.CurrentTick,
-            Buttons = buttons,
-            Yaw = Body.GlobalRotation.Y,
-            Pitch = CameraPivot.GlobalRotation.X
-        };
+            SendClientCommand();
+        }
 
-        ClientCommand.Send(cmd);
+        // Remote client interpolates snapshots
+        if (!IsLocal && !IsAuthority)
+        {
+            InterpolateSnapshots(delta);
+        }
     }
 
-    public void ApplyClientCommand(ClientCommand cmd, float delta)
+    private InputCommand CaptureInput()
     {
-        // ----------------------
-        // VIEW (remote players only)
-        // ----------------------
-        
-        /*
-        if (!IsPossessedLocally)
-        {
-            // Apply yaw
-            var rot = Body.Rotation;
-            rot.Y = cmd.Yaw;
-            Body.Rotation = rot;
+        InputCommand cmd = InputCommand.NONE;
 
-            // Apply pitch
-            if (CameraPivot != null)
-            {
-                var camRot = CameraPivot.Rotation;
-                camRot.X = Mathf.Clamp(cmd.Pitch, -1.5f, 1.5f);
-                CameraPivot.Rotation = camRot;
-            }
-        }*/
+        if (Input.IsActionPressed("move_forward")) cmd |= InputCommand.MOVE_FORWARD;
+        if (Input.IsActionPressed("move_back")) cmd |= InputCommand.MOVE_BACK;
+        if (Input.IsActionPressed("move_left")) cmd |= InputCommand.MOVE_LEFT;
+        if (Input.IsActionPressed("move_right")) cmd |= InputCommand.MOVE_RIGHT;
+        if (Input.IsActionJustPressed("jump")) cmd |= InputCommand.JUMP;
+        if (Input.IsActionPressed("primary_fire")) cmd |= InputCommand.FIRE_PRIMARY;
 
-        // ----------------------
-        // MOVEMENT (server / prediction)
-        // ----------------------
+        LastInputCommand = cmd; // store locally for authority simulation
+        return cmd;
+    }
+
+    public void ApplyInput(InputCommand cmd, double delta)
+    {
         Vector3 moveDir = Vector3.Zero;
 
-        if (cmd.Buttons.HasFlag(InputCommand.MOVE_FORWARD)) moveDir.Z -= 1f;
-        if (cmd.Buttons.HasFlag(InputCommand.MOVE_BACK)) moveDir.Z += 1f;
-        if (cmd.Buttons.HasFlag(InputCommand.MOVE_LEFT)) moveDir.X -= 1f;
-        if (cmd.Buttons.HasFlag(InputCommand.MOVE_RIGHT)) moveDir.X += 1f;
+        if (cmd.HasFlag(InputCommand.MOVE_FORWARD)) moveDir.Z -= 1f;
+        if (cmd.HasFlag(InputCommand.MOVE_BACK)) moveDir.Z += 1f;
+        if (cmd.HasFlag(InputCommand.MOVE_LEFT)) moveDir.X -= 1f;
+        if (cmd.HasFlag(InputCommand.MOVE_RIGHT)) moveDir.X += 1f;
 
         if (moveDir != Vector3.Zero)
+        {
             moveDir = moveDir.Normalized();
+            if (CameraPivot != null)
+                moveDir = moveDir.Rotated(Vector3.Up, CameraPivot.GlobalRotation.Y);
+        }
+
+        UpdateMovementState();
+
+        if (cmd.HasFlag(InputCommand.JUMP) && _canJump)
+            TryJump();
 
         if (_movementState == MovementState.GROUNDED)
         {
@@ -286,26 +268,83 @@ public partial class ArenaCharacter : Pawn
         }
         else
         {
-            _targetVelocity.X += moveDir.X * _airControlAcceleration * delta;
-            _targetVelocity.Z += moveDir.Z * _airControlAcceleration * delta;
+            _targetVelocity.X += moveDir.X * AirControlAcceleration * (float)delta;
+            _targetVelocity.Z += moveDir.Z * AirControlAcceleration * (float)delta;
         }
 
-        if (cmd.Buttons.HasFlag(InputCommand.JUMP) && _canJump)
-        {
-            _targetVelocity.Y = _jumpVelocity;
-            _movementState = MovementState.FALLING;
-        }
-
-        if (!Body.IsOnFloor())
-        {
-            _targetVelocity.Y -= FallAcceleration * delta;
-        }
+        if (!CharacterBody.IsOnFloor())
+            _targetVelocity.Y -= FallAcceleration * (float)delta;
         else if (_targetVelocity.Y < 0)
-        {
             _targetVelocity.Y = 0;
-        }
 
-        Body.Velocity = _targetVelocity;
-        Body.MoveAndSlide();
+        CharacterBody.Velocity = _targetVelocity;
+        CharacterBody.MoveAndSlide();
+    }
+
+    private void InterpolateSnapshots(double delta)
+    {
+        if (SnapshotBuffer.Count < 2) return;
+
+        var prev = SnapshotBuffer[0];
+        var next = SnapshotBuffer[1];
+
+        CharacterBody.GlobalPosition = prev.Position.Lerp(next.Position, 0.5f);
+        var rot = CharacterBody.Rotation;
+        rot.Y = Mathf.LerpAngle(prev.Yaw, next.Yaw, 0.5f);
+        CharacterBody.Rotation = rot;
+    }
+
+    private void SendClientCommand()
+    {
+        InputCommand cmd = CaptureInput();
+
+        var clientCmd = new ClientCommand()
+        {
+            PlayerID = State.PlayerID,
+            TickNumber = MatchState.Instance.CurrentTick,
+            InputButtons = cmd,
+            Yaw = CharacterBody.GlobalRotation.Y,
+            Pitch = CameraPivot.GlobalRotation.X
+        };
+
+        ClientCommand.Send(clientCmd);
+    }
+
+    // ----------------------
+    // Helpers
+    // ----------------------
+    public void UpdateMovementState()
+    {
+        _movementState = CharacterBody.IsOnFloor() ? MovementState.GROUNDED : MovementState.FALLING;
+    }
+
+    public void TryJump()
+    {
+        if (!_canJump) return;
+        _targetVelocity.Y = JumpVelocity;
+        _movementState = MovementState.FALLING;
+    }
+
+    public void TryPrimaryFire()
+    {
+        if (Weapon == null) return;
+        Vector3 dir = -Camera.GlobalTransform.Basis.Z;
+        Weapon.TryPrimaryFire(Camera.GlobalPosition, dir);
+    }
+
+    public void TeleportTo(Transform3D t)
+    {
+        GlobalTransform = t;
+        CharacterBody.Velocity = Vector3.Zero;
+    }
+
+    public void ResetMovement()
+    {
+        CharacterBody.Velocity = Vector3.Zero;
+    }
+
+    public void SetWeaponsEnabled(bool enabled)
+    {
+        _weaponsEnabled = enabled;
     }
 }

@@ -12,12 +12,12 @@ public class MessageRouter
 
 
 
-    public void Initialize(NetRole role)
+    public void Initialize(NetworkMode role)
     {
         _serverHandlers.Clear();
         _clientHandlers.Clear();
 
-        if(role == NetRole.LISTEN_SERVER)
+        if(role == NetworkMode.LISTEN_SERVER)
         {
             // Connection state
             RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, ServerConnectionService.HandleConnectionRequest);
@@ -27,7 +27,7 @@ public class MessageRouter
             RegisterFromClient(Msg.C2S_CLIENT_COMMAND, ServerGameplayService.HandleClientCommand);
 
         }
-        else if (role == NetRole.CLIENT)
+        else if (role == NetworkMode.CLIENT)
         {
             // Connection state
             RegisterFromServer(Msg.S2C_CONNECTION_ACCEPTED, ClientConnectionService.HandleConnectionAccepted);

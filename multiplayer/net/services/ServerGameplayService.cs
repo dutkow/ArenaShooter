@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public static class ServerGameplayService
 {
@@ -7,16 +6,31 @@ public static class ServerGameplayService
     {
         int peerID = (int)peer.GetMeta("id");
 
-        if(NetworkSession.Instance.PeerIDsToPlayerIDs.TryGetValue(peerID, out var playerID))
+        if (NetworkSession.Instance.PeerIDsToPlayerIDs.TryGetValue(peerID, out var playerID))
         {
-            if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
+            if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
             {
-                if(playerState.Character != null)
+                var character = playerState.Character;
+                if (character != null)
                 {
-                    var msg = new ClientCommand();
-                    msg.ReadMessage(data);
+                    // Deserialize byte[] into ClientCommand
+                    var cmd = new ClientCommand();
+                    cmd.ReadMessage(data);
 
-                    playerState.Character.ApplyClientCommand(msg, 1.0f/60.0f); // TODO: manage actual tick deltas in a smart way
+                    // Store last input on character for potential use
+                    character.LastInputCommand = cmd.InputButtons;
+
+                    // Apply the input immediately on the server
+                    float delta = 1f / 60f; // Or your fixed server tick
+                    character.ApplyInput(cmd.InputButtons, delta);
+
+                    // Create a snapshot for remote clients
+                    var snapshot = character.GetSnapshot();
+                    character.SnapshotBuffer.Add(snapshot);
+
+                    // Keep snapshot buffer small
+                    if (character.SnapshotBuffer.Count > 5)
+                        character.SnapshotBuffer.RemoveAt(0);
                 }
             }
         }

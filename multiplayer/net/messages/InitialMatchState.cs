@@ -149,8 +149,8 @@ public class InitialMatchState : Message
 
             if (player.Character != null)
             {
-                positions[i] = player.Character.Body.GlobalPosition;
-                rotations[i] = player.Character.Body.GlobalRotation;
+                positions[i] = player.Character.CharacterBody.GlobalPosition;
+                rotations[i] = player.Character.CharacterBody.GlobalRotation;
                 isAlive[i] = player.IsAlive;
             }
             else

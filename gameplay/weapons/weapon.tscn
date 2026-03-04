@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://b708cmx0cac5h"]
+
+[ext_resource type="Script" uid="uid://cyl8dsxv6iyjh" path="res://gameplay/weapons/Weapon.cs" id="1_mw06c"]
+[ext_resource type="Material" uid="uid://5usfvqlgual7" path="res://assets/materials/gray_material.tres" id="2_ooulu"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ooulu"]
+
+[node name="Weapon" type="Node3D" node_paths=PackedStringArray("FirstPersonWeaponMesh")]
+script = ExtResource("1_mw06c")
+FirstPersonWeaponMesh = NodePath("FirstPersonWeaponMesh")
+
+[node name="FirstPersonWeaponMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.1741803, 0, 0, 0, 0.24183631, 0, 0, 0, 0.25429058, 0, 0, 0)
+material_override = ExtResource("2_ooulu")
+mesh = SubResource("BoxMesh_ooulu")

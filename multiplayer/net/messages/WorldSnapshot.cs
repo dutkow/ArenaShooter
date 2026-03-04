@@ -152,7 +152,7 @@ public class WorldSnapshot : Message
 
             if (player.Character != null)
             {
-                positions[i] = player.Character.Body.GlobalPosition;
+                positions[i] = player.Character.CharacterBody.GlobalPosition;
                 yaws[i] = player.Character.Yaw;
                 pitches[i] = player.Character.AimPitch;
             }
@@ -178,5 +178,23 @@ public class WorldSnapshot : Message
         };
 
         NetworkSender.Broadcast(msg);
+    }
+
+    public ArenaCharacterSnapshot[] GetCharacterSnapshots()
+    {
+        int count = PlayerIDs.Length;
+        var snapshots = new ArenaCharacterSnapshot[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            snapshots[i] = new ArenaCharacterSnapshot(
+                PlayerIDs[i],
+                Positions[i],
+                CharacterYaws[i],
+                AimPitches[i]
+            );
+        }
+
+        return snapshots;
     }
 }

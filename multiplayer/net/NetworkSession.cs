@@ -6,22 +6,29 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-public enum NetRole : byte
+public enum NetworkMode : byte
 {
-    LOCAL,
+    OFFLINE,
+    DEDICATED_SERVER,
     CLIENT,
     LISTEN_SERVER,
-    DEDICATED_SERVER,
+}
+
+public enum NetworkRole : byte
+{
+    NONE,
+    LOCAL,
+    REMOTE
 }
 
 public partial class NetworkSession : Node
 {
     public static NetworkSession Instance { get; private set; }
 
-    public NetRole Role { get; private set; } = NetRole.LOCAL;
-    public bool IsClient => Role == NetRole.CLIENT;
-    public bool IsListenServer => Role == NetRole.LISTEN_SERVER;
-    public bool IsDedicatedServer => Role == NetRole.DEDICATED_SERVER;
+    public NetworkMode NetworkMode { get; private set; } = NetworkMode.OFFLINE;
+    public bool IsClient => NetworkMode == NetworkMode.CLIENT;
+    public bool IsListenServer => NetworkMode == NetworkMode.LISTEN_SERVER;
+    public bool IsDedicatedServer => NetworkMode == NetworkMode.DEDICATED_SERVER;
 
     public bool IsServer => IsListenServer || IsDedicatedServer;
 
@@ -58,7 +65,7 @@ public partial class NetworkSession : Node
     public Action? OnDisconnectedFromServer;
 
     public Action? OnConnectionToServerAccepted;
-    public Action<NetRole> OnRoleChanged;
+    public Action<NetworkMode> OnRoleChanged;
 
     public ENetPacketPeer ServerPeer;
 
@@ -86,21 +93,21 @@ public partial class NetworkSession : Node
         _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
     }
 
-    public void SetRole(NetRole role)
+    public void SetRole(NetworkMode role)
     {
-        if (Role == role)
+        if (NetworkMode == role)
         {
             return;
         }
 
-        if(Role == NetRole.LISTEN_SERVER)
+        if(NetworkMode == NetworkMode.LISTEN_SERVER)
         {
             LocalPlayerID = 0;
         }
 
-        Role = role;
+        NetworkMode = role;
         _router.Initialize(role);
-        OnRoleChanged?.Invoke(Role);
+        OnRoleChanged?.Invoke(NetworkMode);
     }
 
     // ----------------------
@@ -108,7 +115,7 @@ public partial class NetworkSession : Node
     // ----------------------
     public void HostLanServer(ServerInfo info)
     {
-        SetRole(NetRole.LISTEN_SERVER);
+        SetRole(NetworkMode.LISTEN_SERVER);
 
         ServerInfo = info;
 
@@ -128,7 +135,7 @@ public partial class NetworkSession : Node
 
     public void StopHosting()
     {
-        SetRole(NetRole.LOCAL);
+        SetRole(NetworkMode.OFFLINE);
 
         if (!_isHosting)
         {
@@ -171,7 +178,7 @@ public partial class NetworkSession : Node
     // ----------------------
     public void JoinServer(ServerInfo serverInfo)
     {
-        SetRole(NetRole.CLIENT);
+        SetRole(NetworkMode.CLIENT);
 
         ServerInfo = serverInfo;
 
@@ -221,13 +228,13 @@ public partial class NetworkSession : Node
             return;
         }
 
-        switch (Role)
+        switch (NetworkMode)
         {
-            case NetRole.LISTEN_SERVER:
+            case NetworkMode.LISTEN_SERVER:
                 _router.RouteClientMessage(peer, data);
                 break;
 
-            case NetRole.CLIENT:
+            case NetworkMode.CLIENT:
                 _router.RouteServerMessage(data);
                 break;
         }

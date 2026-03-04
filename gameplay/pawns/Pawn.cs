@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class Pawn : Node3D
+public partial class Pawn : Actor
 {
     public Controller Controller { get; private set; }
 
@@ -8,8 +8,7 @@ public partial class Pawn : Node3D
 
     private bool _inputEnabled = false;
 
-    public bool IsPossessedLocally;
-    public bool InputActive => IsPossessedLocally && !_inputEnabled;
+    public bool InputActive => IsLocal && !_inputEnabled;
 
     public override void _Ready()
     {
@@ -22,22 +21,24 @@ public partial class Pawn : Node3D
     {
         Controller = controller;
 
+        IsAuthority = NetworkSession.Instance.IsServer;
+
         if (controller is PlayerController pc && pc.PlayerID == NetworkSession.Instance.LocalPlayerID)
         {
             SetProcessInput(true);
-            IsPossessedLocally = true;
+            Role = NetworkRole.LOCAL;
         }
         else
         {
             SetProcessInput(false);
-            IsPossessedLocally = false;
+            Role = NetworkRole.REMOTE;
         }
     }
 
     public virtual void OnUnpossessed()
     {
         Controller = null;
-        IsPossessedLocally = false;
+        Role = NetworkRole.NONE;
     }
 
     public void SetInputEnabled(bool value)

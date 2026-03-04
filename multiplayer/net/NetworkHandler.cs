@@ -79,7 +79,6 @@ public partial class NetworkHandler : Node
         }
     }
 
-
     public override void _Process(double delta)
     {
         if (Connection == null) return;

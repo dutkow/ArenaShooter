@@ -118,7 +118,7 @@ public partial class MatchState : Node
 
             ConnectedPlayers[playerID] = new PlayerState(playerID);
 
-            GD.Print($"Adding connected player ID [{playerID}] to the connected players list. Role: {NetworkSession.Instance.Role}");
+            GD.Print($"Adding connected player ID [{playerID}] to the connected players list. Role: {NetworkSession.Instance.NetworkMode}");
             SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
 
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);

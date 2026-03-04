@@ -20,32 +20,39 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
-        for(var i = 0; i < msg.PlayerIDs.Length; i++)
+        if (MatchState.Instance == null)
         {
-            if(MatchState.Instance == null)
-            {
-                GD.Print("match state is null");
-                return;
-            }
+            GD.Print("match state is null");
+            return;
+        }
 
-            if(MatchState.Instance.ConnectedPlayers == null)
-            {
-                GD.Print("connected players is null on match state");
-                return;
-            }
+        if (MatchState.Instance.ConnectedPlayers == null)
+        {
+            GD.Print("connected players is null on match state");
+            return;
+        }
 
-            if(MatchState.Instance.ConnectedPlayers.TryGetValue(msg.PlayerIDs[i], out var playerState))
+        var snapshots = msg.GetCharacterSnapshots();
+
+        for (int i = 0; i < snapshots.Length; i++)
+        {
+            var snapshot = snapshots[i];
+
+            if (MatchState.Instance.ConnectedPlayers.TryGetValue(snapshot.PlayerID, out var playerState))
             {
-                if(playerState.Character != null)
+                if (playerState.Character != null)
                 {
-                    playerState.Character.Body.GlobalPosition = msg.Positions[i];
-                    playerState.Character.Body.GlobalRotation = new Vector3(0.0f, msg.CharacterYaws[i], 0.0f);
+                    playerState.Character.ApplySnapshot(snapshot);
                 }
                 else
                 {
-                    GD.Print("player state character is null!");
+                    GD.Print($"player state character is null for PlayerID {snapshot.PlayerID}!");
                 }
+            }
+            else
+            {
+                GD.Print($"player not found in ConnectedPlayers: {snapshot.PlayerID}");
             }
         }
     }
-}
+};

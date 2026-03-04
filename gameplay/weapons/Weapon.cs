@@ -3,6 +3,8 @@ using System;
 
 public partial class Weapon : Node3D
 {
+    [Export] public MeshInstance3D FirstPersonWeaponMesh;
+
     [Export] public float PrimaryFireCooldown = 0.5f;
     protected float _cooldown = 0.0f;
 

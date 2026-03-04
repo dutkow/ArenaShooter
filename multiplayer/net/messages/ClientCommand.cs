@@ -17,7 +17,7 @@ public class ClientCommand : Message
 {
     public byte PlayerID;
     public uint TickNumber;
-    public InputCommand Buttons;
+    public InputCommand InputButtons;
 
     public float Yaw;
     public float Pitch;
@@ -27,7 +27,7 @@ public class ClientCommand : Message
         base.BufferSize();
         Add(PlayerID);
         Add(TickNumber);
-        Add(Buttons);
+        Add(InputButtons);
         Add(Yaw);
         Add(Pitch);
         return _dataSize;
@@ -38,7 +38,7 @@ public class ClientCommand : Message
         base.WriteMessage();
         Write(PlayerID);
         Write(TickNumber);
-        Write((byte)Buttons);
+        Write((byte)InputButtons);
         Write(Yaw);
         Write(Pitch);
         return _data;
@@ -52,7 +52,7 @@ public class ClientCommand : Message
 
         byte buttonByte;
         Read(out buttonByte);
-        Buttons = (InputCommand)buttonByte;
+        InputButtons = (InputCommand)buttonByte;
 
         Read(out Yaw);
         Read(out Pitch);
