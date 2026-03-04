@@ -8,26 +8,6 @@ public enum MovementState
     FALLING
 }
 
-public class ArenaCharacterSnapshot
-{
-    public byte PlayerID;
-    public Vector3 Position;
-    public Vector3 Velocity;
-    public float Yaw;
-    public float AimPitch;
-
-    public ArenaCharacterSnapshot() { }
-
-    public ArenaCharacterSnapshot(byte playerID, Vector3 pos, Vector3 velocity, float yaw, float pitch)
-    {
-        PlayerID = playerID;
-        Position = pos;
-        Velocity = velocity;
-        Yaw = yaw;
-        AimPitch = pitch;
-    }
-}
-
 public partial class ArenaCharacter : Pawn
 {
     // ----------------------
