@@ -149,17 +149,17 @@ public partial class ArenaCharacter : Pawn
     public void ApplyClientCommand(ClientCommand cmd, double delta)
     {
         // --- Apply yaw to character body ---
-        var bodyRot = CharacterBody.Rotation;
+        var bodyRot = CharacterBody.GlobalRotation;
         bodyRot.Y = cmd.Yaw;
-        CharacterBody.Rotation = bodyRot;
+        CharacterBody.GlobalRotation = bodyRot;
 
 
         // --- Apply pitch to third-person weapon mesh (for now) ---
         if (ThirdPersonWeaponMesh != null)
         {
-            var weaponRot = ThirdPersonWeaponMesh.Rotation;
+            var weaponRot = ThirdPersonWeaponMesh.GlobalRotation;
             weaponRot.X = Mathf.Clamp(cmd.Pitch, -1.5f, 1.5f);
-            ThirdPersonWeaponMesh.Rotation = weaponRot;
+            ThirdPersonWeaponMesh.GlobalRotation = weaponRot;
         }
 
         // --- Apply movement using your existing ApplyInput ---
@@ -174,15 +174,15 @@ public partial class ArenaCharacter : Pawn
         {
             CharacterBody.GlobalPosition = snapshot.Position;
 
-            var rot = CharacterBody.Rotation;
+            var rot = CharacterBody.GlobalRotation;
             rot.Y = snapshot.Yaw;
-            CharacterBody.Rotation = rot;
+            CharacterBody.GlobalRotation = rot;
 
             if (CameraPivot != null)
             {
-                var camRot = CameraPivot.Rotation;
+                var camRot = CameraPivot.GlobalRotation;
                 camRot.X = Mathf.Clamp(snapshot.AimPitch, -1.5f, 1.5f);
-                CameraPivot.Rotation = camRot;
+                CameraPivot.GlobalRotation = camRot;
             }
         }
     }
