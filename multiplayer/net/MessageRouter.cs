@@ -36,10 +36,10 @@ public class MessageRouter
             RegisterFromServer(Msg.S2C_PLAYER_JOINED, ClientConnectionService.HandlePlayerJoined);
 
             // Gameplay
+            RegisterFromServer(Msg.S2C_WORLD_SNAPSHOT, ClientGameplayService.HandleWorldSnapshot);
+
             RegisterFromServer(Msg.S2C_PLAYER_SPAWNED, ClientGameplayService.HandlePlayerSpawned);
             RegisterFromServer(Msg.S2C_PROJECTILE_SPAWNED, ClientGameplayService.HandleProjectileSpawned);
-
-            RegisterFromServer(Msg.S2C_WORLD_SNAPSHOT, ClientGameplayService.HandleWorldSnapshot);
 
         }
     }

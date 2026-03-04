@@ -60,6 +60,8 @@ public partial class ArenaCharacter : Pawn
     [Export] public float CorrectionThreshold = 0.1f;  // small differences lerp
     [Export] public float CorrectionSpeed = 10f;       // lerp speed per second
 
+    private bool _wasFiringLastTick = false;
+
     // ----------------------
     // Initialization
     // ----------------------
@@ -195,9 +197,6 @@ public partial class ArenaCharacter : Pawn
         if (@event is InputEventMouseMotion mouseEvent && Input.MouseMode == Input.MouseModeEnum.Captured)
             _cameraInput = mouseEvent.Relative;
 
-        if (_weaponsEnabled && Input.IsActionPressed("primary_fire"))
-            TryPrimaryFire();
-
         if (Input.IsActionJustPressed("toggle_cursor_lock"))
         {
             Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured
@@ -248,6 +247,9 @@ public partial class ArenaCharacter : Pawn
         {
             InputCommand input = IsLocal ? CaptureInput() : LastInputCommand;
             ApplyInput(input, delta);
+
+            Vector3 dir = -Camera.GlobalTransform.Basis.Z;
+            Weapon.TickWeapon(delta, Camera.GlobalPosition, dir);
         }
 
 
@@ -270,7 +272,6 @@ public partial class ArenaCharacter : Pawn
         CharacterBody.MoveAndSlide();
         HandleFallAcceleration(delta);
     }
-
 
     private InputCommand CaptureInput()
     {
@@ -321,6 +322,8 @@ public partial class ArenaCharacter : Pawn
             _targetVelocity.X += moveDir.X * AirControlAcceleration * (float)delta;
             _targetVelocity.Z += moveDir.Z * AirControlAcceleration * (float)delta;
         }
+
+        Weapon.HandleInput(cmd);
 
         CharacterBody.Velocity = _targetVelocity;
     }
@@ -393,8 +396,8 @@ public partial class ArenaCharacter : Pawn
     public void TryPrimaryFire()
     {
         if (Weapon == null) return;
-        Vector3 dir = -Camera.GlobalTransform.Basis.Z;
-        Weapon.TryPrimaryFire(Camera.GlobalPosition, dir);
+        //Vector3 dir = -Camera.GlobalTransform.Basis.Z;
+        //Weapon.TryFire(Camera.GlobalPosition, dir);
     }
 
     public void TeleportTo(Transform3D t)
