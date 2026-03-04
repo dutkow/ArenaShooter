@@ -117,14 +117,13 @@ public partial class MatchState : Node
         {
             byte playerID = initialMatchState.PlayerIDs[i];
 
-            ConnectedPlayers[playerID] = new PlayerState(playerID);
+            AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
 
             if (initialMatchState.IsAlive[i])
             {
                 SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
             }
 
-            AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
         }
     }
 
@@ -206,7 +205,7 @@ public partial class MatchState : Node
     // Player handling
     // ----------------------
     
-    public void AddPlayer(byte playerID, string playerName)
+    public void AddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
     {
         if (ConnectedPlayers.ContainsKey(playerID))
         {
@@ -226,11 +225,11 @@ public partial class MatchState : Node
 
         ConnectedPlayers[playerID] = player;
 
-        GD.Print($"Player added. Player ID: {playerID}. PlayerName: ({player.PlayerName})");
-
         try
         {
             PlayerJoined?.Invoke(player);
+            GD.Print($"Played joined ran invoked on match state. player name: {player.PlayerName}. Network Mode = {NetworkSession.Instance.NetworkMode}");
+
         }
         catch (Exception e)
         {
