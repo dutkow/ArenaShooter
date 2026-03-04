@@ -10,6 +10,7 @@ script = ExtResource("1_mw06c")
 FirstPersonWeaponMesh = NodePath("FirstPersonWeaponMesh")
 
 [node name="FirstPersonWeaponMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.1741803, 0, 0, 0, 0.24183631, 0, 0, 0, 0.25429058, 0, 0, 0)
+transform = Transform3D(4.103345, 0, 0, 0, 0.24183631, 0, 0, 0, 0.25429058, 0, 0, 0)
 material_override = ExtResource("2_ooulu")
+cast_shadow = 0
 mesh = SubResource("BoxMesh_ooulu")

@@ -21,17 +21,9 @@ public partial class Pawn : Actor
     {
         Controller = controller;
 
-        IsAuthority = NetworkSession.Instance.IsServer;
-
-        if (controller is PlayerController pc && pc.PlayerID == NetworkSession.Instance.LocalPlayerID)
+        if(controller is PlayerController)
         {
-            SetProcessInput(true);
             Role = NetworkRole.LOCAL;
-        }
-        else
-        {
-            SetProcessInput(false);
-            Role = NetworkRole.REMOTE;
         }
     }
 

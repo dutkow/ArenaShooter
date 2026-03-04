@@ -69,6 +69,9 @@ public partial class ArenaCharacter : Pawn
     public List<ArenaCharacterSnapshot> SnapshotBuffer = new();
     public InputCommand LastInputCommand;
 
+    private double _inputSendAccumulator = 0f;
+
+
     // ----------------------
     // Initialization
     // ----------------------
@@ -77,40 +80,45 @@ public partial class ArenaCharacter : Pawn
         base._Ready();
         Camera.Current = false;
         Input.MouseMode = Input.MouseModeEnum.Captured;
+
+        SetProcessInput(false);
+        ShowThirdPersonView();
     }
 
     public override void OnPossessed(Controller controller)
     {
         base.OnPossessed(controller);
 
-        // Assign authority/local/remote roles
-        IsAuthority = NetworkSession.Instance.IsServer;
-        if (controller is PlayerController pc && pc.PlayerID == NetworkSession.Instance.LocalPlayerID)
-        {
-            SetProcessInput(true);
-            Role = NetworkRole.LOCAL;
-        }
-        else
-        {
-            SetProcessInput(false);
-            Role = NetworkRole.REMOTE;
-        }
-
-        // Setup mesh visibility
-        if (IsLocal)
-        {
-            Weapon.FirstPersonWeaponMesh.Visible = true;
-            ThirdPersonWeaponMesh.Visible = false;
-            CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
-        }
-        else
-        {
-            Weapon.FirstPersonWeaponMesh.Visible = false;
-            ThirdPersonWeaponMesh.Visible = true;
-            CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
-        }
+        SetProcessInput(true);
+        ShowFirstPersonView();
 
         Camera.Current = true;
+    }
+
+    public void ShowFirstPersonView()
+    {
+        HideThirdPersonView();
+
+        Weapon.FirstPersonWeaponMesh.Visible = true;
+    }
+
+    public void HideFirstPersonView()
+    {
+        Weapon.FirstPersonWeaponMesh.Visible = false;
+    }
+
+    public void ShowThirdPersonView()
+    {
+        HideFirstPersonView();
+
+        CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
+        ThirdPersonWeaponMesh.Visible = true;
+    }
+
+    public void HideThirdPersonView()
+    {
+        CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
+        ThirdPersonWeaponMesh.Visible = false;
     }
 
     public void Initialize(PlayerState state)
@@ -196,6 +204,12 @@ public partial class ArenaCharacter : Pawn
 
         CharacterBody.RotateY(-Mathf.DegToRad(_rotVelocity.X));
         _cameraInput = Vector2.Zero;
+
+
+        if (!IsLocal && !IsAuthority)
+        {
+            InterpolateSnapshots(delta);
+        }
     }
 
     // ----------------------
@@ -215,15 +229,15 @@ public partial class ArenaCharacter : Pawn
         // Local client sends input to server
         if (IsLocal && !IsAuthority)
         {
-            SendClientCommand();
-        }
-
-        // Remote client interpolates snapshots
-        if (!IsLocal && !IsAuthority)
-        {
-            InterpolateSnapshots(delta);
+            _inputSendAccumulator += (float)delta;
+            if (_inputSendAccumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
+            {
+                _inputSendAccumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
+                SendClientCommand();
+            }
         }
     }
+
 
     private InputCommand CaptureInput()
     {

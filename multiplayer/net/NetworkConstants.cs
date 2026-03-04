@@ -7,7 +7,7 @@ public static class NetworkConstants
     public const int MAX_PLAYERS = 16;
 
     // Server tick
-    public const int SERVER_TICK_RATE = 20;
+    public const int SERVER_TICK_RATE = 60;
     public const double SERVER_TICK_INTERVAL = 1.0 / SERVER_TICK_RATE;
 
     // Server discovery

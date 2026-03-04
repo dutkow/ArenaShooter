@@ -58,7 +58,7 @@ public class PlayerSpawned : Message
 
         var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
 
-        if(playerID == NetworkSession.Instance.LocalPlayerID)
+        if (playerID == NetworkSession.Instance.LocalPlayerID)
         {
             GameMode.Instance.LocalPlayerController.Possess(spawnedPlayer);
         }

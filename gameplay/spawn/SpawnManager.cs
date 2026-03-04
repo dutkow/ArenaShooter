@@ -58,13 +58,19 @@ public partial class SpawnManager : Node3D
             GD.PushError($"Failed to assign character to player state because player state not found in connected players. PlayerID of character: {playerID}. Net role: {NetworkSession.Instance.NetworkMode}.");
         }
 
-            LevelUI.Instance.ShowPlayerHud();
+        LevelUI.Instance.ShowPlayerHud();
+
+        spawnedPlayer.IsAuthority = NetworkSession.Instance.IsServer;
 
         if(playerID == NetworkSession.Instance.LocalPlayerID)
         {
             GameMode.Instance.LocalPlayerController.Possess(spawnedPlayer);
         }
-
+        else
+        {
+            spawnedPlayer.Role = NetworkRole.REMOTE;
+        }
+        
         spawnedPlayer.Initialize(playerState);
 
         return spawnedPlayer;
