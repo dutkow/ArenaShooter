@@ -62,6 +62,9 @@ public partial class NetworkHandler : Node
 
     private Dictionary<string, ServerInfo> _discoveredLanServers = new();
 
+    public HashSet<ENetPacketPeer> ReadyPeers = new();
+
+
     public NetworkHandler()
     {
         Instance = this;
@@ -187,6 +190,9 @@ public partial class NetworkHandler : Node
         clientPeers.Remove(peerId);
 
         GD.Print($"Peer disconnected: {peerId}");
+
+        ReadyPeers.Remove(peer);
+
         OnPeerDisconnected?.Invoke(peerId);
     }
 

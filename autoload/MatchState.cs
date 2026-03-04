@@ -113,9 +113,9 @@ public partial class MatchState : Node
     {
         for(int i = 0; i < initialMatchState.PlayerIDs.Length; ++i)
         {
-            GD.Print($"Number of players in initial match state = {initialMatchState.PlayerIDs.Length}");
 
             byte playerID = initialMatchState.PlayerIDs[i];
+
             ConnectedPlayers[playerID] = new PlayerState(playerID);
 
             GD.Print($"Adding connected player ID [{playerID}] to the connected players list. Role: {NetworkSession.Instance.Role}");

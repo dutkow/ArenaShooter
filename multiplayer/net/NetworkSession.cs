@@ -30,11 +30,12 @@ public partial class NetworkSession : Node
     // ----------------------
     public byte LocalPlayerID = 0;
     public int MaxPlayers { get; private set; } = 8;
-    public Dictionary<byte, PlayerState> playerIDtoPlayerState = new();
-    public Dictionary<int, byte> peerIDtoPlayerID = new();
+    public Dictionary<byte, PlayerState> PlayerIDsToPlayerStates = new();
+    public Dictionary<int, byte> PeerIDsToPlayerIDs = new();
     public Dictionary<byte, ENetPacketPeer> PlayerIDsToPeers = new();
     private Queue<byte> _availablePlayerIDs = new();
-    public bool IsServerFull => playerIDtoPlayerState.Count >= MaxPlayers;
+
+    public bool IsServerFull => PlayerIDsToPlayerStates.Count >= MaxPlayers;
 
     private NetworkHandler _networkHandler;
     private MessageRouter _router;
@@ -146,10 +147,10 @@ public partial class NetworkSession : Node
 
     private void HandlePeerDisconnected(int _peerID)
     {
-        if (peerIDtoPlayerID.TryGetValue(_peerID, out byte _playerID))
+        if (PeerIDsToPlayerIDs.TryGetValue(_peerID, out byte _playerID))
         {
-            peerIDtoPlayerID.Remove(_peerID);
-            playerIDtoPlayerState.Remove(_playerID);
+            PeerIDsToPlayerIDs.Remove(_peerID);
+            PlayerIDsToPlayerStates.Remove(_playerID);
             PlayerIDsToPeers.Remove(_playerID);
 
             _availablePlayerIDs.Enqueue(_playerID);
@@ -292,10 +293,10 @@ public partial class NetworkSession : Node
 
         byte playerID = _availablePlayerIDs.Dequeue();
 
-        peerIDtoPlayerID[peerID] = playerID;
+        PeerIDsToPlayerIDs[peerID] = playerID;
         PlayerIDsToPeers[playerID] = peer;
 
-        playerIDtoPlayerState[playerID] = new PlayerState(playerID)
+        PlayerIDsToPlayerStates[playerID] = new PlayerState(playerID)
         {
             PlayerName = playerName
         };

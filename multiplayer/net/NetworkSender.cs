@@ -22,8 +22,6 @@ public static class NetworkSender
             return;
         }
         serverPeer.Send(0, message.WriteMessage(), (int)message.Flags);
-        GD.Print($"Client sent: {message.MessageType}.");
-
     }
 
     // ----------------------
@@ -44,7 +42,7 @@ public static class NetworkSender
     {
         byte[] data = message.WriteMessage();
 
-        foreach (var peer in NetworkHandler.Instance.Connection.GetPeers())
+        foreach (var peer in NetworkHandler.Instance.ReadyPeers) // by using this instead of GetPeers() we can avoid broadcasting to irrelevant peers (i.e., peers that haven't loaded yet)
         {
             if(peer != null)
             {

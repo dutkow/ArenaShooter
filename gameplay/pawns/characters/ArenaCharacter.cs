@@ -61,6 +61,11 @@ public partial class ArenaCharacter : Pawn
 
     public void Initialize(PlayerState state)
     {
+        if(state == null)
+        {
+            GD.PushError("State was null on arena character initialization");
+            return;
+        }
         State = state;
         State.Character = this;
     }
@@ -182,7 +187,6 @@ public partial class ArenaCharacter : Pawn
         if (_movementState != newState)
         {
             _movementState = newState;
-            GD.Print(_movementState == MovementState.FALLING ? "Player left the ground!" : "Player landed!");
         }
     }
 
@@ -213,7 +217,7 @@ public partial class ArenaCharacter : Pawn
 
     private void SendClientCommand()
     {
-        if (!IsPossessedLocally)
+        if (!IsPossessedLocally || !NetworkSession.Instance.IsClient)
         {
             return;
         }

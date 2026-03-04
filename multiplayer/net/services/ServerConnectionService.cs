@@ -21,11 +21,12 @@ public static class ServerConnectionService
         var msg = new ClientLoaded();
         msg.ReadMessage(data);
 
-
         int peerID = (int)peer.GetMeta("id");
-        byte playerID = NetworkSession.Instance.peerIDtoPlayerID[peerID];
-        string playerName = NetworkSession.Instance.playerIDtoPlayerState[playerID].PlayerName;
 
+        byte playerID = NetworkSession.Instance.PeerIDsToPlayerIDs[peerID];
+        string playerName = NetworkSession.Instance.PlayerIDsToPlayerStates[playerID].PlayerName;
+
+        NetworkHandler.Instance.ReadyPeers.Add(peer);
 
 
         GD.Print("Server sending player joined");

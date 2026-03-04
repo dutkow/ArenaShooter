@@ -31,13 +31,14 @@ public partial class Level : Node3D
         var levelUI = (LevelUI)gameMode.LevelUIScene.Instantiate();
         AddChild(levelUI);
 
-        CallDeferred(nameof(PostInit));
 
         if (!NetworkSession.Instance.IsDedicatedServer)
         {
             byte localPlayerID = NetworkSession.Instance.LocalPlayerID;
             GameMode.Instance.AddPlayerController(localPlayerID);
         }
+
+        CallDeferred(nameof(PostInit));
     }
 
     public void PostInit()
