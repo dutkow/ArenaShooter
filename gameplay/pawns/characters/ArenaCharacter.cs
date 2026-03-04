@@ -12,15 +12,17 @@ public class ArenaCharacterSnapshot
 {
     public byte PlayerID;
     public Vector3 Position;
+    public Vector3 Velocity;
     public float Yaw;
     public float AimPitch;
 
     public ArenaCharacterSnapshot() { }
 
-    public ArenaCharacterSnapshot(byte playerID, Vector3 pos, float yaw, float pitch)
+    public ArenaCharacterSnapshot(byte playerID, Vector3 pos, Vector3 velocity, float yaw, float pitch)
     {
         PlayerID = playerID;
         Position = pos;
+        Velocity = velocity;
         Yaw = yaw;
         AimPitch = pitch;
     }
@@ -153,6 +155,7 @@ public partial class ArenaCharacter : Pawn
         return new ArenaCharacterSnapshot(
             State.PlayerID,
             CharacterBody.GlobalPosition,
+            CharacterBody.Velocity,
             Yaw,
             AimPitch
         );
@@ -178,7 +181,7 @@ public partial class ArenaCharacter : Pawn
         ApplyInput(cmd.InputButtons, delta);
     }
 
-    public void ApplySnapshot(ArenaCharacterSnapshot snapshot)
+    public void ApplySnapshot(ArenaCharacterSnapshot snapshot, float deltaTime = 0f)
     {
         if (snapshot == null) return;
 
@@ -186,7 +189,8 @@ public partial class ArenaCharacter : Pawn
 
         if (!IsLocal)
         {
-            CharacterBody.GlobalPosition = snapshot.Position;
+            Vector3 predictedPos = snapshot.Position + snapshot.Velocity * deltaTime;
+            CharacterBody.GlobalPosition = predictedPos;
 
             var rot = CharacterBody.GlobalRotation;
             rot.Y = snapshot.Yaw;
@@ -194,7 +198,7 @@ public partial class ArenaCharacter : Pawn
 
             if (ThirdPersonWeaponMesh != null)
             {
-                var camRot = ThirdPersonWeaponMesh.GlobalRotation; // LOCAL rotation!
+                var camRot = ThirdPersonWeaponMesh.GlobalRotation;
                 camRot.X = Mathf.Clamp(snapshot.AimPitch, -1.5f, 1.5f);
                 ThirdPersonWeaponMesh.GlobalRotation = camRot;
             }
