@@ -1,16 +1,17 @@
 Short term
 
-- Need to fix replication of rotation (pitch and yaw).
-- Need to replicate projectiles (no prediction yet)
-- Need correction parameters for client-side prediction re: movement
-
-
-- once input is working w/ the frame rate lock, add some sort of interpolation and correction thresholds for snapping updates
-- add interpolation on the viewed units. consider whether the classes should be separated (i.e., ServerCharacter, LocalClientCharacter, OtherCharacters)
-
-
+- Fix direction of projectile firing (i.e., replicate a view angle and use that instead of the rotation of something like the camera that doesn't exist).
+- Take damage, simple death and respawn
+- Hitscan weapons
 
 Medium term
 
+- Client-side projectile prediction
 - Add simple chat system (no team system yet - YAGNI for now)
+- Simple scoreboard
+- Simple match victory condition/end state
+- Prediction of projectiles, local firing effects
 
+Medium-long term
+
+- Consider synchronizing projectiles w/ estimated delta time on player side (or some meet in the middle pt)
