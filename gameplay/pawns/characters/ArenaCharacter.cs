@@ -75,21 +75,26 @@ public partial class ArenaCharacter : Pawn
     // ----------------------
     // Initialization
     // ----------------------
-    public override void _Ready()
+    public void HandleRemoteSpawn()
     {
-        base._Ready();
         Camera.Current = false;
-        Input.MouseMode = Input.MouseModeEnum.Captured;
-
         SetProcessInput(false);
         ShowThirdPersonView();
-    }
+        GD.Print($"show third person view ran on {NetworkSession.Instance.NetworkMode} ");
 
+        Role = NetworkRole.REMOTE;
+    }
+    
     public override void OnPossessed(Controller controller)
     {
         base.OnPossessed(controller);
 
+        Input.MouseMode = Input.MouseModeEnum.Captured;
+
+        GD.Print($"on possessed ran on {NetworkSession.Instance.NetworkMode} ");
+
         SetProcessInput(true);
+
         ShowFirstPersonView();
 
         Camera.Current = true;
@@ -99,6 +104,7 @@ public partial class ArenaCharacter : Pawn
     {
         HideThirdPersonView();
 
+        GD.Print($"show first person view ran on {NetworkSession.Instance.NetworkMode} ");
         Weapon.FirstPersonWeaponMesh.Visible = true;
     }
 
@@ -117,8 +123,8 @@ public partial class ArenaCharacter : Pawn
 
     public void HideThirdPersonView()
     {
-        CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
         ThirdPersonWeaponMesh.Visible = false;
+        CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
     }
 
     public void Initialize(PlayerState state)

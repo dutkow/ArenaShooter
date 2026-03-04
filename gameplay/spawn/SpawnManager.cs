@@ -64,11 +64,13 @@ public partial class SpawnManager : Node3D
 
         if(playerID == NetworkSession.Instance.LocalPlayerID)
         {
+            GD.Print($"running possess when spawning player on {NetworkSession.Instance.NetworkMode}. spawned player ID = {playerID} and local player ID = {NetworkSession.Instance.LocalPlayerID}");
             GameMode.Instance.LocalPlayerController.Possess(spawnedPlayer);
         }
         else
         {
-            spawnedPlayer.Role = NetworkRole.REMOTE;
+            GD.Print($"handling remote spawn on {NetworkSession.Instance.NetworkMode}");
+            spawnedPlayer.HandleRemoteSpawn();
         }
         
         spawnedPlayer.Initialize(playerState);

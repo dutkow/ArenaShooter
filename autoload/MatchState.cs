@@ -113,13 +113,14 @@ public partial class MatchState : Node
     {
         for(int i = 0; i < initialMatchState.PlayerIDs.Length; ++i)
         {
-
             byte playerID = initialMatchState.PlayerIDs[i];
 
             ConnectedPlayers[playerID] = new PlayerState(playerID);
 
-            GD.Print($"Adding connected player ID [{playerID}] to the connected players list. Role: {NetworkSession.Instance.NetworkMode}");
-            SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
+            if (initialMatchState.IsAlive[i])
+            {
+                SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
+            }
 
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
         }
