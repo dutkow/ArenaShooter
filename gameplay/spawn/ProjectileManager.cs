@@ -1,0 +1,64 @@
+using Godot;
+using Godot.Collections;
+using System;
+using static Godot.TextServer;
+
+public partial class ProjectileManager : Node3D
+{
+    public static ProjectileManager Instance { get; private set; }
+
+    [Export] private Dictionary<ProjectileType, PackedScene> _projectilesByType = new();
+
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+
+        Instance = this;
+    }
+
+    public void SpawnProjectile(ushort id, ProjectileType type, Vector3 position, Vector3 rotation)
+    {
+        if(NetworkSession.Instance.IsServer)
+        {
+            ServerSpawnProjectile(id, type, position, rotation);
+        }
+        else
+        {
+            LocalSpawnProjectile(id, type, position, rotation);
+        }
+    }
+
+    public void ServerSpawnProjectile(ushort id, ProjectileType type, Vector3 position, Vector3 rotation)
+    {
+        LocalSpawnProjectile(id, type, position, rotation);
+        ProjectileSpawned.Send(id, type, position, rotation);
+    }
+
+    public Projectile LocalSpawnProjectile(ushort id, ProjectileType type, Vector3 position, Vector3 rotation)
+    {
+        if(_projectilesByType.TryGetValue(type, out var projectileScene))
+        {
+            var spawnedProjectile = (Projectile)projectileScene.Instantiate();
+
+            if(spawnedProjectile == null)
+            {
+                GD.PushError($"Projectile Type [{type}] was found in projectiles dictionary but no projectile spawned. Ensure the projectile scene has a projectile script attached to it.");
+                return null;
+            }
+
+            Level.Instance.AddChild(spawnedProjectile);
+
+            spawnedProjectile.GlobalPosition = position;
+            spawnedProjectile.GlobalRotation = rotation;
+
+
+            spawnedProjectile.Initialize(position, rotation);
+            return spawnedProjectile;
+        }
+        else
+        {
+            GD.PushError($"Projectile Type [{type}] not found in projectiles dictionary. It should be set in the editor.");
+            return null;
+        }
+    }
+}

@@ -29,7 +29,9 @@ public partial class Weapon : Node3D
 
     public void PrimaryFire(Vector3 origin, Vector3 direction)
     {
-        SpawnProjectile(origin, direction);
+        //SpawnProjectile(origin, direction);
+
+        ProjectileManager.Instance.ServerSpawnProjectile(1, ProjectileType.DEFAULT, origin, direction);
     }
 
 

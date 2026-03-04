@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://ltpmrgawfeer"]
+
+[ext_resource type="Script" uid="uid://8cpgwa40w10f" path="res://autoload/GameManagers.cs" id="1_2t3dy"]
+[ext_resource type="PackedScene" uid="uid://b24468yqhkorc" path="res://gameplay/spawn/projectile_manager.tscn" id="2_vjrvq"]
+
+[node name="GameManagers" type="Node"]
+script = ExtResource("1_2t3dy")
+_projectileManagerScene = ExtResource("2_vjrvq")

@@ -55,4 +55,12 @@ public static class ClientGameplayService
             }
         }
     }
+
+    public static void HandleProjectileSpawned(byte[] data)
+    {
+        var msg = new ProjectileSpawned();
+        msg.ReadMessage(data);
+
+        ProjectileManager.Instance.LocalSpawnProjectile(msg.ID, msg.Type, msg.SpawnPosition, msg.SpawnRotation);
+    }
 };

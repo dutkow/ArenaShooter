@@ -7,6 +7,7 @@ public partial class SpawnManager : Node3D
     public static SpawnManager Instance;
 
     public List<SpawnPoint> _playerSpawnPoints = new();
+
     public override void _EnterTree()
     {
         base._EnterTree();

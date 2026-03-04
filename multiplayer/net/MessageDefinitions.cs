@@ -66,4 +66,6 @@ public enum Msg : byte
 
     S2C_PLAYER_SPAWNED,
     S2C_WORLD_SNAPSHOT,
+
+    S2C_PROJECTILE_SPAWNED,
 }

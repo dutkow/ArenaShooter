@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://b24468yqhkorc"]
+
+[ext_resource type="Script" uid="uid://trlllwkmb86t" path="res://gameplay/spawn/ProjectileManager.cs" id="1_lll35"]
+[ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/projectile.tscn" id="2_8pttl"]
+
+[node name="ProjectileManager" type="Node3D"]
+script = ExtResource("1_lll35")
+_projectilesByType = Dictionary[int, PackedScene]({
+0: ExtResource("2_8pttl")
+})

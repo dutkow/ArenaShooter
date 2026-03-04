@@ -22,6 +22,7 @@ NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
 GameSession="*res://autoload/SceneNavigator.cs"
 Settings="*res://autoload/Settings.cs"
 SceneNavigator="*res://autoload/SceneNavigator.cs"
+GameManagers="*res://autoload/game_managers.tscn"
 
 [display]
 
