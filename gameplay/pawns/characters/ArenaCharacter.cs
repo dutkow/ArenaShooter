@@ -184,11 +184,11 @@ public partial class ArenaCharacter : Pawn
             rot.Y = snapshot.Yaw;
             CharacterBody.GlobalRotation = rot;
 
-            if (CameraPivot != null)
+            if (ThirdPersonWeaponMesh != null)
             {
-                var camRot = CameraPivot.GlobalRotation;
+                var camRot = ThirdPersonWeaponMesh.GlobalRotation; // LOCAL rotation!
                 camRot.X = Mathf.Clamp(snapshot.AimPitch, -1.5f, 1.5f);
-                CameraPivot.GlobalRotation = camRot;
+                ThirdPersonWeaponMesh.GlobalRotation = camRot;
             }
         }
     }
@@ -346,10 +346,21 @@ public partial class ArenaCharacter : Pawn
         var prev = SnapshotBuffer[0];
         var next = SnapshotBuffer[1];
 
+        // Interpolate position
         CharacterBody.GlobalPosition = prev.Position.Lerp(next.Position, 0.5f);
-        var rot = CharacterBody.Rotation;
+
+        // Interpolate yaw
+        var rot = CharacterBody.GlobalRotation;
         rot.Y = Mathf.LerpAngle(prev.Yaw, next.Yaw, 0.5f);
-        CharacterBody.Rotation = rot;
+        CharacterBody.GlobalRotation = rot;
+
+        // Interpolate pitch
+        if (ThirdPersonWeaponMesh != null)
+        {
+            var camRot = ThirdPersonWeaponMesh.GlobalRotation;
+            camRot.X = Mathf.Lerp(prev.AimPitch, next.AimPitch, 0.5f);
+            ThirdPersonWeaponMesh.GlobalRotation = camRot;
+        }
     }
 
     private void SendClientCommand(InputCommand cmd)
