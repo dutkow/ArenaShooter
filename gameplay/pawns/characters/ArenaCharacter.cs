@@ -491,18 +491,23 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
     public void OnDeath()
     {
-        if (Camera == null || _deathCamPivot == null)
+        if(NetworkedComponent.IsLocal)
         {
-            return;
+            if (Camera == null || _deathCamPivot == null)
+            {
+                return;
+            }
+
+            // Put camera at the end of the spring arm
+            Camera.GlobalPosition = _deathCamPivot.GlobalPosition;
+            Camera.GlobalRotation = _deathCamPivot.GlobalRotation;
+
+            _deathCamPivot.AddChild(Camera);
+
+            ShowThirdPersonView();
         }
 
-        // Put camera at the end of the spring arm
-        Camera.GlobalPosition = _deathCamPivot.GlobalPosition;
-        Camera.GlobalRotation = _deathCamPivot.GlobalRotation;
-
-        _deathCamPivot.AddChild(Camera);
-
-        ShowThirdPersonView();
+        CharacterMesh.Visible = false;
 
         IsAlive = false;
     }

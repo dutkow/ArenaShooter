@@ -41,7 +41,7 @@ public class MessageRouter
             RegisterFromServer(Msg.S2C_PLAYER_SPAWNED, ClientGameplayService.HandlePlayerSpawned);
             RegisterFromServer(Msg.S2C_PROJECTILE_SPAWNED, ClientGameplayService.HandleProjectileSpawned);
             RegisterFromServer(Msg.S2C_HEALTH_CHANGED, ClientGameplayService.HandleHealthChanged);
-
+            RegisterFromServer(Msg.S2C_PLAYER_DIED, ClientGameplayService.HandlePlayerDied);
         }
     }
 

@@ -76,4 +76,16 @@ public static class ClientGameplayService
             character.HealthComponent.SetShield(msg.Shield);
         }
     }
+
+    public static void HandlePlayerDied(byte[] data)
+    {
+        var msg = new PlayerDied();
+        msg.ReadMessage(data);
+
+        var character = MatchState.Instance.ConnectedPlayers[msg.PlayerID].Character;
+        if(character != null)
+        {
+            character.OnDeath();
+        }
+    }
 };

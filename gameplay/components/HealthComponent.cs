@@ -73,7 +73,7 @@ public class HealthComponent : Component
     private bool _isHealthFull => Health == MaxHealth;
     private bool _isShieldFull => Shield == MaxShield;
 
-    private bool _isHealthExhausted => Health <= 0;
+    private bool _isDead => Health <= 0;
     private bool _isShieldExhausted => Shield <= 0;
 
     private bool _isHealthAndShieldFull => _isHealthFull && _isShieldFull;
@@ -132,7 +132,7 @@ public class HealthComponent : Component
 
     public void ApplyHealthDamage(int amount)
     {
-        if (amount <= 0 || _isHealthExhausted)
+        if (amount <= 0 || _isDead)
         {
             return;
         }
@@ -203,7 +203,11 @@ public class HealthComponent : Component
 
         if(Owner != null && Owner is IPlayerEntity playerEntity)
         {
-            if(playerEntity.IsPlayerControlled())
+            if(_isDead)
+            {
+                PlayerDied.Send(playerEntity.GetPlayerID(), 0);
+            }
+            else if (playerEntity.IsPlayerControlled())
             {
                 HealthUpdate.Send(playerEntity.GetPlayerID(), Health, Shield);
             }
@@ -277,7 +281,7 @@ public class HealthComponent : Component
         {
             HealthDamaged?.Invoke();
 
-            if (_isHealthExhausted)
+            if (_isDead)
             {
                 Death?.Invoke();
             }

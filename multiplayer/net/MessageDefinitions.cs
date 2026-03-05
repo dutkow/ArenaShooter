@@ -69,4 +69,5 @@ public enum Msg : byte
 
     S2C_PROJECTILE_SPAWNED,
     S2C_HEALTH_CHANGED,
+    S2C_PLAYER_DIED,
 }
