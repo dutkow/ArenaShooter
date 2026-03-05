@@ -300,6 +300,9 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
             Vector3 dir = -Camera.GlobalTransform.Basis.Z;
             Weapon.TickWeapon(delta, Camera.GlobalPosition, dir);
+
+            MoveAndSlide();
+            HandleFallAcceleration(delta);
         }
 
 
@@ -317,10 +320,10 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
                 _tickAssumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
                 SendClientCommand(cmd);
             }
-        }
 
-        MoveAndSlide();
-        HandleFallAcceleration(delta);
+            MoveAndSlide();
+            HandleFallAcceleration(delta);
+        }
     }
 
     private InputCommand CaptureInput()
@@ -511,4 +514,20 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
         IsAlive = false;
     }
+
+
+    public void LaunchCharacter(Vector3 launchVelocity)
+    {
+        _targetVelocity.Y = launchVelocity.Y;
+
+        _targetVelocity.X += launchVelocity.X;
+        _targetVelocity.Z += launchVelocity.Z;
+
+        Velocity = _targetVelocity;
+
+        _movementState = MovementState.FALLING;
+
+    }
+
+
 }

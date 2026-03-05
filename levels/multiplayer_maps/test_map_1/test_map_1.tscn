@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://byrsxq2i83b2a"]
+[gd_scene load_steps=14 format=3 uid="uid://byrsxq2i83b2a"]
 
 [ext_resource type="Script" uid="uid://cxmw8aq3awmhi" path="res://levels/Level.cs" id="1_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_j23ab"]
 [ext_resource type="PackedScene" uid="uid://cm5541sq1kv43" path="res://core/game_mode.tscn" id="4_h6y0w"]
 [ext_resource type="Material" uid="uid://cfigmojad6es6" path="res://assets/materials/black_material.tres" id="4_j23ab"]
 [ext_resource type="Material" uid="uid://cq4akbweyf2lw" path="res://assets/materials/green_material.tres" id="4_m0y5v"]
+[ext_resource type="PackedScene" uid="uid://c7v5l5n1d2ri" path="res://gameplay/interactables/jump_pad.tscn" id="6_m0y5v"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hsoxx"]
 
@@ -101,3 +102,6 @@ mesh = SubResource("PrismMesh_7q2dv")
 [node name="MeshInstance3D10" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, -23.93961, 5.7173796, 18.219795)
 mesh = SubResource("PrismMesh_7q2dv")
+
+[node name="JumpPad" parent="." instance=ExtResource("6_m0y5v")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.8535771, 0)
