@@ -23,14 +23,6 @@ public static class ServerGameplayService
                     // Apply the input immediately on the server
                     double delta = NetworkConstants.SERVER_TICK_INTERVAL; // Or your fixed server tick
                     character.ApplyClientCommand(cmd, delta);
-
-                    // Create a snapshot for remote clients
-                    var snapshot = character.GetSnapshot();
-                    character.SnapshotBuffer.Add(snapshot);
-
-                    // Keep snapshot buffer small
-                    if (character.SnapshotBuffer.Count > 5)
-                        character.SnapshotBuffer.RemoveAt(0);
                 }
             }
         }

@@ -54,7 +54,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     // Networking
     // ----------------------
     public ArenaCharacterSnapshot LastSnapshot;
-    public List<ArenaCharacterSnapshot> SnapshotBuffer = new();
     public InputCommand LastInputCommand;
 
     private double _tickAssumulator = 0f;
@@ -275,7 +274,7 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
         if (!NetworkedComponent.IsLocal && !NetworkedComponent.IsAuthority)
         {
-            InterpolateRemoteSnapshots(delta);
+            InterpolateRemoteSnapshot(delta);
         }
 
         // Correct local position based on last server snapshot
@@ -393,26 +392,27 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         }
     }
 
-    private void InterpolateRemoteSnapshots(double delta)
+    private void InterpolateRemoteSnapshot(double delta)
     {
-        if (SnapshotBuffer.Count < 2) return;
+        if (LastSnapshot == null) return;
 
-        var prev = SnapshotBuffer[0];
-        var next = SnapshotBuffer[1];
+        // Only for non-local characters
+        if (NetworkedComponent.IsLocal || NetworkedComponent.IsAuthority) return;
 
-        // Interpolate position
-        GlobalPosition = prev.Position.Lerp(next.Position, 0.5f);
+        // Compute predicted position
+        Vector3 targetPos = LastSnapshot.Position + LastSnapshot.Velocity * (float)delta;
+        GlobalPosition = GlobalPosition.Lerp(targetPos, 10f * (float)delta); // 10 = smoothing factor
 
-        // Interpolate yaw
+        // Rotation
         var rot = GlobalRotation;
-        rot.Y = Mathf.LerpAngle(prev.Yaw, next.Yaw, 0.5f);
+        rot.Y = Mathf.LerpAngle(rot.Y, LastSnapshot.Yaw, 10f * (float)delta);
         GlobalRotation = rot;
 
-        // Interpolate pitch
+        // Pitch
         if (ThirdPersonWeaponMesh != null)
         {
             var camRot = ThirdPersonWeaponMesh.GlobalRotation;
-            camRot.X = Mathf.Lerp(prev.AimPitch, next.AimPitch, 0.5f);
+            camRot.X = Mathf.Lerp(camRot.X, LastSnapshot.AimPitch, 10f * (float)delta);
             ThirdPersonWeaponMesh.GlobalRotation = camRot;
         }
     }
