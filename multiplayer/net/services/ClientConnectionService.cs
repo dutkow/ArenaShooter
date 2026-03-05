@@ -12,7 +12,7 @@ public static class ClientConnectionService
         msg.ReadMessage(data);
 
         NetworkSession.Instance.LocalPlayerID = msg.AssignedPlayerID;
-        SceneNavigator.Instance.OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);
+        Main.Instance.OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);
 
         GD.Print($"Client received: {msg.MessageType}");
     }

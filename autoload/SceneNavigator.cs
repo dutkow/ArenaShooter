@@ -1,16 +1,14 @@
-using Godot;
 using System;
 using System.Threading.Tasks;
 
-public partial class SceneNavigator : Node
+public class SceneNavigator
 {
-    public static SceneNavigator Instance { get; private set; }
+    // This class only holds logic and data — no Godot-specific functions.
+    // Main.Instance will be used to actually manipulate the scene tree.
 
-    public override void _Ready()
+    public SceneNavigator()
     {
-        base._Ready();
-        Instance = this;
-
+        // Subscribe to network events (logic only)
         NetworkSession.Instance.OnSessionStarted += OnSessionStarted;
         NetworkSession.Instance.OnConnectedToServer += OnConnectedToServer;
     }
@@ -25,45 +23,38 @@ public partial class SceneNavigator : Node
         OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);
     }
 
-    // Added optional delay in seconds
+    // Delay optional, purely logic
     public async void OpenMultiplayerMap(string mapID, float delayBeforeLoad = 0.5f)
     {
         if (!GameData.Instance.MultiplayerMapsByID.TryGetValue(mapID, out var mapInfo))
         {
-            GD.PushError($"Attempted to load map ID: {mapID}. No corresponding scene was found");
+            Console.WriteLine($"[SceneNavigator] Map ID {mapID} not found");
             return;
         }
 
         var mapScenePath = mapInfo.Scene.ResourcePath;
 
-        UIRoot.Instance.ShowLoadingScreen();
+        // Use Main.Instance to manipulate Godot-specific things
+        Main.Instance.OpenLoadingScreen();
 
         if (delayBeforeLoad > 0f)
         {
-            await ToSignal(GetTree().CreateTimer(delayBeforeLoad), "timeout");
+            // Pure C# delay instead of ToSignal
+            await Task.Delay((int)(delayBeforeLoad * 1000));
         }
 
-        ResourceLoader.LoadThreadedRequest(mapScenePath);
-
-        var packedScene = (PackedScene)ResourceLoader.LoadThreadedGet(mapScenePath);
+        var packedScene = (Godot.PackedScene)Godot.ResourceLoader.Load(mapScenePath);
         if (packedScene == null)
         {
-            GD.PushError($"Failed to load scene {mapScenePath}");
-            UIRoot.Instance.HideLoadingScreen();
+            Console.WriteLine($"[SceneNavigator] Failed to load scene {mapScenePath}");
             return;
         }
 
-        var newScene = packedScene.Instantiate<Node>();
+        var newScene = packedScene.Instantiate<Godot.Node>();
 
-        // Swap scenes
-        var currentScene = GetTree().CurrentScene;
-        GetTree().Root.AddChild(newScene);
-        GetTree().CurrentScene = newScene;
-        currentScene?.QueueFree();
+        // Swap scenes via Main
+        Main.Instance.SetMainScene(newScene);
 
-        // Hide loading screen
-        UIRoot.Instance.HideLoadingScreen();
-
-        GD.Print("Multiplayer map fully loaded!");
+        Console.WriteLine("[SceneNavigator] Multiplayer map fully loaded!");
     }
 }
