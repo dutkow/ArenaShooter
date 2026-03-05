@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 public static class NetworkEmulation
 {
-    public static bool Enabled = true;
+    public static bool Enabled = false;
     public static float MinPingMs = 40f;
     public static float MaxPingMs = 60f;
     public static float PacketLossPercent = 0.01f;

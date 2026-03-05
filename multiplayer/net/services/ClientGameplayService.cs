@@ -20,16 +20,11 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
-        ushort snapshotTick = msg.Tick;
-        int delta = (int)(snapshotTick - MatchState.Instance.CurrentTick);
-        if (delta <= 0 && delta > -32768)
-        {
-            // snapshot is older or duplicate, drop it
+        ushort serverTick = msg.Tick;
+        if (!NetUtils.IsNewerTick(serverTick, MatchState.Instance.LastServerTick))
             return;
-        }
 
-        MatchState.Instance.SetCurrentTick(snapshotTick);
-
+        MatchState.Instance.SetLastServerTick(serverTick);
 
         var snapshots = msg.GetCharacterSnapshots();
 

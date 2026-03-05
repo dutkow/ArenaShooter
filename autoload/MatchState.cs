@@ -17,14 +17,18 @@ public partial class MatchState : Node
 
     public ushort CurrentTick { get; private set; } = 0;
 
-    public void SetCurrentTick(ushort tick)
+    public ushort LastServerTick { get; private set; } = 0;
+
+    public void SetLastServerTick(ushort tick)
     {
-        CurrentTick = tick;
+        LastServerTick = tick;
     }
+
     public void AdvanceTick()
     {
         CurrentTick++;
     }
+
 
     // ----------------------
     // Match phase
