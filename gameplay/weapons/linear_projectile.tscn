@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://uqo3i4jed6bi"]
+
+[ext_resource type="Script" uid="uid://db624jpbu6fdm" path="res://gameplay/weapons/LinearProjectile.cs" id="1_ei5g4"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_to0jx"]
+radius = 0.2
+
+[sub_resource type="SphereMesh" id="SphereMesh_qxf0c"]
+radius = 0.125
+height = 0.25
+
+[node name="LinearProjectile" type="Node3D" node_paths=PackedStringArray("CollisionArea")]
+script = ExtResource("1_ei5g4")
+CollisionArea = NodePath("Area3D")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_to0jx")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D"]
+mesh = SubResource("SphereMesh_qxf0c")
+skeleton = NodePath("../..")

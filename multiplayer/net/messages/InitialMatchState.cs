@@ -128,8 +128,8 @@ public class InitialMatchState : Message
 
             if (player.Character != null)
             {
-                positions[i] = player.Character.CharacterBody.GlobalPosition;
-                rotations[i] = player.Character.CharacterBody.GlobalRotation;
+                positions[i] = player.Character.GlobalPosition;
+                rotations[i] = player.Character.GlobalRotation;
                 isAlive[i] = player.IsAlive;
                 GD.Print("is alive is true in initial match state");
             }

@@ -126,8 +126,8 @@ public class WorldSnapshot : Message
 
             if (player.Character != null)
             {
-                positions[i] = player.Character.CharacterBody.GlobalPosition;
-                velocities[i] = player.Character.CharacterBody.Velocity; // NEW
+                positions[i] = player.Character.GlobalPosition;
+                velocities[i] = player.Character.Velocity; // NEW
                 yaws[i] = player.Character.Yaw;
                 pitches[i] = player.Character.AimPitch;
             }

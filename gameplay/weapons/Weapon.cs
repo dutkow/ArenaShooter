@@ -80,13 +80,18 @@ public partial class Weapon : Node3D
 
     private void TryFire(Vector3 origin = default, Vector3 direction = default)
     {
-        if(_readyToFire)
+        if (!_readyToFire)
+            return;
+
+        if (_projectileScene != null)
         {
-            if (_projectileScene != null)
-            {
-                ProjectileManager.Instance.ServerSpawnProjectile(1, ProjectileType.DEFAULT, origin, direction);
-            }
-            _cooldownTimer = PrimaryFireCooldown;
+            // Spawn 2 meters in front of origin along the direction
+            Vector3 spawnPosition = origin + direction.Normalized() * 2.0f;
+
+            // Call your projectile spawn function
+            ProjectileManager.Instance.ServerSpawnProjectile(1, ProjectileType.DEFAULT, spawnPosition, direction);
         }
+
+        _cooldownTimer = PrimaryFireCooldown;
     }
 }

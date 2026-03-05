@@ -96,7 +96,7 @@ public partial class MatchState : Node
             {
                 byte serverPlayerID = NetworkSession.Instance.LocalPlayerID;
                 AddPlayer(serverPlayerID, Settings.Instance.PlayerName);
-                Pawn spawnedPawn = SpawnManager.Instance.ServerSpawnPlayer(serverPlayerID);
+                var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(serverPlayerID);
             }
         }
     }
