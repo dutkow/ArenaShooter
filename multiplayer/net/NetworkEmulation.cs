@@ -6,8 +6,8 @@ using System.Diagnostics;
 public static class NetworkEmulation
 {
     public static bool Enabled = false;
-    public static float MinPingMs = 40f;
-    public static float MaxPingMs = 60f;
+    public static float MinPingMs = 50.0f;
+    public static float MaxPingMs = 55.0f;
     public static float PacketLossPercent = 0.01f;
 
     private class QueuedPacket
