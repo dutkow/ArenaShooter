@@ -63,4 +63,17 @@ public static class ClientGameplayService
 
         ProjectileManager.Instance.LocalSpawnProjectile(msg.ID, msg.Type, msg.SpawnPosition, msg.SpawnRotation);
     }
+
+    public static void HandleHealthChanged(byte[] data)
+    {
+        var msg = new HealthUpdate();
+        msg.ReadMessage(data);
+
+        var character = MatchState.Instance.ConnectedPlayers[NetworkSession.Instance.LocalPlayerID].Character;
+        if(character != null)
+        {
+            character.HealthComponent.SetHealth(msg.Health);
+            character.HealthComponent.SetShield(msg.Shield);
+        }
+    }
 };

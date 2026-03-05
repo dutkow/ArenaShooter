@@ -8,7 +8,7 @@ public enum MovementState
     FALLING
 }
 
-public partial class ArenaCharacter : Character, IPossessable, IDamageable
+public partial class ArenaCharacter : Character, IPossessable, INetworkedObject, IDamageable, IPlayerEntity
 {
     // ----------------------
     // Exports & Components
@@ -106,6 +106,25 @@ public partial class ArenaCharacter : Character, IPossessable, IDamageable
         PossessableComponent.OnUnpossessed();
     }
 
+    public NetworkRole GetNetworkRole()
+    {
+        return NetworkedComponent.Role;
+    }
+
+    public bool IsAuthority()
+    {
+        return NetworkedComponent.IsAuthority;
+    }
+
+    public byte GetPlayerID()
+    {
+        return State.PlayerID;
+    }
+
+    public bool IsPlayerControlled()
+    {
+        return true; // TODO: need to clean up interfaces and think about bots
+    }
 
     public void ShowFirstPersonView()
     {
@@ -145,6 +164,7 @@ public partial class ArenaCharacter : Character, IPossessable, IDamageable
         State = state;
         State.Character = this;
 
+        HealthComponent.SetOwner(this);
     }
 
     // ----------------------

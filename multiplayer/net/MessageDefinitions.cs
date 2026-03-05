@@ -68,4 +68,5 @@ public enum Msg : byte
     S2C_WORLD_SNAPSHOT,
 
     S2C_PROJECTILE_SPAWNED,
+    S2C_HEALTH_CHANGED,
 }

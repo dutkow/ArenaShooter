@@ -1,6 +1,7 @@
+using Godot;
 using System;
 
-public class HealthComponent
+public class HealthComponent : Component
 {
     /// <summary>
     /// Base health and shield stats
@@ -171,6 +172,11 @@ public class HealthComponent
     {
         _timeSinceLastDamaged = 0;
 
+        if(amount <= 0)
+        {
+            return;
+        }
+
         if (_isHealthRecharging)
         {
             StopHealthRecharge();
@@ -193,6 +199,14 @@ public class HealthComponent
         else
         {
             ApplyHealthDamage(amount);
+        }
+
+        if(Owner != null && Owner is IPlayerEntity playerEntity)
+        {
+            if(playerEntity.IsPlayerControlled())
+            {
+                HealthUpdate.Send(playerEntity.GetPlayerID(), Health, Shield);
+            }
         }
     }
 
