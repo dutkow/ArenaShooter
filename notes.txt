@@ -1,5 +1,7 @@
 Short term
 
+- Need to make main + ui root persist between scenes and add hud that way
+
 - Fix direction of projectile firing (i.e., replicate a view angle and use that instead of the rotation of something like the camera that doesn't exist).
 - Take damage, simple death and respawn
 - Hitscan weapons

@@ -90,6 +90,8 @@ public partial class ArenaCharacter : Pawn, IDamageable
         ShowFirstPersonView();
 
         Camera.Current = true;
+
+        UIRoot.Instance.OnPossessedArenaCharacter(this);
     }
 
     public void ShowFirstPersonView()

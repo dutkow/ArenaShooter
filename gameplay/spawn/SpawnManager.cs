@@ -33,7 +33,6 @@ public partial class SpawnManager : Node3D
     public ArenaCharacter ServerSpawnPlayer(byte playerID)
     {
         var spawnPoint = GetSpawnPoint();
-        LevelUI.Instance.ShowPlayerHud();
 
         ArenaCharacter spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
         PlayerSpawned.Send(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
@@ -58,8 +57,6 @@ public partial class SpawnManager : Node3D
         {
             GD.PushError($"Failed to assign character to player state because player state not found in connected players. PlayerID of character: {playerID}. Net role: {NetworkSession.Instance.NetworkMode}.");
         }
-
-        LevelUI.Instance.ShowPlayerHud();
 
         spawnedPlayer.IsAuthority = NetworkSession.Instance.IsServer;
 

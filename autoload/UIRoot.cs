@@ -12,6 +12,9 @@ public partial class UIRoot : Control
     [Export] PackedScene _mainMenuScene;
     private MainMenu _mainMenu;
 
+    [Export] PackedScene _playerHudScene;
+    private PlayerHud _playerHud;
+
     public override void _Ready()
     {
         base._Ready();
@@ -47,5 +50,33 @@ public partial class UIRoot : Control
     public void SetProgress(float value)
     {
         _loadingScreen?.SetProgress(value);
+    }
+
+    public void OnPossessedArenaCharacter(ArenaCharacter character)
+    {
+        EnsurePlayerHud();
+
+        _playerHud.AssignToArenaCharacter(character);
+
+        ShowPlayerHud();
+    }
+
+    public void EnsurePlayerHud()
+    {
+        if (_playerHud == null)
+        {
+            _playerHud = (PlayerHud)_playerHudScene.Instantiate();
+            AddChild(_playerHud);
+        }
+    }
+
+    public void ShowPlayerHud()
+    {
+        _playerHud.Show();
+    }
+
+    public void HidePlayerHud()
+    {
+        _playerHud.Hide();
     }
 }

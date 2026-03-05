@@ -1,13 +1,11 @@
 [gd_scene load_steps=3 format=3 uid="uid://cqs5aptlgfj17"]
 
 [ext_resource type="Script" uid="uid://dh1trxlq2axlp" path="res://ui/hud/ShieldBar.cs" id="1_iexr6"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iexr6"]
-bg_color = Color(4.5242905e-06, 0.59462214, 0.76870286, 1)
+[ext_resource type="StyleBox" uid="uid://dj3pisflvepyw" path="res://ui/hud/shield_bar_style_box.tres" id="1_rp04u"]
 
 [node name="ShieldBar" type="ProgressBar"]
 offset_right = 300.0
 offset_bottom = 27.0
-theme_override_styles/fill = SubResource("StyleBoxFlat_iexr6")
+theme_override_styles/fill = ExtResource("1_rp04u")
 value = 50.0
 script = ExtResource("1_iexr6")

@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://bnufp106f826h"]
+[gd_scene load_steps=5 format=3 uid="uid://bnufp106f826h"]
 
 [ext_resource type="Script" uid="uid://bc6q206h41ks8" path="res://autoload/UIRoot.cs" id="1_cwasx"]
 [ext_resource type="PackedScene" uid="uid://doianfimes2dl" path="res://ui/loading/loading_screen.tscn" id="2_i0hgf"]
+[ext_resource type="PackedScene" uid="uid://ci8rl3endmnqc" path="res://ui/menus/main_menu/main_menu.tscn" id="3_7ciei"]
+[ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/player_hud.tscn" id="4_7bb3i"]
 
 [node name="UIRoot" type="Control"]
 layout_mode = 3
@@ -13,3 +15,5 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_cwasx")
 _loadingScreenScene = ExtResource("2_i0hgf")
+_mainMenuScene = ExtResource("3_7ciei")
+_playerHudScene = ExtResource("4_7bb3i")
