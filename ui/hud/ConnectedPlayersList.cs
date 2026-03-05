@@ -10,16 +10,28 @@ public partial class ConnectedPlayersList : Control
     {
         base._Ready();
 
-        MatchState.Instance.PlayerJoined += OnPlayerJoined;
+        PopulateInitialPlayerList();
+
+        MatchState.Instance.PlayerJoined += AddPlayerToList;
     }
 
-    public void OnPlayerJoined(PlayerState playerState)
+    public void PopulateInitialPlayerList()
+    {
+        foreach(var child in _playerListContainer.GetChildren())
+        {
+            child.QueueFree();
+        }
+
+        foreach(var kvp in MatchState.Instance.ConnectedPlayers)
+        {
+            AddPlayerToList(kvp.Value);
+        }
+    }
+
+    public void AddPlayerToList(PlayerState playerState)
     {
         Label playerLabel = new();
         playerLabel.Text = playerState.PlayerName;
         _playerListContainer.AddChild(playerLabel);
-
-        GD.Print($"Played joined ran on connected players list. Network Mode = {NetworkSession.Instance.NetworkMode}");
-
     }
 }
