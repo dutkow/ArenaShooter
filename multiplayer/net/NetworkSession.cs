@@ -230,21 +230,12 @@ public partial class NetworkSession : Node
 
         if (NetworkEmulation.Enabled)
         {
+           
             NetworkEmulation.Receive(peer, data, DeliverMessage);
             return;
         }
 
         DeliverMessage(peer, data);
-    }
-
-    public override void _Process(double delta)
-    {
-        base._Process(delta);
-
-        if (NetworkEmulation.Enabled)
-        {
-            NetworkEmulation.ProcessQueue();
-        }
     }
 
     private void DeliverMessage(ENetPacketPeer peer, byte[] data)

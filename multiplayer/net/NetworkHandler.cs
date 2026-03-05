@@ -84,6 +84,11 @@ public partial class NetworkHandler : Node
         if (Connection == null) return;
 
         HandleEvents();
+
+        if (NetworkEmulation.Enabled)
+        {
+            NetworkEmulation.ProcessQueue(delta);
+        }
     }
 
     // ----------------------
@@ -262,4 +267,6 @@ public partial class NetworkHandler : Node
         isListeningForLan = true;
         lanListenTimer = listenSeconds;
     }
+
+
 }

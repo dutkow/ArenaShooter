@@ -5,10 +5,10 @@ using System.Diagnostics;
 
 public static class NetworkEmulation
 {
-    public static bool Enabled = false;
+    public static bool Enabled = true;
     public static float MinPingMs = 50f;
-    public static float MaxPingMs = 200f;
-    public static float PacketLossPercent = 0.02f;
+    public static float MaxPingMs = 100f;
+    public static float PacketLossPercent = 0.0f;
 
     private class QueuedPacket
     {
@@ -42,15 +42,18 @@ public static class NetworkEmulation
     }
 
     // Call this every frame to flush delayed packets
-    public static void ProcessQueue()
+    public static void ProcessQueue(double delta)
     {
-        double now = GetTimeSeconds();
+        
+        GD.Print($"[NetworkEmulation] Processing queue, {IncomingQueue.Count} packets queued, time={delta:F3}s");
 
         for (int i = IncomingQueue.Count - 1; i >= 0; i--)
         {
             var pkt = IncomingQueue[i];
-            if (pkt.DeliveryTime <= now)
+            GD.Print($"  Packet delivery in {(pkt.DeliveryTime - delta):F3}s");
+            if (pkt.DeliveryTime <= delta)
             {
+                GD.Print("  Delivering packet");
                 pkt.DeliverAction(pkt.Peer, pkt.Data);
                 IncomingQueue.RemoveAt(i);
             }
