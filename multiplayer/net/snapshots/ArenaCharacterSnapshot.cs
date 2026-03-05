@@ -26,19 +26,17 @@ public class ArenaCharacterSnapshot
     public Vector3 Velocity;
     public float Yaw;
     public float AimPitch;
-    public int Health;
-    public int Shield;
+
 
     public ArenaCharacterSnapshot() { }
 
-    public ArenaCharacterSnapshot(byte playerID, Vector3 pos, Vector3 velocity, float yaw, float pitch, int health, int shield)
+    public ArenaCharacterSnapshot(byte playerID, Vector3 pos, Vector3 velocity, float yaw, float pitch)
     {
         PlayerID = playerID;
         Position = pos;
         Velocity = velocity;
         Yaw = yaw;
-        AimPitch = pitch;
-        Health = health;
-        Shield = shield;   
+        AimPitch = pitch;  
     }
 }
+

@@ -14,14 +14,13 @@ using System.Linq;
 
 public class WorldSnapshot : Message
 {
+    // Arena character snapshot
     public byte[] PlayerIDs;
     public string[] PlayerNames;
     public Vector3[] Positions;
     public Vector3[] Velocities;
     public float[] CharacterYaws;
     public float[] AimPitches;
-    public int[] Healths;
-    public int[] Shields;
 
     protected override int BufferSize()
     {
@@ -59,16 +58,6 @@ public class WorldSnapshot : Message
         for (int i = 0; i < AimPitches.Length; i++)
         {
             Add(AimPitches[i]);
-        }
-
-        for (int i = 0; i < Healths.Length; i++)
-        {
-            Add(Healths[i]);
-        }
-
-        for (int i = 0; i < Shields.Length; i++)
-        {
-            Add(Shields[i]);
         }
 
         return _dataSize;
@@ -110,16 +99,6 @@ public class WorldSnapshot : Message
         for (int i = 0; i < AimPitches.Length; i++)
         {
             Write(AimPitches[i]);
-        }
-
-        for (int i = 0; i < Healths.Length; i++)
-        {
-            Write(Healths[i]);
-        }
-
-        for (int i = 0; i < Shields.Length; i++)
-        {
-            Write(Shields[i]);
         }
 
         return _data;
@@ -173,20 +152,6 @@ public class WorldSnapshot : Message
         for (int i = 0; i < count; i++)
         {
             Read(out AimPitches[i]);
-        }
-
-        Healths = new int[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            Read(out Healths[i]);
-        }
-
-        Shields = new int[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            Read(out Shields[i]);
         }
     }
 
@@ -244,9 +209,7 @@ public class WorldSnapshot : Message
             Positions = positions,
             Velocities = velocities,
             CharacterYaws = yaws,
-            AimPitches = pitches,
-            Healths = health,
-            Shields = shield
+            AimPitches = pitches
         };
 
         NetworkSender.Broadcast(msg);
@@ -264,9 +227,7 @@ public class WorldSnapshot : Message
                 Positions[i],
                 Velocities[i],
                 CharacterYaws[i],
-                AimPitches[i],
-                Healths[i],
-                Shields[i]
+                AimPitches[i]
             );
         }
         return snapshots;
