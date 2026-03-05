@@ -8,7 +8,7 @@ public partial class ShieldBar : ProgressBar
         MaxValue = healthComponent.MaxShield;
         Value = healthComponent.Shield;
 
-        healthComponent.HealthChanged += OnShieldChanged;
+        healthComponent.ShieldChanged += OnShieldChanged;
     }
 
     public void OnShieldChanged(int newValue)

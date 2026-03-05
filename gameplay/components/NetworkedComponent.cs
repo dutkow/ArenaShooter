@@ -9,7 +9,7 @@ public partial class NetworkedComponent : Node
     public bool IsLocal => Role == NetworkRole.LOCAL;
     public bool IsRemote => Role == NetworkRole.REMOTE;
 
-    public bool IsAuthority => IsLocal;
+    public bool IsAuthority => _isAuthority;
 
     public void SetRole(NetworkRole role)
     {

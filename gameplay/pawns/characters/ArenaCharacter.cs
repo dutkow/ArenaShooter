@@ -97,6 +97,7 @@ public partial class ArenaCharacter : Character, IPossessable, IDamageable
 
         Camera.Current = true;
 
+        NetworkedComponent.SetRole(NetworkRole.LOCAL);
         UIRoot.Instance.OnPossessedArenaCharacter(this);
     }
 
