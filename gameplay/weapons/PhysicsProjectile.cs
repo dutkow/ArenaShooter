@@ -21,13 +21,13 @@ public partial class PhysicsProjectile : Projectile
             RigidBody.LinearVelocity = direction.Normalized() * InitialSpeed;
         }
 
-        if (CollisionArea != null)
+        if(NetworkSession.Instance.IsServer)
         {
-            CollisionArea.BodyEntered += (Node3D body) =>
+            if (NetworkSession.Instance.IsServer && CollisionArea != null)
             {
-                OnCollision(body);
-                QueueFree();
-            };
+                CollisionArea.BodyEntered += OnCollision;
+            }
         }
     }
+
 }

@@ -9,8 +9,12 @@ public class HealthComponent
     public int MaxHealth { get; private set; } = 100;
     public int Health { get; private set; } = 100;
 
+    public float HealthPercent => (float)Health / MaxHealth;
     public int MaxShield { get; private set; } = 100;
     public int Shield { get; private set; } = 100;
+
+    public float ShieldPercent => (float)Shield / MaxShield;
+
 
     private bool _hasShield => MaxShield > 0;
 
@@ -125,38 +129,6 @@ public class HealthComponent
         }
     }
 
-    public void ApplyDamage(int amount)
-    {
-        _timeSinceLastDamaged = 0;
-
-        if(_isHealthRecharging)
-        {
-            StopHealthRecharge();
-        }
-
-        if(_isShieldRecharging)
-        {
-            StopShieldRecharge();
-        }
-
-        if (Shield > 0)
-        {
-            int shieldDamage = Math.Min(Shield, amount);
-            ApplyShieldDamage(shieldDamage);
-
-            int remainingDamage = amount - shieldDamage;
-
-            if (remainingDamage > 0)
-            {
-                ApplyHealthDamage(remainingDamage);
-            }
-        }
-        else
-        {
-            ApplyHealthDamage(amount);
-        }
-    }
-
     public void ApplyHealthDamage(int amount)
     {
         if (amount <= 0 || _isHealthExhausted)
@@ -164,16 +136,7 @@ public class HealthComponent
             return;
         }
 
-        Health = Math.Max(0, Health - amount);
-
-        HealthChanged?.Invoke(Health);
-        HealthPercentChanged?.Invoke((float)Health / MaxHealth);
-        HealthDamaged?.Invoke();
-
-        if (_isHealthExhausted)
-        {
-            HealthExhausted?.Invoke();
-        }
+        SetHealth(Health - amount);
     }
 
     public void ApplyShieldDamage(int amount)
@@ -183,16 +146,7 @@ public class HealthComponent
             return;
         }
 
-        Shield = Math.Max(0, Shield - amount);
-
-        ShieldChanged?.Invoke(Shield);
-        ShieldPercentChanged?.Invoke((float)Shield / MaxShield);
-        ShieldDamaged?.Invoke();
-
-        if (_isShieldExhausted)
-        {
-            ShieldExhausted?.Invoke();
-        }
+        SetShield(Shield - amount);
     }
 
     public void ReceiveHealth(int amount)
@@ -202,40 +156,43 @@ public class HealthComponent
             return;
         }
 
-        Health = Math.Min(MaxHealth, Health + amount);
-
-        HealthChanged?.Invoke(Health);
-        HealthPercentChanged?.Invoke((float)Health / MaxHealth);
-
-        if (_isHealthFull)
-        {
-            HealthFullyRestored?.Invoke();
-        }
-        else
-        {
-            HealthPartiallyRestored?.Invoke();
-        }
+        SetHealth(Health + amount);
     }
 
     public void ReceiveShield(int amount)
     {
         if (amount <= 0 || _isShieldFull)
-        {
             return;
+
+        SetShield(Shield + amount);
+    }
+
+    public void ApplyDamage(int amount)
+    {
+        _timeSinceLastDamaged = 0;
+
+        if (_isHealthRecharging)
+        {
+            StopHealthRecharge();
         }
 
-        Shield = Math.Min(MaxShield, Shield + amount);
-
-        ShieldChanged?.Invoke(Shield);
-        ShieldPercentChanged?.Invoke((float)Shield / MaxShield);
-
-        if (_isShieldFull)
+        if (_isShieldRecharging)
         {
-            ShieldFullyRestored?.Invoke();
+            StopShieldRecharge();
+        }
+
+        if (_hasShield && Shield > 0)
+        {
+            int shieldDamage = Math.Min(Shield, amount);
+            ApplyShieldDamage(shieldDamage);
+
+            int remainingDamage = amount - shieldDamage;
+            if (remainingDamage > 0)
+                ApplyHealthDamage(remainingDamage);
         }
         else
         {
-            ShieldPartiallyRestored?.Invoke();
+            ApplyHealthDamage(amount);
         }
     }
 
@@ -280,6 +237,86 @@ public class HealthComponent
         if (_isShieldFull)
         {
             StopShieldRecharge();
+        }
+    }
+
+    public void SetHealth(int health)
+    {
+        health = Math.Clamp(health, 0, MaxHealth);
+
+        if (Health == health)
+        {
+            return;
+        }
+
+        bool decreased = health < Health;
+        bool increased = health > Health;
+
+        Health = health;
+
+        // Always fire value changed events
+        HealthChanged?.Invoke(Health);
+        HealthPercentChanged?.Invoke(HealthPercent);
+
+        // Handle events based on change direction
+        if (decreased)
+        {
+            HealthDamaged?.Invoke();
+
+            if (_isHealthExhausted)
+            {
+                HealthExhausted?.Invoke();
+            }
+        }
+        else if (increased)
+        {
+            if (_isHealthFull)
+            {
+                HealthFullyRestored?.Invoke();
+            }
+            else
+            {
+                HealthPartiallyRestored?.Invoke();
+            }
+        }
+    }
+
+    public void SetShield(int shield)
+    {
+        shield = Math.Clamp(shield, 0, MaxShield);
+
+        if (Shield == shield)
+        {
+            return;
+        }
+
+        bool decreased = shield < Shield;
+        bool increased = shield > Shield;
+
+        Shield = shield;
+
+        ShieldChanged?.Invoke(Shield);
+        ShieldPercentChanged?.Invoke(ShieldPercent);
+
+        if (decreased)
+        {
+            ShieldDamaged?.Invoke();
+
+            if (_isShieldExhausted)
+            {
+                ShieldExhausted?.Invoke();
+            }
+        }
+        else if (increased)
+        {
+            if (_isShieldFull)
+            {
+                ShieldFullyRestored?.Invoke();
+            }
+            else
+            {
+                ShieldPartiallyRestored?.Invoke();
+            }
         }
     }
 }

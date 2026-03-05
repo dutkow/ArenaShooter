@@ -166,7 +166,9 @@ public partial class ArenaCharacter : Character, IPossessable, IDamageable
             GlobalPosition,
             Velocity,
             Yaw,
-            AimPitch
+            AimPitch,
+            HealthComponent.Health,
+            HealthComponent.Shield
         );
     }
 
@@ -212,6 +214,9 @@ public partial class ArenaCharacter : Character, IPossessable, IDamageable
                 ThirdPersonWeaponMesh.GlobalRotation = camRot;
             }
         }
+
+        HealthComponent.SetHealth(snapshot.Health);
+        HealthComponent.SetShield(snapshot.Shield);
     }
 
     // ----------------------

@@ -25,12 +25,9 @@ public partial class LinearProjectile : Projectile
     {
         base._Ready();
 
-        if (CollisionArea != null)
+        if(NetworkSession.Instance.IsServer && CollisionArea != null)
         {
-            CollisionArea.BodyEntered += (Node3D hitNode) =>
-            {
-                OnCollision(hitNode);
-            };
+            CollisionArea.BodyEntered += OnCollision;
         }
     }
 

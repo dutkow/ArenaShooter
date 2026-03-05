@@ -24,19 +24,18 @@ public abstract partial class Projectile : Node3D
 
         _timeAlive += deltaF;
         if (_timeAlive > LifeTime)
+        {
             QueueFree();
+        }
     }
 
     public virtual void OnCollision(Node3D hit)
     {
-        GD.Print($"Collision with {hit}");
         if(hit is IDamageable damageable)
         {
-            GD.Print($"Applying damage to {damageable}");
             damageable.ApplyDamage(Damage);
         }
 
         QueueFree();
-
     }
 }
