@@ -228,6 +228,27 @@ public partial class NetworkSession : Node
             return;
         }
 
+        if (NetworkEmulation.Enabled)
+        {
+            NetworkEmulation.Receive(peer, data, DeliverMessage);
+            return;
+        }
+
+        DeliverMessage(peer, data);
+    }
+
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
+
+        if (NetworkEmulation.Enabled)
+        {
+            NetworkEmulation.ProcessQueue();
+        }
+    }
+
+    private void DeliverMessage(ENetPacketPeer peer, byte[] data)
+    {
         switch (NetworkMode)
         {
             case NetworkMode.LISTEN_SERVER:
