@@ -87,7 +87,7 @@ public partial class NetworkHandler : Node
 
         if (NetworkEmulation.Enabled)
         {
-            NetworkEmulation.ProcessQueue(delta);
+            NetworkEmulation.ProcessQueue();
         }
     }
 

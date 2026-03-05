@@ -6,9 +6,9 @@ using System.Diagnostics;
 public static class NetworkEmulation
 {
     public static bool Enabled = true;
-    public static float MinPingMs = 50f;
-    public static float MaxPingMs = 100f;
-    public static float PacketLossPercent = 0.0f;
+    public static float MinPingMs = 40f;
+    public static float MaxPingMs = 60f;
+    public static float PacketLossPercent = 0.01f;
 
     private class QueuedPacket
     {
@@ -42,18 +42,15 @@ public static class NetworkEmulation
     }
 
     // Call this every frame to flush delayed packets
-    public static void ProcessQueue(double delta)
+    public static void ProcessQueue()
     {
-        
-        GD.Print($"[NetworkEmulation] Processing queue, {IncomingQueue.Count} packets queued, time={delta:F3}s");
+        double now = GetTimeSeconds(); // use absolute time, NOT delta
 
         for (int i = IncomingQueue.Count - 1; i >= 0; i--)
         {
             var pkt = IncomingQueue[i];
-            GD.Print($"  Packet delivery in {(pkt.DeliveryTime - delta):F3}s");
-            if (pkt.DeliveryTime <= delta)
+            if (pkt.DeliveryTime <= now)
             {
-                GD.Print("  Delivering packet");
                 pkt.DeliverAction(pkt.Peer, pkt.Data);
                 IncomingQueue.RemoveAt(i);
             }
