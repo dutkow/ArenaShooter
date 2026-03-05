@@ -1,5 +1,3 @@
-using Godot;
-using Godot.NativeInterop;
 using System;
 
 public class HealthComponent
@@ -8,13 +6,13 @@ public class HealthComponent
     /// Base health and shield stats
     /// </summary>
 
-    private int _maxHealth = 100;
-    private int _health = 100;
+    public int MaxHealth { get; private set; } = 100;
+    public int Health { get; private set; } = 100;
 
-    private int _shield = 100;
-    private int _maxShield = 100;
+    public int MaxShield { get; private set; } = 100;
+    public int Shield { get; private set; } = 100;
 
-    private bool _hasShield => _maxShield > 0;
+    private bool _hasShield => MaxShield > 0;
 
     // Whether or not health and shield automatically recharge after a period of time post-taking damage
     private bool _healthRecharges;
@@ -67,11 +65,11 @@ public class HealthComponent
     /// State related variables
     /// </summary>
 
-    private bool _isHealthFull => _health == _maxHealth;
-    private bool _isShieldFull => _shield == _maxShield;
+    private bool _isHealthFull => Health == MaxHealth;
+    private bool _isShieldFull => Shield == MaxShield;
 
-    private bool _isHealthExhausted => _health <= 0;
-    private bool _isShieldExhausted => _shield <= 0;
+    private bool _isHealthExhausted => Health <= 0;
+    private bool _isShieldExhausted => Shield <= 0;
 
     private bool _isHealthAndShieldFull => _isHealthFull && _isShieldFull;
 
@@ -127,7 +125,7 @@ public class HealthComponent
         }
     }
 
-    public void ReceiveDamage(int amount)
+    public void ApplyDamage(int amount)
     {
         _timeSinceLastDamaged = 0;
 
@@ -141,9 +139,9 @@ public class HealthComponent
             StopShieldRecharge();
         }
 
-        if (_shield > 0)
+        if (Shield > 0)
         {
-            int shieldDamage = Math.Min(_shield, amount);
+            int shieldDamage = Math.Min(Shield, amount);
             ApplyShieldDamage(shieldDamage);
 
             int remainingDamage = amount - shieldDamage;
@@ -166,13 +164,13 @@ public class HealthComponent
             return;
         }
 
-        _health = Math.Max(0, _health - amount);
+        Health = Math.Max(0, Health - amount);
 
-        HealthChanged?.Invoke(_health);
-        HealthPercentChanged?.Invoke((float)_health / _maxHealth);
+        HealthChanged?.Invoke(Health);
+        HealthPercentChanged?.Invoke((float)Health / MaxHealth);
         HealthDamaged?.Invoke();
 
-        if (_health == 0)
+        if (_isHealthExhausted)
         {
             HealthExhausted?.Invoke();
         }
@@ -185,13 +183,13 @@ public class HealthComponent
             return;
         }
 
-        _shield = Math.Max(0, _shield - amount);
+        Shield = Math.Max(0, Shield - amount);
 
-        ShieldChanged?.Invoke(_shield);
-        ShieldPercentChanged?.Invoke((float)_shield / _maxShield);
+        ShieldChanged?.Invoke(Shield);
+        ShieldPercentChanged?.Invoke((float)Shield / MaxShield);
         ShieldDamaged?.Invoke();
 
-        if (_shield == 0)
+        if (_isShieldExhausted)
         {
             ShieldExhausted?.Invoke();
         }
@@ -204,10 +202,10 @@ public class HealthComponent
             return;
         }
 
-        _health = Math.Min(_maxHealth, _health + amount);
+        Health = Math.Min(MaxHealth, Health + amount);
 
-        HealthChanged?.Invoke(_health);
-        HealthPercentChanged?.Invoke((float)_health / _maxHealth);
+        HealthChanged?.Invoke(Health);
+        HealthPercentChanged?.Invoke((float)Health / MaxHealth);
 
         if (_isHealthFull)
         {
@@ -226,12 +224,12 @@ public class HealthComponent
             return;
         }
 
-        _shield = Math.Min(_maxShield, _shield + amount);
+        Shield = Math.Min(MaxShield, Shield + amount);
 
-        ShieldChanged?.Invoke(_shield);
-        ShieldPercentChanged?.Invoke((float)_shield / _maxShield);
+        ShieldChanged?.Invoke(Shield);
+        ShieldPercentChanged?.Invoke((float)Shield / MaxShield);
 
-        if (_shield == _maxShield)
+        if (_isShieldFull)
         {
             ShieldFullyRestored?.Invoke();
         }

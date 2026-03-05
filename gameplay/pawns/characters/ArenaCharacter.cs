@@ -8,7 +8,7 @@ public enum MovementState
     FALLING
 }
 
-public partial class ArenaCharacter : Pawn
+public partial class ArenaCharacter : Pawn, IDamageable
 {
     // ----------------------
     // Exports & Components
@@ -26,6 +26,8 @@ public partial class ArenaCharacter : Pawn
     [Export] public float AirControlAcceleration { get; set; } = 6f;
     [Export] public float MouseSens = 0.09f;
     [Export] public float MouseSmooth = 50f;
+
+    public HealthComponent HealthComponent { get; private set; } = new HealthComponent();
 
     // ----------------------
     // State
@@ -127,7 +129,17 @@ public partial class ArenaCharacter : Pawn
 
         State = state;
         State.Character = this;
+
     }
+
+    // ----------------------
+    // Interface functions
+    // ----------------------
+    public void ApplyDamage(int amount)
+    {
+        HealthComponent.ApplyDamage(amount);
+    }
+
 
     // ----------------------
     // Replication

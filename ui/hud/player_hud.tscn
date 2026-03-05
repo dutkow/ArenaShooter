@@ -1,10 +1,12 @@
-[gd_scene load_steps=6 format=3 uid="uid://m4y05jbaa545"]
+[gd_scene load_steps=8 format=3 uid="uid://m4y05jbaa545"]
 
 [ext_resource type="Script" uid="uid://dx071qf2ibvq4" path="res://ui/hud/PlayerHud.cs" id="1_boqfv"]
 [ext_resource type="Texture2D" uid="uid://uue7f6y3spks" path="res://assets/textures/crosshair.png" id="2_y2gd1"]
 [ext_resource type="PackedScene" uid="uid://btl1kctnuoavh" path="res://ui/match/match_timer.tscn" id="3_p1j4b"]
 [ext_resource type="PackedScene" uid="uid://djf0qbxcoq6xf" path="res://ui/match/match_debug_panel.tscn" id="4_3hb5n"]
 [ext_resource type="PackedScene" uid="uid://doyibe8885wuq" path="res://ui/hud/connected_players_list.tscn" id="5_tbnm7"]
+[ext_resource type="PackedScene" uid="uid://cqs5aptlgfj17" path="res://ui/hud/shield_bar.tscn" id="6_p1j4b"]
+[ext_resource type="PackedScene" uid="uid://fi4eb24dfgbv" path="res://ui/hud/health_bar.tscn" id="6_y2gd1"]
 
 [node name="PlayerHud" type="Control"]
 layout_mode = 3
@@ -59,3 +61,23 @@ offset_left = 7.0
 offset_top = 63.0
 offset_right = -647.0
 offset_bottom = -398.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -90.0
+offset_right = 150.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="ShieldBar" parent="VBoxContainer" instance=ExtResource("6_p1j4b")]
+layout_mode = 2
+
+[node name="HealthBar" parent="VBoxContainer" instance=ExtResource("6_y2gd1")]
+layout_mode = 2
