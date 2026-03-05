@@ -51,7 +51,7 @@ public class HealthComponent : Component
     public event Action HealthDamaged;
     public event Action ShieldDamaged;
 
-    public event Action HealthExhausted;
+    public event Action Death;
     public event Action ShieldExhausted;
 
     public event Action HealthPartiallyRestored;
@@ -279,7 +279,7 @@ public class HealthComponent : Component
 
             if (_isHealthExhausted)
             {
-                HealthExhausted?.Invoke();
+                Death?.Invoke();
             }
         }
         else if (increased)

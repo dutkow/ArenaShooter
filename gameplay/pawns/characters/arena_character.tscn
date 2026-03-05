@@ -13,13 +13,14 @@ material = ExtResource("4_xipnf")
 
 [sub_resource type="BoxMesh" id="BoxMesh_4flbx"]
 
-[node name="ArenaCharacter" type="CharacterBody3D" node_paths=PackedStringArray("CharacterMesh", "Weapon", "ThirdPersonWeaponMesh", "Camera", "CameraPivot")]
+[node name="ArenaCharacter" type="CharacterBody3D" node_paths=PackedStringArray("CharacterMesh", "Weapon", "ThirdPersonWeaponMesh", "Camera", "CameraPivot", "_deathCamPivot")]
 script = ExtResource("1_60ybg")
 CharacterMesh = NodePath("CharacterMesh")
 Weapon = NodePath("CameraPivot/Weapon")
 ThirdPersonWeaponMesh = NodePath("CharacterMesh/ThirdPersonWeapon")
 Camera = NodePath("CameraPivot/Camera3D")
 CameraPivot = NodePath("CameraPivot")
+_deathCamPivot = NodePath("DeathCamSpringArm/DeathCamPivot")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.017611, 0)
@@ -44,3 +45,10 @@ transform = Transform3D(0.16136354, 0, 0, 0, 0.20816346, 0, 0, 0, 0.96933186, 0,
 material_override = ExtResource("4_xipnf")
 mesh = SubResource("BoxMesh_4flbx")
 skeleton = NodePath("../../CameraPivot")
+
+[node name="DeathCamSpringArm" type="SpringArm3D" parent="."]
+transform = Transform3D(0.7071067, 0.49999976, -0.49999976, 4.2351647e-22, 0.70710653, 0.70710653, 0.70710677, -0.49999982, 0.49999982, 0, 1, 0)
+spring_length = 5.0
+
+[node name="DeathCamPivot" type="Node3D" parent="DeathCamSpringArm"]
+transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 5)

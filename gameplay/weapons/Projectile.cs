@@ -6,7 +6,7 @@ using System;
 /// </summary>
 public abstract partial class Projectile : Node3D
 {
-    [Export] public int Damage = 10;
+    [Export] public int Damage = 75;
     [Export] public float LifeTime = 5f;
 
     protected float _timeAlive = 0f;

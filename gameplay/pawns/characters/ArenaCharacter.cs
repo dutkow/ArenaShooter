@@ -26,6 +26,9 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     [Export] public float MouseSens = 0.09f;
     [Export] public float MouseSmooth = 50f;
 
+    [Export] Node3D _deathCamPivot;
+
+
     public HealthComponent HealthComponent { get; private set; } = new();
     public PossessableComponent PossessableComponent { get; private set; } = new();
     public NetworkedComponent NetworkedComponent { get; private set; } = new();
@@ -87,12 +90,12 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     {
         PossessableComponent.OnPossessed(controller);
 
+
+        HealthComponent.Death += OnDeath;
+
         Input.MouseMode = Input.MouseModeEnum.Captured;
 
-        GD.Print($"on possessed ran on {NetworkSession.Instance.NetworkMode} ");
-
         SetProcessInput(true);
-
         ShowFirstPersonView();
 
         Camera.Current = true;
@@ -484,5 +487,23 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
                 (float)(CorrectionSpeed * delta)
             );
         }
+    }
+
+    public void OnDeath()
+    {
+        if (Camera == null || _deathCamPivot == null)
+        {
+            return;
+        }
+
+        // Put camera at the end of the spring arm
+        Camera.GlobalPosition = _deathCamPivot.GlobalPosition;
+        Camera.GlobalRotation = _deathCamPivot.GlobalRotation;
+
+        _deathCamPivot.AddChild(Camera);
+
+        ShowThirdPersonView();
+
+        IsAlive = false;
     }
 }
