@@ -334,7 +334,7 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         if (Input.IsActionJustPressed("jump")) cmd |= InputCommand.JUMP;
         if (Input.IsActionPressed("primary_fire")) cmd |= InputCommand.FIRE_PRIMARY;
 
-        LastInputCommand = cmd; // store locally for authority simulation
+        LastInputCommand = cmd;
         return cmd;
     }
 

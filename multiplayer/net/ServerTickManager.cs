@@ -7,6 +7,7 @@ using System;
 public class ServerTickManager
 {
     private double _accumulator = 0f;
+    public ushort ServerTick { get; private set; }
 
     public void PhysicsTick(double delta)
     {
@@ -22,6 +23,7 @@ public class ServerTickManager
     private void TickServer()
     {
         SendWorldSnapshot();
+        MatchState.Instance.AdvanceTick();
     }
 
 

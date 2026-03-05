@@ -15,8 +15,12 @@ public partial class MatchState : Node
 {
     public static MatchState Instance { get; private set; }
 
-    public uint CurrentTick { get; private set; } = 0;
+    public ushort CurrentTick { get; private set; } = 0;
 
+    public void SetCurrentTick(ushort tick)
+    {
+        CurrentTick = tick;
+    }
     public void AdvanceTick()
     {
         CurrentTick++;

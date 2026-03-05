@@ -20,17 +20,16 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
-        if (MatchState.Instance == null)
+        ushort snapshotTick = msg.Tick;
+        int delta = (int)(snapshotTick - MatchState.Instance.CurrentTick);
+        if (delta <= 0 && delta > -32768)
         {
-            GD.Print("match state is null");
+            // snapshot is older or duplicate, drop it
             return;
         }
 
-        if (MatchState.Instance.ConnectedPlayers == null)
-        {
-            GD.Print("connected players is null on match state");
-            return;
-        }
+        MatchState.Instance.SetCurrentTick(snapshotTick);
+
 
         var snapshots = msg.GetCharacterSnapshots();
 

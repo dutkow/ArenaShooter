@@ -2,18 +2,14 @@ using Godot;
 using System;
 using System.Linq;
 
-
-
-
 /// <summary>
 /// Sent from Server → Client to sync the current tick’s player positions, rotations, and velocity.
 /// </summary>
-using Godot;
-using System;
-using System.Linq;
-
 public class WorldSnapshot : Message
 {
+    // Server tick
+    public ushort Tick;
+
     // Arena character snapshot
     public byte[] PlayerIDs;
     public string[] PlayerNames;
@@ -26,39 +22,28 @@ public class WorldSnapshot : Message
     {
         base.BufferSize();
 
-        Add(PlayerIDs.Length);
+        // Add ServerTick
+        Add(Tick);
 
+        Add(PlayerIDs.Length);
         for (int i = 0; i < PlayerIDs.Length; i++)
-        {
             Add(PlayerIDs[i]);
-        }
 
         Add(PlayerNames.Length);
-
         for (int i = 0; i < PlayerNames.Length; i++)
-        {
             Add(PlayerNames[i]);
-        }
 
         for (int i = 0; i < Positions.Length; i++)
-        {
             Add(Positions[i]);
-        }
 
         for (int i = 0; i < Velocities.Length; i++)
-        {
             Add(Velocities[i]);
-        }
 
         for (int i = 0; i < CharacterYaws.Length; i++)
-        {
             Add(CharacterYaws[i]);
-        }
 
         for (int i = 0; i < AimPitches.Length; i++)
-        {
             Add(AimPitches[i]);
-        }
 
         return _dataSize;
     }
@@ -67,39 +52,28 @@ public class WorldSnapshot : Message
     {
         base.WriteMessage();
 
-        Write(PlayerIDs.Length);
+        // Write ServerTick first
+        Write(Tick);
 
+        Write(PlayerIDs.Length);
         for (int i = 0; i < PlayerIDs.Length; i++)
-        {
             Write(PlayerIDs[i]);
-        }
 
         Write(PlayerNames.Length);
-
         for (int i = 0; i < PlayerNames.Length; i++)
-        {
             Write(PlayerNames[i]);
-        }
 
         for (int i = 0; i < Positions.Length; i++)
-        {
             Write(Positions[i]);
-        }
 
         for (int i = 0; i < Velocities.Length; i++)
-        {
             Write(Velocities[i]);
-        }
 
         for (int i = 0; i < CharacterYaws.Length; i++)
-        {
             Write(CharacterYaws[i]);
-        }
 
         for (int i = 0; i < AimPitches.Length; i++)
-        {
             Write(AimPitches[i]);
-        }
 
         return _data;
     }
@@ -108,51 +82,36 @@ public class WorldSnapshot : Message
     {
         base.ReadMessage(data);
 
+        // Read ServerTick first
+        Read(out Tick);
+
         int count = 0;
 
         Read(out count);
         PlayerIDs = new byte[count];
-
         for (int i = 0; i < count; i++)
-        {
             Read(out PlayerIDs[i]);
-        }
 
         Read(out count);
         PlayerNames = new string[count];
-
         for (int i = 0; i < count; i++)
-        {
             Read(out PlayerNames[i]);
-        }
 
         Positions = new Vector3[count];
-
         for (int i = 0; i < count; i++)
-        {
             Read(out Positions[i]);
-        }
 
         Velocities = new Vector3[count];
-
         for (int i = 0; i < count; i++)
-        {
             Read(out Velocities[i]);
-        }
 
         CharacterYaws = new float[count];
-
         for (int i = 0; i < count; i++)
-        {
             Read(out CharacterYaws[i]);
-        }
 
         AimPitches = new float[count];
-
         for (int i = 0; i < count; i++)
-        {
             Read(out AimPitches[i]);
-        }
     }
 
     public static void Send()
@@ -170,7 +129,6 @@ public class WorldSnapshot : Message
         int[] shield = new int[count];
 
         int i = 0;
-
         foreach (var kvp in players)
         {
             var player = kvp.Value;
@@ -204,6 +162,7 @@ public class WorldSnapshot : Message
         {
             MessageType = Msg.S2C_WORLD_SNAPSHOT,
             ENetFlags = ENetPacketFlags.Reliable,
+            Tick = MatchState.Instance.CurrentTick, // set the current server tick
             PlayerIDs = playerIDs,
             PlayerNames = playerNames,
             Positions = positions,
