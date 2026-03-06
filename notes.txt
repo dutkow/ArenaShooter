@@ -1,8 +1,7 @@
 Short term
 
-- move character movement into its own component
-- move character movement off of physics into stoppable functions
-- build out client-side prediction with tick/last tick sharing and input buffer
+- need to fork godot to allow for jolt physics stepping manually for client-side prediction
+
 
 - Hitscan weapons
 
