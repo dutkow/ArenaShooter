@@ -20,8 +20,6 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
-        GD.Print($"receiving world snapshot");
-
         ushort serverTick = msg.Tick;
         if (!NetUtils.IsNewerTick(serverTick, MatchState.Instance.LastAppliedServerTick))
         {

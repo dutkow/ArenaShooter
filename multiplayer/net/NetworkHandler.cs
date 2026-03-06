@@ -85,9 +85,9 @@ public partial class NetworkHandler : Node
 
         HandleEvents();
 
-        if (NetworkEmulation.Enabled)
+        if (NetworkEmulator.Enabled)
         {
-            NetworkEmulation.ProcessQueue();
+            NetworkEmulator.ProcessQueue();
         }
     }
 

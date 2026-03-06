@@ -234,21 +234,67 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
     public void ApplySnapshot(ArenaCharacterSnapshot snapshot, float deltaTime = 0f)
     {
-        LastSnapshot = snapshot;
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position))
+            LastSnapshot.Position = snapshot.Position;
+
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity))
+            LastSnapshot.Velocity = snapshot.Velocity;
+
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw))
+            LastSnapshot.Yaw = snapshot.Yaw;
+
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch))
+            LastSnapshot.AimPitch = snapshot.AimPitch;
+
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Health))
+        {
+            LastSnapshot.Health = snapshot.Health;
+            HealthComponent.SetHealth(snapshot.Health);
+        }
+
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Shield))
+        {
+            LastSnapshot.Shield = snapshot.Shield;
+            HealthComponent.SetShield(snapshot.Shield);
+
+        }
+
 
         if (!NetworkedComponent.IsLocal)
         {
-            Vector3 predicted = snapshot.Position + snapshot.Velocity * deltaTime;
-            GlobalPosition = predicted;
+            Vector3 targetPos = GlobalPosition;
+            Vector3 targetVel = MovementComp.Velocity;
+            bool predictedPositionChanged = false;
 
-            var rot = GlobalRotation;
-            rot.Y = snapshot.Yaw;
-            GlobalRotation = rot;
+            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position))
+            {
+                targetPos = LastSnapshot.Position;
+                predictedPositionChanged = true;
+            }
 
-            if (ThirdPersonWeaponMesh != null)
+            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity))
+            {
+                targetVel = LastSnapshot.Velocity;
+                predictedPositionChanged = true;
+            }
+
+            if (predictedPositionChanged)
+            {
+                Vector3 predicted = targetPos + targetVel * deltaTime;
+                GlobalPosition = predicted;
+            }
+
+            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw))
+            {
+                var rot = GlobalRotation;
+                rot.Y = LastSnapshot.Yaw;
+                GlobalRotation = rot;
+            }
+
+            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch) && ThirdPersonWeaponMesh != null)
             {
                 var camRot = ThirdPersonWeaponMesh.GlobalRotation;
-                camRot.X = Mathf.Clamp(snapshot.AimPitch, -1.5f, 1.5f);
+                camRot.X = Mathf.Clamp(LastSnapshot.AimPitch, -1.5f, 1.5f);
                 ThirdPersonWeaponMesh.GlobalRotation = camRot;
             }
         }

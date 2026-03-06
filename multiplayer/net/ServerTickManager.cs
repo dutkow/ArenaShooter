@@ -17,6 +17,9 @@ public class ServerTickManager
     private readonly Dictionary<ushort, WorldSnapshot> _snapshotHistory = new();
     private readonly Queue<ushort> _snapshotQueue = new();
 
+    // ---- For traffic tracking ----
+    private int _bytesSentThisPeriod = 0;
+
     public void PhysicsTick(double delta)
     {
         _accumulator += delta;
@@ -26,21 +29,25 @@ public class ServerTickManager
             _accumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
             TickServer();
             ServerTick++;
+
+            if (ServerTick % NetworkConstants.SERVER_TICK_RATE == 0)
+            {
+                float mbps = (_bytesSentThisPeriod * 8f) / 1_000_000f;
+                GD.Print($"Traffic: ~{mbps:F4} Mbps, {_bytesSentThisPeriod} bytes/sec (~{_bytesSentThisPeriod / 64.0f} bytes/tick)");
+                _bytesSentThisPeriod = 0;
+            }
         }
     }
 
     private void TickServer()
     {
         var newSnapshot = WorldSnapshot.Build();
-
         SendWorldSnapshotDeltas(newSnapshot);
-
         AddSnapshotToHistory(ServerTick, newSnapshot);
     }
 
     private void SendWorldSnapshotDeltas(WorldSnapshot newSnapshot)
     {
-        // Cache calculated deltas for this send
         var snapshotDeltas = new Dictionary<uint, WorldSnapshot>();
 
         foreach (var kvp in MatchState.Instance.LastAckedTickByPeerID)
@@ -53,28 +60,25 @@ public class ServerTickManager
 
             WorldSnapshot snapshotToSend;
 
-            // Use cached delta if already calculated
             if (snapshotDeltas.TryGetValue(lastAckedTick, out var deltaSnapshot))
             {
                 snapshotToSend = deltaSnapshot;
             }
-            // Build delta from previous snapshot if it exists
             else if (_snapshotHistory.TryGetValue((ushort)lastAckedTick, out var previousSnapshot))
             {
                 snapshotToSend = newSnapshot.BuildDelta(previousSnapshot);
                 snapshotDeltas[lastAckedTick] = snapshotToSend;
             }
-            // Otherwise, send full snapshot
             else
             {
                 snapshotToSend = newSnapshot;
             }
 
-            // Debug: log size of serialized snapshot
+            // Write message to calculate bytes
             var bytes = snapshotToSend.WriteMessage();
 
-            GD.Print($"Sending snapshot to peer {peerID}, tick {ServerTick}, size {bytes.Length} bytes");
-
+            // ---- Accumulate bytes sent ----
+            _bytesSentThisPeriod += bytes.Length;
 
             NetworkSender.ToClient(peer, snapshotToSend);
         }
@@ -85,7 +89,6 @@ public class ServerTickManager
         _snapshotHistory[tick] = snapshot;
         _snapshotQueue.Enqueue(tick);
 
-        // Trim old snapshots
         while (_snapshotQueue.Count > MaxSnapshotHistory)
         {
             var oldTick = _snapshotQueue.Dequeue();

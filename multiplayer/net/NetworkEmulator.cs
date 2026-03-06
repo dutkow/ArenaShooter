@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-public static class NetworkEmulation
+public static class NetworkEmulator
 {
-    public static bool Enabled = false;
+    public static bool Enabled = true;
     public static float MinPingMs = 50.0f;
-    public static float MaxPingMs = 55.0f;
+    public static float MaxPingMs = 60.0f;
     public static float PacketLossPercent = 0.01f;
 
     private class QueuedPacket

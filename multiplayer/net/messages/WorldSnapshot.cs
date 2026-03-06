@@ -3,21 +3,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-/// <summary>
-/// Snapshot of a single character in the world
-/// </summary>
+
+[Flags]
+public enum CharacterSnapshotFlags : ushort
+{
+    None = 0,
+    Position = 1 << 0,
+    Velocity = 1 << 1,
+    Yaw = 1 << 2,
+    AimPitch = 1 << 3,
+    Health = 1 << 4,
+    Shield = 1 << 5,
+}
+
 public struct ArenaCharacterSnapshot
 {
     public byte PlayerID;
+    public CharacterSnapshotFlags DirtyFlags;
+
     public Vector3 Position;
     public Vector3 Velocity;
+
     public float Yaw;
     public float AimPitch;
+
     public byte Health;
     public byte Shield;
 
     public ArenaCharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
-                                  float yaw, float aimPitch, byte health, byte shield)
+                                  float yaw, float aimPitch, byte health, byte shield,
+                                  CharacterSnapshotFlags dirtyFlags)
     {
         PlayerID = playerID;
         Position = position;
@@ -26,6 +41,30 @@ public struct ArenaCharacterSnapshot
         AimPitch = aimPitch;
         Health = health;
         Shield = shield;
+        DirtyFlags = dirtyFlags;
+    }
+
+    // Compute DirtyFlags compared to a previous snapshot
+    public static CharacterSnapshotFlags ComputeDirtyFlags(ArenaCharacterSnapshot current, ArenaCharacterSnapshot? previous)
+    {
+        if (previous == null)
+            return CharacterSnapshotFlags.Position |
+                   CharacterSnapshotFlags.Velocity |
+                   CharacterSnapshotFlags.Yaw |
+                   CharacterSnapshotFlags.AimPitch |
+                   CharacterSnapshotFlags.Health |
+                   CharacterSnapshotFlags.Shield;
+
+        CharacterSnapshotFlags flags = CharacterSnapshotFlags.None;
+
+        if (current.Position != previous.Value.Position) flags |= CharacterSnapshotFlags.Position;
+        if (current.Velocity != previous.Value.Velocity) flags |= CharacterSnapshotFlags.Velocity;
+        if (current.Yaw != previous.Value.Yaw) flags |= CharacterSnapshotFlags.Yaw;
+        if (current.AimPitch != previous.Value.AimPitch) flags |= CharacterSnapshotFlags.AimPitch;
+        if (current.Health != previous.Value.Health) flags |= CharacterSnapshotFlags.Health;
+        if (current.Shield != previous.Value.Shield) flags |= CharacterSnapshotFlags.Shield;
+
+        return flags;
     }
 }
 
@@ -55,14 +94,15 @@ public class WorldSnapshot : Message
         {
             var c = Characters[i];
             Add(c.PlayerID);
-            Add(c.Position);
-            Add(c.Velocity);
-            Add(c.Yaw);
-            Add(c.AimPitch);
-            Add(c.Health);
-            Add(c.Shield);
-        }
 
+            Add((ushort)c.DirtyFlags);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position)) Add(c.Position);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity)) Add(c.Velocity);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw)) Add(c.Yaw);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch)) Add(c.AimPitch);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Health)) Add(c.Health);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Shield)) Add(c.Shield);
+        }
         return _dataSize;
     }
 
@@ -77,12 +117,14 @@ public class WorldSnapshot : Message
         {
             var c = Characters[i];
             Write(c.PlayerID);
-            Write(c.Position);
-            Write(c.Velocity);
-            Write(c.Yaw);
-            Write(c.AimPitch);
-            Write(c.Health);
-            Write(c.Shield);
+
+            Write((ushort)c.DirtyFlags);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position)) Write(c.Position);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity)) Write(c.Velocity);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw)) Write(c.Yaw);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch)) Write(c.AimPitch);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Health)) Write(c.Health);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Shield)) Write(c.Shield);
         }
 
         return _data;
@@ -101,19 +143,24 @@ public class WorldSnapshot : Message
         for (int i = 0; i < count; i++)
         {
             byte id;
-            Vector3 pos, vel;
-            float yaw, pitch;
-            byte health, shield;
-
             Read(out id);
-            Read(out pos);
-            Read(out vel);
-            Read(out yaw);
-            Read(out pitch);
-            Read(out health);
-            Read(out shield);
 
-            Characters[i] = new ArenaCharacterSnapshot(id, pos, vel, yaw, pitch, health, shield);
+            ushort rawFlags;
+            Read(out rawFlags);
+            var flags = (CharacterSnapshotFlags)rawFlags;
+
+            Vector3 pos = default, vel = default;
+            float yaw = 0f, pitch = 0f;
+            byte health = 0, shield = 0;
+
+            if (flags.HasFlag(CharacterSnapshotFlags.Position)) Read(out pos);
+            if (flags.HasFlag(CharacterSnapshotFlags.Velocity)) Read(out vel);
+            if (flags.HasFlag(CharacterSnapshotFlags.Yaw)) Read(out yaw);
+            if (flags.HasFlag(CharacterSnapshotFlags.AimPitch)) Read(out pitch);
+            if (flags.HasFlag(CharacterSnapshotFlags.Health)) Read(out health);
+            if (flags.HasFlag(CharacterSnapshotFlags.Shield)) Read(out shield);
+
+            Characters[i] = new ArenaCharacterSnapshot(id, pos, vel, yaw, pitch, health, shield, flags);
         }
     }
 
@@ -148,7 +195,14 @@ public class WorldSnapshot : Message
                 shield = (byte)player.Character.HealthComponent.Shield;
             }
 
-            characters[i++] = new ArenaCharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, health, shield);
+            CharacterSnapshotFlags allFlags = CharacterSnapshotFlags.Position |
+                                                CharacterSnapshotFlags.Velocity |
+                                                CharacterSnapshotFlags.Yaw |
+                                                CharacterSnapshotFlags.AimPitch |
+                                                CharacterSnapshotFlags.Health |
+                                                CharacterSnapshotFlags.Shield;
+
+            characters[i++] = new ArenaCharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, health, shield, allFlags);
         }
 
         newSnapshot.Tick = MatchState.Instance.ServerTickManager.ServerTick;
@@ -162,32 +216,53 @@ public class WorldSnapshot : Message
     public WorldSnapshot BuildDelta(WorldSnapshot previous)
     {
         if (previous == null)
-            return this; // no previous snapshot, send full
+            return this; // no previous snapshot, send full snapshot
 
         var deltaList = new List<ArenaCharacterSnapshot>();
 
-        // convert previous snapshot to dictionary for fast lookup
+        // Convert previous snapshot to dictionary for fast lookup
         var prevDict = previous.Characters.ToDictionary(c => c.PlayerID);
 
-        foreach (var c in Characters)
+        foreach (var current in Characters)
         {
-            if (prevDict.TryGetValue(c.PlayerID, out var old))
+            CharacterSnapshotFlags flags = CharacterSnapshotFlags.None;
+
+            if (prevDict.TryGetValue(current.PlayerID, out var old))
             {
-                // include if any field changed
-                if (c.Position != old.Position ||
-                   c.Velocity != old.Velocity ||
-                   c.Yaw != old.Yaw ||
-                   c.AimPitch != old.AimPitch ||
-                   c.Health != old.Health ||
-                   c.Shield != old.Shield)
+                // compute which fields changed
+                flags = ArenaCharacterSnapshot.ComputeDirtyFlags(current, old);
+
+                // Only add if something actually changed
+                if (flags != CharacterSnapshotFlags.None)
                 {
-                    deltaList.Add(c);
+                    var delta = new ArenaCharacterSnapshot(
+                        current.PlayerID,
+                        current.Position,
+                        current.Velocity,
+                        current.Yaw,
+                        current.AimPitch,
+                        current.Health,
+                        current.Shield,
+                        flags
+                    );
+                    deltaList.Add(delta);
                 }
             }
             else
             {
-                // new character not in previous snapshot
-                deltaList.Add(c);
+                // New character not in previous snapshot — include all fields
+                flags = ArenaCharacterSnapshot.ComputeDirtyFlags(current, null);
+                var delta = new ArenaCharacterSnapshot(
+                    current.PlayerID,
+                    current.Position,
+                    current.Velocity,
+                    current.Yaw,
+                    current.AimPitch,
+                    current.Health,
+                    current.Shield,
+                    flags
+                );
+                deltaList.Add(delta);
             }
         }
 

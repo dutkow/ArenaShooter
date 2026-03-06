@@ -205,11 +205,11 @@ public class HealthComponent : Component
         {
             if(_isDead)
             {
-                PlayerDied.Send(playerEntity.GetPlayerID(), 0);
+                //PlayerDied.Send(playerEntity.GetPlayerID(), 0);
             }
             else if (playerEntity.IsPlayerControlled())
             {
-                HealthUpdate.Send(playerEntity.GetPlayerID(), Health, Shield);
+                //HealthUpdate.Send(playerEntity.GetPlayerID(), Health, Shield);
             }
         }
     }
