@@ -1,49 +1,60 @@
 using Godot;
 using System;
-using System.Linq;
 
 /// <summary>
-/// Sent from Server → Client to sync the current tick’s player positions, rotations, and velocity.
+/// Snapshot of a single character in the world
+/// </summary>
+public struct ArenaCharacterSnapshot
+{
+    public byte PlayerID;
+    public Vector3 Position;
+    public Vector3 Velocity;
+    public float Yaw;
+    public float AimPitch;
+    public byte Health;
+    public byte Shield;
+
+    public ArenaCharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
+                                  float yaw, float aimPitch, byte health, byte shield)
+    {
+        PlayerID = playerID;
+        Position = position;
+        Velocity = velocity;
+        Yaw = yaw;
+        AimPitch = aimPitch;
+        Health = health;
+        Shield = shield;
+    }
+}
+
+/// <summary>
+/// Sent from Server → Client to sync the current tick’s player states
 /// </summary>
 public class WorldSnapshot : Message
 {
-    // Server tick
     public ushort Tick;
 
-    // Arena character snapshot
-    public byte[] PlayerIDs;
-    public string[] PlayerNames;
-    public Vector3[] Positions;
-    public Vector3[] Velocities;
-    public float[] CharacterYaws;
-    public float[] AimPitches;
+    // Use an array of character snapshots instead of parallel arrays
+    public ArenaCharacterSnapshot[] Characters;
 
     protected override int BufferSize()
     {
         base.BufferSize();
 
-        // Add ServerTick
         Add(Tick);
 
-        Add(PlayerIDs.Length);
-        for (int i = 0; i < PlayerIDs.Length; i++)
-            Add(PlayerIDs[i]);
-
-        Add(PlayerNames.Length);
-        for (int i = 0; i < PlayerNames.Length; i++)
-            Add(PlayerNames[i]);
-
-        for (int i = 0; i < Positions.Length; i++)
-            Add(Positions[i]);
-
-        for (int i = 0; i < Velocities.Length; i++)
-            Add(Velocities[i]);
-
-        for (int i = 0; i < CharacterYaws.Length; i++)
-            Add(CharacterYaws[i]);
-
-        for (int i = 0; i < AimPitches.Length; i++)
-            Add(AimPitches[i]);
+        Add(Characters.Length);
+        for (int i = 0; i < Characters.Length; i++)
+        {
+            var c = Characters[i];
+            Add(c.PlayerID);
+            Add(c.Position);
+            Add(c.Velocity);
+            Add(c.Yaw);
+            Add(c.AimPitch);
+            Add(c.Health);
+            Add(c.Shield);
+        }
 
         return _dataSize;
     }
@@ -52,28 +63,20 @@ public class WorldSnapshot : Message
     {
         base.WriteMessage();
 
-        // Write ServerTick first
         Write(Tick);
 
-        Write(PlayerIDs.Length);
-        for (int i = 0; i < PlayerIDs.Length; i++)
-            Write(PlayerIDs[i]);
-
-        Write(PlayerNames.Length);
-        for (int i = 0; i < PlayerNames.Length; i++)
-            Write(PlayerNames[i]);
-
-        for (int i = 0; i < Positions.Length; i++)
-            Write(Positions[i]);
-
-        for (int i = 0; i < Velocities.Length; i++)
-            Write(Velocities[i]);
-
-        for (int i = 0; i < CharacterYaws.Length; i++)
-            Write(CharacterYaws[i]);
-
-        for (int i = 0; i < AimPitches.Length; i++)
-            Write(AimPitches[i]);
+        Write(Characters.Length);
+        for (int i = 0; i < Characters.Length; i++)
+        {
+            var c = Characters[i];
+            Write(c.PlayerID);
+            Write(c.Position);
+            Write(c.Velocity);
+            Write(c.Yaw);
+            Write(c.AimPitch);
+            Write(c.Health);
+            Write(c.Shield);
+        }
 
         return _data;
     }
@@ -82,36 +85,29 @@ public class WorldSnapshot : Message
     {
         base.ReadMessage(data);
 
-        // Read ServerTick first
         Read(out Tick);
 
-        int count = 0;
-
+        int count;
         Read(out count);
-        PlayerIDs = new byte[count];
-        for (int i = 0; i < count; i++)
-            Read(out PlayerIDs[i]);
+        Characters = new ArenaCharacterSnapshot[count];
 
-        Read(out count);
-        PlayerNames = new string[count];
         for (int i = 0; i < count; i++)
-            Read(out PlayerNames[i]);
+        {
+            byte id;
+            Vector3 pos, vel;
+            float yaw, pitch;
+            byte health, shield;
 
-        Positions = new Vector3[count];
-        for (int i = 0; i < count; i++)
-            Read(out Positions[i]);
+            Read(out id);
+            Read(out pos);
+            Read(out vel);
+            Read(out yaw);
+            Read(out pitch);
+            Read(out health);
+            Read(out shield);
 
-        Velocities = new Vector3[count];
-        for (int i = 0; i < count; i++)
-            Read(out Velocities[i]);
-
-        CharacterYaws = new float[count];
-        for (int i = 0; i < count; i++)
-            Read(out CharacterYaws[i]);
-
-        AimPitches = new float[count];
-        for (int i = 0; i < count; i++)
-            Read(out AimPitches[i]);
+            Characters[i] = new ArenaCharacterSnapshot(id, pos, vel, yaw, pitch, health, shield);
+        }
     }
 
     public static void Send()
@@ -119,76 +115,39 @@ public class WorldSnapshot : Message
         var players = MatchState.Instance.ConnectedPlayers;
         int count = players.Count;
 
-        byte[] playerIDs = new byte[count];
-        string[] playerNames = new string[count];
-        Vector3[] positions = new Vector3[count];
-        Vector3[] velocities = new Vector3[count];
-        float[] yaws = new float[count];
-        float[] pitches = new float[count];
-        int[] health = new int[count];
-        int[] shield = new int[count];
-
+        var characters = new ArenaCharacterSnapshot[count];
         int i = 0;
+
         foreach (var kvp in players)
         {
             var player = kvp.Value;
-
-            playerIDs[i] = kvp.Key;
-            playerNames[i] = player.PlayerName;
+            byte health = 0, shield = 0;
+            Vector3 pos = Vector3.Zero, vel = Vector3.Zero;
+            float yaw = 0f, pitch = 0f;
 
             if (player.Character != null)
             {
-                positions[i] = player.Character.GlobalPosition;
-                velocities[i] = player.Character.Velocity;
-                yaws[i] = player.Character.Yaw;
-                pitches[i] = player.Character.AimPitch;
-                health[i] = player.Character.HealthComponent.Health;
-                shield[i] = player.Character.HealthComponent.Shield;
-            }
-            else
-            {
-                positions[i] = Vector3.Zero;
-                velocities[i] = Vector3.Zero;
-                yaws[i] = 0f;
-                pitches[i] = 0f;
-                health[i] = 0;
-                shield[i] = 0;
+                pos = player.Character.GlobalPosition;
+                vel = player.Character.Velocity;
+                yaw = player.Character.Yaw;
+                pitch = player.Character.AimPitch;
+                health = (byte)player.Character.HealthComponent.Health;
+                shield = (byte)player.Character.HealthComponent.Shield;
             }
 
-            i++;
+            characters[i++] = new ArenaCharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, health, shield);
         }
 
         var msg = new WorldSnapshot()
         {
             MessageType = Msg.S2C_WORLD_SNAPSHOT,
-            ENetFlags = ENetPacketFlags.Reliable,
-            Tick = MatchState.Instance.CurrentTick, // set the current server tick
-            PlayerIDs = playerIDs,
-            PlayerNames = playerNames,
-            Positions = positions,
-            Velocities = velocities,
-            CharacterYaws = yaws,
-            AimPitches = pitches
+            ENetFlags = ENetPacketFlags.UnreliableFragment,
+            Tick = MatchState.Instance.CurrentTick,
+            Characters = characters
         };
 
         NetworkSender.Broadcast(msg);
     }
 
-    public ArenaCharacterSnapshot[] GetCharacterSnapshots()
-    {
-        int count = PlayerIDs.Length;
-        var snapshots = new ArenaCharacterSnapshot[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            snapshots[i] = new ArenaCharacterSnapshot(
-                PlayerIDs[i],
-                Positions[i],
-                Velocities[i],
-                CharacterYaws[i],
-                AimPitches[i]
-            );
-        }
-        return snapshots;
-    }
+    public ArenaCharacterSnapshot[] GetCharacterSnapshots() => Characters;
 }

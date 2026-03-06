@@ -184,13 +184,16 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
     public ArenaCharacterSnapshot GetSnapshot()
     {
-        return new ArenaCharacterSnapshot(
-            State.PlayerID,
-            GlobalPosition,
-            MovementComp.Velocity,
-            Yaw,
-            AimPitch
-        );
+        var snapshot = new ArenaCharacterSnapshot();
+        snapshot.PlayerID = State.PlayerID;
+        snapshot.Position = GlobalPosition;
+        snapshot.Velocity = MovementComp.Velocity;
+        snapshot.Yaw = Yaw;
+        snapshot.AimPitch = AimPitch;
+        snapshot.Health = (byte)HealthComponent.Health;
+        snapshot.Shield = (byte)HealthComponent.Shield;
+
+        return snapshot;
     }
 
     public void HandleClientCommandBatch(ClientCommand cmdBatch, double delta)
@@ -232,8 +235,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
     public void ApplySnapshot(ArenaCharacterSnapshot snapshot, float deltaTime = 0f)
     {
-        if (snapshot == null) return;
-
         LastSnapshot = snapshot;
 
         if (!NetworkedComponent.IsLocal)
@@ -296,14 +297,17 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         RotateY(-Mathf.DegToRad(_rotVelocity.X));
         _cameraInput = Vector2.Zero;
 
-        if (!NetworkedComponent.IsLocal && !NetworkedComponent.IsAuthority)
-        {
-            InterpolateRemoteSnapshot(delta);
-        }
 
-        if (NetworkedComponent.IsLocal && LastSnapshot != null)
+        if (!NetworkedComponent.IsAuthority)
         {
-            CorrectClientPosition(LastSnapshot, delta);
+            if(NetworkedComponent.IsLocal)
+            {
+                CorrectClientPosition(LastSnapshot, delta);
+            }
+            else
+            {
+                InterpolateRemoteSnapshot(delta);
+            }
         }
     }
 
@@ -401,7 +405,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
     private void InterpolateRemoteSnapshot(double delta)
     {
-        if (LastSnapshot == null) return;
 
         if (NetworkedComponent.IsLocal || NetworkedComponent.IsAuthority) return;
 
