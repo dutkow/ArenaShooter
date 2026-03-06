@@ -20,11 +20,15 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
-        ushort serverTick = msg.Tick;
-        if (!NetUtils.IsNewerTick(serverTick, MatchState.Instance.LastServerTick))
-            return;
+        GD.Print($"receiving world snapshot");
 
-        MatchState.Instance.SetLastServerTick(serverTick);
+        ushort serverTick = msg.Tick;
+        if (!NetUtils.IsNewerTick(serverTick, MatchState.Instance.LastAppliedServerTick))
+        {
+            return;
+        }
+
+        MatchState.Instance.LastAppliedServerTick = serverTick;
 
         var snapshots = msg.GetCharacterSnapshots();
 

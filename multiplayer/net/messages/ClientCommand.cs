@@ -15,23 +15,25 @@ public enum InputCommand : byte
 
 public struct TickCommand
 {
-    public uint TickNumber;
+    public ushort TickNumber;      // client tick number
     public InputCommand InputButtons;
     public float Yaw;
     public float Pitch;
 }
 
-
 public class ClientCommand : Message
 {
     // Array of tick commands we want to send in one packet
     public TickCommand[] Commands;
-    public uint LastAcknowledgedTick => Commands.Length > 0 ? Commands[Commands.Length - 1].TickNumber : 0;
+
+    // The last server tick the client has received & applied
+    public ushort LastAppliedServerTick;
 
     protected override int BufferSize()
     {
         base.BufferSize();
-        Add((byte)Commands.Length); // store how many ticks are in this packet
+        Add(LastAppliedServerTick);        // send the server tick first
+        Add((byte)Commands.Length);        // then send command count
         foreach (var cmd in Commands)
         {
             Add(cmd.TickNumber);
@@ -45,6 +47,7 @@ public class ClientCommand : Message
     public override byte[] WriteMessage()
     {
         base.WriteMessage();
+        Write(LastAppliedServerTick);
         Write((byte)Commands.Length);
         foreach (var cmd in Commands)
         {
@@ -59,9 +62,11 @@ public class ClientCommand : Message
     public override void ReadMessage(byte[] data)
     {
         base.ReadMessage(data);
+
+        Read(out LastAppliedServerTick);   // read server tick first
+
         byte count;
         Read(out count);
-
         Commands = new TickCommand[count];
         for (int i = 0; i < count; i++)
         {
@@ -79,13 +84,15 @@ public class ClientCommand : Message
         }
     }
 
-    public static void Send(TickCommand[] commands)
+    public static void Send(TickCommand[] commands, ushort lastAppliedServerTick)
     {
-        var msg = new ClientCommand();
-        msg.MessageType = Msg.C2S_CLIENT_COMMAND;
-        msg.ENetFlags = ENetPacketFlags.UnreliableFragment;
-
-        msg.Commands = commands;
+        var msg = new ClientCommand
+        {
+            MessageType = Msg.C2S_CLIENT_COMMAND,
+            ENetFlags = ENetPacketFlags.UnreliableFragment,
+            Commands = commands,
+            LastAppliedServerTick = lastAppliedServerTick
+        };
 
         NetworkSender.ToServer(msg);
     }

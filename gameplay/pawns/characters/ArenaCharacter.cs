@@ -218,7 +218,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     {
         if (_pendingCommands.Count == 0)
         {
-            GD.Print("[DEBUG] No pending commands.");
             return;
         }
 
@@ -396,7 +395,7 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         Array.Copy(historyArray, startIdx, commandsToSend, 0, length);
 
         // Send the batch directly
-        ClientCommand.Send(commandsToSend);
+        ClientCommand.Send(commandsToSend, MatchState.Instance.LastAppliedServerTick);
     }
 
     // ----------------------

@@ -19,15 +19,10 @@ public partial class MatchState : Node
 
     public ushort CurrentTick { get; private set; } = 0;
 
-    public ushort LastServerTick { get; private set; } = 0;
 
     private double _clientTickAccumulator = 0;
 
-
-    public void SetLastServerTick(ushort tick)
-    {
-        LastServerTick = tick;
-    }
+    public ushort LastAppliedServerTick;
 
     public void AdvanceTick()
     {
@@ -85,8 +80,12 @@ public partial class MatchState : Node
     public event Action<PlayerState>? PlayerJoined;
     public event Action<int, PlayerState>? PlayerLeft;
 
-    ServerTickManager _serverTickManager;
-    
+    public ServerTickManager ServerTickManager;
+
+    public Dictionary<int, ushort> LastAckedTickByPeerID = new();
+
+
+
     public override void _EnterTree()
     {
         base._EnterTree();
@@ -103,7 +102,7 @@ public partial class MatchState : Node
 
         if (NetworkSession.Instance.IsServer)
         {
-            _serverTickManager = new();
+            ServerTickManager = new();
 
             if (NetworkSession.Instance.IsListenServer)
             {
@@ -122,9 +121,9 @@ public partial class MatchState : Node
 
         if (NetworkSession.Instance.IsServer)
         {
-            if (_serverTickManager != null)
+            if (ServerTickManager != null)
             {
-                _serverTickManager.PhysicsTick(delta);
+                ServerTickManager.PhysicsTick(delta);
             }
         }
 
@@ -278,4 +277,5 @@ public partial class MatchState : Node
 
     public IReadOnlyList<PlayerState> GetActivePlayers() =>
         new List<PlayerState>(ConnectedPlayers.Values).FindAll(p => p.Character != null);
+
 }

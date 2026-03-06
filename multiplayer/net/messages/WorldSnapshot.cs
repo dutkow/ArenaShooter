@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Snapshot of a single character in the world
@@ -32,6 +34,11 @@ public struct ArenaCharacterSnapshot
 /// </summary>
 public class WorldSnapshot : Message
 {
+    public WorldSnapshot()
+    {
+        MessageType = Msg.S2C_WORLD_SNAPSHOT;
+    }
+
     public ushort Tick;
 
     // Use an array of character snapshots instead of parallel arrays
@@ -110,12 +117,18 @@ public class WorldSnapshot : Message
         }
     }
 
-    public static void Send()
+    public static void Send(ENetPacketPeer peer, WorldSnapshot snapshot)
     {
-        var players = MatchState.Instance.ConnectedPlayers;
-        int count = players.Count;
+        //var msg = snapshot.Read();
+        //NetworkSender.Broadcast(msg);
+    }
 
-        var characters = new ArenaCharacterSnapshot[count];
+    public static WorldSnapshot Build()
+    {
+        WorldSnapshot newSnapshot = new();
+
+        var players = MatchState.Instance.ConnectedPlayers;
+        var characters = new ArenaCharacterSnapshot[players.Count];
         int i = 0;
 
         foreach (var kvp in players)
@@ -138,15 +151,53 @@ public class WorldSnapshot : Message
             characters[i++] = new ArenaCharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, health, shield);
         }
 
-        var msg = new WorldSnapshot()
-        {
-            MessageType = Msg.S2C_WORLD_SNAPSHOT,
-            ENetFlags = ENetPacketFlags.UnreliableFragment,
-            Tick = MatchState.Instance.CurrentTick,
-            Characters = characters
-        };
+        newSnapshot.Tick = MatchState.Instance.ServerTickManager.ServerTick;
+        newSnapshot.Characters = characters;
 
-        NetworkSender.Broadcast(msg);
+        return newSnapshot;
+    }
+
+
+    // Build a delta snapshot compared to a previous snapshot
+    public WorldSnapshot BuildDelta(WorldSnapshot previous)
+    {
+        if (previous == null)
+            return this; // no previous snapshot, send full
+
+        var deltaList = new List<ArenaCharacterSnapshot>();
+
+        // convert previous snapshot to dictionary for fast lookup
+        var prevDict = previous.Characters.ToDictionary(c => c.PlayerID);
+
+        foreach (var c in Characters)
+        {
+            if (prevDict.TryGetValue(c.PlayerID, out var old))
+            {
+                // include if any field changed
+                if (c.Position != old.Position ||
+                   c.Velocity != old.Velocity ||
+                   c.Yaw != old.Yaw ||
+                   c.AimPitch != old.AimPitch ||
+                   c.Health != old.Health ||
+                   c.Shield != old.Shield)
+                {
+                    deltaList.Add(c);
+                }
+            }
+            else
+            {
+                // new character not in previous snapshot
+                deltaList.Add(c);
+            }
+        }
+
+        return new WorldSnapshot
+        {
+            Tick = Tick,
+            Characters = deltaList.ToArray(),
+            MessageType = Msg.S2C_WORLD_SNAPSHOT,
+            ENetFlags = ENetFlags
+        };
     }
 
     public ArenaCharacterSnapshot[] GetCharacterSnapshots() => Characters;

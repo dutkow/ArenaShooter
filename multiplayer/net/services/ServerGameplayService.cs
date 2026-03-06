@@ -17,6 +17,15 @@ public static class ServerGameplayService
                     var cmd = new ClientCommand();
                     cmd.ReadMessage(data);
 
+                    ushort currentAcked = MatchState.Instance.LastAckedTickByPeerID.TryGetValue(peerID, out var lastTick)
+                        ? lastTick
+                        : (ushort)0;
+
+                    // Wrap-safe update: only store if cmd.LastAppliedServerTick is newer
+                    if (NetUtils.IsNewerTick((ushort)cmd.LastAppliedServerTick, currentAcked))
+                    {
+                        MatchState.Instance.LastAckedTickByPeerID[peerID] = (ushort)cmd.LastAppliedServerTick;
+                    }
                     // Apply the input immediately on the server
                     double delta = NetworkConstants.SERVER_TICK_INTERVAL; // Or your fixed server tick
                     character.HandleClientCommandBatch(cmd, delta);

@@ -11,6 +11,8 @@ public enum ENetPacketFlags : int
 
 public enum Msg : byte
 {
+    A_MESSAGE_DOESNT_HAVE_TYPE_PROPERLY_CONFIGURED,
+
     // SHARED PACKETS / P2P
     P2P_HOLE_PUNCH_REQUEST,
     P2P_HOLE_PUNCH_ACK,

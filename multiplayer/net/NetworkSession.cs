@@ -39,6 +39,8 @@ public partial class NetworkSession : Node
     public int MaxPlayers { get; private set; } = 8;
     public Dictionary<byte, PlayerState> PlayerIDsToPlayerStates = new();
     public Dictionary<int, byte> PeerIDsToPlayerIDs = new();
+    public Dictionary<int, ENetPacketPeer> PeerIDsToPeers = new();
+
     public Dictionary<byte, ENetPacketPeer> PlayerIDsToPeers = new();
     private Queue<byte> _availablePlayerIDs = new();
 
@@ -158,6 +160,9 @@ public partial class NetworkSession : Node
         {
             PeerIDsToPlayerIDs.Remove(_peerID);
             PlayerIDsToPlayerStates.Remove(_playerID);
+
+            PeerIDsToPeers.Remove(_peerID);
+
             PlayerIDsToPeers.Remove(_playerID);
 
             _availablePlayerIDs.Enqueue(_playerID);
@@ -314,6 +319,7 @@ public partial class NetworkSession : Node
 
         PeerIDsToPlayerIDs[peerID] = playerID;
         PlayerIDsToPeers[playerID] = peer;
+        PeerIDsToPeers[peerID] = peer;
 
         PlayerIDsToPlayerStates[playerID] = new PlayerState(playerID)
         {
