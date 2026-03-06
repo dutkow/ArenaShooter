@@ -137,12 +137,6 @@ public partial class MatchState : Node
             byte playerID = initialMatchState.PlayerIDs[i];
 
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
-
-            if (initialMatchState.IsAlive[i])
-            {
-                SpawnManager.Instance.LocalSpawnPlayer(initialMatchState.PlayerIDs[i], initialMatchState.Positions[i], initialMatchState.Rotations[i].Y);
-            }
-
         }
     }
 
