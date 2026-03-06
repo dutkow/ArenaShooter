@@ -1,6 +1,5 @@
 using Godot;
 using System;
-using System.Collections.Generic;
 
 public enum MovementState
 {
@@ -19,16 +18,14 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     [Export] public Camera3D Camera;
     [Export] public Marker3D CameraPivot;
 
-    [Export] public int Speed { get; set; } = 14;
-    [Export] public int FallAcceleration { get; set; } = 50;
-    [Export] public float JumpVelocity { get; set; } = 20f;
-    [Export] public float AirControlAcceleration { get; set; } = 6f;
+
+
     [Export] public float MouseSens = 0.09f;
     [Export] public float MouseSmooth = 50f;
 
     [Export] Node3D _deathCamPivot;
 
-
+    public CharacterMovementComponent MovementComp { get; private set; } = new();
     public HealthComponent HealthComponent { get; private set; } = new();
     public PossessableComponent PossessableComponent { get; private set; } = new();
     public NetworkedComponent NetworkedComponent { get; private set; } = new();
@@ -39,14 +36,11 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     public bool IsAlive = true;
     public PlayerState State { get; private set; }
 
-    private MovementState _movementState;
     private bool _weaponsEnabled = true;
 
-    private Vector3 _targetVelocity = Vector3.Zero;
     private Vector2 _cameraInput = Vector2.Zero;
     private Vector2 _rotVelocity = Vector2.Zero;
 
-    private bool _canJump => IsOnFloor();
     public float Yaw => GlobalRotation.Y;
     public float AimPitch => CameraPivot.Rotation.X;
 
@@ -56,26 +50,40 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     public ArenaCharacterSnapshot LastSnapshot;
     public InputCommand LastInputCommand;
 
-    private double _tickAssumulator = 0f;
+    private double _tickAccumulator = 0f;
 
     // ----------------------
-    // Position Correction (client only)
+    // Position Correction
     // ----------------------
-    [Export] public float SnapThreshold = 2f;          // units to snap instantly
-    [Export] public float CorrectionThreshold = 0.1f;  // small differences lerp
-    [Export] public float CorrectionSpeed = 10f;       // lerp speed per second
-
-    private bool _wasFiringLastTick = false;
+    [Export] public float SnapThreshold = 2f;
+    [Export] public float CorrectionThreshold = 0.1f;
+    [Export] public float CorrectionSpeed = 10f;
 
     // ----------------------
     // Initialization
     // ----------------------
+
+    public void Initialize(PlayerState state)
+    {
+        if (state == null)
+        {
+            GD.PushError("State was null on arena character initialization");
+            return;
+        }
+
+        State = state;
+        State.Character = this;
+
+        MovementComp.SetCharacter(this);
+
+        HealthComponent.SetOwner(this);
+    }
+
     public void HandleRemoteSpawn()
     {
         Camera.Current = false;
         SetProcessInput(false);
         ShowThirdPersonView();
-        GD.Print($"show third person view ran on {NetworkSession.Instance.NetworkMode} ");
 
         NetworkedComponent.SetRole(NetworkRole.REMOTE);
     }
@@ -84,11 +92,10 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     {
         PossessableComponent.SetInputEnabled(enabled);
     }
-    
+
     public void OnPossessed(Controller controller)
     {
         PossessableComponent.OnPossessed(controller);
-
 
         HealthComponent.Death += OnDeath;
 
@@ -108,31 +115,18 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         PossessableComponent.OnUnpossessed();
     }
 
-    public NetworkRole GetNetworkRole()
-    {
-        return NetworkedComponent.Role;
-    }
+    public NetworkRole GetNetworkRole() => NetworkedComponent.Role;
+    public bool IsAuthority() => NetworkedComponent.IsAuthority;
+    public byte GetPlayerID() => State.PlayerID;
+    public bool IsPlayerControlled() => true;
 
-    public bool IsAuthority()
-    {
-        return NetworkedComponent.IsAuthority;
-    }
-
-    public byte GetPlayerID()
-    {
-        return State.PlayerID;
-    }
-
-    public bool IsPlayerControlled()
-    {
-        return true; // TODO: need to clean up interfaces and think about bots
-    }
+    // ----------------------
+    // Views
+    // ----------------------
 
     public void ShowFirstPersonView()
     {
         HideThirdPersonView();
-
-        GD.Print($"show first person view ran on {NetworkSession.Instance.NetworkMode} ");
         Weapon.FirstPersonWeaponMesh.Visible = true;
     }
 
@@ -155,38 +149,25 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         CharacterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
     }
 
-    public void Initialize(PlayerState state)
-    {
-        if (state == null)
-        {
-            GD.PushError("State was null on arena character initialization");
-            return;
-        }
-
-        State = state;
-        State.Character = this;
-
-        HealthComponent.SetOwner(this);
-    }
-
     // ----------------------
-    // Interface functions
+    // Damage
     // ----------------------
+
     public void ApplyDamage(int amount)
     {
         HealthComponent.ApplyDamage(amount);
     }
 
-
     // ----------------------
     // Replication
     // ----------------------
+
     public ArenaCharacterSnapshot GetSnapshot()
     {
         return new ArenaCharacterSnapshot(
             State.PlayerID,
             GlobalPosition,
-            Velocity,
+            MovementComp.Velocity,
             Yaw,
             AimPitch
         );
@@ -194,13 +175,10 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
     public void ApplyClientCommand(ClientCommand cmd, double delta)
     {
-        // --- Apply yaw to character body ---
         var bodyRot = GlobalRotation;
         bodyRot.Y = cmd.Yaw;
         GlobalRotation = bodyRot;
 
-
-        // --- Apply pitch to third-person weapon mesh (for now) ---
         if (ThirdPersonWeaponMesh != null)
         {
             var weaponRot = ThirdPersonWeaponMesh.GlobalRotation;
@@ -208,8 +186,8 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
             ThirdPersonWeaponMesh.GlobalRotation = weaponRot;
         }
 
-        // --- Apply movement using your existing ApplyInput ---
-        ApplyInput(cmd.InputButtons, delta);
+        MovementComp.ApplyInput(cmd.InputButtons, delta, CameraPivot);
+        Weapon.HandleInput(cmd.InputButtons);
     }
 
     public void ApplySnapshot(ArenaCharacterSnapshot snapshot, float deltaTime = 0f)
@@ -220,8 +198,8 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
         if (!NetworkedComponent.IsLocal)
         {
-            Vector3 predictedPos = snapshot.Position + snapshot.Velocity * deltaTime;
-            GlobalPosition = predictedPos;
+            Vector3 predicted = snapshot.Position + snapshot.Velocity * deltaTime;
+            GlobalPosition = predicted;
 
             var rot = GlobalRotation;
             rot.Y = snapshot.Yaw;
@@ -237,14 +215,18 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     }
 
     // ----------------------
-    // Input & Mouse
+    // Input
     // ----------------------
+
     public override void _Input(InputEvent @event)
     {
         if (!PossessableComponent.InputActive) return;
 
-        if (@event is InputEventMouseMotion mouseEvent && Input.MouseMode == Input.MouseModeEnum.Captured)
+        if (@event is InputEventMouseMotion mouseEvent &&
+            Input.MouseMode == Input.MouseModeEnum.Captured)
+        {
             _cameraInput = mouseEvent.Relative;
+        }
 
         if (Input.IsActionJustPressed("toggle_cursor_lock"))
         {
@@ -256,11 +238,14 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
     public override void _Process(double delta)
     {
+        base._Process(delta);
+
         _rotVelocity = _rotVelocity.Lerp(_cameraInput * MouseSens, (float)delta * MouseSmooth);
 
         if (CameraPivot != null)
         {
             CameraPivot.RotateX(-Mathf.DegToRad(_rotVelocity.Y));
+
             CameraPivot.Rotation = new Vector3(
                 Mathf.Clamp(CameraPivot.Rotation.X, -1.5f, 1.5f),
                 CameraPivot.Rotation.Y,
@@ -271,13 +256,11 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         RotateY(-Mathf.DegToRad(_rotVelocity.X));
         _cameraInput = Vector2.Zero;
 
-
         if (!NetworkedComponent.IsLocal && !NetworkedComponent.IsAuthority)
         {
             InterpolateRemoteSnapshot(delta);
         }
 
-        // Correct local position based on last server snapshot
         if (NetworkedComponent.IsLocal && LastSnapshot != null)
         {
             CorrectClientPosition(LastSnapshot, delta);
@@ -285,43 +268,36 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     }
 
     // ----------------------
-    // Physics & Movement
+    // Physics
     // ----------------------
+
     public override void _PhysicsProcess(double delta)
     {
         base._PhysicsProcess(delta);
 
-        // Authority (server) simulates movement
         if (NetworkedComponent.IsAuthority)
         {
             InputCommand input = NetworkedComponent.IsLocal ? CaptureInput() : LastInputCommand;
-            ApplyInput(input, delta);
+
+            MovementComp.Tick(input, delta, CameraPivot);
 
             Vector3 dir = -Camera.GlobalTransform.Basis.Z;
             Weapon.TickWeapon(delta, Camera.GlobalPosition, dir);
-
-            MoveAndSlide();
-            HandleFallAcceleration(delta);
         }
 
-
-        // Local client sends input to server
         if (NetworkedComponent.IsLocal && !NetworkedComponent.IsAuthority)
         {
             InputCommand cmd = CaptureInput();
 
-            // Apply input locally
-            ApplyInput(cmd, delta);
+            MovementComp.Tick(cmd, delta, CameraPivot);
 
-            _tickAssumulator += (float)delta;
-            if (_tickAssumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
+            _tickAccumulator += delta;
+
+            if (_tickAccumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
             {
-                _tickAssumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
+                _tickAccumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
                 SendClientCommand(cmd);
             }
-
-            MoveAndSlide();
-            HandleFallAcceleration(delta);
         }
     }
 
@@ -337,84 +313,10 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         if (Input.IsActionPressed("primary_fire")) cmd |= InputCommand.FIRE_PRIMARY;
 
         LastInputCommand = cmd;
-        return cmd;
-    }
-
-
-    public void ApplyInput(InputCommand cmd, double delta)
-    {
-        Vector3 moveDir = Vector3.Zero;
-
-        if (cmd.HasFlag(InputCommand.MOVE_FORWARD)) moveDir.Z -= 1f;
-        if (cmd.HasFlag(InputCommand.MOVE_BACK)) moveDir.Z += 1f;
-        if (cmd.HasFlag(InputCommand.MOVE_LEFT)) moveDir.X -= 1f;
-        if (cmd.HasFlag(InputCommand.MOVE_RIGHT)) moveDir.X += 1f;
-
-        if (moveDir != Vector3.Zero)
-        {
-            moveDir = moveDir.Normalized();
-            if (CameraPivot != null)
-                moveDir = moveDir.Rotated(Vector3.Up, CameraPivot.GlobalRotation.Y);
-        }
-
-        UpdateMovementState();
-
-        if (cmd.HasFlag(InputCommand.JUMP) && _canJump)
-        {
-            TryJump();
-        }
-
-        if (_movementState == MovementState.GROUNDED)
-        {
-            _targetVelocity.X = moveDir.X * Speed;
-            _targetVelocity.Z = moveDir.Z * Speed;
-        }
-        else
-        {
-            _targetVelocity.X += moveDir.X * AirControlAcceleration * (float)delta;
-            _targetVelocity.Z += moveDir.Z * AirControlAcceleration * (float)delta;
-        }
 
         Weapon.HandleInput(cmd);
 
-        Velocity = _targetVelocity;
-    }
-
-    public void HandleFallAcceleration(double delta)
-    {
-        if (!IsOnFloor())
-        {
-            _targetVelocity.Y -= FallAcceleration * (float)delta;
-        }
-        else if (_targetVelocity.Y < 0)
-        {
-            _targetVelocity.Y = 0;
-        }
-    }
-
-    private void InterpolateRemoteSnapshot(double delta)
-    {
-        if (LastSnapshot == null) return;
-
-        // Only for non-local characters
-        if (NetworkedComponent.IsLocal || NetworkedComponent.IsAuthority) return;
-
-        // Compute predicted position
-        Vector3 targetPos = LastSnapshot.Position + LastSnapshot.Velocity * (float)delta;
-        GlobalPosition = GlobalPosition.Lerp(targetPos, 10f * (float)delta); // 10 = smoothing factor
-
-        // Rotation
-        var rot = GlobalRotation;
-        rot.Y = Mathf.LerpAngle(rot.Y, LastSnapshot.Yaw, 10f * (float)delta);
-        GlobalRotation = rot;
-
-        // Pitch
-        if (ThirdPersonWeaponMesh != null)
-        {
-            var camRot = ThirdPersonWeaponMesh.GlobalRotation;
-            camRot.X = Mathf.Lerp(camRot.X, LastSnapshot.AimPitch, 10f * (float)delta);
-            ThirdPersonWeaponMesh.GlobalRotation = camRot;
-        }
+        return cmd;
     }
 
     private void SendClientCommand(InputCommand cmd)
@@ -432,59 +334,49 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     }
 
     // ----------------------
-    // Helpers
+    // Remote Interpolation
     // ----------------------
-    public void UpdateMovementState()
+
+    private void InterpolateRemoteSnapshot(double delta)
     {
-        _movementState = IsOnFloor() ? MovementState.GROUNDED : MovementState.FALLING;
+        if (LastSnapshot == null) return;
+
+        if (NetworkedComponent.IsLocal || NetworkedComponent.IsAuthority) return;
+
+        Vector3 target = LastSnapshot.Position + LastSnapshot.Velocity * (float)delta;
+        GlobalPosition = GlobalPosition.Lerp(target, 10f * (float)delta);
+
+        var rot = GlobalRotation;
+        rot.Y = Mathf.LerpAngle(rot.Y, LastSnapshot.Yaw, 10f * (float)delta);
+        GlobalRotation = rot;
+
+        if (ThirdPersonWeaponMesh != null)
+        {
+            var camRot = ThirdPersonWeaponMesh.GlobalRotation;
+            camRot.X = Mathf.Lerp(camRot.X, LastSnapshot.AimPitch, 10f * (float)delta);
+            ThirdPersonWeaponMesh.GlobalRotation = camRot;
+        }
     }
 
-    public void TryJump()
-    {
-        if (!_canJump) return;
-        _targetVelocity.Y = JumpVelocity;
-        _movementState = MovementState.FALLING;
-    }
-
-    public void TryPrimaryFire()
-    {
-        if (Weapon == null) return;
-        //Vector3 dir = -Camera.GlobalTransform.Basis.Z;
-        //Weapon.TryFire(Camera.GlobalPosition, dir);
-    }
-
-    public void TeleportTo(Transform3D t)
-    {
-        GlobalTransform = t;
-        Velocity = Vector3.Zero;
-    }
-
-    public void ResetMovement()
-    {
-        Velocity = Vector3.Zero;
-    }
-
-    public void SetWeaponsEnabled(bool enabled)
-    {
-        _weaponsEnabled = enabled;
-    }
+    // ----------------------
+    // Client Correction
+    // ----------------------
 
     public void CorrectClientPosition(ArenaCharacterSnapshot serverSnapshot, double delta)
     {
-        if (!NetworkedComponent.IsLocal) return; // only correct local player
+        if (!NetworkedComponent.IsLocal) return;
 
         Vector3 serverPos = serverSnapshot.Position;
         Vector3 localPos = GlobalPosition;
+
         float distance = serverPos.DistanceTo(localPos);
 
         if (distance >= SnapThreshold)
         {
-            // Big difference? Snap immediately
             GlobalPosition = serverPos;
         }
         else if (distance >= CorrectionThreshold)
         {
-            // Small difference? Smoothly lerp
             GlobalPosition = localPos.Lerp(
                 serverPos,
                 (float)(CorrectionSpeed * delta)
@@ -492,16 +384,42 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         }
     }
 
+    // ----------------------
+    // Utility
+    // ----------------------
+
+    public void TeleportTo(Transform3D t)
+    {
+        GlobalTransform = t;
+        MovementComp.ResetVelocity();
+    }
+
+    public void LaunchCharacter(Vector3 velocity)
+    {
+        MovementComp.Launch(velocity);
+    }
+
+    public void ResetMovement()
+    {
+        MovementComp.ResetVelocity();
+    }
+
+    public void SetWeaponsEnabled(bool enabled)
+    {
+        _weaponsEnabled = enabled;
+    }
+
+    // ----------------------
+    // Death
+    // ----------------------
+
     public void OnDeath()
     {
-        if(NetworkedComponent.IsLocal)
+        if (NetworkedComponent.IsLocal)
         {
             if (Camera == null || _deathCamPivot == null)
-            {
                 return;
-            }
 
-            // Put camera at the end of the spring arm
             Camera.GlobalPosition = _deathCamPivot.GlobalPosition;
             Camera.GlobalRotation = _deathCamPivot.GlobalRotation;
 
@@ -511,23 +429,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         }
 
         CharacterMesh.Visible = false;
-
         IsAlive = false;
     }
-
-
-    public void LaunchCharacter(Vector3 launchVelocity)
-    {
-        _targetVelocity.Y = launchVelocity.Y;
-
-        _targetVelocity.X += launchVelocity.X;
-        _targetVelocity.Z += launchVelocity.Z;
-
-        Velocity = _targetVelocity;
-
-        _movementState = MovementState.FALLING;
-
-    }
-
-
 }
