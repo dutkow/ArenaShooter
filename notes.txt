@@ -1,11 +1,14 @@
-Short term
+# General notes
+- Still working on net framework. Should clean it up when closer to ready.
+- Need to move onto client-side prediction and network emulation
+- Net quantizing variables/etc. could certainly be useful, but bandwidth doesn't seem to be a problem at all at the moment. Would need either horrible upload speeds or huge player counts, neither of which seems likely.
+- Delta compression of world state is nice, but need to tidy it up.
+- Sending actual deltas would be the next logical step.
 
-- need to fork godot to allow for jolt physics stepping manually for client-side prediction
-
-
+# Short term
 - Hitscan weapons
 
-Medium term
+# Medium term
 
 - Client-side projectile prediction
 - Add simple chat system (no team system yet - YAGNI for now)
@@ -13,6 +16,6 @@ Medium term
 - Simple match victory condition/end state
 - Prediction of projectiles, local firing effects
 
-Medium-long term
+# Medium-long term
 
 - Consider synchronizing projectiles w/ estimated delta time on player side (or some meet in the middle pt)
