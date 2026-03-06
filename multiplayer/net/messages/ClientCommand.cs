@@ -26,6 +26,7 @@ public class ClientCommand : Message
 {
     // Array of tick commands we want to send in one packet
     public TickCommand[] Commands;
+    public uint LastAcknowledgedTick => Commands.Length > 0 ? Commands[Commands.Length - 1].TickNumber : 0;
 
     protected override int BufferSize()
     {
