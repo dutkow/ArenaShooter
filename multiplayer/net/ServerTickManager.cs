@@ -49,34 +49,27 @@ public class ServerTickManager
             uint lastAckedTick = kvp.Value;
 
             if (!NetworkSession.Instance.PeerIDsToPeers.TryGetValue(peerID, out var peer) || peer == null)
+            {
                 continue;
-
-            WorldSnapshot snapshotToSend;
+            }
 
             // Use cached delta if already calculated
             if (snapshotDeltas.TryGetValue(lastAckedTick, out var deltaSnapshot))
             {
-                snapshotToSend = deltaSnapshot;
+                NetworkSender.ToClient(peer, deltaSnapshot);
             }
             // Build delta from previous snapshot if it exists
             else if (_snapshotHistory.TryGetValue((ushort)lastAckedTick, out var previousSnapshot))
             {
-                snapshotToSend = newSnapshot.BuildDelta(previousSnapshot);
-                snapshotDeltas[lastAckedTick] = snapshotToSend;
+                var snapDelta = newSnapshot.BuildDelta(previousSnapshot);
+                snapshotDeltas[lastAckedTick] = snapDelta;
+                NetworkSender.ToClient(peer, snapDelta);
             }
             // Otherwise, send full snapshot
             else
             {
-                snapshotToSend = newSnapshot;
+                NetworkSender.ToClient(peer, newSnapshot);
             }
-
-            // Debug: log size of serialized snapshot
-            var bytes = snapshotToSend.WriteMessage();
-
-            GD.Print($"Sending snapshot to peer {peerID}, tick {ServerTick}, size {bytes.Length} bytes");
-
-
-            NetworkSender.ToClient(peer, snapshotToSend);
         }
     }
 

@@ -9,58 +9,24 @@ using System.Linq;
 public struct ArenaCharacterSnapshot
 {
     public byte PlayerID;
-
-    // Compressed position & velocity as integers
-    public Vector3I Position;
-    public Vector3I Velocity;
-
-    // Compressed angles as bytes
-    public byte YawByte;
-    public byte PitchByte;
-
+    public Vector3 Position;
+    public Vector3 Velocity;
+    public float Yaw;
+    public float AimPitch;
     public byte Health;
     public byte Shield;
 
     public ArenaCharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
-                                  float yaw, float aimPitch, byte health, byte shield, float scale = 100f)
+                                  float yaw, float aimPitch, byte health, byte shield)
     {
         PlayerID = playerID;
-
-        // convert float Vector3 -> Vector3i with scaling
-        Position = new Vector3I(
-            (int)(position.X * scale),
-            (int)(position.Y * scale),
-            (int)(position.Z * scale)
-        );
-        Velocity = new Vector3I(
-            (int)(velocity.X * scale),
-            (int)(velocity.Y * scale),
-            (int)(velocity.Z * scale)
-        );
-
-        // quantize yaw/pitch
-        YawByte = (byte)(yaw / 360f * 255f);
-        PitchByte = (byte)((aimPitch + 90f) / 180f * 255f); // pitch -90° to 90°
-
+        Position = position;
+        Velocity = velocity;
+        Yaw = yaw;
+        AimPitch = aimPitch;
         Health = health;
         Shield = shield;
     }
-
-    // decompress
-    public Vector3 GetPosition(float scale = 100f) => new Vector3(
-        Position.x / scale,
-        Position.y / scale,
-        Position.z / scale
-    );
-
-    public Vector3 GetVelocity(float scale = 100f) => new Vector3(
-        Velocity.x / scale,
-        Velocity.y / scale,
-        Velocity.z / scale
-    );
-
-    public float GetYaw() => YawByte / 255f * 360f;
-    public float GetPitch() => PitchByte / 255f * 180f - 90f;
 }
 
 /// <summary>

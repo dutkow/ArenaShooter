@@ -186,9 +186,9 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     {
         var snapshot = new ArenaCharacterSnapshot();
         snapshot.PlayerID = State.PlayerID;
-        snapshot.Position = (Vector3I)GlobalPosition;
-        snapshot.Velocity = NetUtils.ToVector3i(MovementComp.Velocity);
-        snapshot.YawByte = (byte)Yaw;
+        snapshot.Position = GlobalPosition;
+        snapshot.Velocity = MovementComp.Velocity;
+        snapshot.Yaw = Yaw;
         snapshot.AimPitch = AimPitch;
         snapshot.Health = (byte)HealthComponent.Health;
         snapshot.Shield = (byte)HealthComponent.Shield;
@@ -238,17 +238,17 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
         if (!NetworkedComponent.IsLocal)
         {
-            Vector3 predicted = snapshot.Position + (Vector3)snapshot.Velocity * deltaTime;
+            Vector3 predicted = snapshot.Position + snapshot.Velocity * deltaTime;
             GlobalPosition = predicted;
 
             var rot = GlobalRotation;
-            rot.Y = (float)snapshot.YawByte;
+            rot.Y = snapshot.Yaw;
             GlobalRotation = rot;
 
             if (ThirdPersonWeaponMesh != null)
             {
                 var camRot = ThirdPersonWeaponMesh.GlobalRotation;
-                camRot.X = Mathf.Clamp((float)snapshot.AimPitch, -1.5f, 1.5f);
+                camRot.X = Mathf.Clamp(snapshot.AimPitch, -1.5f, 1.5f);
                 ThirdPersonWeaponMesh.GlobalRotation = camRot;
             }
         }
@@ -407,17 +407,17 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
         if (NetworkedComponent.IsLocal || NetworkedComponent.IsAuthority) return;
 
-        Vector3 target = LastSnapshot.Position + (Vector3)LastSnapshot.Velocity * (float)delta;
+        Vector3 target = LastSnapshot.Position + LastSnapshot.Velocity * (float)delta;
         GlobalPosition = GlobalPosition.Lerp(target, 10f * (float)delta);
 
         var rot = GlobalRotation;
-        rot.Y = Mathf.LerpAngle(rot.Y, (float)LastSnapshot.YawByte, 10f * (float)delta);
+        rot.Y = Mathf.LerpAngle(rot.Y, LastSnapshot.Yaw, 10f * (float)delta);
         GlobalRotation = rot;
 
         if (ThirdPersonWeaponMesh != null)
         {
             var camRot = ThirdPersonWeaponMesh.GlobalRotation;
-            camRot.X = Mathf.Lerp(camRot.X, (float)LastSnapshot.PitchByte, 10f * (float)delta);
+            camRot.X = Mathf.Lerp(camRot.X, LastSnapshot.AimPitch, 10f * (float)delta);
             ThirdPersonWeaponMesh.GlobalRotation = camRot;
         }
     }
