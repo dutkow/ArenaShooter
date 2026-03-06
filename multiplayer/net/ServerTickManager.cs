@@ -23,7 +23,6 @@ public class ServerTickManager
     private void TickServer()
     {
         SendWorldSnapshot();
-        MatchState.Instance.AdvanceTick();
     }
 
 

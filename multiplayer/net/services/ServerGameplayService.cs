@@ -17,12 +17,9 @@ public static class ServerGameplayService
                     var cmd = new ClientCommand();
                     cmd.ReadMessage(data);
 
-                    // Store last input on character for potential use
-                    character.LastInputCommand = cmd.InputButtons;
-
                     // Apply the input immediately on the server
                     double delta = NetworkConstants.SERVER_TICK_INTERVAL; // Or your fixed server tick
-                    character.ApplyClientCommand(cmd, delta);
+                    character.HandleClientCommandBatch(cmd, delta);
                 }
             }
         }

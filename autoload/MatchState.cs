@@ -11,6 +11,8 @@ public enum MatchPhase
     POST_MATCH,
 }
 
+
+
 public partial class MatchState : Node
 {
     public static MatchState Instance { get; private set; }
@@ -18,6 +20,9 @@ public partial class MatchState : Node
     public ushort CurrentTick { get; private set; } = 0;
 
     public ushort LastServerTick { get; private set; } = 0;
+
+    private double _clientTickAccumulator = 0;
+
 
     public void SetLastServerTick(ushort tick)
     {
@@ -113,10 +118,16 @@ public partial class MatchState : Node
     {
         base._PhysicsProcess(delta);
 
-        if(_serverTickManager != null)
+        CurrentTick++;
+
+        if (NetworkSession.Instance.IsServer)
         {
-            _serverTickManager.PhysicsTick(delta);
+            if (_serverTickManager != null)
+            {
+                _serverTickManager.PhysicsTick(delta);
+            }
         }
+
     }
 
     public void OnReceivedInitialMatchState(InitialMatchState initialMatchState)

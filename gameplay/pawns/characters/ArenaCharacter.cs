@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public enum MovementState
 {
@@ -58,6 +59,24 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     [Export] public float SnapThreshold = 2f;
     [Export] public float CorrectionThreshold = 0.1f;
     [Export] public float CorrectionSpeed = 10f;
+
+
+    // ----------------------
+    // Command history
+    // ----------------------
+    private SortedDictionary<uint, TickCommand> _pendingCommands = new SortedDictionary<uint, TickCommand>();
+
+    public uint LastAppliedTick;
+
+    private const int CommandHistorySize = 64;
+    private Queue<TickCommand> _commandHistory = new Queue<TickCommand>();
+
+    public void AddToHistory(TickCommand cmd)
+    {
+        _commandHistory.Enqueue(cmd);
+        if (_commandHistory.Count > CommandHistorySize)
+            _commandHistory.Dequeue();
+    }
 
     // ----------------------
     // Initialization
@@ -173,21 +192,53 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         );
     }
 
-    public void ApplyClientCommand(ClientCommand cmd, double delta)
+    public void HandleClientCommandBatch(ClientCommand cmdBatch, double delta)
     {
-        var bodyRot = GlobalRotation;
-        bodyRot.Y = cmd.Yaw;
-        GlobalRotation = bodyRot;
+        GD.Print($"[Server] Received {cmdBatch.Commands.Length} commands from client.");
 
-        if (ThirdPersonWeaponMesh != null)
+        foreach (var cmd in cmdBatch.Commands)
         {
-            var weaponRot = ThirdPersonWeaponMesh.GlobalRotation;
-            weaponRot.X = Mathf.Clamp(cmd.Pitch, -1.5f, 1.5f);
-            ThirdPersonWeaponMesh.GlobalRotation = weaponRot;
-        }
+            if (cmd.TickNumber <= LastAppliedTick)
+            {
+                GD.Print($"Ignoring cmd tick number because last applied tick is greater. cmd tick: [{cmd.TickNumber}. last applied tick: {LastAppliedTick}");
+                continue; // ignore already-applied ticks
+            }
 
-        MovementComp.ApplyInput(cmd.InputButtons, delta, CameraPivot);
-        Weapon.HandleInput(cmd.InputButtons);
+            if (!_pendingCommands.ContainsKey(cmd.TickNumber))
+            {
+                GD.Print($"Adding tick [{cmd.TickNumber}] to pending commands dictionary");
+
+                _pendingCommands.Add(cmd.TickNumber, cmd);
+            }
+        }
+    }
+
+    private void ApplyNextClientCommand(double delta)
+    {
+        uint nextTick = LastAppliedTick + 1;
+
+        if (_pendingCommands.TryGetValue(nextTick, out TickCommand cmd))
+        {
+            var bodyRot = GlobalRotation;
+            bodyRot.Y = cmd.Yaw;
+            GlobalRotation = bodyRot;
+
+            if (ThirdPersonWeaponMesh != null)
+            {
+                var weaponRot = ThirdPersonWeaponMesh.GlobalRotation;
+                weaponRot.X = Mathf.Clamp(cmd.Pitch, -1.5f, 1.5f);
+                ThirdPersonWeaponMesh.GlobalRotation = weaponRot;
+            }
+
+            MovementComp.ApplyInput(cmd.InputButtons, delta, CameraPivot);
+            Weapon.HandleInput(cmd.InputButtons);
+
+            _pendingCommands.Remove(nextTick);
+
+            LastAppliedTick = nextTick;
+
+            AddToHistory(cmd);
+        }
     }
 
     public void ApplySnapshot(ArenaCharacterSnapshot snapshot, float deltaTime = 0f)
@@ -277,8 +328,9 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
         if (NetworkedComponent.IsAuthority)
         {
-            InputCommand input = NetworkedComponent.IsLocal ? CaptureInput() : LastInputCommand;
+            ApplyNextClientCommand(delta);
 
+            InputCommand input = NetworkedComponent.IsLocal ? CaptureInput() : LastInputCommand;
             MovementComp.Tick(input, delta, CameraPivot);
 
             Vector3 dir = -Camera.GlobalTransform.Basis.Z;
@@ -288,7 +340,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         if (NetworkedComponent.IsLocal && !NetworkedComponent.IsAuthority)
         {
             InputCommand cmd = CaptureInput();
-
             MovementComp.Tick(cmd, delta, CameraPivot);
 
             _tickAccumulator += delta;
@@ -300,7 +351,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
             }
         }
     }
-
     private InputCommand CaptureInput()
     {
         InputCommand cmd = InputCommand.NONE;
@@ -321,16 +371,28 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
     private void SendClientCommand(InputCommand cmd)
     {
-        var clientCmd = new ClientCommand()
+        // Capture current tick as a TickCommand
+        TickCommand tickCmd = new TickCommand
         {
-            PlayerID = State.PlayerID,
             TickNumber = MatchState.Instance.CurrentTick,
-            InputButtons = cmd,
+            InputButtons = cmd, // use the captured input
             Yaw = GlobalRotation.Y,
             Pitch = CameraPivot.GlobalRotation.X
         };
 
-        ClientCommand.Send(clientCmd);
+        // Add to local history queue
+        AddToHistory(tickCmd);
+
+        // Grab the last N commands from history
+        int batchSize = 4;
+        TickCommand[] historyArray = _commandHistory.ToArray();
+        int startIdx = Mathf.Max(0, historyArray.Length - batchSize);
+        int length = historyArray.Length - startIdx;
+        TickCommand[] commandsToSend = new TickCommand[length];
+        Array.Copy(historyArray, startIdx, commandsToSend, 0, length);
+
+        // Send the batch directly
+        ClientCommand.Send(commandsToSend);
     }
 
     // ----------------------

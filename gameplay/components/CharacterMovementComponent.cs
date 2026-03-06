@@ -19,7 +19,6 @@ public class CharacterMovementComponent
         _character = character;
     }
 
-
     public void Tick(InputCommand cmd, double delta, Node3D cameraPivot)
     {
         ApplyInput(cmd, delta, cameraPivot);

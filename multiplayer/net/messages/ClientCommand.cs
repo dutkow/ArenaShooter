@@ -13,55 +13,79 @@ public enum InputCommand : byte
     FIRE_PRIMARY = 1 << 5
 }
 
-public class ClientCommand : Message
+public struct TickCommand
 {
-    public byte PlayerID;
     public uint TickNumber;
     public InputCommand InputButtons;
-
     public float Yaw;
     public float Pitch;
+}
+
+
+public class ClientCommand : Message
+{
+    // Array of tick commands we want to send in one packet
+    public TickCommand[] Commands;
 
     protected override int BufferSize()
     {
         base.BufferSize();
-        Add(PlayerID);
-        Add(TickNumber);
-        Add(InputButtons);
-        Add(Yaw);
-        Add(Pitch);
+        Add((byte)Commands.Length); // store how many ticks are in this packet
+        foreach (var cmd in Commands)
+        {
+            Add(cmd.TickNumber);
+            Add((byte)cmd.InputButtons);
+            Add(cmd.Yaw);
+            Add(cmd.Pitch);
+        }
         return _dataSize;
     }
 
     public override byte[] WriteMessage()
     {
         base.WriteMessage();
-        Write(PlayerID);
-        Write(TickNumber);
-        Write((byte)InputButtons);
-        Write(Yaw);
-        Write(Pitch);
+        Write((byte)Commands.Length);
+        foreach (var cmd in Commands)
+        {
+            Write(cmd.TickNumber);
+            Write((byte)cmd.InputButtons);
+            Write(cmd.Yaw);
+            Write(cmd.Pitch);
+        }
         return _data;
     }
 
     public override void ReadMessage(byte[] data)
     {
         base.ReadMessage(data);
-        Read(out PlayerID);
-        Read(out TickNumber);
+        byte count;
+        Read(out count);
 
-        byte buttonByte;
-        Read(out buttonByte);
-        InputButtons = (InputCommand)buttonByte;
+        Commands = new TickCommand[count];
+        for (int i = 0; i < count; i++)
+        {
+            TickCommand cmd = new TickCommand();
+            Read(out cmd.TickNumber);
 
-        Read(out Yaw);
-        Read(out Pitch);
+            byte buttons;
+            Read(out buttons);
+            cmd.InputButtons = (InputCommand)buttons;
+
+            Read(out cmd.Yaw);
+            Read(out cmd.Pitch);
+
+            Commands[i] = cmd;
+        }
     }
 
-    public static void Send(ClientCommand cmd)
+    public static void Send(TickCommand[] commands)
     {
-        cmd.MessageType = Msg.C2S_CLIENT_COMMAND;
-        cmd.ENetFlags = ENetPacketFlags.UnreliableFragment;
-        NetworkSender.ToServer(cmd);
+        var msg = new ClientCommand();
+        msg.MessageType = Msg.C2S_CLIENT_COMMAND;
+        msg.ENetFlags = ENetPacketFlags.UnreliableFragment;
+
+        msg.Commands = commands;
+
+        NetworkSender.ToServer(msg);
     }
 }
