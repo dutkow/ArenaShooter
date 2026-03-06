@@ -222,8 +222,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         uint nextTick = _pendingCommands.Keys.Min();
         TickCommand cmd = _pendingCommands[nextTick];
 
-        GD.Print($"[DEBUG] Selected tick {nextTick} | LastAppliedTick: {LastAppliedTick}");
-
         _currentServerCommand = cmd;
 
         _pendingCommands.Remove(nextTick);
@@ -327,10 +325,11 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
             else
             {
                 SetNextClientCommand();
-                MovementComp.Tick(_currentServerCommand.InputButtons, delta, CameraPivot);
 
                 GlobalRotation = new Vector3(0.0f, _currentServerCommand.Yaw, 0.0f);
-                CameraPivot.GlobalRotation = new Vector3(_currentServerCommand.Pitch, 0.0f, 0.0f);
+                CameraPivot.Rotation = new Vector3(_currentServerCommand.Pitch, 0.0f, 0.0f);
+
+                MovementComp.Tick(_currentServerCommand.InputButtons, delta, CameraPivot);
             }
 
             Vector3 dir = -Camera.GlobalTransform.Basis.Z;
@@ -351,6 +350,7 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
             }
         }
     }
+
     private InputCommand CaptureInput()
     {
         InputCommand cmd = InputCommand.NONE;
