@@ -12,7 +12,7 @@ public partial class KinematicCharacter : Node3D
     CharacterMoveState _moveState;
 
     [Export] public float Speed = 10.0f;
-    [Export] public float Gravity = -9.8f;      // Units per second^2
+    [Export] public float Gravity = -20.0f;      // Units per second^2
     [Export] public float JumpSpeed = 5.0f;
     [Export] public Area3D Area;
     [Export] public CollisionShape3D CollisionShape;
@@ -112,46 +112,17 @@ public partial class KinematicCharacter : Node3D
         if (inputCommand.HasFlag(InputCommand.JUMP))
             _velocity.Y = JumpSpeed;
 
-        // Apply horizontal movement relative to yaw
         _velocity.X = moveDirection.X;
         _velocity.Z = moveDirection.Z;
 
-        // Step position
         _position += _velocity * delta;
 
-        // If grounded, prevent sinking into ground
         if (_isGrounded && _velocity.Y < 0)
             _velocity.Y = 0;
 
         GlobalPosition = _position;
     }
 
-    private bool IsGrounded()
-    {
-        if (CollisionShape == null || CollisionShape.Shape == null)
-            return false;
-
-        var spaceState = GetWorld3D().DirectSpaceState;
-
-        // Build the query
-        PhysicsShapeQueryParameters3D query = new PhysicsShapeQueryParameters3D
-        {
-            Shape = CollisionShape.Shape,
-            Transform = CollisionShape.GlobalTransform,
-            Motion = Vector3.Down * 1.0f, // small downward sweep for ground check
-            CollideWithBodies = true,
-            CollideWithAreas = true,
-            Exclude = new Godot.Collections.Array<Rid> { Area.GetRid() } // ignore self
-        };
-
-        // Cast the shape downward
-        float[] result = spaceState.CastMotion(query);
-
-        // If motion was blocked, we are grounded
-
-        _isGrounded = result[0] == 0.0f;
-        return _isGrounded;
-    }
     private bool RaycastGrounded()
     {
         // Get the physics space
@@ -159,7 +130,7 @@ public partial class KinematicCharacter : Node3D
 
         // Start at the character position
         Vector3 from = GlobalPosition;
-        Vector3 to = from + Vector3.Down * 0.1f; // 1000 meters down
+        Vector3 to = from + Vector3.Down * 0.5f; // 1000 meters down
 
         // Build raycast parameters
         PhysicsRayQueryParameters3D query = new PhysicsRayQueryParameters3D
