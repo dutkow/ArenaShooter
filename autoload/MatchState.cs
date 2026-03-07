@@ -22,7 +22,7 @@ public partial class MatchState : Node
 
     private double _clientTickAccumulator = 0;
 
-    public ushort LastAppliedServerTick;
+    public ushort LastProcessedClientTick;
 
     public void AdvanceTick()
     {

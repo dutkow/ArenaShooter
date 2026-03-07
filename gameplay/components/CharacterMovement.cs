@@ -72,6 +72,10 @@ public class CharacterMovement
 
         moveDirection = moveDirection.Normalized() * Speed;
 
+        state.Velocity.X = moveDirection.X;
+        state.Velocity.Z = moveDirection.Z;
+
+        state.Position += state.Velocity * delta;
         // Gravity
         /*
         if (!IsGrounded())
@@ -86,17 +90,14 @@ public class CharacterMovement
         if (inputCommand.HasFlag(InputCommand.JUMP))
         {
             state.Velocity.Y = JumpSpeed;
-        }*/
+        }
 
-        state.Velocity.X = moveDirection.X;
-        state.Velocity.Z = moveDirection.Z;
-
-        state.Position += state.Velocity * delta;
+ 
 
         if (_isGrounded && state.Velocity.Y < 0)
         {
             state.Velocity.Y = 0;
-        }
+        }*/
         return state;
     }
 

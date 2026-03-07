@@ -17,9 +17,9 @@ public static class ServerGameplayService
                     var cmd = new ClientCommand();
                     cmd.ReadMessage(data);
 
-                    ushort lastProcessedClientComandTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
+                    ushort lastProcessedClientCommandTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
 
-                    if (NetUtils.IsNewerTick(cmd.ClientTick, lastProcessedClientComandTick))
+                    if (NetUtils.IsNewerTick(cmd.ClientTick, lastProcessedClientCommandTick))
                     {
                         character.ReceiveClientCommand(cmd);
                     }

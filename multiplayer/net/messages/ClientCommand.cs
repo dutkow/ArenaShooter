@@ -15,7 +15,7 @@ public enum InputCommand : byte
 
 public struct ClientInputCommand
 {
-    public ushort TickNumber;
+    public ushort ClientTick;
     public InputCommand Input;
     public float Yaw;
     public float Pitch;
@@ -36,7 +36,7 @@ public class ClientCommand : Message
         Add((byte)Commands.Length);        // then send command count
         foreach (var cmd in Commands)
         {
-            Add(cmd.TickNumber);
+            Add(cmd.ClientTick);
             Add((byte)cmd.Input);
             Add(cmd.Yaw);
             Add(cmd.Pitch);
@@ -51,7 +51,7 @@ public class ClientCommand : Message
         Write((byte)Commands.Length);
         foreach (var cmd in Commands)
         {
-            Write(cmd.TickNumber);
+            Write(cmd.ClientTick);
             Write((byte)cmd.Input);
             Write(cmd.Yaw);
             Write(cmd.Pitch);
@@ -71,7 +71,7 @@ public class ClientCommand : Message
         for (int i = 0; i < count; i++)
         {
             ClientInputCommand cmd = new ClientInputCommand();
-            Read(out cmd.TickNumber);
+            Read(out cmd.ClientTick);
 
             byte buttons;
             Read(out buttons);

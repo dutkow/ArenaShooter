@@ -116,9 +116,8 @@ public partial class Character : Pawn
             _unprocessedClientInputs.Remove(nextTick);
             _lastAckedClientCommandTick = nextTick;
 
-            MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = _lastAckedClientCommandTick;
+            MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = cmd.ClientTick;
         }
-        // replay last input. TODO: consider replaying for a specific time and tracking state of missed inputs
         else
         {
             cmd = _lastProcessedClientCommand;
@@ -276,7 +275,7 @@ public partial class Character : Pawn
 
         if (IsLocal)
         {
-            _unacknowledgedClientInputs.RemoveAll(cmd => cmd.TickNumber <= _lastAckedClientCommandTick);
+            _unacknowledgedClientInputs.RemoveAll(cmd => cmd.ClientTick <= _lastAckedClientCommandTick);
             var reconciledState = snapshotMoveState;
 
             foreach (var cmd in _unacknowledgedClientInputs)
@@ -302,13 +301,14 @@ public partial class Character : Pawn
 
         if (positionDelta > SNAP_THRESHOLD)
         {
-            GD.Print("client snapping reconciliation");
+            GD.Print($"snapping correction");
             MovementComp.State.Position = newPredictedState.Position;
             MovementComp.State.Velocity = newPredictedState.Velocity;
         }
         else if (positionDelta > INTERP_THRESHOLD)
         {
-            GD.Print("client interping reconciliation");
+            GD.Print($"lerping correction, error is {positionDelta}");
+
             MovementComp.State.Position = MovementComp.State.Position.Lerp(newPredictedState.Position, 0.5f);
             MovementComp.State.Velocity = newPredictedState.Velocity;
         }
@@ -318,9 +318,9 @@ public partial class Character : Pawn
     {
         foreach (var cmd in command.Commands)
         {
-            if (!_unprocessedClientInputs.ContainsKey(cmd.TickNumber))
+            if (!_unprocessedClientInputs.ContainsKey(cmd.ClientTick))
             {
-                _unprocessedClientInputs.Add(cmd.TickNumber, cmd);
+                _unprocessedClientInputs.Add(cmd.ClientTick, cmd);
             }
         }
     }
@@ -336,7 +336,7 @@ public partial class Character : Pawn
     {
         var inputCommand = new ClientInputCommand
         {
-            TickNumber = MatchState.Instance.CurrentTick,
+            ClientTick = MatchState.Instance.CurrentTick,
             Input = newInput,
             Yaw = GlobalRotation.Y,
             Pitch = _cameraPivot.GlobalRotation.X

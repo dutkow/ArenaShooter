@@ -20,14 +20,13 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
-        ushort serverTick = msg.LastProcessedClientTick;
-        if (!NetUtils.IsNewerTick(serverTick, MatchState.Instance.LastAppliedServerTick))
+        ushort lastProcessedClientTick = msg.LastProcessedClientTick;
+        if (!NetUtils.IsNewerTick(lastProcessedClientTick, MatchState.Instance.LastProcessedClientTick))
         {
             return;
         }
-
-        ushort lastAckedTick = serverTick;
-        MatchState.Instance.LastAppliedServerTick = lastAckedTick;
+        
+        MatchState.Instance.LastProcessedClientTick = lastProcessedClientTick;
 
         var snapshots = msg.GetCharacterSnapshots();
 
@@ -40,7 +39,7 @@ public static class ClientGameplayService
             {
                 if (playerState.Pawn != null && playerState.Pawn is Character character)
                 {
-                    character.ApplyServerSnapshot(snapshot, lastAckedTick);
+                    character.ApplyServerSnapshot(snapshot, lastProcessedClientTick);
                 }
                 else
                 {

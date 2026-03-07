@@ -53,7 +53,7 @@ public class ServerTickManager
         foreach (var kvp in MatchState.Instance.LastProcessedTickByPlayerID)
         {
             byte playerID = kvp.Key;
-            uint lastAckedTick = kvp.Value;
+            ushort lastProcessedClientTick = kvp.Value;
 
             if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
             {
@@ -61,16 +61,16 @@ public class ServerTickManager
                 continue;
             }
 
-            WorldSnapshot snapshotToSend;
+            WorldSnapshot snapshotToSend = WorldSnapshot.Build();
 
-            if (snapshotDeltas.TryGetValue(lastAckedTick, out var deltaSnapshot))
+            if (snapshotDeltas.TryGetValue(lastProcessedClientTick, out var deltaSnapshot))
             {
                 snapshotToSend = deltaSnapshot;
             }
-            else if (_snapshotHistory.TryGetValue((ushort)lastAckedTick, out var previousSnapshot))
+            else if (_snapshotHistory.TryGetValue((ushort)lastProcessedClientTick, out var previousSnapshot))
             {
                 snapshotToSend = newSnapshot.BuildDelta(previousSnapshot);
-                snapshotDeltas[lastAckedTick] = snapshotToSend;
+                snapshotDeltas[lastProcessedClientTick] = snapshotToSend;
             }
             else
             {
@@ -82,6 +82,8 @@ public class ServerTickManager
 
             // ---- Accumulate bytes sent ----
             _bytesSentThisPeriod += bytes.Length;
+
+            snapshotToSend.LastProcessedClientTick = lastProcessedClientTick;
 
             NetworkSender.ToClient(peer, snapshotToSend);
         }

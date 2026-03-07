@@ -10,13 +10,13 @@ public static class NetworkSender
     public static bool EmulationEnabled = true;
 
     // Client → Server
-    public static float ClientToServerBasePingMs = 375.0f;
-    public static float ClientToServerVarianceMs = 15.0f;
+    public static float ClientToServerBasePingMs = 25.0f;
+    public static float ClientToServerVarianceMs = 5;
     public static float ClientToServerPacketLossPercent = 0.0f;
 
     // Server → Client
-    public static float ServerToClientBasePingMs = 375.0f;
-    public static float ServerToClientVarianceMs = 15.0f;
+    public static float ServerToClientBasePingMs = 25.0f;
+    public static float ServerToClientVarianceMs = 5;
     public static float ServerToClientPacketLossPercent = 0.0f;
 
     private class QueuedPacket

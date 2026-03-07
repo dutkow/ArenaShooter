@@ -204,14 +204,14 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
     {
         foreach (var cmd in clientCommand.Commands)
         {
-            if (cmd.TickNumber <= LastAppliedTick)
+            if (cmd.ClientTick <= LastAppliedTick)
             {
                 continue; // ignore already-applied ticks
             }
 
-            if (!_pendingCommands.ContainsKey(cmd.TickNumber))
+            if (!_pendingCommands.ContainsKey(cmd.ClientTick))
             {
-                _pendingCommands.Add(cmd.TickNumber, cmd);
+                _pendingCommands.Add(cmd.ClientTick, cmd);
             }
         }
     }
@@ -296,7 +296,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
 
                 Vector3 startingPosition = GlobalPosition;
                 GlobalPosition = _predictedPosition;
-                foreach (var cmd in _commandHistory.Where(c => c.TickNumber > MatchState.Instance.LastAppliedServerTick))
+                foreach (var cmd in _commandHistory.Where(c => c.ClientTick > MatchState.Instance.LastProcessedClientTick))
                 {
                     // Apply movement inputs to your movement component manually
                     MovementComp.Tick(cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, CameraPivot);
@@ -446,7 +446,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
         // Capture current tick as a TickCommand
         ClientInputCommand tickCmd = new ClientInputCommand
         {
-            TickNumber = MatchState.Instance.CurrentTick,
+            ClientTick = MatchState.Instance.CurrentTick,
             Input = cmd, // use the captured input
             Yaw = GlobalRotation.Y,
             Pitch = CameraPivot.GlobalRotation.X
@@ -464,7 +464,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
         Array.Copy(historyArray, startIdx, commandsToSend, 0, length);
 
         // Send the batch directly
-        ClientCommand.Send(commandsToSend, MatchState.Instance.LastAppliedServerTick);
+        ClientCommand.Send(commandsToSend, MatchState.Instance.LastProcessedClientTick);
     }
 
     // ----------------------
