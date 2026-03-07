@@ -16,7 +16,7 @@ public enum CharacterSnapshotFlags : ushort
     Shield = 1 << 5,
 }
 
-public struct ArenaCharacterSnapshot
+public struct CharacterSnapshot
 {
     public byte PlayerID;
     public CharacterSnapshotFlags DirtyFlags;
@@ -25,7 +25,7 @@ public struct ArenaCharacterSnapshot
     public Vector3 Velocity;
 
     public float Yaw;
-    public float AimPitch;
+    public float Pitch;
 
     public byte Health;
     public byte Shield;
@@ -36,13 +36,13 @@ public struct ArenaCharacterSnapshot
         state.Position = Position;
         state.Velocity = Velocity;
         state.Yaw = Yaw;
-        state.Pitch = AimPitch;
+        state.Pitch = Pitch;
         return state;
     }
         
     public bool IsMoveStateDirty => DirtyFlags.HasFlag(CharacterSnapshotFlags.Position | CharacterSnapshotFlags.Yaw | CharacterSnapshotFlags.Velocity);
 
-    public ArenaCharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
+    public CharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
                                   float yaw, float aimPitch, byte health, byte shield,
                                   CharacterSnapshotFlags dirtyFlags)
     {
@@ -50,14 +50,14 @@ public struct ArenaCharacterSnapshot
         Position = position;
         Velocity = velocity;
         Yaw = yaw;
-        AimPitch = aimPitch;
+        Pitch = aimPitch;
         Health = health;
         Shield = shield;
         DirtyFlags = dirtyFlags;
     }
 
     // Compute DirtyFlags compared to a previous snapshot
-    public static CharacterSnapshotFlags ComputeDirtyFlags(ArenaCharacterSnapshot current, ArenaCharacterSnapshot? previous)
+    public static CharacterSnapshotFlags ComputeDirtyFlags(CharacterSnapshot current, CharacterSnapshot? previous)
     {
         if (previous == null)
             return CharacterSnapshotFlags.Position |
@@ -72,7 +72,7 @@ public struct ArenaCharacterSnapshot
         if (current.Position != previous.Value.Position) flags |= CharacterSnapshotFlags.Position;
         if (current.Velocity != previous.Value.Velocity) flags |= CharacterSnapshotFlags.Velocity;
         if (current.Yaw != previous.Value.Yaw) flags |= CharacterSnapshotFlags.Yaw;
-        if (current.AimPitch != previous.Value.AimPitch) flags |= CharacterSnapshotFlags.AimPitch;
+        if (current.Pitch != previous.Value.Pitch) flags |= CharacterSnapshotFlags.AimPitch;
         if (current.Health != previous.Value.Health) flags |= CharacterSnapshotFlags.Health;
         if (current.Shield != previous.Value.Shield) flags |= CharacterSnapshotFlags.Shield;
 
@@ -93,7 +93,7 @@ public class WorldSnapshot : Message
     public ushort LastProcessedClientTick;
 
     // Use an array of character snapshots instead of parallel arrays
-    public ArenaCharacterSnapshot[] Characters;
+    public CharacterSnapshot[] Characters;
 
     protected override int BufferSize()
     {
@@ -111,7 +111,7 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position)) Add(c.Position);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity)) Add(c.Velocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw)) Add(c.Yaw);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch)) Add(c.AimPitch);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch)) Add(c.Pitch);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Health)) Add(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Shield)) Add(c.Shield);
         }
@@ -134,7 +134,7 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position)) Write(c.Position);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity)) Write(c.Velocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw)) Write(c.Yaw);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch)) Write(c.AimPitch);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch)) Write(c.Pitch);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Health)) Write(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.Shield)) Write(c.Shield);
         }
@@ -150,7 +150,7 @@ public class WorldSnapshot : Message
 
         int count;
         Read(out count);
-        Characters = new ArenaCharacterSnapshot[count];
+        Characters = new CharacterSnapshot[count];
 
         for (int i = 0; i < count; i++)
         {
@@ -172,7 +172,7 @@ public class WorldSnapshot : Message
             if (flags.HasFlag(CharacterSnapshotFlags.Health)) Read(out health);
             if (flags.HasFlag(CharacterSnapshotFlags.Shield)) Read(out shield);
 
-            Characters[i] = new ArenaCharacterSnapshot(id, pos, vel, yaw, pitch, health, shield, flags);
+            Characters[i] = new CharacterSnapshot(id, pos, vel, yaw, pitch, health, shield, flags);
         }
     }
 
@@ -187,7 +187,7 @@ public class WorldSnapshot : Message
         WorldSnapshot newSnapshot = new();
 
         var players = MatchState.Instance.ConnectedPlayers;
-        var characters = new ArenaCharacterSnapshot[players.Count];
+        var characters = new CharacterSnapshot[players.Count];
         int i = 0;
 
         foreach (var kvp in players)
@@ -214,7 +214,7 @@ public class WorldSnapshot : Message
                                                 CharacterSnapshotFlags.Health |
                                                 CharacterSnapshotFlags.Shield;
 
-            characters[i++] = new ArenaCharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, health, shield, allFlags);
+            characters[i++] = new CharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, health, shield, allFlags);
         }
 
         newSnapshot.LastProcessedClientTick = MatchState.Instance.ServerTickManager.ServerTick;
@@ -230,7 +230,7 @@ public class WorldSnapshot : Message
         if (previous == null)
             return this; // no previous snapshot, send full snapshot
 
-        var deltaList = new List<ArenaCharacterSnapshot>();
+        var deltaList = new List<CharacterSnapshot>();
 
         // Convert previous snapshot to dictionary for fast lookup
         var prevDict = previous.Characters.ToDictionary(c => c.PlayerID);
@@ -242,17 +242,17 @@ public class WorldSnapshot : Message
             if (prevDict.TryGetValue(current.PlayerID, out var old))
             {
                 // compute which fields changed
-                flags = ArenaCharacterSnapshot.ComputeDirtyFlags(current, old);
+                flags = CharacterSnapshot.ComputeDirtyFlags(current, old);
 
                 // Only add if something actually changed
                 if (flags != CharacterSnapshotFlags.None)
                 {
-                    var delta = new ArenaCharacterSnapshot(
+                    var delta = new CharacterSnapshot(
                         current.PlayerID,
                         current.Position,
                         current.Velocity,
                         current.Yaw,
-                        current.AimPitch,
+                        current.Pitch,
                         current.Health,
                         current.Shield,
                         flags
@@ -263,13 +263,13 @@ public class WorldSnapshot : Message
             else
             {
                 // New character not in previous snapshot — include all fields
-                flags = ArenaCharacterSnapshot.ComputeDirtyFlags(current, null);
-                var delta = new ArenaCharacterSnapshot(
+                flags = CharacterSnapshot.ComputeDirtyFlags(current, null);
+                var delta = new CharacterSnapshot(
                     current.PlayerID,
                     current.Position,
                     current.Velocity,
                     current.Yaw,
-                    current.AimPitch,
+                    current.Pitch,
                     current.Health,
                     current.Shield,
                     flags
@@ -280,12 +280,12 @@ public class WorldSnapshot : Message
 
         return new WorldSnapshot
         {
+            ENetFlags = ENetPacketFlags.UnreliableFragment,
             LastProcessedClientTick = LastProcessedClientTick,
             Characters = deltaList.ToArray(),
             MessageType = Msg.S2C_WORLD_SNAPSHOT,
-            ENetFlags = ENetFlags
         };
     }
 
-    public ArenaCharacterSnapshot[] GetCharacterSnapshots() => Characters;
+    public CharacterSnapshot[] GetCharacterSnapshots() => Characters;
 }

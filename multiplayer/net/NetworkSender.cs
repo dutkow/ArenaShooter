@@ -7,13 +7,17 @@ public static class NetworkSender
     // -------------------------------------------------
     // Emulator Settings
     // -------------------------------------------------
-
     public static bool EmulationEnabled = true;
 
-    public static float BasePingMs = 500f;
-    public static float PingVarianceMs = 20f;
+    // Client → Server
+    public static float ClientToServerBasePingMs = 75.0f;
+    public static float ClientToServerVarianceMs = 15.0f;
+    public static float ClientToServerPacketLossPercent = 0.01f;
 
-    public static float PacketLossPercent = 1.0f;
+    // Server → Client
+    public static float ServerToClientBasePingMs = 75.0f;
+    public static float ServerToClientVarianceMs = 15.0f;
+    public static float ServerToClientPacketLossPercent = 0.01f;
 
     private class QueuedPacket
     {
@@ -24,14 +28,14 @@ public static class NetworkSender
         public double SendTime;
     }
 
-    private static readonly List<QueuedPacket> Queue = new();
+    private static readonly List<QueuedPacket> ClientToServerQueue = new();
+    private static readonly List<QueuedPacket> ServerToClientQueue = new();
     private static readonly Random Rng = new();
     private static double CurrentTime = 0.0;
 
     // -------------------------------------------------
     // Frame Update
     // -------------------------------------------------
-
     public static void Process(double delta)
     {
         CurrentTime += delta;
@@ -39,14 +43,20 @@ public static class NetworkSender
         if (!EmulationEnabled)
             return;
 
-        for (int i = Queue.Count - 1; i >= 0; i--)
-        {
-            var pkt = Queue[i];
+        // Flush both queues
+        FlushQueue(ClientToServerQueue);
+        FlushQueue(ServerToClientQueue);
+    }
 
+    private static void FlushQueue(List<QueuedPacket> queue)
+    {
+        for (int i = queue.Count - 1; i >= 0; i--)
+        {
+            var pkt = queue[i];
             if (pkt.SendTime <= CurrentTime)
             {
                 pkt.Peer.Send(pkt.Channel, pkt.Data, pkt.Flags);
-                Queue.RemoveAt(i);
+                queue.RemoveAt(i);
             }
         }
     }
@@ -54,8 +64,7 @@ public static class NetworkSender
     // -------------------------------------------------
     // Core Send Wrapper
     // -------------------------------------------------
-
-    private static void SendInternal(ENetPacketPeer peer, int channel, byte[] data, int flags)
+    private static void SendInternal(ENetPacketPeer peer, int channel, byte[] data, int flags, bool clientToServer)
     {
         if (!EmulationEnabled)
         {
@@ -65,13 +74,18 @@ public static class NetworkSender
 
         bool reliable = (flags & (int)ENetPacketFlags.Reliable) != 0;
 
+        float packetLoss = clientToServer ? ClientToServerPacketLossPercent : ServerToClientPacketLossPercent;
+        float basePing = clientToServer ? ClientToServerBasePingMs : ServerToClientBasePingMs;
+        float variance = clientToServer ? ClientToServerVarianceMs : ServerToClientVarianceMs;
+
         // drop only unreliable packets
-        if (!reliable && Rng.NextDouble() < PacketLossPercent / 100.0)
+        if (!reliable && Rng.NextDouble() < packetLoss)
             return;
 
-        double delay = (BasePingMs + (Rng.NextDouble() * 2 - 1) * PingVarianceMs) / 2000.0;
+        double delay = (basePing + (Rng.NextDouble() * 2 - 1) * variance) / 2000.0;
 
-        Queue.Add(new QueuedPacket
+        var queue = clientToServer ? ClientToServerQueue : ServerToClientQueue;
+        queue.Add(new QueuedPacket
         {
             Peer = peer,
             Data = data,
@@ -81,44 +95,35 @@ public static class NetworkSender
         });
     }
 
-    private static double RandRange(double min, double max)
-    {
-        return Rng.NextDouble() * (max - min) + min;
-    }
-
     // -------------------------------------------------
     // Client → Server
     // -------------------------------------------------
-
     public static void ToServer(Message message)
     {
         ENetPacketPeer serverPeer = NetworkSession.Instance.ServerPeer;
-
         if (serverPeer == null)
         {
             GD.PushError("ServerPeer is null.");
             return;
         }
 
-        SendInternal(serverPeer, 0, message.WriteMessage(), (int)message.Flags);
+        SendInternal(serverPeer, 0, message.WriteMessage(), (int)message.Flags, clientToServer: true);
     }
 
     // -------------------------------------------------
     // Server → Single Client
     // -------------------------------------------------
-
     public static void ToClient(ENetPacketPeer clientPeer, Message message)
     {
         if (clientPeer == null)
             return;
 
-        SendInternal(clientPeer, 0, message.WriteMessage(), (int)message.Flags);
+        SendInternal(clientPeer, 0, message.WriteMessage(), (int)message.Flags, clientToServer: false);
     }
 
     // -------------------------------------------------
     // Server → All Clients
     // -------------------------------------------------
-
     public static void Broadcast(Message message)
     {
         byte[] data = message.WriteMessage();
@@ -127,14 +132,13 @@ public static class NetworkSender
         foreach (var peer in NetworkHandler.Instance.ReadyPeers)
         {
             if (peer != null)
-                SendInternal(peer, 0, data, flags);
+                SendInternal(peer, 0, data, flags, clientToServer: false);
         }
     }
 
     // -------------------------------------------------
     // Server → All Clients Except One
     // -------------------------------------------------
-
     public static void BroadcastExcept(byte excludedPlayerID, Message message)
     {
         byte[] data = message.WriteMessage();
@@ -145,18 +149,14 @@ public static class NetworkSender
             if (kvp.Key == excludedPlayerID)
                 continue;
 
-            SendInternal(kvp.Value, 0, data, flags);
+            SendInternal(kvp.Value, 0, data, flags, clientToServer: false);
         }
     }
 
     // -------------------------------------------------
     // Server → Filtered Clients
     // -------------------------------------------------
-
-    public static void BroadcastFiltered(
-        IEnumerable<ENetPacketPeer> clients,
-        Func<ENetPacketPeer, bool> filter,
-        Message message)
+    public static void BroadcastFiltered(IEnumerable<ENetPacketPeer> clients, Func<ENetPacketPeer, bool> filter, Message message)
     {
         byte[] data = message.WriteMessage();
         int flags = (int)message.Flags;
@@ -164,7 +164,7 @@ public static class NetworkSender
         foreach (var client in clients)
         {
             if (client != null && filter(client))
-                SendInternal(client, 0, data, flags);
+                SendInternal(client, 0, data, flags, clientToServer: false);
         }
     }
 }

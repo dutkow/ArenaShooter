@@ -89,7 +89,7 @@ public class ClientCommand : Message
         var msg = new ClientCommand
         {
             MessageType = Msg.C2S_CLIENT_COMMAND,
-            ENetFlags = ENetPacketFlags.UnreliableFragment,
+            ENetFlags = ENetPacketFlags.Unsequenced,
             Commands = commands,
             ClientTick = lastAppliedServerTick
         };

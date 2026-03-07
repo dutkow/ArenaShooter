@@ -22,7 +22,7 @@ public class CharacterMovement
     Character _character;
 
     public float Speed = 15.0f;
-    public float Gravity = 0.0f;
+    public float Gravity = -0.0f;
     public float JumpSpeed = 5.0f;
 
     private bool _isGrounded = false;

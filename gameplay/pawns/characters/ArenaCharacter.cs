@@ -49,7 +49,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
     // ----------------------
     // Networking
     // ----------------------
-    public ArenaCharacterSnapshot LastSnapshot;
+    public CharacterSnapshot LastSnapshot;
     public InputCommand LastInputCommand;
 
     private double _tickAccumulator = 0f;
@@ -186,14 +186,14 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
     // Replication
     // ----------------------
 
-    public ArenaCharacterSnapshot GetSnapshot()
+    public CharacterSnapshot GetSnapshot()
     {
-        var snapshot = new ArenaCharacterSnapshot();
+        var snapshot = new CharacterSnapshot();
         snapshot.PlayerID = State.PlayerID;
         snapshot.Position = GlobalPosition;
         snapshot.Velocity = MovementComp.Velocity;
         snapshot.Yaw = Yaw;
-        snapshot.AimPitch = AimPitch;
+        snapshot.Pitch = AimPitch;
         snapshot.Health = (byte)HealthComponent.Health;
         snapshot.Shield = (byte)HealthComponent.Shield;
 
@@ -236,7 +236,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
         AddToHistory(cmd);
     }
 
-    public void ApplySnapshot(ArenaCharacterSnapshot snapshot, float deltaTime = 0f)
+    public void ApplySnapshot(CharacterSnapshot snapshot, float deltaTime = 0f)
     {
         if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position))
             LastSnapshot.Position = snapshot.Position;
@@ -248,7 +248,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
             LastSnapshot.Yaw = snapshot.Yaw;
 
         if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch))
-            LastSnapshot.AimPitch = snapshot.AimPitch;
+            LastSnapshot.Pitch = snapshot.Pitch;
 
         if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Health))
         {
@@ -317,7 +317,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
             if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch) && ThirdPersonWeaponMesh != null)
             {
                 var camRot = ThirdPersonWeaponMesh.GlobalRotation;
-                camRot.X = Mathf.Clamp(LastSnapshot.AimPitch, -1.5f, 1.5f);
+                camRot.X = Mathf.Clamp(LastSnapshot.Pitch, -1.5f, 1.5f);
                 ThirdPersonWeaponMesh.GlobalRotation = camRot;
             }
         }
@@ -486,7 +486,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
         if (ThirdPersonWeaponMesh != null)
         {
             var camRot = ThirdPersonWeaponMesh.GlobalRotation;
-            camRot.X = Mathf.Lerp(camRot.X, LastSnapshot.AimPitch, 10f * (float)delta);
+            camRot.X = Mathf.Lerp(camRot.X, LastSnapshot.Pitch, 10f * (float)delta);
             ThirdPersonWeaponMesh.GlobalRotation = camRot;
         }
     }
@@ -495,7 +495,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
     // Client Correction
     // ----------------------
 
-    public void CorrectClientPosition(ArenaCharacterSnapshot serverSnapshot, double delta)
+    public void CorrectClientPosition(CharacterSnapshot serverSnapshot, double delta)
     {
         if (!NetworkedComponent.IsLocal) return;
 

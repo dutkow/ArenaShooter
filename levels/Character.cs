@@ -235,7 +235,7 @@ public partial class Character : Pawn
         _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
-    public void ApplyServerSnapshot(ArenaCharacterSnapshot snapshot, ushort lastProcessedClientTick)
+    public void ApplyServerSnapshot(CharacterSnapshot snapshot, ushort lastProcessedClientTick)
     {
         _lastAckedClientCommandTick = lastProcessedClientTick;
 
@@ -252,7 +252,7 @@ public partial class Character : Pawn
 
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch))
         {
-            snapshot.AimPitch = MovementComp.State.Pitch;
+            snapshot.Pitch = MovementComp.State.Pitch;
         }
 
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity))
