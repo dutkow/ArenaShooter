@@ -63,8 +63,11 @@ public class CharacterMovement
 
         Vector3 moveDirection = Vector3.Zero;
 
-        Vector3 forward = _character.GlobalTransform.Basis.Z;
-        Vector3 right = _character.GlobalTransform.Basis.X;
+        float yawRad = Mathf.DegToRad(state.Yaw);
+        Vector3 forward = new Vector3(Mathf.Sin(yawRad), 0, Mathf.Cos(yawRad));
+        Vector3 right = new Vector3(forward.Z, 0, -forward.X);
+
+        //GD.Print($"state.yaw = {state.Yaw}");
 
         moveDirection += forward * move.Z;
         moveDirection += right * move.X;

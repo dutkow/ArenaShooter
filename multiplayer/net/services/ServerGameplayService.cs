@@ -27,7 +27,7 @@ public static class ServerGameplayService
                         MatchState.Instance.LastAckedTickByPeerID[peerID] = (ushort)cmd.LastAppliedServerTick;
 
                     }
-                    character.HandleClientCommand(cmd);
+                    character.ReceiveClientCommand(cmd);
                 }
             }
         }

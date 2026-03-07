@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
+using static Godot.WebSocketPeer;
 
 
 public partial class Character : Pawn
@@ -44,6 +45,8 @@ public partial class Character : Pawn
     private uint _lastAckedClientCommandTick;
 
     private ClientInputCommand _lastProcessedClientCommand;
+
+    private bool _useInterpolation = false;
 
     public override void _Ready()
     {
@@ -177,26 +180,32 @@ public partial class Character : Pawn
 
     public void InterpolateMovement(float delta)
     {
-        if (IsAuthority)
+        if(_useInterpolation)
         {
-            if(IsLocal)
+            if (IsLocal)
             {
                 InterpolatePosition(delta * LOCAL_SV_INTERP_RATE);
+            }
+            else
+            {
+                InterpolatePosition(delta * REMOTE_CL_INTERP_RATE);
+                InterpolateYaw(delta * 10.0f);
+                InterpolatePitch(delta * 10.0f);
             }
         }
         else
         {
             if(IsLocal)
             {
-                InterpolatePosition(delta * LOCAL_CL_INTERP_RATE);
+                GlobalPosition = MovementComp.State.Position;
             }
             else
             {
-                InterpolatePosition(delta * REMOTE_CL_INTERP_RATE);
-                InterpolateYaw(delta * REMOTE_CL_INTERP_RATE);
-                InterpolatePitch(delta * 10.0f);
+                GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
+                _thirdPersonWeaponMesh.GlobalRotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
             }
         }
+
     }
 
     public void InterpolatePosition(float interpSpeed)
@@ -206,15 +215,17 @@ public partial class Character : Pawn
 
     public void InterpolateYaw(float interpSpeed)
     {
-        GlobalRotation = GlobalRotation.Lerp(new Vector3(0.0f, MovementComp.State.Yaw, 0.0f), interpSpeed);
-
+        /*
+        Vector3 rot = GlobalRotation;
+        rot.Y = Mathf.LerpAngle(rot.Y, MovementComp.State.Yaw, interpSpeed);
+        GlobalRotation = rot;*/
     }
 
     public void InterpolatePitch(float interpSpeed)
     {
-        var weaponMeshRotation = _thirdPersonWeaponMesh.GlobalRotation;
-        weaponMeshRotation.X = Mathf.Lerp(weaponMeshRotation.X, MovementComp.State.Pitch, interpSpeed);
-        _thirdPersonWeaponMesh.GlobalRotation = weaponMeshRotation;
+        Vector3 camRot = _thirdPersonWeaponMesh.GlobalRotation;
+        camRot.X = Mathf.Lerp(camRot.X, MovementComp.State.Pitch, interpSpeed);
+        _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
     public void ApplyServerSnapshot(ArenaCharacterSnapshot snapshot, ushort lastProcessedClientTick)
@@ -239,25 +250,22 @@ public partial class Character : Pawn
         }
     }
 
-    public void HandleClientCommand(ClientCommand command)
+    public void ReceiveClientCommand(ClientCommand command)
     {
+        GD.Print("Receiving client command entry");
+
         foreach (var cmd in command.Commands)
         {
-            if (cmd.TickNumber <= _lastAckedClientCommandTick)
-            {
-                continue;
-            }
-
-            if (_unprocessedClientInputs.ContainsKey(cmd.TickNumber))
+            if (!_unprocessedClientInputs.ContainsKey(cmd.TickNumber))
             {
                 _unprocessedClientInputs.Add(cmd.TickNumber, cmd);
+                GD.Print("Receiving client command and adding command to unprocessed inputs");
             }
         }
     }
 
     public void ReconcileMoveState(CharacterMoveState newPredictedState)
     {
-        GD.Print("running reconcile move state on client");
         float positionDelta = (MovementComp.State.Position - newPredictedState.Position).Length();
 
         const float SNAP_THRESHOLD = 1.0f;
@@ -297,6 +305,7 @@ public partial class Character : Pawn
             .Skip(Math.Max(0, _unacknowledgedClientInputs.Count - REDUNDANT_INPUTS))
             .ToArray();
 
+
         ClientCommand.Send(commandsToSend, MatchState.Instance.CurrentTick);
     }
 
@@ -331,9 +340,16 @@ public partial class Character : Pawn
 
         if (Input.IsActionJustPressed("toggle_cursor_lock"))
         {
-            Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured
-                ? Input.MouseModeEnum.Visible
-                : Input.MouseModeEnum.Captured;
+            if(Input.MouseMode == Input.MouseModeEnum.Captured)
+            {
+                Input.MouseMode = Input.MouseModeEnum.Visible;
+                SetInputEnabled(false);
+            }
+            else if(Input.MouseMode == Input.MouseModeEnum.Visible)
+            {
+                Input.MouseMode = Input.MouseModeEnum.Captured;
+                SetInputEnabled(true);
+            }
         }
     }
 
