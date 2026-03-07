@@ -1,0 +1,61 @@
+[gd_scene load_steps=9 format=3 uid="uid://bqojlp6n3woby"]
+
+[ext_resource type="Material" uid="uid://cq4akbweyf2lw" path="res://assets/materials/green_material.tres" id="1_mqmeg"]
+[ext_resource type="PackedScene" uid="uid://ckn5b0j16otei" path="res://levels/kinematic_character.tscn" id="2_tpebg"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tpebg"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_i3gy6"]
+sky_material = SubResource("ProceduralSkyMaterial_tpebg")
+
+[sub_resource type="Environment" id="Environment_t1e14"]
+background_mode = 2
+sky = SubResource("Sky_i3gy6")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_tpebg"]
+size = Vector2(200, 200)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tpebg"]
+size = Vector3(200, 10, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i3gy6"]
+size = Vector3(10, 10, 10)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_t1e14")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = ExtResource("1_mqmeg")
+mesh = SubResource("PlaneMesh_tpebg")
+
+[node name="KinematicCharacter" parent="." instance=ExtResource("2_tpebg")]
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.712275, -58.20501)
+mesh = SubResource("BoxMesh_tpebg")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.783691, 1.712275, -38.63349)
+mesh = SubResource("BoxMesh_i3gy6")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.311356, 1.712275, -38.63349)
+mesh = SubResource("BoxMesh_i3gy6")
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.071175, 1.712275, 3.8747215)
+mesh = SubResource("BoxMesh_i3gy6")
+
+[node name="MeshInstance3D6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.651833, 1.712275, 3.8747215)
+mesh = SubResource("BoxMesh_i3gy6")

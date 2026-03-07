@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="ArenaShooter"
-run/main_scene="uid://pfp32j0hxv8n"
+run/main_scene="uid://bqojlp6n3woby"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 config/icon="res://assets/textures/icon.svg"
 
@@ -25,6 +25,7 @@ GameData="*res://autoload/game_data.tscn"
 NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
 Settings="*res://autoload/Settings.cs"
 GameManagers="*res://autoload/game_managers.tscn"
+NetManager="*res://autoload/NetManager.cs"
 
 [display]
 

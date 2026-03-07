@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 public enum MovementState
@@ -78,6 +79,9 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         if (_commandHistory.Count > CommandHistorySize)
             _commandHistory.Dequeue();
     }
+
+
+    private Vector3 _predictedPosition;
 
     // ----------------------
     // Initialization
@@ -280,8 +284,28 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
             if (predictedPositionChanged)
             {
-                Vector3 predicted = targetPos + targetVel * deltaTime;
-                GlobalPosition = predicted;
+                // #TODO. this should be changed.
+
+                //Vector3 predicted = targetPos + targetVel * deltaTime;
+                //GlobalPosition = predicted;
+
+
+                //it should instead simulate all input since the last server tick and predict a new position.
+                // i.e., iterate over command history
+                // so like do this on every input, then check position, 
+                _predictedPosition = LastSnapshot.Position;
+
+                Vector3 startingPosition = GlobalPosition;
+                GlobalPosition = _predictedPosition;
+                foreach (var cmd in _commandHistory.Where(c => c.TickNumber > MatchState.Instance.LastAppliedServerTick))
+                {
+                    // Apply movement inputs to your movement component manually
+                    MovementComp.Tick(cmd.InputButtons, NetworkConstants.SERVER_TICK_INTERVAL, CameraPivot);
+                    GlobalPosition = _predictedPosition;
+                }
+
+                _predictedPosition = GlobalPosition;
+                GlobalPosition = startingPosition;
             }
 
             if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw))
