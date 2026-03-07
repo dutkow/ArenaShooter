@@ -199,10 +199,10 @@ public class WorldSnapshot : Message
 
             if (player.Pawn != null && player.Pawn is Character character)
             {
-                pos = character.GlobalPosition;
-                vel = character.MovementComp.Velocity;
-                yaw = character.Yaw;
-                pitch = character.Pitch;
+                pos = character.MovementComp.State.Position;
+                vel = character.MovementComp.State.Velocity;
+                yaw = character.MovementComp.State.Yaw;
+                pitch = character.MovementComp.State.Pitch;
                 health = (byte)character.HealthComp.Health;
                 shield = (byte)character.HealthComp.Shield;
             }

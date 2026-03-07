@@ -27,8 +27,6 @@ public partial class Character : Pawn
 
     private uint _lastProcessedClientTick;
 
-    private CharacterMoveState _currentMoveState;
-
 
     // Components
     [Export] MeshInstance3D _characterMesh;
@@ -63,7 +61,7 @@ public partial class Character : Pawn
         Tick((float)delta);
     }
 
-    public virtual void Tick(float delta)
+    public override void Tick(float delta)
     {
         base.Tick(delta);
 
@@ -104,10 +102,10 @@ public partial class Character : Pawn
             cmd = _lastProcessedClientCommand;
         }
 
-        _currentMoveState = MovementComp.Step(_currentMoveState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
+        MovementComp.State = MovementComp.Step(MovementComp.State, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
 
-        _currentMoveState.Yaw = cmd.Yaw;
-        _currentMoveState.Pitch = cmd.Pitch;
+        MovementComp.State.Yaw = cmd.Yaw;
+        MovementComp.State.Pitch = cmd.Pitch;
     }
 
     public override void _Process(double delta)
@@ -120,7 +118,7 @@ public partial class Character : Pawn
     /// <summary>
     /// Interface functions
     /// </summary>
-    public void OnPossessed(Controller controller)
+    public override void OnPossessed(Controller controller)
     {
         base.OnPossessed(controller);
 
@@ -137,7 +135,7 @@ public partial class Character : Pawn
         UIRoot.Instance.OnPossessedCharacter(this);
     }
 
-    public void OnUnpossessed()
+    public override void OnUnpossessed()
     {
         base.OnUnpossessed();
     }
@@ -146,8 +144,6 @@ public partial class Character : Pawn
     {
         return HealthComp.IsAlive;
     }
-
-
 
     public void ShowFirstPersonView()
     {
@@ -184,19 +180,19 @@ public partial class Character : Pawn
         {
             if(IsLocal)
             {
-                GlobalPosition.Lerp(_currentMoveState.Position, LOCAL_SV_INTERP_RATE);
+                GlobalPosition = GlobalPosition.Lerp(MovementComp.State.Position, LOCAL_SV_INTERP_RATE);
             }
         }
         else
         {
             if(IsLocal)
             {
-                GlobalPosition.Lerp(_currentMoveState.Position, LOCAL_CL_INTERP_RATE);
+                GlobalPosition = GlobalPosition.Lerp(MovementComp.State.Position, LOCAL_CL_INTERP_RATE);
             }
             else
             {
-                GlobalPosition.Lerp(_currentMoveState.Position, REMOTE_CL_INTERP_RATE);
-                GlobalRotation.Lerp(new Vector3(0.0f, _currentMoveState.Yaw, REMOTE_CL_INTERP_RATE), REMOTE_CL_INTERP_RATE);
+                GlobalPosition = GlobalPosition.Lerp(MovementComp.State.Position, REMOTE_CL_INTERP_RATE);
+                GlobalRotation = GlobalRotation.Lerp(new Vector3(0.0f, MovementComp.State.Yaw, 0.0f), REMOTE_CL_INTERP_RATE);
             }
         }
     }
@@ -236,27 +232,27 @@ public partial class Character : Pawn
 
     public void ReconcileMoveState(CharacterMoveState newPredictedState)
     {
-        float positionDelta = (_currentMoveState.Position - newPredictedState.Position).Length();
+        float positionDelta = (MovementComp.State.Position - newPredictedState.Position).Length();
 
         const float SNAP_THRESHOLD = 1.0f;
         const float INTERP_THRESHOLD = 0.05f;
 
         if (positionDelta > SNAP_THRESHOLD)
         {
-            _currentMoveState.Position = newPredictedState.Position;
-            _currentMoveState.Velocity = newPredictedState.Velocity;
+            MovementComp.State.Position = newPredictedState.Position;
+            MovementComp.State.Velocity = newPredictedState.Velocity;
         }
         else if (positionDelta > INTERP_THRESHOLD)
         {
-            _currentMoveState.Position = _currentMoveState.Position.Lerp(newPredictedState.Position, 0.5f);
-            _currentMoveState.Velocity = newPredictedState.Velocity;
+            MovementComp.State.Position = MovementComp.State.Position.Lerp(newPredictedState.Position, 0.5f);
+            MovementComp.State.Velocity = newPredictedState.Velocity;
         }
     }
 
     // predicting on the server so the server can also interpolate to this, just without snapshot based reconciliation
     public void HandleInput(InputCommand input, float delta)
     {
-        _currentMoveState = MovementComp.Step(_currentMoveState, input, delta);
+        MovementComp.HandleInput(input, delta);
     }
 
     public void SendClientInput(InputCommand newInput)

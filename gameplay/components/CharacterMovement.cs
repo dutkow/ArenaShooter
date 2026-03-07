@@ -24,10 +24,9 @@ public class CharacterMovement
     [Export] Character _character;
 
     [Export] public float Speed = 10.0f;
-    [Export] public float Gravity = -20.0f;
+    [Export] public float Gravity = 0.0f;
     [Export] public float JumpSpeed = 5.0f;
 
-    public Vector3 Velocity { get; private set; } = Vector3.Zero;
     private bool _isGrounded = false;
 
     private CharacterMoveMode _mode;
@@ -90,11 +89,12 @@ public class CharacterMovement
         state.Velocity.X = moveDirection.X;
         state.Velocity.Z = moveDirection.Z;
 
-        _character.GlobalPosition += Velocity * delta;
+        state.Position += state.Velocity * delta;
 
-        if (_isGrounded && Velocity.Y < 0)
+        if (_isGrounded && state.Velocity.Y < 0)
+        {
             state.Velocity.Y = 0;
-
+        }
         return state;
     }
 
@@ -165,5 +165,10 @@ public class CharacterMovement
                 OnStartedFalling();
             }
         }
+    }
+
+    public void HandleInput(InputCommand input, float delta)
+    {
+        State = Step(State, input, delta);
     }
 }

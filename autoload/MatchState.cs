@@ -252,6 +252,7 @@ public partial class MatchState : Node
         if(NetworkSession.Instance.IsServer)
         {
             PlayerController playerController = GameMode.Instance.PlayerControllers[playerID];
+            AddChild(playerController);
         }
     }
 

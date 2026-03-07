@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class Controller
+public partial class Controller : Node
 {
     public Pawn PossessedPawn { get; private set; }
 
