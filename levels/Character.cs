@@ -40,13 +40,13 @@ public partial class Character : Pawn
 
     public HealthComponent HealthComp { get; private set; } = new();
 
-    private SortedDictionary<uint, ClientInputCommand> _unprocessedClientInputs = new SortedDictionary<uint, ClientInputCommand>();
+    private SortedDictionary<ushort, ClientInputCommand> _unprocessedClientInputs = new();
 
-    private uint _lastAckedClientCommandTick;
+    private ushort _lastAckedClientCommandTick;
 
     private ClientInputCommand _lastProcessedClientCommand;
 
-    private bool _useInterpolation = false;
+    private bool _useInterpolation = true;
 
     public override void _Ready()
     {
@@ -98,11 +98,13 @@ public partial class Character : Pawn
 
         if (_unprocessedClientInputs.Count > 0)
         {
-            uint nextTick = _unprocessedClientInputs.Keys.Min();
+            ushort nextTick = _unprocessedClientInputs.Keys.Min();
             cmd = _unprocessedClientInputs[nextTick];
             _lastProcessedClientCommand = cmd;
             _unprocessedClientInputs.Remove(nextTick);
             _lastAckedClientCommandTick = nextTick;
+
+            MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = _lastAckedClientCommandTick;
         }
         // replay last input. TODO: consider replaying for a specific time and tracking state of missed inputs
         else
@@ -205,6 +207,8 @@ public partial class Character : Pawn
             }
             else
             {
+                GlobalPosition = MovementComp.State.Position;
+
                 GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
                 _thirdPersonWeaponMesh.GlobalRotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
             }
@@ -219,10 +223,9 @@ public partial class Character : Pawn
 
     public void InterpolateYaw(float interpSpeed)
     {
-        /*
         Vector3 rot = GlobalRotation;
         rot.Y = Mathf.LerpAngle(rot.Y, MovementComp.State.Yaw, interpSpeed);
-        GlobalRotation = rot;*/
+        GlobalRotation = rot;
     }
 
     public void InterpolatePitch(float interpSpeed)
@@ -234,13 +237,41 @@ public partial class Character : Pawn
 
     public void ApplyServerSnapshot(ArenaCharacterSnapshot snapshot, ushort lastProcessedClientTick)
     {
-        _unacknowledgedClientInputs.RemoveAll(cmd => cmd.TickNumber <= lastProcessedClientTick);
+        _lastAckedClientCommandTick = lastProcessedClientTick;
+
+        // Reset any values which haven't changed
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position))
+        {
+            snapshot.Position = MovementComp.State.Position;
+        }
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw))
+        {
+            snapshot.Yaw = MovementComp.State.Yaw;
+        }
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch))
+        {
+            snapshot.AimPitch = MovementComp.State.Pitch;
+        }
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity))
+        {
+            snapshot.Velocity = MovementComp.State.Velocity;
+        }
 
         var snapshotMoveState = snapshot.GetMoveState();
 
         if (IsLocal)
         {
+
+            GD.Print($"[ApplyServerSnapshot] Last acked tick: {_lastAckedClientCommandTick}");
+            GD.Print($"[ApplyServerSnapshot] Unacked inputs before remove ({_unacknowledgedClientInputs.Count}): " +
+                     string.Join(", ", _unacknowledgedClientInputs.Select(i => i.TickNumber)));
+
+            _unacknowledgedClientInputs.RemoveAll(cmd => cmd.TickNumber <= _lastAckedClientCommandTick);
             var reconciledState = snapshotMoveState;
+
             foreach (var cmd in _unacknowledgedClientInputs)
             {
                 reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
@@ -250,20 +281,17 @@ public partial class Character : Pawn
         }
         else
         {
-            MovementComp.State = snapshot.GetMoveState();
+            MovementComp.State = snapshotMoveState;
         }
     }
 
     public void ReceiveClientCommand(ClientCommand command)
     {
-        GD.Print("Receiving client command entry");
-
         foreach (var cmd in command.Commands)
         {
             if (!_unprocessedClientInputs.ContainsKey(cmd.TickNumber))
             {
                 _unprocessedClientInputs.Add(cmd.TickNumber, cmd);
-                GD.Print("Receiving client command and adding command to unprocessed inputs");
             }
         }
     }

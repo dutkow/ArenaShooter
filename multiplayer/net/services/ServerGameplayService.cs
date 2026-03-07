@@ -17,17 +17,12 @@ public static class ServerGameplayService
                     var cmd = new ClientCommand();
                     cmd.ReadMessage(data);
 
-                    ushort currentAcked = MatchState.Instance.LastAckedTickByPeerID.TryGetValue(peerID, out var lastTick)
-                        ? lastTick
-                        : (ushort)0;
+                    ushort lastProcessedClientComandTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
 
-                    // Wrap-safe update: only store if cmd.LastAppliedServerTick is newer
-                    if (NetUtils.IsNewerTick((ushort)cmd.LastAppliedServerTick, currentAcked))
+                    if (NetUtils.IsNewerTick(cmd.ClientTick, lastProcessedClientComandTick))
                     {
-                        MatchState.Instance.LastAckedTickByPeerID[peerID] = (ushort)cmd.LastAppliedServerTick;
-
+                        character.ReceiveClientCommand(cmd);
                     }
-                    character.ReceiveClientCommand(cmd);
                 }
             }
         }

@@ -90,7 +90,7 @@ public class WorldSnapshot : Message
         MessageType = Msg.S2C_WORLD_SNAPSHOT;
     }
 
-    public ushort Tick;
+    public ushort LastProcessedClientTick;
 
     // Use an array of character snapshots instead of parallel arrays
     public ArenaCharacterSnapshot[] Characters;
@@ -99,7 +99,7 @@ public class WorldSnapshot : Message
     {
         base.BufferSize();
 
-        Add(Tick);
+        Add(LastProcessedClientTick);
 
         Add(Characters.Length);
         for (int i = 0; i < Characters.Length; i++)
@@ -122,7 +122,7 @@ public class WorldSnapshot : Message
     {
         base.WriteMessage();
 
-        Write(Tick);
+        Write(LastProcessedClientTick);
 
         Write(Characters.Length);
         for (int i = 0; i < Characters.Length; i++)
@@ -146,7 +146,7 @@ public class WorldSnapshot : Message
     {
         base.ReadMessage(data);
 
-        Read(out Tick);
+        Read(out LastProcessedClientTick);
 
         int count;
         Read(out count);
@@ -217,7 +217,7 @@ public class WorldSnapshot : Message
             characters[i++] = new ArenaCharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, health, shield, allFlags);
         }
 
-        newSnapshot.Tick = MatchState.Instance.ServerTickManager.ServerTick;
+        newSnapshot.LastProcessedClientTick = MatchState.Instance.ServerTickManager.ServerTick;
         newSnapshot.Characters = characters;
 
         return newSnapshot;
@@ -280,7 +280,7 @@ public class WorldSnapshot : Message
 
         return new WorldSnapshot
         {
-            Tick = Tick,
+            LastProcessedClientTick = LastProcessedClientTick,
             Characters = deltaList.ToArray(),
             MessageType = Msg.S2C_WORLD_SNAPSHOT,
             ENetFlags = ENetFlags

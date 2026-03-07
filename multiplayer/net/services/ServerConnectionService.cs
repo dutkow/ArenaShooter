@@ -31,7 +31,7 @@ public static class ServerConnectionService
 
         GD.Print("Server sending player joined");
 
-        MatchState.Instance.LastAckedTickByPeerID[peerID] = 0;
+        MatchState.Instance.LastProcessedTickByPlayerID[playerID] = 0;
         PlayerJoined.Execute(playerID, playerName);
         
         

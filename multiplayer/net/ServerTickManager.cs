@@ -50,7 +50,7 @@ public class ServerTickManager
     {
         var snapshotDeltas = new Dictionary<uint, WorldSnapshot>();
 
-        foreach (var kvp in MatchState.Instance.LastAckedTickByPeerID)
+        foreach (var kvp in MatchState.Instance.LastProcessedTickByPlayerID)
         {
             int peerID = kvp.Key;
             uint lastAckedTick = kvp.Value;
@@ -79,6 +79,7 @@ public class ServerTickManager
 
             // ---- Accumulate bytes sent ----
             _bytesSentThisPeriod += bytes.Length;
+
 
             NetworkSender.ToClient(peer, snapshotToSend);
         }

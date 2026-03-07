@@ -82,7 +82,7 @@ public partial class MatchState : Node
 
     public ServerTickManager ServerTickManager;
 
-    public Dictionary<int, ushort> LastAckedTickByPeerID = new();
+    public Dictionary<byte, ushort> LastProcessedTickByPlayerID = new();
 
 
 

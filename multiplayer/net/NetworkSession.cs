@@ -235,7 +235,6 @@ public partial class NetworkSession : Node
 
         if (NetworkEmulator.Enabled)
         {
-           
             NetworkEmulator.Receive(peer, data, DeliverMessage);
             return;
         }

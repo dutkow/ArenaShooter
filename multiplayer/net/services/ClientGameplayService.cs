@@ -20,7 +20,7 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
-        ushort serverTick = msg.Tick;
+        ushort serverTick = msg.LastProcessedClientTick;
         if (!NetUtils.IsNewerTick(serverTick, MatchState.Instance.LastAppliedServerTick))
         {
             return;

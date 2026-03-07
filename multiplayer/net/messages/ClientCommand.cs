@@ -27,12 +27,12 @@ public class ClientCommand : Message
     public ClientInputCommand[] Commands;
 
     // The last server tick the client has received & applied
-    public ushort LastAppliedServerTick;
+    public ushort ClientTick;
 
     protected override int BufferSize()
     {
         base.BufferSize();
-        Add(LastAppliedServerTick);        // send the server tick first
+        Add(ClientTick);        // send the server tick first
         Add((byte)Commands.Length);        // then send command count
         foreach (var cmd in Commands)
         {
@@ -47,7 +47,7 @@ public class ClientCommand : Message
     public override byte[] WriteMessage()
     {
         base.WriteMessage();
-        Write(LastAppliedServerTick);
+        Write(ClientTick);
         Write((byte)Commands.Length);
         foreach (var cmd in Commands)
         {
@@ -63,7 +63,7 @@ public class ClientCommand : Message
     {
         base.ReadMessage(data);
 
-        Read(out LastAppliedServerTick);   // read server tick first
+        Read(out ClientTick);   // read server tick first
 
         byte count;
         Read(out count);
@@ -91,7 +91,7 @@ public class ClientCommand : Message
             MessageType = Msg.C2S_CLIENT_COMMAND,
             ENetFlags = ENetPacketFlags.UnreliableFragment,
             Commands = commands,
-            LastAppliedServerTick = lastAppliedServerTick
+            ClientTick = lastAppliedServerTick
         };
 
         NetworkSender.ToServer(msg);

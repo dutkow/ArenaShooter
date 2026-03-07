@@ -7,10 +7,6 @@ public static class NetUtils
     {
         return (short)(a - b) > 0;
     }
-
-
-
-
 }
 
 public static class Quantize
