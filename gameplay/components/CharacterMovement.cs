@@ -22,7 +22,7 @@ public class CharacterMovement
     Character _character;
 
     public float Speed = 15.0f;
-    public float Gravity = -12.0f;
+    public float Gravity = 0.0f;
     public float JumpSpeed = 5.0f;
 
     private bool _isGrounded = false;
@@ -73,6 +73,7 @@ public class CharacterMovement
         moveDirection = moveDirection.Normalized() * Speed;
 
         // Gravity
+        /*
         if (!IsGrounded())
         {
             state.Velocity.Y += Gravity * delta;
@@ -85,7 +86,7 @@ public class CharacterMovement
         if (inputCommand.HasFlag(InputCommand.JUMP))
         {
             state.Velocity.Y = JumpSpeed;
-        }
+        }*/
 
         state.Velocity.X = moveDirection.X;
         state.Velocity.Z = moveDirection.Z;

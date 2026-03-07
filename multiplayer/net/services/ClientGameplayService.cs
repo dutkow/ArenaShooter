@@ -17,8 +17,6 @@ public static class ClientGameplayService
 
     public static void HandleWorldSnapshot(byte[] data)
     {
-        GD.Print($"Client handling world snapshot");
-
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 

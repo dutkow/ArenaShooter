@@ -83,8 +83,6 @@ public class ServerTickManager
             // ---- Accumulate bytes sent ----
             _bytesSentThisPeriod += bytes.Length;
 
-
-            GD.Print($"sending snapshot to {peer} ");
             NetworkSender.ToClient(peer, snapshotToSend);
         }
     }

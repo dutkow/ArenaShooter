@@ -46,7 +46,7 @@ public partial class Character : Pawn
 
     private ClientInputCommand _lastProcessedClientCommand;
 
-    private bool _useInterpolation = true;
+    private bool _useInterpolation = false;
 
     public override void _Ready()
     {
@@ -292,6 +292,28 @@ public partial class Character : Pawn
         }
     }
 
+
+    public void ReconcileMoveState(CharacterMoveState newPredictedState)
+    {
+        float positionDelta = (MovementComp.State.Position - newPredictedState.Position).Length();
+
+        const float SNAP_THRESHOLD = 1.0f;
+        const float INTERP_THRESHOLD = 0.05f;
+
+        if (positionDelta > SNAP_THRESHOLD)
+        {
+            GD.Print("client snapping reconciliation");
+            MovementComp.State.Position = newPredictedState.Position;
+            MovementComp.State.Velocity = newPredictedState.Velocity;
+        }
+        else if (positionDelta > INTERP_THRESHOLD)
+        {
+            GD.Print("client interping reconciliation");
+            MovementComp.State.Position = MovementComp.State.Position.Lerp(newPredictedState.Position, 0.5f);
+            MovementComp.State.Velocity = newPredictedState.Velocity;
+        }
+    }
+
     public void ReceiveClientCommand(ClientCommand command)
     {
         foreach (var cmd in command.Commands)
@@ -303,24 +325,6 @@ public partial class Character : Pawn
         }
     }
 
-    public void ReconcileMoveState(CharacterMoveState newPredictedState)
-    {
-        float positionDelta = (MovementComp.State.Position - newPredictedState.Position).Length();
-
-        const float SNAP_THRESHOLD = 1.0f;
-        const float INTERP_THRESHOLD = 0.05f;
-
-        if (positionDelta > SNAP_THRESHOLD)
-        {
-            MovementComp.State.Position = newPredictedState.Position;
-            MovementComp.State.Velocity = newPredictedState.Velocity;
-        }
-        else if (positionDelta > INTERP_THRESHOLD)
-        {
-            MovementComp.State.Position = MovementComp.State.Position.Lerp(newPredictedState.Position, 0.5f);
-            MovementComp.State.Velocity = newPredictedState.Velocity;
-        }
-    }
 
     // predicting on the server so the server can also interpolate to this, just without snapshot based reconciliation
     public void HandleInput(InputCommand input, float delta)
