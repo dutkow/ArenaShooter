@@ -33,7 +33,7 @@ public partial class Character : Pawn
     // Components
     [Export] MeshInstance3D _characterMesh;
     [Export] MeshInstance3D _thirdPersonWeaponMesh;
-
+    [Export] Node3D _cameraPivot;
     [Export] Weapon _weapon;
 
     public CharacterMovement MovementComp { get; private set; } = new();
@@ -51,6 +51,10 @@ public partial class Character : Pawn
     public override void _Ready()
     {
         base._Ready();
+
+        Camera.Current = false;
+        SetProcessInput(false);
+        ShowThirdPersonView();
 
         Input.MouseMode = Input.MouseModeEnum.Captured;
 
@@ -296,7 +300,7 @@ public partial class Character : Pawn
             TickNumber = MatchState.Instance.CurrentTick,
             Input = newInput,
             Yaw = GlobalRotation.Y,
-            Pitch = Camera.GlobalRotation.Y
+            Pitch = _cameraPivot.GlobalRotation.X
         };
 
         _unacknowledgedClientInputs.Add(inputCommand);
@@ -363,9 +367,9 @@ public partial class Character : Pawn
             Pitch += -mouseEvent.Relative.Y * MouseSensitivity;
             Pitch = Mathf.Clamp(Pitch, -90, 90);
 
-            if (Camera != null)
+            if (_cameraPivot != null)
             {
-                Camera.RotationDegrees = new Vector3(Pitch, 0, 0);
+                _cameraPivot.RotationDegrees = new Vector3(Pitch, 0, 0);
             }
 
             MovementComp.State.Yaw = Yaw;
