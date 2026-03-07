@@ -259,22 +259,22 @@ public partial class Character : Pawn
         _lastAckedClientCommandTick = lastProcessedClientTick;
 
         // Reset any values which haven't changed
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position))
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
         {
             snapshot.Position = MovementComp.State.Position;
         }
 
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw))
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))
         {
             snapshot.Yaw = MovementComp.State.Yaw;
         }
 
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch))
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))
         {
             snapshot.Pitch = MovementComp.State.Pitch;
         }
 
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity))
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
         {
             snapshot.Velocity = MovementComp.State.Velocity;
         }

@@ -10,10 +10,10 @@ public enum CharacterMoveMode
 public struct CharacterMoveState
 {
     public Vector3 Position;
+    public Vector3 Velocity;
     public float Yaw;
     public float Pitch;
-    public Vector3 Velocity;
-    public bool IsGrounded;
+    public CharacterMoveMode MoveMode;
 }
 
 
@@ -22,8 +22,8 @@ public class CharacterMovement
     Character _character;
 
     public float Speed = 10.0f;
-    public float Gravity = 0.0f;
-    public float JumpSpeed = 5.0f;
+    public float Gravity = -15.0f;
+    public float JumpSpeed = 10.0f;
 
     private bool _isGrounded = false;
 
@@ -76,8 +76,8 @@ public class CharacterMovement
         state.Velocity.Z = moveDirection.Z;
 
         state.Position += state.Velocity * delta;
+
         // Gravity
-        /*
         if (!IsGrounded())
         {
             state.Velocity.Y += Gravity * delta;
@@ -97,7 +97,7 @@ public class CharacterMovement
         if (_isGrounded && state.Velocity.Y < 0)
         {
             state.Velocity.Y = 0;
-        }*/
+        }
         return state;
     }
 

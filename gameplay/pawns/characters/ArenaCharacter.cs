@@ -238,25 +238,25 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
 
     public void ApplySnapshot(CharacterSnapshot snapshot, float deltaTime = 0f)
     {
-        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position))
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
             LastSnapshot.Position = snapshot.Position;
 
-        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity))
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
             LastSnapshot.Velocity = snapshot.Velocity;
 
-        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw))
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))
             LastSnapshot.Yaw = snapshot.Yaw;
 
-        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch))
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))
             LastSnapshot.Pitch = snapshot.Pitch;
 
-        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Health))
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH))
         {
             LastSnapshot.Health = snapshot.Health;
             HealthComponent.SetHealth(snapshot.Health);
         }
 
-        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Shield))
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD))
         {
             LastSnapshot.Shield = snapshot.Shield;
             HealthComponent.SetShield(snapshot.Shield);
@@ -269,13 +269,13 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
             Vector3 targetVel = MovementComp.Velocity;
             bool predictedPositionChanged = false;
 
-            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Position))
+            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
             {
                 targetPos = LastSnapshot.Position;
                 predictedPositionChanged = true;
             }
 
-            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Velocity))
+            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
             {
                 targetVel = LastSnapshot.Velocity;
                 predictedPositionChanged = true;
@@ -307,14 +307,14 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
                 GlobalPosition = startingPosition;
             }
 
-            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.Yaw))
+            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))
             {
                 var rot = GlobalRotation;
                 rot.Y = LastSnapshot.Yaw;
                 GlobalRotation = rot;
             }
 
-            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.AimPitch) && ThirdPersonWeaponMesh != null)
+            if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH) && ThirdPersonWeaponMesh != null)
             {
                 var camRot = ThirdPersonWeaponMesh.GlobalRotation;
                 camRot.X = Mathf.Clamp(LastSnapshot.Pitch, -1.5f, 1.5f);
