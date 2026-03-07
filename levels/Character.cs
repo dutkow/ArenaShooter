@@ -264,11 +264,6 @@ public partial class Character : Pawn
 
         if (IsLocal)
         {
-
-            GD.Print($"[ApplyServerSnapshot] Last acked tick: {_lastAckedClientCommandTick}");
-            GD.Print($"[ApplyServerSnapshot] Unacked inputs before remove ({_unacknowledgedClientInputs.Count}): " +
-                     string.Join(", ", _unacknowledgedClientInputs.Select(i => i.TickNumber)));
-
             _unacknowledgedClientInputs.RemoveAll(cmd => cmd.TickNumber <= _lastAckedClientCommandTick);
             var reconciledState = snapshotMoveState;
 
