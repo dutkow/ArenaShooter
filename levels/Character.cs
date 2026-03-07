@@ -35,6 +35,10 @@ public partial class Character : Pawn
     [Export] MeshInstance3D _thirdPersonWeaponMesh;
     [Export] Node3D _cameraPivot;
     [Export] Weapon _weapon;
+    [Export] Node3D _visualContainer;
+
+    private Vector3 _visualContainerPosition;
+
 
     public CharacterMovement MovementComp { get; private set; } = new();
 
@@ -58,6 +62,7 @@ public partial class Character : Pawn
 
         Input.MouseMode = Input.MouseModeEnum.Captured;
 
+        _visualContainerPosition = _visualContainer.Position;
     }
 
     public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
@@ -230,7 +235,9 @@ public partial class Character : Pawn
 
     public void InterpolatePosition(float interpSpeed)
     {
-        GlobalPosition = GlobalPosition.Lerp(MovementComp.State.Position, LOCAL_SV_INTERP_RATE);
+
+        var targetPosition = MovementComp.State.Position + _visualContainerPosition;
+        _visualContainer.GlobalPosition = _visualContainer.GlobalPosition.Lerp(targetPosition, LOCAL_SV_INTERP_RATE);
     }
 
     public void InterpolateYaw(float interpSpeed)

@@ -11,15 +11,16 @@
 
 [sub_resource type="BoxMesh" id="BoxMesh_4ueed"]
 
-[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_cameraPivot", "_weapon")]
+[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_cameraPivot", "_weapon", "_visualContainer")]
 script = ExtResource("1_4ffih")
 Area = NodePath("Area3D")
 CollisionShape = NodePath("Area3D/CollisionShape3D")
-Camera = NodePath("Area3D/CharacterMesh/CameraPivot/Camera3D")
-_characterMesh = NodePath("Area3D/CharacterMesh")
-_thirdPersonWeaponMesh = NodePath("Area3D/CharacterMesh/ThirdPersonWeaponMesh")
-_cameraPivot = NodePath("Area3D/CharacterMesh/CameraPivot")
-_weapon = NodePath("Area3D/CharacterMesh/CameraPivot/Camera3D/Weapon")
+Camera = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D")
+_characterMesh = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh")
+_thirdPersonWeaponMesh = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponMesh")
+_cameraPivot = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot")
+_weapon = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D/Weapon")
+_visualContainer = NodePath("Area3D/CollisionShape3D/VisualContainer")
 
 [node name="Area3D" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0290723, 0)
@@ -27,21 +28,23 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0290723, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
 shape = SubResource("CapsuleShape3D_sbyc8")
 
-[node name="CharacterMesh" type="MeshInstance3D" parent="Area3D"]
+[node name="VisualContainer" type="Node3D" parent="Area3D/CollisionShape3D"]
+
+[node name="CharacterMesh" type="MeshInstance3D" parent="Area3D/CollisionShape3D/VisualContainer"]
 material_override = ExtResource("2_smvd3")
 mesh = SubResource("CapsuleMesh_tcfo8")
-skeleton = NodePath("../..")
+skeleton = NodePath("../../../..")
 
-[node name="ThirdPersonWeaponMesh" type="MeshInstance3D" parent="Area3D/CharacterMesh"]
+[node name="ThirdPersonWeaponMesh" type="MeshInstance3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh"]
 transform = Transform3D(0.19100595, 0, 0, 0, 0.20596787, 0, 0, 0, 1.3711782, 0.21747983, 0.28292036, -0.5755629)
 mesh = SubResource("BoxMesh_4ueed")
-skeleton = NodePath("../../..")
+skeleton = NodePath("../../../../..")
 
-[node name="CameraPivot" type="Node3D" parent="Area3D/CharacterMesh"]
+[node name="CameraPivot" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4623046, -0.5022421)
 
-[node name="Camera3D" type="Camera3D" parent="Area3D/CharacterMesh/CameraPivot"]
+[node name="Camera3D" type="Camera3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot"]
 
-[node name="Weapon" parent="Area3D/CharacterMesh/CameraPivot/Camera3D" instance=ExtResource("2_u04n7")]
+[node name="Weapon" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D" instance=ExtResource("2_u04n7")]
 transform = Transform3D(-1.3637659e-08, 0, 0.59218806, 0, 1, 0, -0.31199327, 0, -2.5885361e-08, 0, -0.31457317, 0)
 _projectileScene = ExtResource("3_7lgj7")
