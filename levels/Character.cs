@@ -106,17 +106,18 @@ public partial class Character : Pawn
 
     public void ProcessNextClientInput()
     {
+
         ClientInputCommand cmd = new();
 
         if (_unprocessedClientInputs.Count > 0)
         {
-            ushort nextTick = _unprocessedClientInputs.Keys.Min();
-            cmd = _unprocessedClientInputs[nextTick];
+            ushort tickToProcess = _unprocessedClientInputs.Keys.Min();
+            cmd = _unprocessedClientInputs[tickToProcess];
             _lastProcessedClientCommand = cmd;
-            _unprocessedClientInputs.Remove(nextTick);
-            _lastAckedClientCommandTick = nextTick;
+            _unprocessedClientInputs.Remove(tickToProcess);
+            _lastAckedClientCommandTick = tickToProcess;
 
-            MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = cmd.ClientTick;
+            MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = tickToProcess;
         }
         else
         {
@@ -298,18 +299,17 @@ public partial class Character : Pawn
 
         const float SNAP_THRESHOLD = 1.0f;
         const float INTERP_THRESHOLD = 0.05f;
+        const float INTER_CORRECTION_SPEED = 0.25f;
 
         if (positionDelta > SNAP_THRESHOLD)
         {
-            GD.Print($"snapping correction");
             MovementComp.State.Position = newPredictedState.Position;
             MovementComp.State.Velocity = newPredictedState.Velocity;
         }
         else if (positionDelta > INTERP_THRESHOLD)
         {
             GD.Print($"lerping correction, error is {positionDelta}");
-
-            MovementComp.State.Position = MovementComp.State.Position.Lerp(newPredictedState.Position, 0.5f);
+            MovementComp.State.Position = MovementComp.State.Position.Lerp(newPredictedState.Position, INTER_CORRECTION_SPEED);
             MovementComp.State.Velocity = newPredictedState.Velocity;
         }
     }

@@ -21,7 +21,7 @@ public class CharacterMovement
 {
     Character _character;
 
-    public float Speed = 15.0f;
+    public float Speed = 10.0f;
     public float Gravity = 0.0f;
     public float JumpSpeed = 5.0f;
 

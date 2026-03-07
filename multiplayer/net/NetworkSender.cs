@@ -9,15 +9,13 @@ public static class NetworkSender
     // -------------------------------------------------
     public static bool EmulationEnabled = true;
 
-    // Client → Server
-    public static float ClientToServerBasePingMs = 25.0f;
-    public static float ClientToServerVarianceMs = 5;
-    public static float ClientToServerPacketLossPercent = 0.0f;
+    public static float ClientToServerBasePingMs = 50.0f;
+    public static float ClientToServerVarianceMs = 5.0f;
+    public static float ClientToServerPacketLossPercent = 0.01f;
 
-    // Server → Client
-    public static float ServerToClientBasePingMs = 25.0f;
-    public static float ServerToClientVarianceMs = 5;
-    public static float ServerToClientPacketLossPercent = 0.0f;
+    public static float ServerToClientBasePingMs = 50.0f;
+    public static float ServerToClientVarianceMs = 5.0f;
+    public static float ServerToClientPacketLossPercent = 0.01f;
 
     private class QueuedPacket
     {
@@ -34,6 +32,48 @@ public static class NetworkSender
     private static double CurrentTime = 0.0;
 
     // -------------------------------------------------
+    // Predefined Network Profiles
+    // -------------------------------------------------
+    public enum NetworkProfile
+    {
+        GREAT,
+        GOOD,
+        AVERAGE,
+        BAD
+    }
+
+    private static readonly Dictionary<NetworkProfile, (float basePing, float variance, float packetLoss)> ProfileSettings
+        = new()
+    {
+        // Base ping = RTT (round trip), variance in ms, packet loss %
+        { NetworkProfile.GREAT,   (40f, 5f, 0f) },    // ~20 ms one-way, very stable
+        { NetworkProfile.GOOD,    (60f, 10f, 0.01f) }, // ~30 ms one-way, slight jitter
+        { NetworkProfile.AVERAGE, (100f, 15f, 0.02f) }, // ~50 ms one-way, normal internet
+        { NetworkProfile.BAD,     (200f, 20f, 0.05f) }  // ~100 ms one-way, noticeable latency
+    };
+
+    // -------------------------------------------------
+    // Network Emulation Control
+    // -------------------------------------------------
+    public static void ToggleNetEmulation(bool enabled)
+    {
+        EmulationEnabled = enabled;
+    }
+
+    public static void SetNetworkProfile(NetworkProfile profile)
+    {
+        var settings = ProfileSettings[profile];
+
+        ClientToServerBasePingMs = settings.basePing;
+        ClientToServerVarianceMs = settings.variance;
+        ClientToServerPacketLossPercent = settings.packetLoss;
+
+        ServerToClientBasePingMs = settings.basePing;
+        ServerToClientVarianceMs = settings.variance;
+        ServerToClientPacketLossPercent = settings.packetLoss;
+    }
+
+    // -------------------------------------------------
     // Frame Update
     // -------------------------------------------------
     public static void Process(double delta)
@@ -43,7 +83,6 @@ public static class NetworkSender
         if (!EmulationEnabled)
             return;
 
-        // Flush both queues
         FlushQueue(ClientToServerQueue);
         FlushQueue(ServerToClientQueue);
     }
@@ -78,11 +117,12 @@ public static class NetworkSender
         float basePing = clientToServer ? ClientToServerBasePingMs : ServerToClientBasePingMs;
         float variance = clientToServer ? ClientToServerVarianceMs : ServerToClientVarianceMs;
 
-        // drop only unreliable packets
+        // Drop only unreliable packets
         if (!reliable && Rng.NextDouble() < packetLoss)
             return;
 
-        double delay = (basePing + (Rng.NextDouble() * 2 - 1) * variance) / 2000.0;
+        // Delay in seconds (half RTT to simulate one-way)
+        double delay = (basePing / 2.0 + (Rng.NextDouble() * 2 - 1) * variance / 2.0) / 1000.0;
 
         var queue = clientToServer ? ClientToServerQueue : ServerToClientQueue;
         queue.Add(new QueuedPacket
@@ -107,7 +147,7 @@ public static class NetworkSender
             return;
         }
 
-        SendInternal(serverPeer, 0, message.WriteMessage(), (int)message.Flags, clientToServer: true);
+        SendInternal(serverPeer, 0, message.WriteMessage(), (int)message.Flags, true);
     }
 
     // -------------------------------------------------
@@ -118,7 +158,7 @@ public static class NetworkSender
         if (clientPeer == null)
             return;
 
-        SendInternal(clientPeer, 0, message.WriteMessage(), (int)message.Flags, clientToServer: false);
+        SendInternal(clientPeer, 0, message.WriteMessage(), (int)message.Flags, false);
     }
 
     // -------------------------------------------------
@@ -132,7 +172,7 @@ public static class NetworkSender
         foreach (var peer in NetworkHandler.Instance.ReadyPeers)
         {
             if (peer != null)
-                SendInternal(peer, 0, data, flags, clientToServer: false);
+                SendInternal(peer, 0, data, flags, false);
         }
     }
 
@@ -149,7 +189,7 @@ public static class NetworkSender
             if (kvp.Key == excludedPlayerID)
                 continue;
 
-            SendInternal(kvp.Value, 0, data, flags, clientToServer: false);
+            SendInternal(kvp.Value, 0, data, flags, false);
         }
     }
 
@@ -164,7 +204,7 @@ public static class NetworkSender
         foreach (var client in clients)
         {
             if (client != null && filter(client))
-                SendInternal(client, 0, data, flags, clientToServer: false);
+                SendInternal(client, 0, data, flags, false);
         }
     }
 }
