@@ -111,4 +111,6 @@ public class CharacterMovementComponent
         if (_character != null)
             _character.Velocity = Vector3.Zero;
     }
+
+
 }

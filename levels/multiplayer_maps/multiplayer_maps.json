@@ -1,16 +1,16 @@
 {
   "maps": [
-    {
-      "id": "test_map_1",
-      "name": "Test Map 1",
-      "folder": "test_map_1",
-      "scene": "test_map_1"
-    },
-    {
-      "id": "test_map_2",
-      "name": "Test Map 2",
-      "folder": "test_map_2",
-      "scene": "test_map_2"
-    }
+	{
+	  "id": "test_map_1",
+	  "name": "Test Map 1",
+	  "folder": "test_map_1",
+	  "scene": "test_map_1"
+	},
+	{
+	  "id": "test_map_2",
+	  "name": "Test Map 2",
+	  "folder": "test_map_2",
+	  "scene": "test_map_2"
+	}
   ]
 }

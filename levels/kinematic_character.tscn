@@ -6,8 +6,11 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_tcfo8"]
 
-[node name="KinematicCharacter" type="Node3D"]
+[node name="KinematicCharacter" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera")]
 script = ExtResource("1_4ffih")
+Area = NodePath("Area3D")
+CollisionShape = NodePath("Area3D/CollisionShape3D")
+Camera = NodePath("Area3D/Camera3D")
 
 [node name="Area3D" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0290723, 0)

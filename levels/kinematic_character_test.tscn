@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://bqojlp6n3woby"]
+[gd_scene load_steps=11 format=3 uid="uid://bqojlp6n3woby"]
 
 [ext_resource type="Material" uid="uid://cq4akbweyf2lw" path="res://assets/materials/green_material.tres" id="1_mqmeg"]
 [ext_resource type="PackedScene" uid="uid://ckn5b0j16otei" path="res://levels/kinematic_character.tscn" id="2_tpebg"]
+[ext_resource type="PackedScene" uid="uid://dhbu7x63mvhje" path="res://ball.tscn" id="3_i3gy6"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tpebg"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -16,14 +17,17 @@ sky = SubResource("Sky_i3gy6")
 tonemap_mode = 2
 glow_enabled = true
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_tpebg"]
-size = Vector2(200, 200)
+[sub_resource type="BoxMesh" id="BoxMesh_t1e14"]
+size = Vector3(200, 1, 200)
 
 [sub_resource type="BoxMesh" id="BoxMesh_tpebg"]
 size = Vector3(200, 10, 10)
 
 [sub_resource type="BoxMesh" id="BoxMesh_i3gy6"]
 size = Vector3(10, 10, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ohvgb"]
+size = Vector3(200, 2, 200)
 
 [node name="Node3D" type="Node3D"]
 
@@ -35,10 +39,13 @@ shadow_enabled = true
 environment = SubResource("Environment_t1e14")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.014770508, 0)
 material_override = ExtResource("1_mqmeg")
-mesh = SubResource("PlaneMesh_tpebg")
+mesh = SubResource("BoxMesh_t1e14")
 
-[node name="KinematicCharacter" parent="." instance=ExtResource("2_tpebg")]
+[node name="KinematicCharacter" parent="." node_paths=PackedStringArray("CollisionShape") instance=ExtResource("2_tpebg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6964779, 3.0766883, 0.43860126)
+CollisionShape = NodePath("../StaticBody3D/CollisionShape3D")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.712275, -58.20501)
@@ -59,3 +66,12 @@ mesh = SubResource("BoxMesh_i3gy6")
 [node name="MeshInstance3D6" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.651833, 1.712275, 3.8747215)
 mesh = SubResource("BoxMesh_i3gy6")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_ohvgb")
+debug_color = Color(0, 0.6, 0.69803923, 0.9019608)
+
+[node name="Ball" parent="." instance=ExtResource("3_i3gy6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3779812, -8.847899)
