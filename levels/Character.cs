@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
+using System.Linq;
 
 
 public partial class Character : Pawn
@@ -15,7 +16,7 @@ public partial class Character : Pawn
     [Export] public Camera3D Camera; // assign in editor
     [Export] public float MouseSensitivity = 0.1f;
 
-    List<ClientInputCommand> _unacknowledgedInputs = new();
+    List<ClientInputCommand> _unacknowledgedClientInputs = new();
 
 
     const int REDUNDANT_INPUTS = 4;
@@ -26,7 +27,7 @@ public partial class Character : Pawn
 
     private uint _lastProcessedClientTick;
 
-    private CharacterMoveState _predictedMoveState;
+    private CharacterMoveState _currentMoveState;
 
 
     // Components
@@ -38,6 +39,12 @@ public partial class Character : Pawn
     public CharacterMovement MovementComp { get; private set; } = new();
 
     public HealthComponent HealthComp { get; private set; } = new();
+
+    private SortedDictionary<uint, ClientInputCommand> _unprocessedClientInputs = new SortedDictionary<uint, ClientInputCommand>();
+
+    private uint _lastAcknowledgedTick;
+
+    private ClientInputCommand _lastProcessedClientCommand;
 
     public override void _Ready()
     {
@@ -60,16 +67,47 @@ public partial class Character : Pawn
     {
         base.Tick(delta);
 
-        if(IsLocal)
+        if(IsAuthority)
+        {
+            if(IsLocal)
+            {
+                HandleInput(CaptureInput(), delta);
+            }
+            else
+            {
+                ProcessNextClientInput();
+            }
+        }
+        else if (IsLocal)
         {
             var input = CaptureInput();
             HandleInput(input, delta);
-
-            if(!IsAuthority)
-            {
-                SendClientInput(input);
-            }
+            SendClientInput(input);
         }
+    }
+
+    public void ProcessNextClientInput()
+    {
+        ClientInputCommand cmd = new();
+
+        if (_unprocessedClientInputs.Count > 0)
+        {
+            uint nextTick = _unprocessedClientInputs.Keys.Min();
+            cmd = _unprocessedClientInputs[nextTick];
+            _lastProcessedClientCommand = cmd;
+            _unprocessedClientInputs.Remove(nextTick);
+            _lastAcknowledgedTick = nextTick;
+        }
+        // replay last input. TODO: consider replaying for a specific time and tracking state of missed inputs
+        else
+        {
+            cmd = _lastProcessedClientCommand;
+        }
+
+        _currentMoveState = MovementComp.Step(_currentMoveState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
+
+        _currentMoveState.Yaw = cmd.Yaw;
+        _currentMoveState.Pitch = cmd.Pitch;
     }
 
     public override void _Process(double delta)
@@ -146,32 +184,32 @@ public partial class Character : Pawn
         {
             if(IsLocal)
             {
-                GlobalPosition.Lerp(_predictedMoveState.Position, LOCAL_SV_INTERP_RATE);
+                GlobalPosition.Lerp(_currentMoveState.Position, LOCAL_SV_INTERP_RATE);
             }
         }
         else
         {
             if(IsLocal)
             {
-                GlobalPosition.Lerp(_predictedMoveState.Position, LOCAL_CL_INTERP_RATE);
+                GlobalPosition.Lerp(_currentMoveState.Position, LOCAL_CL_INTERP_RATE);
             }
             else
             {
-                GlobalPosition.Lerp(_predictedMoveState.Position, REMOTE_CL_INTERP_RATE);
-                GlobalRotation.Lerp(new Vector3(0.0f, _predictedMoveState.Yaw, REMOTE_CL_INTERP_RATE), REMOTE_CL_INTERP_RATE);
+                GlobalPosition.Lerp(_currentMoveState.Position, REMOTE_CL_INTERP_RATE);
+                GlobalRotation.Lerp(new Vector3(0.0f, _currentMoveState.Yaw, REMOTE_CL_INTERP_RATE), REMOTE_CL_INTERP_RATE);
             }
         }
     }
 
     public void ApplyServerSnapshot(ArenaCharacterSnapshot snapshot, ushort lastProcessedClientTick)
     {
-        _unacknowledgedInputs.RemoveAll(cmd => cmd.TickNumber <= lastProcessedClientTick);
+        _unacknowledgedClientInputs.RemoveAll(cmd => cmd.TickNumber <= lastProcessedClientTick);
 
         if (IsLocal)
         {
             var reconciledState = snapshot.GetMoveState();
 
-            foreach (var cmd in _unacknowledgedInputs)
+            foreach (var cmd in _unacknowledgedClientInputs)
             {
                 reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
             }
@@ -182,32 +220,43 @@ public partial class Character : Pawn
 
     public void HandleClientCommand(ClientCommand command)
     {
+        foreach (var cmd in command.Commands)
+        {
+            if (cmd.TickNumber <= _lastAcknowledgedTick)
+            {
+                continue;
+            }
 
+            if (_unprocessedClientInputs.ContainsKey(cmd.TickNumber))
+            {
+                _unprocessedClientInputs.Add(cmd.TickNumber, cmd);
+            }
+        }
     }
 
     public void ReconcileMoveState(CharacterMoveState newPredictedState)
     {
-        float positionDelta = (_predictedMoveState.Position - newPredictedState.Position).Length();
+        float positionDelta = (_currentMoveState.Position - newPredictedState.Position).Length();
 
         const float SNAP_THRESHOLD = 1.0f;
         const float INTERP_THRESHOLD = 0.05f;
 
         if (positionDelta > SNAP_THRESHOLD)
         {
-            _predictedMoveState.Position = newPredictedState.Position;
-            _predictedMoveState.Velocity = newPredictedState.Velocity;
+            _currentMoveState.Position = newPredictedState.Position;
+            _currentMoveState.Velocity = newPredictedState.Velocity;
         }
         else if (positionDelta > INTERP_THRESHOLD)
         {
-            _predictedMoveState.Position = _predictedMoveState.Position.Lerp(newPredictedState.Position, 0.5f);
-            _predictedMoveState.Velocity = newPredictedState.Velocity;
+            _currentMoveState.Position = _currentMoveState.Position.Lerp(newPredictedState.Position, 0.5f);
+            _currentMoveState.Velocity = newPredictedState.Velocity;
         }
     }
 
     // predicting on the server so the server can also interpolate to this, just without snapshot based reconciliation
     public void HandleInput(InputCommand input, float delta)
     {
-        _predictedMoveState = MovementComp.Step(_predictedMoveState, input, delta);
+        _currentMoveState = MovementComp.Step(_currentMoveState, input, delta);
     }
 
     public void SendClientInput(InputCommand newInput)
@@ -219,7 +268,7 @@ public partial class Character : Pawn
         inputCommand.Yaw = GlobalRotation.Y;
         inputCommand.Pitch = Camera.GlobalRotation.Y;
 
-        _unacknowledgedInputs.Add(inputCommand);
+        _unacknowledgedClientInputs.Add(inputCommand);
     }
 
 
