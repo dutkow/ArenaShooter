@@ -1,12 +1,12 @@
 [gd_scene load_steps=5 format=3 uid="uid://cm5541sq1kv43"]
 
 [ext_resource type="Script" uid="uid://boo408k7s368l" path="res://core/GameMode.cs" id="1_2ollm"]
-[ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://gameplay/pawns/characters/arena_character.tscn" id="2_ruqs1"]
+[ext_resource type="PackedScene" uid="uid://ckn5b0j16otei" path="res://levels/character.tscn" id="2_xrwxx"]
 [ext_resource type="PackedScene" uid="uid://bmtkb45r7yy6j" path="res://core/level_ui.tscn" id="3_61523"]
 [ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/player_hud.tscn" id="3_xrwxx"]
 
 [node name="GameMode" type="Node"]
 script = ExtResource("1_2ollm")
-DefaultPawnScene = ExtResource("2_ruqs1")
+DefaultPawnScene = ExtResource("2_xrwxx")
 MatchStateScene = ExtResource("3_xrwxx")
 LevelUIScene = ExtResource("3_61523")

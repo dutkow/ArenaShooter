@@ -10,6 +10,8 @@ public partial class Pawn : Actor
 
     public bool InputActive => IsLocal && !_inputEnabled;
 
+    public PlayerState PlayerState { get; private set; }
+
     public override void _Ready()
     {
         base._Ready();
@@ -33,8 +35,20 @@ public partial class Pawn : Actor
         Role = NetworkRole.NONE;
     }
 
-    public void SetInputEnabled(bool value)
+    public virtual void SetInputEnabled(bool value)
     {
         _inputEnabled = value;
     }
+
+    public virtual void TeleportTo(Transform3D t) { GlobalTransform = t; }
+    public virtual void SetWeaponsEnabled(bool enabled) { }
+
+    public virtual void HandleRemoteSpawn() { }
+
+    public virtual void Initialize(PlayerState playerState)
+    {
+        PlayerState = playerState;
+    }
+
+    public virtual void OnDeath() { }
 }

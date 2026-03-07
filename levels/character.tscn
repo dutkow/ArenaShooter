@@ -1,16 +1,24 @@
-[gd_scene load_steps=4 format=3 uid="uid://ckn5b0j16otei"]
+[gd_scene load_steps=8 format=3 uid="uid://ckn5b0j16otei"]
 
 [ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://levels/Character.cs" id="1_4ffih"]
+[ext_resource type="Material" uid="uid://dfwluwkwpcsjl" path="res://assets/materials/orange_material.tres" id="2_smvd3"]
+[ext_resource type="PackedScene" uid="uid://b708cmx0cac5h" path="res://gameplay/weapons/weapon.tscn" id="2_u04n7"]
+[ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/linear_projectile.tscn" id="3_7lgj7"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sbyc8"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_tcfo8"]
 
-[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera")]
+[sub_resource type="BoxMesh" id="BoxMesh_4ueed"]
+
+[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_weapon")]
 script = ExtResource("1_4ffih")
 Area = NodePath("Area3D")
 CollisionShape = NodePath("Area3D/CollisionShape3D")
 Camera = NodePath("Area3D/Camera3D")
+_characterMesh = NodePath("Area3D/CharacterMesh")
+_thirdPersonWeaponMesh = NodePath("Area3D/CharacterMesh/ThirdPersonWeaponMesh")
+_weapon = NodePath("Area3D/Camera3D/Weapon")
 
 [node name="Area3D" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0290723, 0)
@@ -19,8 +27,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0290723, 0)
 shape = SubResource("CapsuleShape3D_sbyc8")
 
 [node name="Camera3D" type="Camera3D" parent="Area3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35319614, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5687082, -0.44957167)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D"]
+[node name="Weapon" parent="Area3D/Camera3D" instance=ExtResource("2_u04n7")]
+transform = Transform3D(-1.684197e-08, 0, 0.59218806, 0, 1, 0, -0.38529935, 0, -2.5885361e-08, 0, -0.27359498, -0.34407926)
+_projectileScene = ExtResource("3_7lgj7")
+
+[node name="CharacterMesh" type="MeshInstance3D" parent="Area3D"]
+material_override = ExtResource("2_smvd3")
 mesh = SubResource("CapsuleMesh_tcfo8")
 skeleton = NodePath("../..")
+
+[node name="ThirdPersonWeaponMesh" type="MeshInstance3D" parent="Area3D/CharacterMesh"]
+transform = Transform3D(0.19100595, 0, 0, 0, 0.20596787, 0, 0, 0, 1.3711782, 0, 0.28292036, -0.5755629)
+mesh = SubResource("BoxMesh_4ueed")
+skeleton = NodePath("../../..")

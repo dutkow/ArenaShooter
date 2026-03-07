@@ -3,33 +3,33 @@ using System;
 
 public class Controller
 {
-    public IPossessable PossessedEntity { get; private set; }
+    public Pawn PossessedPawn { get; private set; }
 
     public int PlayerID = -1;
 
-    public void Possess(IPossessable possessable)
+    public void Possess(Pawn pawn)
     {
-        if (possessable == null || possessable == PossessedEntity)
+        if (pawn == null || pawn == PossessedPawn)
         {
             return;
         }
 
         UnPossess();
 
-        PossessedEntity = possessable;
+        PossessedPawn = pawn;
 
-        PossessedEntity.OnPossessed(this);
+        PossessedPawn.OnPossessed(this);
     }
 
     public void UnPossess()
     {
-        if (PossessedEntity == null)
+        if (PossessedPawn == null)
         {
             return;
         }
 
-        PossessedEntity.OnUnpossessed();
-        PossessedEntity = null;
+        PossessedPawn.OnUnpossessed();
+        PossessedPawn = null;
     }
 
 }

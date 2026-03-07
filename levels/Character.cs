@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 
 
 public partial class Character : Pawn
@@ -10,43 +11,49 @@ public partial class Character : Pawn
     [Export] public Area3D Area;
     [Export] public CollisionShape3D CollisionShape;
 
-    // State
-    private Vector3 _position = Vector3.Zero;
-    private Vector3 _velocity = Vector3.Zero;
-    private bool _isGrounded = false;
-
 
     [Export] public Camera3D Camera; // assign in editor
     [Export] public float MouseSensitivity = 0.1f;
 
     List<ClientInputCommand> _unacknowledgedInputs = new();
 
-    private CharacterMovement _charMovement = new();
 
     const int REDUNDANT_INPUTS = 4;
 
+    public float Yaw => GlobalRotation.Y;
+    public float Pitch { get; private set; }
 
-    private float _pitch = 0f; // rotation around X
-
-
-    ArenaCharacterSnapshot _lastServerSnapshot;
-
-    private HealthComponent _healthComp = new();
 
     private uint _lastProcessedClientTick;
 
     private CharacterMoveState _predictedMoveState;
 
+
+    // Components
+    [Export] MeshInstance3D _characterMesh;
+    [Export] MeshInstance3D _thirdPersonWeaponMesh;
+
+    [Export] Weapon _weapon;
+
+    public CharacterMovement MovementComp { get; private set; } = new();
+
+    public HealthComponent HealthComp { get; private set; } = new();
+
     public override void _Ready()
     {
         base._Ready();
 
-        Role = NetworkRole.LOCAL;
-
-        _position = GlobalPosition;
         Input.MouseMode = Input.MouseModeEnum.Captured;
 
-        _charMovement.Initialize(this);
+        MovementComp.Initialize(this);
+    }
+    
+    // Ticking using physics process for now for simplicity, will move to server tick
+    public override void _PhysicsProcess(double delta)
+    {
+        base._PhysicsProcess(delta);
+
+        Tick((float)delta);
     }
 
     public virtual void Tick(float delta)
@@ -63,9 +70,6 @@ public partial class Character : Pawn
                 SendClientInput(input);
             }
         }
-        else
-        {
-        }
     }
 
     public override void _Process(double delta)
@@ -73,6 +77,63 @@ public partial class Character : Pawn
         base._Process(delta);
 
         InterpolateMovement((float)delta);
+    }
+
+    /// <summary>
+    /// Interface functions
+    /// </summary>
+    public void OnPossessed(Controller controller)
+    {
+        base.OnPossessed(controller);
+
+        //_healthComp.Death += OnDeath;
+
+        Input.MouseMode = Input.MouseModeEnum.Captured;
+
+        SetProcessInput(true);
+        ShowFirstPersonView();
+
+        Camera.Current = true;
+
+        SetRole(NetworkRole.LOCAL);
+        UIRoot.Instance.OnPossessedCharacter(this);
+    }
+
+    public void OnUnpossessed()
+    {
+        base.OnUnpossessed();
+    }
+
+    public bool IsAlive()
+    {
+        return HealthComp.IsAlive;
+    }
+
+
+
+    public void ShowFirstPersonView()
+    {
+        HideThirdPersonView();
+        _weapon.FirstPersonWeaponMesh.Visible = true;
+    }
+
+    public void HideFirstPersonView()
+    {
+        _weapon.FirstPersonWeaponMesh.Visible = false;
+    }
+
+    public void ShowThirdPersonView()
+    {
+        HideFirstPersonView();
+
+        _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
+        _thirdPersonWeaponMesh.Visible = true;
+    }
+
+    public void HideThirdPersonView()
+    {
+        _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
+        _thirdPersonWeaponMesh.Visible = false;
     }
 
     float LOCAL_SV_INTERP_RATE = 0.5f;
@@ -96,15 +157,14 @@ public partial class Character : Pawn
             }
             else
             {
-                GlobalPosition.Lerp(_lastServerSnapshot.Position, REMOTE_CL_INTERP_RATE);
-                GlobalRotation.Lerp(new Vector3(0.0f, _lastServerSnapshot.Yaw, REMOTE_CL_INTERP_RATE), REMOTE_CL_INTERP_RATE);
+                GlobalPosition.Lerp(_predictedMoveState.Position, REMOTE_CL_INTERP_RATE);
+                GlobalRotation.Lerp(new Vector3(0.0f, _predictedMoveState.Yaw, REMOTE_CL_INTERP_RATE), REMOTE_CL_INTERP_RATE);
             }
         }
     }
 
-    public void ApplyServerSnapshot(ArenaCharacterSnapshot snapshot, uint lastProcessedClientTick)
+    public void ApplyServerSnapshot(ArenaCharacterSnapshot snapshot, ushort lastProcessedClientTick)
     {
-        _lastServerSnapshot = snapshot;
         _unacknowledgedInputs.RemoveAll(cmd => cmd.TickNumber <= lastProcessedClientTick);
 
         if (IsLocal)
@@ -113,11 +173,16 @@ public partial class Character : Pawn
 
             foreach (var cmd in _unacknowledgedInputs)
             {
-                reconciledState = _charMovement.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
+                reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
             }
 
             ReconcileMoveState(reconciledState);
         }
+    }
+
+    public void HandleClientCommand(ClientCommand command)
+    {
+
     }
 
     public void ReconcileMoveState(CharacterMoveState newPredictedState)
@@ -142,7 +207,7 @@ public partial class Character : Pawn
     // predicting on the server so the server can also interpolate to this, just without snapshot based reconciliation
     public void HandleInput(InputCommand input, float delta)
     {
-        _predictedMoveState = _charMovement.Step(_predictedMoveState, input, delta);
+        _predictedMoveState = MovementComp.Step(_predictedMoveState, input, delta);
     }
 
     public void SendClientInput(InputCommand newInput)
@@ -193,15 +258,15 @@ public partial class Character : Pawn
     {
         if (@event is InputEventMouseMotion mouseEvent)
         {
-            // Yaw: rotate the character around Y
             RotateY(Mathf.DegToRad(-mouseEvent.Relative.X * MouseSensitivity));
 
-            // Pitch: rotate camera around X
-            _pitch += -mouseEvent.Relative.Y * MouseSensitivity;
-            _pitch = Mathf.Clamp(_pitch, -90, 90);
+            Pitch += -mouseEvent.Relative.Y * MouseSensitivity;
+            Pitch = Mathf.Clamp(Pitch, -90, 90);
 
             if (Camera != null)
-                Camera.RotationDegrees = new Vector3(_pitch, 0, 0);
+            {
+                Camera.RotationDegrees = new Vector3(Pitch, 0, 0);
+            }
         }
     }
 }

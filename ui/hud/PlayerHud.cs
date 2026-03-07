@@ -13,4 +13,12 @@ public partial class PlayerHud : Control
         _shieldBar.AssignHealthComponent(healthComponent);
         _healthBar.AssignHealthComponent(healthComponent);
     }
+
+    public void AssignToCharacter(Character character)
+    {
+        var healthComponent = character.HealthComp;
+
+        _shieldBar.AssignHealthComponent(healthComponent);
+        _healthBar.AssignHealthComponent(healthComponent);
+    }
 }

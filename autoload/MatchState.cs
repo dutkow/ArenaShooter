@@ -232,7 +232,7 @@ public partial class MatchState : Node
             Shields = 100,
             Ammo = 0,
             TeamId = -1,
-            Character = null
+            Pawn = null
         };
 
         ConnectedPlayers[playerID] = player;
@@ -276,6 +276,6 @@ public partial class MatchState : Node
     public IReadOnlyList<PlayerState> GetAllPlayers() => new List<PlayerState>(ConnectedPlayers.Values);
 
     public IReadOnlyList<PlayerState> GetActivePlayers() =>
-        new List<PlayerState>(ConnectedPlayers.Values).FindAll(p => p.Character != null);
+        new List<PlayerState>(ConnectedPlayers.Values).FindAll(p => p.Pawn != null);
 
 }

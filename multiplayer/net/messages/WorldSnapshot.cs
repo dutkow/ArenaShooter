@@ -197,14 +197,14 @@ public class WorldSnapshot : Message
             Vector3 pos = Vector3.Zero, vel = Vector3.Zero;
             float yaw = 0f, pitch = 0f;
 
-            if (player.Character != null)
+            if (player.Pawn != null && player.Pawn is Character character)
             {
-                pos = player.Character.GlobalPosition;
-                vel = player.Character.Velocity;
-                yaw = player.Character.Yaw;
-                pitch = player.Character.AimPitch;
-                health = (byte)player.Character.HealthComponent.Health;
-                shield = (byte)player.Character.HealthComponent.Shield;
+                pos = character.GlobalPosition;
+                vel = character.MovementComp.Velocity;
+                yaw = character.Yaw;
+                pitch = character.Pitch;
+                health = (byte)character.HealthComp.Health;
+                shield = (byte)character.HealthComp.Shield;
             }
 
             CharacterSnapshotFlags allFlags = CharacterSnapshotFlags.Position |

@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="ArenaShooter"
-run/main_scene="uid://bqojlp6n3woby"
+run/main_scene="uid://pfp32j0hxv8n"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 config/icon="res://assets/textures/icon.svg"
 

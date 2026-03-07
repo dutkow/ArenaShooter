@@ -64,7 +64,7 @@ public partial class GameMode : Node
 
         foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
-            var playerCharacter = kvp.Value.Character;
+            var playerCharacter = kvp.Value.Pawn;
 
             if(playerCharacter != null)
             {

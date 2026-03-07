@@ -30,20 +30,20 @@ public partial class SpawnManager : Node3D
         return ListUtils.RandomElement(_playerSpawnPoints);
     }
 
-    public ArenaCharacter ServerSpawnPlayer(byte playerID)
+    public Pawn ServerSpawnPlayer(byte playerID)
     {
         var spawnPoint = GetSpawnPoint();
 
-        ArenaCharacter spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
+        Pawn spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
         PlayerSpawned.Send(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
         return spawnedPlayer;
     }
 
-    public ArenaCharacter LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
+    public Pawn LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
     {
         GD.Print($"Spawning player locally. PlayerID = {playerID}. Position = {spawnPosition}. Y rotation = {yRotation}");
-        var spawnedPlayer = (ArenaCharacter)GameMode.Instance.DefaultPawnScene.Instantiate();
+        var spawnedPlayer = (Pawn)GameMode.Instance.DefaultPawnScene.Instantiate();
         AddChild(spawnedPlayer);
 
         spawnedPlayer.GlobalPosition = spawnPosition;
@@ -51,14 +51,14 @@ public partial class SpawnManager : Node3D
 
         if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
         {
-            playerState.AssignCharacter(spawnedPlayer);
+            playerState.AssignPawn(spawnedPlayer);
         }
         else
         {
             GD.PushError($"Failed to assign character to player state because player state not found in connected players. PlayerID of character: {playerID}. Net role: {NetworkSession.Instance.NetworkMode}.");
         }
 
-        spawnedPlayer.NetworkedComponent.SetAuthority(NetworkSession.Instance.IsServer);
+        spawnedPlayer.SetIsAuthority(NetworkSession.Instance.IsServer);
 
         if(playerID == NetworkSession.Instance.LocalPlayerID)
         {

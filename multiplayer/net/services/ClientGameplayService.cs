@@ -26,7 +26,8 @@ public static class ClientGameplayService
             return;
         }
 
-        MatchState.Instance.LastAppliedServerTick = serverTick;
+        ushort lastAckedTick = serverTick;
+        MatchState.Instance.LastAppliedServerTick = lastAckedTick;
 
         var snapshots = msg.GetCharacterSnapshots();
 
@@ -36,9 +37,9 @@ public static class ClientGameplayService
 
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(snapshot.PlayerID, out var playerState))
             {
-                if (playerState.Character != null)
+                if (playerState.Pawn != null && playerState.Pawn is Character character)
                 {
-                    playerState.Character.ApplySnapshot(snapshot);
+                    character.ApplyServerSnapshot(snapshot, lastAckedTick);
                 }
                 else
                 {
@@ -66,11 +67,11 @@ public static class ClientGameplayService
         var msg = new HealthUpdate();
         msg.ReadMessage(data);
 
-        var character = MatchState.Instance.ConnectedPlayers[NetworkSession.Instance.LocalPlayerID].Character;
-        if(character != null)
+        var pawn = MatchState.Instance.ConnectedPlayers[NetworkSession.Instance.LocalPlayerID].Pawn;
+        if(pawn != null && pawn is Character character)
         {
-            character.HealthComponent.SetHealth(msg.Health);
-            character.HealthComponent.SetShield(msg.Shield);
+            character.HealthComp.SetHealth(msg.Health);
+            character.HealthComp.SetShield(msg.Shield);
         }
     }
 
@@ -79,7 +80,7 @@ public static class ClientGameplayService
         var msg = new PlayerDied();
         msg.ReadMessage(data);
 
-        var character = MatchState.Instance.ConnectedPlayers[msg.PlayerID].Character;
+        var character = MatchState.Instance.ConnectedPlayers[msg.PlayerID].Pawn;
         if(character != null)
         {
             character.OnDeath();

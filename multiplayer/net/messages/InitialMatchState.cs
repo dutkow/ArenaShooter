@@ -126,10 +126,10 @@ public class InitialMatchState : Message
             playerIDs[i] = kvp.Key;
             playerNames[i] = player.PlayerName;
 
-            if (player.Character != null)
+            if (player.Pawn != null)
             {
-                positions[i] = player.Character.GlobalPosition;
-                rotations[i] = player.Character.GlobalRotation;
+                positions[i] = player.Pawn.GlobalPosition;
+                rotations[i] = player.Pawn.GlobalRotation;
                 isAlive[i] = player.IsAlive;
                 GD.Print("is alive is true in initial match state");
             }

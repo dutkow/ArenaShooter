@@ -27,7 +27,7 @@ public class CharacterMovement
     [Export] public float Gravity = -20.0f;
     [Export] public float JumpSpeed = 5.0f;
 
-    private Vector3 _velocity = Vector3.Zero;
+    public Vector3 Velocity { get; private set; } = Vector3.Zero;
     private bool _isGrounded = false;
 
     private CharacterMoveMode _mode;
@@ -44,13 +44,21 @@ public class CharacterMovement
         Vector3 move = Vector3.Zero;
 
         if (inputCommand.HasFlag(InputCommand.MOVE_FORWARD))
+        {
             move.Z -= 1;
+        }
         if (inputCommand.HasFlag(InputCommand.MOVE_BACK))
+        {
             move.Z += 1;
+        }
         if (inputCommand.HasFlag(InputCommand.MOVE_LEFT))
+        {
             move.X -= 1;
+        }
         if (inputCommand.HasFlag(InputCommand.MOVE_RIGHT))
+        {
             move.X += 1;
+        }
 
         move = move.Normalized() * Speed;
 
@@ -82,9 +90,9 @@ public class CharacterMovement
         state.Velocity.X = moveDirection.X;
         state.Velocity.Z = moveDirection.Z;
 
-        _character.GlobalPosition += _velocity * delta;
+        _character.GlobalPosition += Velocity * delta;
 
-        if (_isGrounded && _velocity.Y < 0)
+        if (_isGrounded && Velocity.Y < 0)
             state.Velocity.Y = 0;
 
         return state;

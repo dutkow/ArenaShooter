@@ -10,8 +10,8 @@ public static class ServerGameplayService
         {
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
             {
-                var character = playerState.Character;
-                if (character != null)
+                var pawn = playerState.Pawn;
+                if (pawn != null && pawn is Character character)
                 {
                     // Deserialize byte[] into ClientCommand
                     var cmd = new ClientCommand();
@@ -28,7 +28,7 @@ public static class ServerGameplayService
                     }
                     // Apply the input immediately on the server
                     double delta = NetworkConstants.SERVER_TICK_INTERVAL; // Or your fixed server tick
-                    character.HandleClientCommandBatch(cmd, delta);
+                    character.HandleClientCommand(cmd);
                 }
             }
         }

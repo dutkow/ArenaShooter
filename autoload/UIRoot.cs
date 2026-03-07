@@ -16,6 +16,15 @@ public partial class UIRoot : Control
 
     }
 
+    public void OnPossessedCharacter(Character character)
+    {
+        EnsurePlayerHud();
+
+        _playerHud.AssignToCharacter(character);
+
+        ShowPlayerHud();
+    }
+
     public void OnPossessedArenaCharacter(ArenaCharacter character)
     {
         EnsurePlayerHud();

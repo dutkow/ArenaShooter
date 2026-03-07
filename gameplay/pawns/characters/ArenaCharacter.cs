@@ -21,7 +21,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
     [Export] public Camera3D Camera;
     [Export] public Marker3D CameraPivot;
 
-
+    public Pawn pawn;
 
     [Export] public float MouseSens = 0.09f;
     [Export] public float MouseSmooth = 50f;
@@ -36,7 +36,6 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
     // ----------------------
     // State
     // ----------------------
-    public bool IsAlive = true;
     public PlayerState State { get; private set; }
 
     private bool _weaponsEnabled = true;
@@ -96,12 +95,13 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
         }
 
         State = state;
-        State.Character = this;
+        State.Pawn = pawn;
 
         MovementComp.SetCharacter(this);
 
         HealthComponent.SetOwner(this);
     }
+
 
     public void HandleRemoteSpawn()
     {
@@ -200,9 +200,9 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
         return snapshot;
     }
 
-    public void HandleClientCommandBatch(ClientCommand cmdBatch, double delta)
+    public void HandleClientCommand(ClientCommand clientCommand)
     {
-        foreach (var cmd in cmdBatch.Commands)
+        foreach (var cmd in clientCommand.Commands)
         {
             if (cmd.TickNumber <= LastAppliedTick)
             {
@@ -562,6 +562,10 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
         }
 
         CharacterMesh.Visible = false;
-        IsAlive = false;
+    }
+
+    public bool IsAlive()
+    {
+        return HealthComponent.IsAlive;
     }
 }
