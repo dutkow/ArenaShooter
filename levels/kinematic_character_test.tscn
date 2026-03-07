@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=3 uid="uid://bqojlp6n3woby"]
 
 [ext_resource type="Material" uid="uid://cq4akbweyf2lw" path="res://assets/materials/green_material.tres" id="1_mqmeg"]
-[ext_resource type="PackedScene" uid="uid://ckn5b0j16otei" path="res://levels/kinematic_character.tscn" id="2_tpebg"]
+[ext_resource type="PackedScene" uid="uid://ckn5b0j16otei" path="res://levels/character.tscn" id="2_tpebg"]
 [ext_resource type="PackedScene" uid="uid://dhbu7x63mvhje" path="res://ball.tscn" id="3_i3gy6"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tpebg"]

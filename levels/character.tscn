@@ -1,12 +1,12 @@
 [gd_scene load_steps=4 format=3 uid="uid://ckn5b0j16otei"]
 
-[ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://levels/KinematicCharacter.cs" id="1_4ffih"]
+[ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://levels/Character.cs" id="1_4ffih"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sbyc8"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_tcfo8"]
 
-[node name="KinematicCharacter" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera")]
+[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera")]
 script = ExtResource("1_4ffih")
 Area = NodePath("Area3D")
 CollisionShape = NodePath("Area3D/CollisionShape3D")

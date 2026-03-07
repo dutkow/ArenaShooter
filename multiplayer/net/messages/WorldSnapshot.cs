@@ -30,6 +30,18 @@ public struct ArenaCharacterSnapshot
     public byte Health;
     public byte Shield;
 
+    public CharacterMoveState GetMoveState()
+    {
+        CharacterMoveState state = new();
+        state.Position = Position;
+        state.Velocity = Velocity;
+        state.Yaw = Yaw;
+        state.Pitch = AimPitch;
+        return state;
+    }
+        
+    public bool IsMoveStateDirty => DirtyFlags.HasFlag(CharacterSnapshotFlags.Position | CharacterSnapshotFlags.Yaw | CharacterSnapshotFlags.Velocity);
+
     public ArenaCharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
                                   float yaw, float aimPitch, byte health, byte shield,
                                   CharacterSnapshotFlags dirtyFlags)

@@ -9,4 +9,8 @@ public partial class Actor : Node3D
     public bool IsRemote => Role == NetworkRole.REMOTE;
     public bool IsAuthority;
 
+    public virtual void Tick(float delta)
+    {
+
+    }
 }

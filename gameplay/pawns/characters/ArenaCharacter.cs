@@ -10,7 +10,7 @@ public enum MovementState
     FALLING
 }
 
-public partial class ArenaCharacter : Character, IPossessable, INetworkedObject, IDamageable, IPlayerEntity
+public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedObject, IDamageable, IPlayerEntity
 {
     // ----------------------
     // Exports & Components
@@ -66,14 +66,14 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     // ----------------------
     // Command history
     // ----------------------
-    private SortedDictionary<uint, TickCommand> _pendingCommands = new SortedDictionary<uint, TickCommand>();
+    private SortedDictionary<uint, ClientInputCommand> _pendingCommands = new SortedDictionary<uint, ClientInputCommand>();
 
     public uint LastAppliedTick;
 
     private const int CommandHistorySize = 64;
-    private Queue<TickCommand> _commandHistory = new Queue<TickCommand>();
+    private Queue<ClientInputCommand> _commandHistory = new Queue<ClientInputCommand>();
 
-    public void AddToHistory(TickCommand cmd)
+    public void AddToHistory(ClientInputCommand cmd)
     {
         _commandHistory.Enqueue(cmd);
         if (_commandHistory.Count > CommandHistorySize)
@@ -216,7 +216,7 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         }
     }
 
-    private TickCommand _currentServerCommand;
+    private ClientInputCommand _currentServerCommand;
 
     private void SetNextClientCommand()
     {
@@ -226,7 +226,7 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         }
 
         uint nextTick = _pendingCommands.Keys.Min();
-        TickCommand cmd = _pendingCommands[nextTick];
+        ClientInputCommand cmd = _pendingCommands[nextTick];
 
         _currentServerCommand = cmd;
 
@@ -260,7 +260,6 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
         {
             LastSnapshot.Shield = snapshot.Shield;
             HealthComponent.SetShield(snapshot.Shield);
-
         }
 
 
@@ -300,7 +299,7 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
                 foreach (var cmd in _commandHistory.Where(c => c.TickNumber > MatchState.Instance.LastAppliedServerTick))
                 {
                     // Apply movement inputs to your movement component manually
-                    MovementComp.Tick(cmd.InputButtons, NetworkConstants.SERVER_TICK_INTERVAL, CameraPivot);
+                    MovementComp.Tick(cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, CameraPivot);
                     GlobalPosition = _predictedPosition;
                 }
 
@@ -402,7 +401,7 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
                 GlobalRotation = new Vector3(0.0f, _currentServerCommand.Yaw, 0.0f);
                 CameraPivot.Rotation = new Vector3(_currentServerCommand.Pitch, 0.0f, 0.0f);
 
-                MovementComp.Tick(_currentServerCommand.InputButtons, delta, CameraPivot);
+                MovementComp.Tick(_currentServerCommand.Input, delta, CameraPivot);
             }
 
             Vector3 dir = -Camera.GlobalTransform.Basis.Z;
@@ -445,10 +444,10 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
     private void SendClientCommand(InputCommand cmd)
     {
         // Capture current tick as a TickCommand
-        TickCommand tickCmd = new TickCommand
+        ClientInputCommand tickCmd = new ClientInputCommand
         {
             TickNumber = MatchState.Instance.CurrentTick,
-            InputButtons = cmd, // use the captured input
+            Input = cmd, // use the captured input
             Yaw = GlobalRotation.Y,
             Pitch = CameraPivot.GlobalRotation.X
         };
@@ -458,10 +457,10 @@ public partial class ArenaCharacter : Character, IPossessable, INetworkedObject,
 
         // Grab the last N commands from history
         int batchSize = 4;
-        TickCommand[] historyArray = _commandHistory.ToArray();
+        ClientInputCommand[] historyArray = _commandHistory.ToArray();
         int startIdx = Mathf.Max(0, historyArray.Length - batchSize);
         int length = historyArray.Length - startIdx;
-        TickCommand[] commandsToSend = new TickCommand[length];
+        ClientInputCommand[] commandsToSend = new ClientInputCommand[length];
         Array.Copy(historyArray, startIdx, commandsToSend, 0, length);
 
         // Send the batch directly

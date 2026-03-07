@@ -8,7 +8,7 @@ public static class NetworkConstants
 
     // Server tick
     public const int SERVER_TICK_RATE = 60;
-    public const double SERVER_TICK_INTERVAL = 1.0 / SERVER_TICK_RATE;
+    public const float SERVER_TICK_INTERVAL = 1.0f / SERVER_TICK_RATE;
 
     // Server discovery
     public const int DEFAULT_PORT = 7777;

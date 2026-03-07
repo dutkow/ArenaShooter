@@ -13,10 +13,10 @@ public enum InputCommand : byte
     FIRE_PRIMARY = 1 << 5
 }
 
-public struct TickCommand
+public struct ClientInputCommand
 {
-    public ushort TickNumber;      // client tick number
-    public InputCommand InputButtons;
+    public ushort TickNumber;
+    public InputCommand Input;
     public float Yaw;
     public float Pitch;
 }
@@ -24,7 +24,7 @@ public struct TickCommand
 public class ClientCommand : Message
 {
     // Array of tick commands we want to send in one packet
-    public TickCommand[] Commands;
+    public ClientInputCommand[] Commands;
 
     // The last server tick the client has received & applied
     public ushort LastAppliedServerTick;
@@ -37,7 +37,7 @@ public class ClientCommand : Message
         foreach (var cmd in Commands)
         {
             Add(cmd.TickNumber);
-            Add((byte)cmd.InputButtons);
+            Add((byte)cmd.Input);
             Add(cmd.Yaw);
             Add(cmd.Pitch);
         }
@@ -52,7 +52,7 @@ public class ClientCommand : Message
         foreach (var cmd in Commands)
         {
             Write(cmd.TickNumber);
-            Write((byte)cmd.InputButtons);
+            Write((byte)cmd.Input);
             Write(cmd.Yaw);
             Write(cmd.Pitch);
         }
@@ -67,15 +67,15 @@ public class ClientCommand : Message
 
         byte count;
         Read(out count);
-        Commands = new TickCommand[count];
+        Commands = new ClientInputCommand[count];
         for (int i = 0; i < count; i++)
         {
-            TickCommand cmd = new TickCommand();
+            ClientInputCommand cmd = new ClientInputCommand();
             Read(out cmd.TickNumber);
 
             byte buttons;
             Read(out buttons);
-            cmd.InputButtons = (InputCommand)buttons;
+            cmd.Input = (InputCommand)buttons;
 
             Read(out cmd.Yaw);
             Read(out cmd.Pitch);
@@ -84,7 +84,7 @@ public class ClientCommand : Message
         }
     }
 
-    public static void Send(TickCommand[] commands, ushort lastAppliedServerTick)
+    public static void Send(ClientInputCommand[] commands, ushort lastAppliedServerTick)
     {
         var msg = new ClientCommand
         {
