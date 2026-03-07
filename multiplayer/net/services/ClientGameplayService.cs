@@ -44,7 +44,7 @@ public static class ClientGameplayService
                 else
                 {
                     SpawnManager.Instance.LocalSpawnPlayer(snapshot.PlayerID, snapshot.Position, snapshot.Yaw);
-                    GD.Print($"player state character is null for PlayerID {snapshot.PlayerID}!");
+                    GD.Print($"Player not found so spawning player at position {snapshot.Position}");
                 }
             }
             else

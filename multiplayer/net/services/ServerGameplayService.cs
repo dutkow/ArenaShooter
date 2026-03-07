@@ -25,9 +25,8 @@ public static class ServerGameplayService
                     if (NetUtils.IsNewerTick((ushort)cmd.LastAppliedServerTick, currentAcked))
                     {
                         MatchState.Instance.LastAckedTickByPeerID[peerID] = (ushort)cmd.LastAppliedServerTick;
+
                     }
-                    // Apply the input immediately on the server
-                    double delta = NetworkConstants.SERVER_TICK_INTERVAL; // Or your fixed server tick
                     character.HandleClientCommand(cmd);
                 }
             }

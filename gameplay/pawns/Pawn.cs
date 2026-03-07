@@ -16,6 +16,8 @@ public partial class Pawn : Actor
     {
         base._Ready();
 
+
+
         SetProcessInput(false);
     }
 

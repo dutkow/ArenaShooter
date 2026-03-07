@@ -9,6 +9,12 @@ public partial class Actor : Node3D
     public bool IsRemote => Role == NetworkRole.REMOTE;
     public bool IsAuthority;
 
+    public override void _Ready()
+    {
+        base._Ready();
+
+        IsAuthority = NetworkSession.Instance.IsServer;
+    }
     public void SetRole(NetworkRole role)
     {
         Role = role;

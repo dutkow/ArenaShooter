@@ -7,11 +7,6 @@ public partial class PlayerController : Controller
     {
         base._Input(@event);
 
-        if (Input.IsActionJustPressed("toggle_cursor_lock"))
-        {
-            Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured
-                ? Input.MouseModeEnum.Visible
-                : Input.MouseModeEnum.Captured;
-        }
+
     }
 }
