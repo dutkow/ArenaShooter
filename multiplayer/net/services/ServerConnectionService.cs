@@ -34,7 +34,6 @@ public static class ServerConnectionService
         MatchState.Instance.LastProcessedTickByPlayerID[playerID] = 0;
         PlayerJoined.Execute(playerID, playerName);
         
-        
         InitialMatchState.Send(peer); // NOTE: need to reconsider ordering, but match state should send loaded client in initial match state for now
 
         PlayerJoined.Send(playerID, playerName);

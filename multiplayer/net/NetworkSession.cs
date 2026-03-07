@@ -312,6 +312,7 @@ public partial class NetworkSession : Node
 
         PeerIDsToPlayerIDs[peerID] = playerID;
         PlayerIDsToPeers[playerID] = peer;
+
         PeerIDsToPeers[peerID] = peer;
 
         PlayerIDsToPlayerStates[playerID] = new PlayerState(playerID)

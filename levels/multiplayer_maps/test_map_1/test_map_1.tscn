@@ -39,9 +39,10 @@ transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76
 shadow_enabled = true
 
 [node name="SpawnPoint" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 9.879747, 1.3157029, -20.762333)
+transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 9.879747, 6.753014, -20.762333)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.94112587, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("BoxShape3D_f7g2b")
@@ -67,13 +68,13 @@ transform = Transform3D(-5.0441763e-06, 0, 3.4196808, 0, 21.922268, 0, -115.3973
 mesh = SubResource("BoxMesh_f7g2b")
 
 [node name="SpawnPoint2" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.57391953, 0, -0.8189119, 0, 1, 0, 0.8189119, 0, 0.57391953, -18.980814, 2.6314058, 15.393024)
+transform = Transform3D(0.57391953, 0, -0.8189119, 0, 1, 0, 0.8189119, 0, 0.57391953, -18.980814, 8.068717, 15.393024)
 
 [node name="SpawnPoint3" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 2.6314058, 16.797209)
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 8.068717, 16.797209)
 
 [node name="SpawnPoint4" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -18.980818, 2.6314058, -18.443748)
+transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -18.980818, 8.068717, -18.443748)
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, 17.54002, 5.7173796, -1.4282513)

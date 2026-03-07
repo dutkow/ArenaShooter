@@ -46,10 +46,12 @@ public partial class SpawnManager : Node3D
         var spawnedPlayer = (Pawn)GameMode.Instance.DefaultPawnScene.Instantiate();
         AddChild(spawnedPlayer);
 
-        spawnedPlayer.GlobalPosition = spawnPosition;
-        spawnedPlayer.GlobalRotation = new Vector3(0.0f, yRotation, 0.0f);
+        if(spawnedPlayer is Character character)
+        {
+            character.HandleSpawn(spawnPosition, yRotation, 0.0f);
+        }
 
-        if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
+        if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
         {
             playerState.AssignPawn(spawnedPlayer);
         }

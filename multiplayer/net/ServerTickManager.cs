@@ -52,11 +52,14 @@ public class ServerTickManager
 
         foreach (var kvp in MatchState.Instance.LastProcessedTickByPlayerID)
         {
-            int peerID = kvp.Key;
+            byte playerID = kvp.Key;
             uint lastAckedTick = kvp.Value;
 
-            if (!NetworkSession.Instance.PeerIDsToPeers.TryGetValue(peerID, out var peer) || peer == null)
+            if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
+            {
+                GD.Print($"not found. Peer id: {playerID}. Peer: {peer}");
                 continue;
+            }
 
             WorldSnapshot snapshotToSend;
 
@@ -81,6 +84,7 @@ public class ServerTickManager
             _bytesSentThisPeriod += bytes.Length;
 
 
+            GD.Print($"sending snapshot to {peer} ");
             NetworkSender.ToClient(peer, snapshotToSend);
         }
     }

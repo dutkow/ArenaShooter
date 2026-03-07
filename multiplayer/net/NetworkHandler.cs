@@ -177,6 +177,10 @@ public partial class NetworkHandler : Node
         availablePeerIds.RemoveAt(availablePeerIds.Count - 1);
 
         peer.SetMeta("id", peerId);
+        NetworkSession.Instance.PeerIDsToPeers[peerId] = peer;
+
+        GD.Print($"added peer with peer id {peerId} to dict. peer = {peer}");
+
         clientPeers[peerId] = peer;
 
         GD.Print($"Peer connected: {peerId}");

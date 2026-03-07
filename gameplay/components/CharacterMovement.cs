@@ -22,7 +22,7 @@ public class CharacterMovement
     Character _character;
 
     public float Speed = 15.0f;
-    public float Gravity = -0.0f;
+    public float Gravity = -12.0f;
     public float JumpSpeed = 5.0f;
 
     private bool _isGrounded = false;
@@ -73,7 +73,7 @@ public class CharacterMovement
         moveDirection = moveDirection.Normalized() * Speed;
 
         // Gravity
-        if (!state.IsGrounded)
+        if (!IsGrounded())
         {
             state.Velocity.Y += Gravity * delta;
         }
@@ -100,13 +100,13 @@ public class CharacterMovement
     }
 
 
-    private bool RaycastGrounded()
+    private bool IsGrounded()
     {
         // Get the physics space
         var spaceState = _character.GetWorld3D().DirectSpaceState;
 
         // Start at the character position
-        Vector3 from = _character.GlobalPosition;
+        Vector3 from = State.Position;
         Vector3 to = from + Vector3.Down * 0.5f; // 1000 meters down
 
         // Build raycast parameters

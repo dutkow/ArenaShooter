@@ -58,9 +58,21 @@ public partial class Character : Pawn
 
         Input.MouseMode = Input.MouseModeEnum.Captured;
 
-        MovementComp.Initialize(this);
     }
-    
+
+    public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
+    {
+        GlobalPosition = spawnPosition;
+        GlobalRotation = new Vector3(0.0f, yaw, 0.0f);
+
+        MovementComp.State.Position = spawnPosition;
+        MovementComp.State.Yaw = yaw;
+        MovementComp.State.Pitch = pitch;
+
+        MovementComp.Initialize(this);
+
+    }
+
     // Ticking using physics process for now for simplicity, will move to server tick
     public override void _PhysicsProcess(double delta)
     {

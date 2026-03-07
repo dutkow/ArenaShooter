@@ -11,7 +11,7 @@ public class CharacterMovementComponent
 
     public int Speed = 15;
     public int FallAcceleration = 50;
-    public float JumpVelocity = 20;
+    public float JumpVelocity = 50;
     public float AirControlAcceleration = 0.5f;
 
     public void SetCharacter(ArenaCharacter character)

@@ -17,6 +17,8 @@ public static class ClientGameplayService
 
     public static void HandleWorldSnapshot(byte[] data)
     {
+        GD.Print($"Client handling world snapshot");
+
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
@@ -30,6 +32,7 @@ public static class ClientGameplayService
         MatchState.Instance.LastAppliedServerTick = lastAckedTick;
 
         var snapshots = msg.GetCharacterSnapshots();
+
 
         for (int i = 0; i < snapshots.Length; i++)
         {
