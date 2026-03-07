@@ -7,8 +7,6 @@ public enum CharacterMoveMode
     FALLING,
 }
 
-
-
 public struct CharacterMoveState
 {
     public Vector3 Position;
@@ -21,11 +19,11 @@ public struct CharacterMoveState
 
 public class CharacterMovement
 {
-    [Export] Character _character;
+    Character _character;
 
-    [Export] public float Speed = 10.0f;
-    [Export] public float Gravity = 0.0f;
-    [Export] public float JumpSpeed = 5.0f;
+    public float Speed = 15.0f;
+    public float Gravity = 0.0f;
+    public float JumpSpeed = 5.0f;
 
     private bool _isGrounded = false;
 
