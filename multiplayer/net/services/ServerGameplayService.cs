@@ -23,12 +23,19 @@ public static class ServerGameplayService
                     {
                         if (NetUtils.IsNewerTick(cmd.ClientTick, lastProcessedTick))
                         {
+                            GD.Print("receive client command ran");
                             character.ReceiveClientCommand(cmd);
                             MatchState.Instance.LastProcessedTickByPlayerID[playerID] = cmd.ClientTick;
+                        }
+                        else
+                        {
+                            GD.Print($"receive client command DID NOT run. because {cmd.ClientTick} is newer than {lastProcessedTick}");
+
                         }
                     }
                     else
                     {
+                        GD.Print("receive client command ran");
                         character.ReceiveClientCommand(cmd);
                         MatchState.Instance.LastProcessedTickByPlayerID[playerID] = cmd.ClientTick;
                     }

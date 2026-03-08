@@ -90,17 +90,16 @@ public class ClientCommand : Message
         }
     }
 
-    public static void Send(ClientInputCommand[] commands, ushort lastAppliedServerTick)
+    public static void Send(ClientInputCommand[] commands)
     {
         var msg = new ClientCommand
         {
             MessageType = Msg.C2S_CLIENT_COMMAND,
             ENetFlags = ENetPacketFlags.Unsequenced,
             Commands = commands,
-            ClientTick = lastAppliedServerTick,
+            ClientTick = MatchState.Instance.CurrentTick,
             LastReceivedServerTick = MatchState.Instance.LastReceivedServerTick
         };
-
         NetworkSender.ToServer(msg);
     }
 }

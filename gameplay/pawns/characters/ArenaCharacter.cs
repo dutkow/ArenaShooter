@@ -464,7 +464,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
         Array.Copy(historyArray, startIdx, commandsToSend, 0, length);
 
         // Send the batch directly
-        ClientCommand.Send(commandsToSend, MatchState.Instance.LastProcessedClientTick);
+        ClientCommand.Send(commandsToSend);
     }
 
     // ----------------------
