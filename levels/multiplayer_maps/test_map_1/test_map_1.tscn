@@ -1,9 +1,8 @@
-[gd_scene load_steps=16 format=3 uid="uid://byrsxq2i83b2a"]
+[gd_scene load_steps=15 format=3 uid="uid://byrsxq2i83b2a"]
 
 [ext_resource type="Script" uid="uid://cxmw8aq3awmhi" path="res://levels/Level.cs" id="1_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_j23ab"]
 [ext_resource type="PackedScene" uid="uid://cm5541sq1kv43" path="res://core/game_mode.tscn" id="4_h6y0w"]
-[ext_resource type="Material" uid="uid://cfigmojad6es6" path="res://assets/materials/black_material.tres" id="4_j23ab"]
 [ext_resource type="Material" uid="uid://cq4akbweyf2lw" path="res://assets/materials/green_material.tres" id="4_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c7v5l5n1d2ri" path="res://gameplay/interactables/jump_pad.tscn" id="6_m0y5v"]
 
@@ -16,12 +15,11 @@ sky_material = SubResource("ProceduralSkyMaterial_hsoxx")
 background_mode = 2
 sky = SubResource("Sky_gojnm")
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_f7g2b"]
-size = Vector3(100, 1, 100)
+[sub_resource type="BoxShape3D" id="BoxShape3D_j23ab"]
+size = Vector3(200, 0.1, 200)
 
-[sub_resource type="BoxMesh" id="BoxMesh_4ptq8"]
-material = ExtResource("4_j23ab")
-size = Vector3(100, 1, 100)
+[sub_resource type="PlaneMesh" id="PlaneMesh_m0y5v"]
+size = Vector2(200, 200)
 
 [sub_resource type="BoxMesh" id="BoxMesh_f7g2b"]
 
@@ -45,17 +43,17 @@ transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76
 shadow_enabled = true
 
 [node name="SpawnPoint" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 9.879747, 6.753014, -20.762333)
+transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 12.648947, 3.9694695, -20.762333)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.94112587, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
-shape = SubResource("BoxShape3D_f7g2b")
+shape = SubResource("BoxShape3D_j23ab")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.015209198, 0, 0.080890656)
 material_override = ExtResource("4_m0y5v")
-mesh = SubResource("BoxMesh_4ptq8")
+mesh = SubResource("PlaneMesh_m0y5v")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(130.00789, 0, 0, 0, 21.922266, 0, 0, 0, 3.4196804, 0, 0, -41.267952)
@@ -74,13 +72,13 @@ transform = Transform3D(-5.0441763e-06, 0, 3.4196808, 0, 21.922268, 0, -115.3973
 mesh = SubResource("BoxMesh_f7g2b")
 
 [node name="SpawnPoint2" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.57391953, 0, -0.8189119, 0, 1, 0, 0.8189119, 0, 0.57391953, -18.980814, 8.068717, 15.393024)
+transform = Transform3D(0.57391953, 0, -0.8189119, 0, 1, 0, 0.8189119, 0, 0.57391953, -7.49806, 4.698415, 8.134499)
 
 [node name="SpawnPoint3" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 8.068717, 16.797209)
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 1.3986387, 7.3622265)
 
 [node name="SpawnPoint4" parent="." instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -18.980818, 8.068717, -18.443748)
+transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -7.112715, 6.9946356, -18.443748)
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, 17.54002, 5.7173796, -1.4282513)
@@ -114,7 +112,7 @@ mesh = SubResource("PrismMesh_7q2dv")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.8535771, 0)
 
 [node name="StaticBody3D2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.9874735, -19.879372)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.9874735, 36.382656)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2"]
 mesh = SubResource("BoxMesh_m0y5v")
