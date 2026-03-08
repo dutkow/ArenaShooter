@@ -118,7 +118,7 @@ public class CharacterMovement
         var initialQuery = new PhysicsShapeQueryParameters3D
         {
             Shape = _collisionCapsule,
-            Transform = new Transform3D(Basis.Identity, _character.CollisionShape.GlobalPosition),
+            Transform = new Transform3D(Basis.Identity, state.Position),
             Motion = motion,
             CollideWithBodies = true,
             CollideWithAreas = false
