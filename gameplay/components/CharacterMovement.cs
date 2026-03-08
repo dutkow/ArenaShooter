@@ -70,7 +70,7 @@ public class CharacterMovement
         Vector3 desiredMoveDirection = (basis.Z * move.Z + basis.X * move.X).Normalized() * MaxGroundSpeed;
 
         // --- Gravity & jump ---
-        CheckGrounded();
+        CheckGrounded(state);
        
 
         // Jump
@@ -78,7 +78,6 @@ public class CharacterMovement
         {
             state.Velocity.Y = JumpSpeed;
             _isGrounded = false;
-            GD.Print($"Jumping. NetMode = {NetworkSession.Instance.NetworkMode}");
         }
         else if (!_isGrounded)
         {
@@ -167,13 +166,13 @@ public class CharacterMovement
         return safeMotion;
     }
 
-    private void CheckGrounded()
+    private void CheckGrounded(CharacterMoveState state)
     {
         var spaceState = _character.GetWorld3D().DirectSpaceState;
 
         float beginTraceOffset = 0.25f;
         float groundTraceDistance = 0.25f;
-        Vector3 from = _character.CollisionShape.GlobalPosition + Vector3.Down * (_collisionCapsule.MidHeight - beginTraceOffset);
+        Vector3 from = state.Position + Vector3.Down * (_collisionCapsule.MidHeight - beginTraceOffset);
         Vector3 to = from + Vector3.Down * (beginTraceOffset + groundTraceDistance);
 
         PhysicsRayQueryParameters3D query = new PhysicsRayQueryParameters3D
