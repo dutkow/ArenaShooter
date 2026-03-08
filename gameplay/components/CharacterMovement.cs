@@ -95,11 +95,11 @@ public class CharacterMovement
         switch(state.MoveMode)
         {
             case CharacterMoveMode.GROUNDED:
-                HandleGroundedMovement(desiredMoveDirection, delta);
+                HandleGroundedMovement(state, desiredMoveDirection, delta);
                 break;
 
             case CharacterMoveMode.FALLING:
-                HandleAerialMovement(desiredMoveDirection, delta);
+                HandleAerialMovement(state, desiredMoveDirection, delta);
                 break;
         }
 
@@ -207,34 +207,27 @@ public class CharacterMovement
         State = Step(State, input, delta);
     }
 
-    private void HandleGroundedMovement(Vector3 desiredMoveDirection, float delta)
+    private void HandleGroundedMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
     {
-        Vector3 horizontalVel = new Vector3(State.Velocity.X, 0, State.Velocity.Z);
+        Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
 
         if (desiredMoveDirection.LengthSquared() > 0)
         {
             Vector3 desiredDir = desiredMoveDirection.Normalized();
 
-            // Split velocity into components parallel and perpendicular to input
             float forwardSpeed = horizontalVel.Dot(desiredDir);
             Vector3 forwardVel = desiredDir * forwardSpeed;
             Vector3 perpVel = horizontalVel - forwardVel;
 
-            // Cancel perpendicular momentum immediately
-            horizontalVel = forwardVel;
+            horizontalVel = forwardVel; // cancel perpendicular momentum
 
-            // Accelerate along desired input direction
             float accelAmount = GroundAcceleration * delta;
-            float targetSpeed = MaxGroundSpeed;
-            float newForwardSpeed = forwardSpeed + accelAmount;
-            if (newForwardSpeed > targetSpeed)
-                newForwardSpeed = targetSpeed;
+            float newForwardSpeed = Math.Min(forwardSpeed + accelAmount, MaxGroundSpeed);
 
             horizontalVel = desiredDir * newForwardSpeed;
         }
         else
         {
-            // No input → decelerate all horizontal movement
             float decelAmount = GroundDeceleration * delta;
             if (horizontalVel.Length() <= decelAmount)
                 horizontalVel = Vector3.Zero;
@@ -242,13 +235,12 @@ public class CharacterMovement
                 horizontalVel -= horizontalVel.Normalized() * decelAmount;
         }
 
-        State.Velocity.X = horizontalVel.X;
-        State.Velocity.Z = horizontalVel.Z;
+        state.Velocity.X = horizontalVel.X;
+        state.Velocity.Z = horizontalVel.Z;
     }
-
-    private void HandleAerialMovement(Vector3 desiredMoveDirection, float delta)
+    private void HandleAerialMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
     {
-        Vector3 horizontalVel = new Vector3(State.Velocity.X, 0, State.Velocity.Z);
+        Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
 
         if (desiredMoveDirection.LengthSquared() > 0)
         {
@@ -271,7 +263,7 @@ public class CharacterMovement
         if (horizontalVel.Length() > MaxGroundSpeed)
             horizontalVel = horizontalVel.Normalized() * MaxGroundSpeed;
 
-        State.Velocity.X = horizontalVel.X;
-        State.Velocity.Z = horizontalVel.Z;
+        state.Velocity.X = horizontalVel.X;
+        state.Velocity.Z = horizontalVel.Z;
     }
 }
