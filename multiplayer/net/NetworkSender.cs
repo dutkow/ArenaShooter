@@ -7,13 +7,13 @@ public static class NetworkSender
     // -------------------------------------------------
     // Emulator Settings
     // -------------------------------------------------
-    public static bool EmulationEnabled = true;
+    public static bool EmulationEnabled = false;
 
-    public static float ClientToServerBasePingMs = 60.0f;
+    public static float ClientToServerBasePingMs = 25.0f;
     public static float ClientToServerVarianceMs = 5.0f;
     public static float ClientToServerPacketLossPercent = 0.0f;
 
-    public static float ServerToClientBasePingMs = 60.0f;
+    public static float ServerToClientBasePingMs = 25.0f;
     public static float ServerToClientVarianceMs = 5.0f;
     public static float ServerToClientPacketLossPercent = 0.0f;
 

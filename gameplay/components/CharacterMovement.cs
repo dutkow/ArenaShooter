@@ -65,7 +65,7 @@ public class CharacterMovement
         if (inputCommand.HasFlag(InputCommand.MOVE_LEFT)) move.X -= 1;
         if (inputCommand.HasFlag(InputCommand.MOVE_RIGHT)) move.X += 1;
 
-        move = move.Normalized() * MaxGroundSpeed;
+        move = move.Normalized();
         var basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
         Vector3 desiredMoveDirection = (basis.Z * move.Z + basis.X * move.X).Normalized() * MaxGroundSpeed;
 
@@ -78,6 +78,7 @@ public class CharacterMovement
         {
             state.Velocity.Y = JumpSpeed;
             _isGrounded = false;
+            GD.Print($"Jumping. NetMode = {NetworkSession.Instance.NetworkMode}");
         }
         else if (!_isGrounded)
         {
@@ -87,8 +88,6 @@ public class CharacterMovement
         {
             if (state.Velocity.Y < 0) state.Velocity.Y = 0;
         }
-
-        //state.Position += state.Velocity * delta;
 
         state.MoveMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
 
@@ -105,16 +104,7 @@ public class CharacterMovement
 
         Vector3 safeMotion = HandleCollision(state, delta);
 
-        if (_isGrounded)
-        {
-            state.Position += safeMotion;
-        }
-        else
-        {
-            float deltaY = state.Velocity.Y * delta - safeMotion.Y;
-            safeMotion.Y += deltaY;
-            state.Position += safeMotion;
-        }
+        state.Position += safeMotion;
 
         return state;
     }

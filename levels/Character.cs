@@ -128,10 +128,12 @@ public partial class Character : Pawn
             cmd = _lastProcessedClientCommand;
         }
 
-        MovementComp.State = MovementComp.Step(MovementComp.State, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
-
         MovementComp.State.Yaw = cmd.Yaw;
         MovementComp.State.Pitch = cmd.Pitch;
+
+        MovementComp.State = MovementComp.Step(MovementComp.State, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
+
+
     }
 
     public override void _Process(double delta)
@@ -282,6 +284,8 @@ public partial class Character : Pawn
         {
             snapshot.Pitch = MovementComp.State.Pitch;
         }
+
+        // if has flag -> jump then like pass the value of jumped this tick and then like snapshot move state gets 'jumped'
 
 
         var snapshotMoveState = snapshot.GetMoveState();
