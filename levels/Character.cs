@@ -312,9 +312,9 @@ public partial class Character : Pawn
 
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
-        const float SNAP_THRESHOLD_V = 4.0f;        // Vertical snap (Y)
+        const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
         const float INTERP_THRESHOLD_H = 0.1f;      // Horizontal lerp start
-        const float INTERP_THRESHOLD_V = 0.25f;     // Vertical lerp start
+        const float INTERP_THRESHOLD_V = 0.1f;     // Vertical lerp start
 
         // Lerp speeds
         const float INTERP_SPEED_H = 0.15f;
@@ -404,7 +404,7 @@ public partial class Character : Pawn
         if (Input.IsActionPressed("move_back")) cmd |= InputCommand.MOVE_BACK;
         if (Input.IsActionPressed("move_left")) cmd |= InputCommand.MOVE_LEFT;
         if (Input.IsActionPressed("move_right")) cmd |= InputCommand.MOVE_RIGHT;
-        if (Input.IsActionJustPressed("jump")) cmd |= InputCommand.JUMP;
+        if (Input.IsActionPressed("jump")) cmd |= InputCommand.JUMP;
         if (Input.IsActionPressed("primary_fire")) cmd |= InputCommand.FIRE_PRIMARY;
 
         //LastInputCommand = cmd;

@@ -42,6 +42,7 @@ public class CharacterMovement
         if (inputCommand.HasFlag(InputCommand.MOVE_BACK)) move.Z += 1;
         if (inputCommand.HasFlag(InputCommand.MOVE_LEFT)) move.X -= 1;
         if (inputCommand.HasFlag(InputCommand.MOVE_RIGHT)) move.X += 1;
+
         move = move.Normalized() * Speed;
 
         var basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
@@ -52,44 +53,32 @@ public class CharacterMovement
 
         // --- Gravity & jump ---
         bool grounded;
-        if (_character.IsAuthority)
-        {
-            // Server uses real raycast
-            grounded = CheckGroundedServer(state.Position);
-        }
-        else
-        {
-            // Client prediction: assume floor at Y = 0
-            grounded = state.Position.Y <= 0f && state.Velocity.Y <= 0f;
-        }
+        grounded = CheckGrounded(state.Position);
+
 
         // Jump
         if (inputCommand.HasFlag(InputCommand.JUMP) && grounded)
         {
             state.Velocity.Y = JumpSpeed;
-            grounded = false; // leaving ground
+            grounded = false;
         }
         else if (!grounded)
         {
-            // Apply gravity only when falling
             state.Velocity.Y += Gravity * delta;
         }
         else
         {
-            // Stop downward velocity when grounded
             if (state.Velocity.Y < 0) state.Velocity.Y = 0;
         }
 
-        // --- Apply movement ---
         state.Position += state.Velocity * delta;
 
-        // --- Update MoveMode ---
         state.MoveMode = grounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
 
         return state;
     }
 
-    private bool CheckGroundedServer(Vector3 position)
+    private bool CheckGrounded(Vector3 position)
     {
         var spaceState = _character.GetWorld3D().DirectSpaceState;
 
