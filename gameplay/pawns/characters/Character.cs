@@ -127,9 +127,11 @@ public partial class Character : Pawn
             _lastAckedClientCommandTick = tickToProcess;
 
             MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = tickToProcess;
+            GD.Print($"setting last processed tick of player id {PlayerState.PlayerID} to {tickToProcess}");
         }
         else
         {
+            GD.Print($"unprocessed client inputs is empty");
             cmd = _lastProcessedClientCommand;
         }
 
@@ -297,9 +299,12 @@ public partial class Character : Pawn
 
         if (IsLocal)
         {
-            _unacknowledgedClientInputs.RemoveAll(cmd => cmd.ClientTick <= _lastAckedClientCommandTick);
+            GD.Print($"number unacked inputs before removal = {_unacknowledgedClientInputs.Count}");
+            GD.Print($"last processed tick to compare  {MatchState.Instance.LastProcessedClientTick}");
+            _unacknowledgedClientInputs.RemoveAll(cmd => cmd.ClientTick <= MatchState.Instance.LastProcessedClientTick);
             var reconciledState = snapshotMoveState;
 
+            GD.Print($"number unacked inputs = {_unacknowledgedClientInputs.Count}");
             foreach (var cmd in _unacknowledgedClientInputs)
             {
                 reconciledState = MovementComp.Step(reconciledState, cmd.Input, cmd.LaunchVelocity, NetworkConstants.SERVER_TICK_INTERVAL, true);
@@ -390,10 +395,7 @@ public partial class Character : Pawn
             LaunchVelocity = MovementComp.State.LaunchVelocity
         };
 
-        if(inputCommand.LaunchVelocity != Vector3.Zero)
-        {
-            GD.Print($"PUTTING LAUNCH VELOCITY {inputCommand.LaunchVelocity} IN INPUT COMMAND");
-        }
+        GD.Print($"adding unacked input");
 
         _unacknowledgedClientInputs.Add(inputCommand);
         var commandsToSend = _unacknowledgedClientInputs

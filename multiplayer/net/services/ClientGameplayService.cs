@@ -29,7 +29,6 @@ public static class ClientGameplayService
         MatchState.Instance.LastReceivedServerTick = msg.ServerTick;
         MatchState.Instance.LastProcessedClientTick = msg.LastProcessedClientTick;
 
-
         var snapshots = msg.GetCharacterSnapshots();
 
         for (int i = 0; i < snapshots.Length; i++)

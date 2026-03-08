@@ -24,6 +24,7 @@ public static class ServerGameplayService
                         if (NetUtils.IsNewerTick(cmd.ClientTick, lastProcessedTick))
                         {
                             character.ReceiveClientCommand(cmd);
+                            MatchState.Instance.LastProcessedTickByPlayerID[playerID] = cmd.ClientTick;
                         }
                     }
                     else

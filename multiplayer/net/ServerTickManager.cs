@@ -53,7 +53,9 @@ public class ServerTickManager
         foreach (var kvp in MatchState.Instance.LastReceivedServerTickByPlayerID)
         {
             byte playerID = kvp.Key;
-            ushort lastProcessedClientTick = kvp.Value;
+            ushort lastProcessedClientTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
+
+            GD.Print($"sending snapshot and saying the last processed tick is {lastProcessedClientTick}");
 
             if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
             {
