@@ -11,7 +11,7 @@ public class ServerTickManager
     private double _accumulator = 0f;
     public ushort ServerTick { get; private set; }
 
-    private const int MaxSnapshotHistory = 128;
+    private const int MaxSnapshotHistory = 200;
 
     // History of snapshots, keyed by server tick
     private readonly Dictionary<ushort, WorldSnapshot> _snapshotHistory = new();
@@ -50,7 +50,7 @@ public class ServerTickManager
     {
         var snapshotDeltas = new Dictionary<uint, WorldSnapshot>();
 
-        foreach (var kvp in MatchState.Instance.LastProcessedTickByPlayerID)
+        foreach (var kvp in MatchState.Instance.LastReceivedServerTickByPlayerID)
         {
             byte playerID = kvp.Key;
             ushort lastProcessedClientTick = kvp.Value;
@@ -61,31 +61,32 @@ public class ServerTickManager
                 continue;
             }
 
-            WorldSnapshot snapshotToSend = WorldSnapshot.Build();
 
             if (snapshotDeltas.TryGetValue(lastProcessedClientTick, out var deltaSnapshot))
             {
-                snapshotToSend = deltaSnapshot;
+                newSnapshot = deltaSnapshot;
             }
             else if (_snapshotHistory.TryGetValue((ushort)lastProcessedClientTick, out var previousSnapshot))
             {
-                snapshotToSend = newSnapshot.BuildDelta(previousSnapshot);
-                snapshotDeltas[lastProcessedClientTick] = snapshotToSend;
+                GD.Print("build delta ran");
+                newSnapshot = newSnapshot.BuildDelta(previousSnapshot);
+                newSnapshot.LastProcessedClientTick = kvp.Value;
+                snapshotDeltas[lastProcessedClientTick] = newSnapshot;
             }
             else
             {
-                snapshotToSend = newSnapshot;
+                GD.Print($"build ran because we did not find {lastProcessedClientTick} snapshot.");
             }
 
             // Write message to calculate bytes
-            var bytes = snapshotToSend.WriteMessage();
+            var bytes = newSnapshot.WriteMessage();
 
             // ---- Accumulate bytes sent ----
             _bytesSentThisPeriod += bytes.Length;
 
-            snapshotToSend.LastProcessedClientTick = lastProcessedClientTick;
+            newSnapshot.LastProcessedClientTick = lastProcessedClientTick;
 
-            NetworkSender.ToClient(peer, snapshotToSend);
+            NetworkSender.ToClient(peer, newSnapshot);
         }
     }
 

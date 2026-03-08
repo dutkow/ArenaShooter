@@ -16,9 +16,12 @@ public enum InputCommand : byte
 public struct ClientInputCommand
 {
     public ushort ClientTick;
+
     public InputCommand Input;
     public float Yaw;
     public float Pitch;
+
+    public Vector3 LaunchVelocity;
 }
 
 public class ClientCommand : Message
@@ -28,12 +31,14 @@ public class ClientCommand : Message
 
     // The last server tick the client has received & applied
     public ushort ClientTick;
+    public ushort LastReceivedServerTick;
 
     protected override int BufferSize()
     {
         base.BufferSize();
-        Add(ClientTick);        // send the server tick first
-        Add((byte)Commands.Length);        // then send command count
+        Add(ClientTick);
+        Add(LastReceivedServerTick);
+        Add((byte)Commands.Length);
         foreach (var cmd in Commands)
         {
             Add(cmd.ClientTick);
@@ -48,6 +53,7 @@ public class ClientCommand : Message
     {
         base.WriteMessage();
         Write(ClientTick);
+        Write(LastReceivedServerTick);
         Write((byte)Commands.Length);
         foreach (var cmd in Commands)
         {
@@ -63,8 +69,8 @@ public class ClientCommand : Message
     {
         base.ReadMessage(data);
 
-        Read(out ClientTick);   // read server tick first
-
+        Read(out ClientTick);
+        Read(out LastReceivedServerTick);
         byte count;
         Read(out count);
         Commands = new ClientInputCommand[count];
@@ -91,7 +97,8 @@ public class ClientCommand : Message
             MessageType = Msg.C2S_CLIENT_COMMAND,
             ENetFlags = ENetPacketFlags.Unsequenced,
             Commands = commands,
-            ClientTick = lastAppliedServerTick
+            ClientTick = lastAppliedServerTick,
+            LastReceivedServerTick = MatchState.Instance.LastReceivedServerTick
         };
 
         NetworkSender.ToServer(msg);

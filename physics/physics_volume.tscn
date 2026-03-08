@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvqkdsjtbk3vx"]
+
+[ext_resource type="Script" path="res://physics/PhysicsVolume.cs" id="1_5fl4m"]
+
+[node name="PhysicsVolume" type="Node3D"]
+script = ExtResource("1_5fl4m")
+CollisionLayer = null
+CollisionMask = null
+LaunchVector = null

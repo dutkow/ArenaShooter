@@ -32,6 +32,8 @@ public static class ServerConnectionService
         GD.Print("Server sending player joined");
 
         MatchState.Instance.LastProcessedTickByPlayerID[playerID] = 0;
+        MatchState.Instance.LastReceivedServerTickByPlayerID[playerID] = 0;
+
         PlayerJoined.Execute(playerID, playerName);
         
         InitialMatchState.Send(peer); // NOTE: need to reconsider ordering, but match state should send loaded client in initial match state for now

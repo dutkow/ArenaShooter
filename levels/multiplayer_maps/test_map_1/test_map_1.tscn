@@ -92,6 +92,7 @@ transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55
 
 [node name="JumpPad" parent="." instance=ExtResource("6_m0y5v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.1323514, 0)
+JumpStrength = 20.0
 
 [node name="StaticBody3D2" type="StaticBody3D" parent="."]
 transform = Transform3D(0.9828614, 0, 0.18434592, 0, 1, 0, -0.18434592, 0, 0.9828614, 0, 3.9874735, 16.166216)

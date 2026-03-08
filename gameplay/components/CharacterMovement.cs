@@ -17,6 +17,8 @@ public class CharacterMoveState
     public float Yaw;
     public float Pitch;
     public CharacterMoveMode MoveMode;
+
+    public Vector3 LaunchVelocity;
 }
 
 public class CharacterMovement
@@ -61,7 +63,7 @@ public class CharacterMovement
         }
     }
 
-    public CharacterMoveState Step(CharacterMoveState state, InputCommand inputCommand, float delta)
+    public CharacterMoveState Step(CharacterMoveState state, InputCommand inputCommand, Vector3 launchVelocity, float delta, bool isSimulating = false)
     {
         // --- Movement input ---
         Vector3 move = Vector3.Zero;
@@ -81,7 +83,7 @@ public class CharacterMovement
         // Jump
         if (inputCommand.HasFlag(InputCommand.JUMP) && _isGrounded)
         {
-            state.Velocity.Y = JumpSpeed;
+            state.Velocity.Y += JumpSpeed;
             _isGrounded = false;
         }
         else if (!_isGrounded)
@@ -104,6 +106,12 @@ public class CharacterMovement
             case CharacterMoveMode.FALLING:
                 HandleAerialMovement(state, desiredMoveDirection, delta);
                 break;
+        }
+
+        if(launchVelocity != Vector3.Zero)
+        {
+            state.Velocity += launchVelocity;
+            GD.Print($"applying launch velocity {launchVelocity}. {NetworkSession.Instance.NetworkMode}. is simulating {isSimulating}");
         }
 
         Vector3 safeMotion = HandleCollision(state, delta);
@@ -232,7 +240,7 @@ public class CharacterMovement
 
     public void HandleInput(InputCommand input, float delta)
     {
-        State = Step(State, input, delta);
+        State = Step(State, input, State.LaunchVelocity, delta);
     }
 
     private void HandleGroundedMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
@@ -295,13 +303,8 @@ public class CharacterMovement
         state.Velocity.Z = horizontalVel.Z;
     }
 
-    public void Launch(Vector3 velocity)
+    public void QueueLaunch(CharacterMoveState state, Vector3 vector)
     {
-        // Directly add the launch velocity to current velocity
-        State.Velocity += velocity;
-
-        // Mark as airborne so gravity will apply
-        _isGrounded = false;
-        State.MoveMode = CharacterMoveMode.FALLING;
+        state.LaunchVelocity = vector;
     }
 }

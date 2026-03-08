@@ -83,7 +83,9 @@ public partial class MatchState : Node
     public ServerTickManager ServerTickManager;
 
     public Dictionary<byte, ushort> LastProcessedTickByPlayerID = new();
+    public Dictionary<byte, ushort> LastReceivedServerTickByPlayerID = new();
 
+    public ushort LastReceivedServerTick;
 
 
     public override void _EnterTree()

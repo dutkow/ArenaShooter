@@ -64,6 +64,8 @@ public partial class Character : Pawn
         Input.MouseMode = Input.MouseModeEnum.Captured;
 
         _visualContainerPosition = _visualContainer.Position;
+
+        Area.Owner = this;
     }
 
     public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
@@ -95,7 +97,7 @@ public partial class Character : Pawn
         {
             if (IsLocal)
             {
-                HandleInput(CaptureInput(), delta);
+                MovementComp.HandleInput(CaptureInput(), delta);
             }
             else
             {
@@ -105,14 +107,15 @@ public partial class Character : Pawn
         else if (IsLocal)
         {
             var input = CaptureInput();
-            HandleInput(input, delta);
             SendClientInput(input);
+            MovementComp.HandleInput(input, delta);
         }
+
+        MovementComp.State.LaunchVelocity = Vector3.Zero;
     }
 
     public void ProcessNextClientInput()
     {
-
         ClientInputCommand cmd = new();
 
         if (_unprocessedClientInputs.Count > 0)
@@ -133,9 +136,7 @@ public partial class Character : Pawn
         MovementComp.State.Yaw = cmd.Yaw;
         MovementComp.State.Pitch = cmd.Pitch;
 
-        MovementComp.State = MovementComp.Step(MovementComp.State, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
-
-
+        MovementComp.State = MovementComp.Step(MovementComp.State, cmd.Input, MovementComp.State.LaunchVelocity, NetworkConstants.SERVER_TICK_INTERVAL);
     }
 
     public override void _Process(double delta)
@@ -260,11 +261,22 @@ public partial class Character : Pawn
     {
         _lastAckedClientCommandTick = lastProcessedClientTick;
 
+        /*
+        GD.Print($"Snapshot DirtyFlags for player {snapshot.PlayerID}: {snapshot.DirtyFlags} " +
+            $"(POSITION={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))}, " +
+            $"VELOCITY={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))}, " +
+            $"YAW={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))}, " +
+            $"PITCH={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))}, " +
+            $"MOVE_MODE={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))}, " +
+            $"LAUNCH_VELOCITY={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY))}, " +
+            $"HEALTH={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH))}, " +
+            $"SHIELD={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD))})");*/
+
         // Reset any values which haven't changed
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
         {
-            snapshot.Position = MovementComp.State.Position;
-        }
+            snapshot.Position = MovementComp.State.Position;        }
+
 
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
         {
@@ -287,11 +299,13 @@ public partial class Character : Pawn
             snapshot.MoveMode = MovementComp.State.MoveMode;
         }
 
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY))
+        {
+            snapshot.LaunchVelocity = MovementComp.State.LaunchVelocity;
+            GD.Print("launch velocity unchanged");
+        }
 
-        // if has flag -> jump then like pass the value of jumped this tick and then like snapshot move state gets 'jumped'
-
-
-        var snapshotMoveState = snapshot.GetMoveState();
+            var snapshotMoveState = snapshot.GetMoveState();
 
         if (IsLocal)
         {
@@ -300,7 +314,7 @@ public partial class Character : Pawn
 
             foreach (var cmd in _unacknowledgedClientInputs)
             {
-                reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
+                reconciledState = MovementComp.Step(reconciledState, cmd.Input, cmd.LaunchVelocity, NetworkConstants.SERVER_TICK_INTERVAL, true);
             }
 
             ReconcileMoveState(reconciledState);
@@ -376,31 +390,30 @@ public partial class Character : Pawn
         }
     }
 
-
-    // predicting on the server so the server can also interpolate to this, just without snapshot based reconciliation
-    public void HandleInput(InputCommand input, float delta)
-    {
-        MovementComp.HandleInput(input, delta);
-    }
-
     public void SendClientInput(InputCommand newInput)
     {
         var inputCommand = new ClientInputCommand
         {
             ClientTick = MatchState.Instance.CurrentTick,
+            
             Input = newInput,
             Yaw = GlobalRotation.Y,
-            Pitch = _thirdPersonWeaponSocket.Rotation.X
+            Pitch = _thirdPersonWeaponSocket.Rotation.X,
+            LaunchVelocity = MovementComp.State.LaunchVelocity
         };
 
-        _unacknowledgedClientInputs.Add(inputCommand);
+        if(inputCommand.LaunchVelocity != Vector3.Zero)
+        {
+            GD.Print($"PUTTING LAUNCH VELOCITY {inputCommand.LaunchVelocity} IN INPUT COMMAND");
+        }
 
+        _unacknowledgedClientInputs.Add(inputCommand);
         var commandsToSend = _unacknowledgedClientInputs
             .Skip(Math.Max(0, _unacknowledgedClientInputs.Count - REDUNDANT_INPUTS))
             .ToArray();
 
 
-        ClientCommand.Send(commandsToSend, MatchState.Instance.CurrentTick);
+        ClientCommand.Send(commandsToSend, MatchState.Instance.LastProcessedClientTick);
     }
 
     public InputCommand CaptureInput()
@@ -469,8 +482,8 @@ public partial class Character : Pawn
         }
     }
 
-    public void LaunchCharacter(Vector3 velocity)
+    public void Launch(Vector3 velocity)
     {
-        MovementComp.Launch(velocity);
+        MovementComp.QueueLaunch(MovementComp.State, velocity);
     }
 }

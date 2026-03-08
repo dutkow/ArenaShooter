@@ -13,8 +13,9 @@ public enum CharacterSnapshotFlags : ushort
     YAW = 1 << 2,
     PITCH = 1 << 3,
     MOVE_MODE = 1 << 4,
-    HEALTH = 1 << 5,
-    SHIELD = 1 << 6,
+    LAUNCH_VELOCITY = 1 << 5,
+    HEALTH = 1 << 6,
+    SHIELD = 1 << 7,
 }
 
 public struct CharacterSnapshot
@@ -27,6 +28,7 @@ public struct CharacterSnapshot
     public float Yaw;
     public float Pitch;
     public CharacterMoveMode MoveMode;
+    public Vector3 LaunchVelocity;
     public byte Health;
     public byte Shield;
 
@@ -37,12 +39,13 @@ public struct CharacterSnapshot
         state.Velocity = Velocity;
         state.Yaw = Yaw;
         state.Pitch = Pitch;
-        state.MoveMode = MoveMode; // populate
+        state.MoveMode = MoveMode;
+        state.LaunchVelocity = LaunchVelocity;
         return state;
     }
 
     public CharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
-                             float yaw, float pitch, CharacterMoveMode moveMode,
+                             float yaw, float pitch, CharacterMoveMode moveMode, Vector3 launchVelocity,
                              byte health, byte shield,
                              CharacterSnapshotFlags dirtyFlags)
     {
@@ -52,6 +55,7 @@ public struct CharacterSnapshot
         Yaw = yaw;
         Pitch = pitch;
         MoveMode = moveMode;
+        LaunchVelocity = launchVelocity;
         Health = health;
         Shield = shield;
         DirtyFlags = dirtyFlags;
@@ -65,18 +69,37 @@ public struct CharacterSnapshot
                    CharacterSnapshotFlags.YAW |
                    CharacterSnapshotFlags.PITCH |
                    CharacterSnapshotFlags.MOVE_MODE |
+                   CharacterSnapshotFlags.LAUNCH_VELOCITY |
                    CharacterSnapshotFlags.HEALTH |
                    CharacterSnapshotFlags.SHIELD;
 
         CharacterSnapshotFlags flags = CharacterSnapshotFlags.NONE;
 
-        if (current.Position != previous.Value.Position) flags |= CharacterSnapshotFlags.POSITION;
-        if (current.Velocity != previous.Value.Velocity) flags |= CharacterSnapshotFlags.VELOCITY;
-        if (current.Yaw != previous.Value.Yaw) flags |= CharacterSnapshotFlags.YAW;
-        if (current.Pitch != previous.Value.Pitch) flags |= CharacterSnapshotFlags.PITCH;
-        if (current.MoveMode != previous.Value.MoveMode) flags |= CharacterSnapshotFlags.MOVE_MODE;
-        if (current.Health != previous.Value.Health) flags |= CharacterSnapshotFlags.HEALTH;
-        if (current.Shield != previous.Value.Shield) flags |= CharacterSnapshotFlags.SHIELD;
+        const float EPSILON = 0.0001f;
+
+        if ((current.Position - previous.Value.Position).LengthSquared() > EPSILON)
+            flags |= CharacterSnapshotFlags.POSITION;
+
+        if ((current.Velocity - previous.Value.Velocity).LengthSquared() > EPSILON)
+            flags |= CharacterSnapshotFlags.VELOCITY;
+
+        if (Mathf.Abs(current.Yaw - previous.Value.Yaw) > EPSILON)
+            flags |= CharacterSnapshotFlags.YAW;
+
+        if (Mathf.Abs(current.Pitch - previous.Value.Pitch) > EPSILON)
+            flags |= CharacterSnapshotFlags.PITCH;
+
+        if ((current.LaunchVelocity - previous.Value.LaunchVelocity).LengthSquared() > EPSILON)
+            flags |= CharacterSnapshotFlags.LAUNCH_VELOCITY;
+
+        if (current.MoveMode != previous.Value.MoveMode)
+            flags |= CharacterSnapshotFlags.MOVE_MODE;
+
+        if (current.Health != previous.Value.Health)
+            flags |= CharacterSnapshotFlags.HEALTH;
+
+        if (current.Shield != previous.Value.Shield)
+            flags |= CharacterSnapshotFlags.SHIELD;
 
         return flags;
     }
@@ -92,6 +115,7 @@ public class WorldSnapshot : Message
         MessageType = Msg.S2C_WORLD_SNAPSHOT;
     }
 
+    public ushort ServerTick;
     public ushort LastProcessedClientTick;
 
     // Use an array of character snapshots instead of parallel arrays
@@ -101,6 +125,7 @@ public class WorldSnapshot : Message
     {
         base.BufferSize();
 
+        Add(ServerTick);
         Add(LastProcessedClientTick);
 
         Add(Characters.Length);
@@ -115,6 +140,7 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Add(c.Yaw);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Add(c.Pitch);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Add(c.MoveMode);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY)) Add(c.LaunchVelocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Add(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Add(c.Shield);
         }
@@ -125,6 +151,7 @@ public class WorldSnapshot : Message
     {
         base.WriteMessage();
 
+        Write(ServerTick);
         Write(LastProcessedClientTick);
 
         Write(Characters.Length);
@@ -139,6 +166,7 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Write(c.Yaw);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Write(c.Pitch);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Write(c.MoveMode);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY)) Write(c.LaunchVelocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Write(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Write(c.Shield);
         }
@@ -150,6 +178,7 @@ public class WorldSnapshot : Message
     {
         base.ReadMessage(data);
 
+        Read(out ServerTick);
         Read(out LastProcessedClientTick);
 
         int count;
@@ -170,6 +199,7 @@ public class WorldSnapshot : Message
             float yaw = 0f;
             float pitch = 0f;
             CharacterMoveMode moveMode = default;
+            Vector3 launchVelocity = default;
             byte health = 0;
             byte shield = 0;
 
@@ -178,10 +208,11 @@ public class WorldSnapshot : Message
             if (flags.HasFlag(CharacterSnapshotFlags.YAW)) Read(out yaw);
             if (flags.HasFlag(CharacterSnapshotFlags.PITCH)) Read(out pitch);
             if (flags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Read(out moveMode);
+            if (flags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY)) Read(out launchVelocity);
             if (flags.HasFlag(CharacterSnapshotFlags.HEALTH)) Read(out health);
             if (flags.HasFlag(CharacterSnapshotFlags.SHIELD)) Read(out shield);
 
-            Characters[i] = new CharacterSnapshot(id, pos, vel, yaw, pitch, moveMode, health, shield, flags);
+            Characters[i] = new CharacterSnapshot(id, pos, vel, yaw, pitch, moveMode, launchVelocity, health, shield, flags);
         }
     }
 
@@ -203,12 +234,12 @@ public class WorldSnapshot : Message
         {
             var player = kvp.Value;
 
-
             Vector3 pos = Vector3.Zero;
             Vector3 vel = Vector3.Zero;
             float yaw = 0f;
             float pitch = 0f;
             CharacterMoveMode moveMode = default;
+            Vector3 launchVelocity = default;
 
             byte health = 0;
             byte shield = 0;
@@ -219,6 +250,8 @@ public class WorldSnapshot : Message
                 vel = character.MovementComp.State.Velocity;
                 yaw = character.MovementComp.State.Yaw;
                 pitch = character.MovementComp.State.Pitch;
+                moveMode = character.MovementComp.State.MoveMode;
+                launchVelocity = character.MovementComp.State.LaunchVelocity;
                 health = (byte)character.HealthComp.Health;
                 shield = (byte)character.HealthComp.Shield;
             }
@@ -227,13 +260,16 @@ public class WorldSnapshot : Message
                                                 CharacterSnapshotFlags.VELOCITY |
                                                 CharacterSnapshotFlags.YAW |
                                                 CharacterSnapshotFlags.PITCH |
+                                                CharacterSnapshotFlags.MOVE_MODE |
+                                                CharacterSnapshotFlags.LAUNCH_VELOCITY |
                                                 CharacterSnapshotFlags.HEALTH |
                                                 CharacterSnapshotFlags.SHIELD;
 
-            characters[i++] = new CharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, moveMode, health, shield, allFlags);
+            characters[i++] = new CharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, moveMode, launchVelocity, health, shield, allFlags);
         }
 
-        newSnapshot.LastProcessedClientTick = MatchState.Instance.ServerTickManager.ServerTick;
+        newSnapshot.ServerTick = MatchState.Instance.CurrentTick;
+        newSnapshot.LastProcessedClientTick = 0;
         newSnapshot.Characters = characters;
 
         return newSnapshot;
@@ -270,6 +306,7 @@ public class WorldSnapshot : Message
                         current.Yaw,
                         current.Pitch,
                         current.MoveMode,
+                        current.LaunchVelocity,
                         current.Health,
                         current.Shield,
                         flags
@@ -288,6 +325,7 @@ public class WorldSnapshot : Message
                     current.Yaw,
                     current.Pitch,
                     current.MoveMode,
+                    current.LaunchVelocity,
                     current.Health,
                     current.Shield,
                     flags
