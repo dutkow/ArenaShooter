@@ -36,6 +36,8 @@ public partial class Character : Pawn
     [Export] Weapon _weapon;
     [Export] Node3D _visualContainer;
 
+    [Export] Node3D _thirdPersonWeaponSocket;
+
     private Vector3 _visualContainerPosition;
 
 
@@ -89,9 +91,9 @@ public partial class Character : Pawn
     {
         base.Tick(delta);
 
-        if(IsAuthority)
+        if (IsAuthority)
         {
-            if(IsLocal)
+            if (IsLocal)
             {
                 HandleInput(CaptureInput(), delta);
             }
@@ -189,13 +191,14 @@ public partial class Character : Pawn
         HideFirstPersonView();
 
         _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
+        _thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
         _thirdPersonWeaponMesh.Visible = true;
     }
 
     public void HideThirdPersonView()
     {
         _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
-        _thirdPersonWeaponMesh.Visible = false;
+        _thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
     }
 
     float LOCAL_SV_INTERP_RATE = 0.5f;
@@ -226,9 +229,8 @@ public partial class Character : Pawn
             else
             {
                 GlobalPosition = MovementComp.State.Position;
-
                 GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
-                _thirdPersonWeaponMesh.GlobalRotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
+                _thirdPersonWeaponSocket.Rotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
             }
         }
 
@@ -270,11 +272,6 @@ public partial class Character : Pawn
             snapshot.Velocity = MovementComp.State.Velocity;
         }
 
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))
-        {
-            snapshot.MoveMode = MovementComp.State.MoveMode;
-        }
-
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))
         {
             snapshot.Yaw = MovementComp.State.Yaw;
@@ -284,6 +281,13 @@ public partial class Character : Pawn
         {
             snapshot.Pitch = MovementComp.State.Pitch;
         }
+
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))
+        {
+            snapshot.MoveMode = MovementComp.State.MoveMode;
+        }
+
 
         // if has flag -> jump then like pass the value of jumped this tick and then like snapshot move state gets 'jumped'
 
@@ -387,7 +391,7 @@ public partial class Character : Pawn
             ClientTick = MatchState.Instance.CurrentTick,
             Input = newInput,
             Yaw = GlobalRotation.Y,
-            Pitch = _cameraPivot.GlobalRotation.X
+            Pitch = _thirdPersonWeaponSocket.Rotation.X
         };
 
         _unacknowledgedClientInputs.Add(inputCommand);
@@ -460,7 +464,14 @@ public partial class Character : Pawn
             }
 
             MovementComp.State.Yaw = Yaw;
-            MovementComp.State.Pitch = Pitch;
+            MovementComp.State.Pitch = _cameraPivot.Rotation.X;
+
+            _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;
         }
+    }
+
+    public void LaunchCharacter(Vector3 velocity)
+    {
+        MovementComp.Launch(velocity);
     }
 }

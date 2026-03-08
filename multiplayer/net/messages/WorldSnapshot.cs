@@ -114,7 +114,7 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY)) Add(c.Velocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Add(c.Yaw);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Add(c.Pitch);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Add(c.MoveMode);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Add(c.MoveMode);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Add(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Add(c.Shield);
         }

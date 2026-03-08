@@ -27,6 +27,8 @@ public class CharacterMovement
     public float Gravity = -20.0f;
     public float JumpSpeed = 10.0f;
 
+    public float MaxStepHeight = 0.25f;
+
     public float GroundAcceleration = 60.0f;
     public float AirAcceleration = 1.0f;
 
@@ -40,6 +42,9 @@ public class CharacterMovement
 
     private CapsuleShape3D _collisionCapsule;
     private Array<Rid> _characterCollisionRids = new();
+
+    public float MaxWalkableSlopeAngle = 45f;
+    public bool PreserveHorizontalSpeedOnSlope = true;
 
     public void Initialize(Character character)
     {
@@ -111,11 +116,9 @@ public class CharacterMovement
     private Vector3 HandleCollision(CharacterMoveState state, float delta)
     {
         var space = _character.CollisionShape.GetWorld3D().DirectSpaceState;
-
         Vector3 motion = state.Velocity * delta;
 
-        // Initial cast from current position along desired motion
-        var initialQuery = new PhysicsShapeQueryParameters3D
+        var query = new PhysicsShapeQueryParameters3D
         {
             Shape = _collisionCapsule,
             Transform = new Transform3D(Basis.Identity, state.Position),
@@ -123,46 +126,82 @@ public class CharacterMovement
             CollideWithBodies = true,
             CollideWithAreas = false
         };
-        initialQuery.SetExclude(_characterCollisionRids);
+        query.SetExclude(_characterCollisionRids);
 
-        var result = space.CastMotion(initialQuery);
-
+        var result = space.CastMotion(query);
         Vector3 safeMotion = motion * result[0];
         Vector3 unsafeMotion = motion * result[1];
 
-        // Cast at the point of collision to get the collision normal
-        var normalQuery = new PhysicsShapeQueryParameters3D
+        if (result[1] < 1.0f) // hit something
         {
-            Shape = _collisionCapsule,
-            Transform = initialQuery.Transform.Translated(unsafeMotion),
-            Motion = Vector3.Zero,
-            CollideWithBodies = true,
-            CollideWithAreas = false
-        };
-        normalQuery.SetExclude(_characterCollisionRids);
-
-        var collisions = space.GetRestInfo(normalQuery);
-        if (collisions.Count > 0 && collisions.TryGetValue("normal", out var value))
-        {
-            Vector3 normal = (Vector3)value;
-
-            // Only slide along horizontal surfaces, ignore vertical-only normals (ground/ceiling)
-            Vector3 horizontalNormal = new Vector3(normal.X, 0, normal.Z);
-            if (horizontalNormal.LengthSquared() > 0.01f)
+            // Cast at collision point to get normal
+            var normalQuery = new PhysicsShapeQueryParameters3D
             {
-                horizontalNormal = horizontalNormal.Normalized();
+                Shape = _collisionCapsule,
+                Transform = query.Transform.Translated(unsafeMotion),
+                Motion = Vector3.Zero,
+                CollideWithBodies = true,
+                CollideWithAreas = false
+            };
+            normalQuery.SetExclude(_characterCollisionRids);
 
-                // Project motion along the wall plane to slide
-                safeMotion = motion - horizontalNormal * motion.Dot(horizontalNormal);
+            var collisions = space.GetRestInfo(normalQuery);
+            if (collisions.Count > 0 && collisions.TryGetValue("normal", out var n))
+            {
+                Vector3 normal = (Vector3)n;
 
-                // Optional: recast the adjusted motion to prevent clipping
-                initialQuery.Motion = safeMotion;
-                result = space.CastMotion(initialQuery);
-                safeMotion = safeMotion * result[0];
+                float slopeAngle = Mathf.RadToDeg(Mathf.Acos(normal.Dot(Vector3.Up)));
+
+                if (slopeAngle <= MaxWalkableSlopeAngle)
+                {
+                    // Walkable slope: slide along slope
+                    Vector3 slopeRight = normal.Cross(Vector3.Up).Normalized();
+                    Vector3 slopeForward = slopeRight.Cross(normal).Normalized();
+
+                    Vector3 slopeMotion = slopeForward * motion.Dot(slopeForward) + slopeRight * motion.Dot(slopeRight);
+
+                    if (!PreserveHorizontalSpeedOnSlope)
+                        slopeMotion = slopeMotion.Normalized() * motion.Length();
+
+                    safeMotion = slopeMotion;
+
+                    // Optional: recast along slope
+                    query.Motion = safeMotion;
+                    result = space.CastMotion(query);
+                    safeMotion *= result[0];
+                }
+                else
+                {
+                    // Too steep: try stepping up if possible
+                    Vector3 stepUp = Vector3.Up * MaxStepHeight;
+
+                    // Test if stepping up avoids collision
+                    query.Transform = new Transform3D(Basis.Identity, state.Position + stepUp);
+                    query.Motion = motion;
+                    result = space.CastMotion(query);
+
+                    if (result[0] > 0.99f) // can step up fully
+                    {
+                        safeMotion = stepUp + motion * result[0];
+                    }
+                    else
+                    {
+                        // slide along horizontal as fallback
+                        Vector3 horizontalNormal = new Vector3(normal.X, 0, normal.Z);
+                        if (horizontalNormal.LengthSquared() > 0.01f)
+                        {
+                            horizontalNormal = horizontalNormal.Normalized();
+                            safeMotion = motion - horizontalNormal * motion.Dot(horizontalNormal);
+
+                            query.Motion = safeMotion;
+                            result = space.CastMotion(query);
+                            safeMotion *= result[0];
+                        }
+                    }
+                }
             }
         }
 
-        // Return safe motion; main loop decides how to apply it
         return safeMotion;
     }
 
@@ -254,5 +293,15 @@ public class CharacterMovement
 
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;
+    }
+
+    public void Launch(Vector3 velocity)
+    {
+        // Directly add the launch velocity to current velocity
+        State.Velocity += velocity;
+
+        // Mark as airborne so gravity will apply
+        _isGrounded = false;
+        State.MoveMode = CharacterMoveMode.FALLING;
     }
 }

@@ -121,7 +121,7 @@ transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, -23.93961, 5.7173796,
 mesh = SubResource("PrismMesh_7q2dv")
 
 [node name="JumpPad" parent="." instance=ExtResource("6_m0y5v")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.8535771, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.1323514, 0)
 
 [node name="StaticBody3D2" type="StaticBody3D" parent="."]
 transform = Transform3D(0.9828614, 0, 0.18434592, 0, 1, 0, -0.18434592, 0, 0.9828614, 0, 3.9874735, 16.166216)
@@ -131,4 +131,34 @@ mesh = SubResource("BoxMesh_m0y5v")
 skeleton = NodePath("")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2"]
+shape = SubResource("BoxShape3D_j45q0")
+
+[node name="StaticBody3D4" type="StaticBody3D" parent="."]
+transform = Transform3D(0.83763415, 0, 0.044146813, 0, 0.15359405, 0, -0.15710703, 0, 0.2353738, 0, -0.35494566, -10.2675495)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D4"]
+mesh = SubResource("BoxMesh_m0y5v")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D4"]
+shape = SubResource("BoxShape3D_j45q0")
+
+[node name="StaticBody3D5" type="StaticBody3D" parent="."]
+transform = Transform3D(0.29804954, 0, 0.041805197, 0, 0.37036037, 0, -0.055902302, 0, 0.22288923, -4.4170513, -0.018283844, -2.583188)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D5"]
+mesh = SubResource("BoxMesh_m0y5v")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D5"]
+shape = SubResource("BoxShape3D_j45q0")
+
+[node name="StaticBody3D3" type="StaticBody3D" parent="."]
+transform = Transform3D(2.2169564, -0.35262573, -0.2755493, 0.8354194, 0.9357644, -0.10383572, 0.18133868, -5.642393e-10, 3.8470955, 38.836494, -1.8875723, 7.788679)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D3"]
+mesh = SubResource("BoxMesh_m0y5v")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D3"]
 shape = SubResource("BoxShape3D_j45q0")
