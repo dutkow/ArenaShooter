@@ -1,5 +1,7 @@
 using Godot;
+using Godot.Collections;
 using System;
+using System.Linq;
 
 public enum CharacterMoveMode : byte
 {
@@ -7,7 +9,7 @@ public enum CharacterMoveMode : byte
     FALLING,
 }
 
-public struct CharacterMoveState
+public class CharacterMoveState
 {
     public Vector3 Position;
     public Vector3 Velocity;
@@ -27,11 +29,24 @@ public class CharacterMovement
     // Only used for server-side grounded logic
     private bool _isGrounded = false;
 
-    public CharacterMoveState State;
+    public CharacterMoveState State = new();
+
+    private CapsuleShape3D _collisionCapsule;
+    private Array<Rid> _characterCollisionRids = new();
 
     public void Initialize(Character character)
     {
         _character = character;
+
+        if(_character.CollisionShape.Shape is CapsuleShape3D collisionCapsule)
+        {
+            _collisionCapsule = collisionCapsule;
+            _characterCollisionRids.Add(collisionCapsule.GetRid());
+        }
+        else
+        {
+            GD.PushError("Character does not have a CapsuleShape3D set as its collision shape.");
+        }
     }
 
     public CharacterMoveState Step(CharacterMoveState state, InputCommand inputCommand, float delta)
@@ -71,19 +86,40 @@ public class CharacterMovement
             if (state.Velocity.Y < 0) state.Velocity.Y = 0;
         }
 
-        state.Position += state.Velocity * delta;
+        //state.Position += state.Velocity * delta;
+        MoveWithCollision(state, delta);
 
         state.MoveMode = grounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
 
         return state;
     }
 
+    private void MoveWithCollision(CharacterMoveState state, float delta)
+    {
+        var space = _character.GetWorld3D().DirectSpaceState;
+
+        Vector3 motion = state.Velocity * delta;
+
+        var query = new PhysicsShapeQueryParameters3D();
+        query.Shape = _collisionCapsule;
+        Vector3 capsuleOffset = Vector3.Up * (0.5f);
+        query.Transform = new Transform3D(Basis.Identity, state.Position + capsuleOffset);
+        query.Motion = motion;
+        query.CollideWithBodies = true;
+        query.CollideWithAreas = false;
+        query.SetExclude(_characterCollisionRids);
+
+        var result = space.CastMotion(query);
+
+        state.Position += motion * result[0];
+        GD.Print($"Safe collision: {result[0]}. Unsafe collision: {result[1]}. Desired motion = {motion}");
+    }
     private bool CheckGrounded(Vector3 position)
     {
         var spaceState = _character.GetWorld3D().DirectSpaceState;
 
         Vector3 from = position;
-        Vector3 to = from + Vector3.Down * 0.5f;
+        Vector3 to = from + Vector3.Down * 2.0f;
 
         PhysicsRayQueryParameters3D query = new PhysicsRayQueryParameters3D
         {

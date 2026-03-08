@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://byrsxq2i83b2a"]
+[gd_scene load_steps=16 format=3 uid="uid://byrsxq2i83b2a"]
 
 [ext_resource type="Script" uid="uid://cxmw8aq3awmhi" path="res://levels/Level.cs" id="1_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_j23ab"]
@@ -26,6 +26,12 @@ size = Vector3(100, 1, 100)
 [sub_resource type="BoxMesh" id="BoxMesh_f7g2b"]
 
 [sub_resource type="PrismMesh" id="PrismMesh_7q2dv"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_m0y5v"]
+size = Vector3(10, 10, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_j45q0"]
+size = Vector3(10, 10, 10)
 
 [node name="TestLevel" type="Node3D"]
 script = ExtResource("1_m0y5v")
@@ -106,3 +112,13 @@ mesh = SubResource("PrismMesh_7q2dv")
 
 [node name="JumpPad" parent="." instance=ExtResource("6_m0y5v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.8535771, 0)
+
+[node name="StaticBody3D2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.9874735, -19.879372)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2"]
+mesh = SubResource("BoxMesh_m0y5v")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2"]
+shape = SubResource("BoxShape3D_j45q0")

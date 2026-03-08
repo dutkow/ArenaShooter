@@ -41,7 +41,7 @@ mesh = SubResource("BoxMesh_4ueed")
 skeleton = NodePath("../../../../..")
 
 [node name="CameraPivot" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4623046, -0.5022421)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4623046, -0.34713352)
 
 [node name="Camera3D" type="Camera3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot"]
 
