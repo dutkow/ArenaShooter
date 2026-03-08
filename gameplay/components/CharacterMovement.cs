@@ -26,6 +26,8 @@ public class CharacterMovement
     public float Gravity = -15.0f;
     public float JumpSpeed = 10.0f;
 
+    public float AirControl = 0.3f;
+
     // Only used for server-side grounded logic
     private bool _isGrounded = false;
 
@@ -59,15 +61,15 @@ public class CharacterMovement
         if (inputCommand.HasFlag(InputCommand.MOVE_RIGHT)) move.X += 1;
 
         move = move.Normalized() * Speed;
-
         var basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
-        Vector3 moveDir = (basis.Z * move.Z + basis.X * move.X).Normalized() * Speed;
-
-        state.Velocity.X = moveDir.X;
-        state.Velocity.Z = moveDir.Z;
+        Vector3 desiredMoveDirection = (basis.Z * move.Z + basis.X * move.X).Normalized() * Speed;
 
         // --- Gravity & jump ---
         CheckGrounded();
+
+        GD.Print($"Grounded: {_isGrounded}");
+
+        
 
         // Jump
         if (inputCommand.HasFlag(InputCommand.JUMP) && _isGrounded)
@@ -85,22 +87,34 @@ public class CharacterMovement
         }
 
         //state.Position += state.Velocity * delta;
-        MoveWithCollision(state, delta);
 
         state.MoveMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
+
+        switch(state.MoveMode)
+        {
+            case CharacterMoveMode.GROUNDED:
+                HandleGroundedMovement(desiredMoveDirection);
+                break;
+
+            case CharacterMoveMode.FALLING:
+                HandleAerialMovement(desiredMoveDirection);
+                break;
+        }
+
+        HandleCollision(state, delta);
 
         return state;
     }
 
-    private void MoveWithCollision(CharacterMoveState state, float delta)
+    private void HandleCollision(CharacterMoveState state, float delta)
     {
-        var space = _character.GetWorld3D().DirectSpaceState;
+        var space = _character.CollisionShape.GetWorld3D().DirectSpaceState;
 
         Vector3 motion = state.Velocity * delta;
 
         var query = new PhysicsShapeQueryParameters3D();
         query.Shape = _collisionCapsule;
-        query.Transform = new Transform3D(Basis.Identity, state.Position);
+        query.Transform = new Transform3D(Basis.Identity, _character.CollisionShape.GlobalPosition);
         query.Motion = motion;
         query.CollideWithBodies = true;
         query.CollideWithAreas = false;
@@ -115,10 +129,10 @@ public class CharacterMovement
     {
         var spaceState = _character.GetWorld3D().DirectSpaceState;
 
-        float traceBeginOffset = 0.1f;
-        float groundedEpsilon = 1.0f;
-        Vector3 from = State.Position + new Vector3(0.0f, -_collisionCapsule.MidHeight, 0.0f);
-        Vector3 to = from + Vector3.Down * (groundedEpsilon - traceBeginOffset);
+        float beginTraceOffset = 0.25f;
+        float groundTraceDistance = 0.02f;
+        Vector3 from = _character.CollisionShape.GlobalPosition + Vector3.Down * (_collisionCapsule.MidHeight - beginTraceOffset);
+        Vector3 to = from + Vector3.Down * (beginTraceOffset + groundTraceDistance);
 
         PhysicsRayQueryParameters3D query = new PhysicsRayQueryParameters3D
         {
@@ -139,5 +153,27 @@ public class CharacterMovement
     public void HandleInput(InputCommand input, float delta)
     {
         State = Step(State, input, delta);
+    }
+
+    private void HandleGroundedMovement(Vector3 desiredMoveDirection)
+    {
+        State.Velocity.X = desiredMoveDirection.X;
+        State.Velocity.Z = desiredMoveDirection.Z;
+    }
+
+    private void HandleAerialMovement(Vector3 desiredMoveDirection)
+    {
+        Vector3 horizontalVel = new Vector3(State.Velocity.X, 0, State.Velocity.Z);
+
+        Vector3 accel = desiredMoveDirection - horizontalVel;
+
+        float accelFactor = _isGrounded ? 1f : AirControl;
+        horizontalVel += accel * accelFactor;
+
+        if (horizontalVel.Length() > Speed)
+            horizontalVel = horizontalVel.Normalized() * Speed;
+
+        State.Velocity.X = horizontalVel.X;
+        State.Velocity.Z = horizontalVel.Z;
     }
 }

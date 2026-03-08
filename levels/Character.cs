@@ -313,7 +313,7 @@ public partial class Character : Pawn
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
         const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
         const float INTERP_THRESHOLD_H = 0.1f;      // Horizontal lerp start
-        const float INTERP_THRESHOLD_V = 0.1f;     // Vertical lerp start
+        const float INTERP_THRESHOLD_V = 0.2f;     // Vertical lerp start
 
         // Lerp speeds
         const float INTERP_SPEED_H = 0.15f;

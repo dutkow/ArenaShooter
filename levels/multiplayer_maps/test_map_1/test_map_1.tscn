@@ -77,8 +77,20 @@ transform = Transform3D(0.57391953, 0, -0.8189119, 0, 1, 0, 0.8189119, 0, 0.5739
 [node name="SpawnPoint3" parent="." instance=ExtResource("2_j23ab")]
 transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 1.3986387, 7.3622265)
 
+[node name="SpawnPoint5" parent="." instance=ExtResource("2_j23ab")]
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 1.3986387, -3.7766695)
+
+[node name="SpawnPoint6" parent="." instance=ExtResource("2_j23ab")]
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 4.138729, 1.3986387, 6.186696)
+
+[node name="SpawnPoint7" parent="." instance=ExtResource("2_j23ab")]
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 4.138729, 1.3986387, -21.01632)
+
 [node name="SpawnPoint4" parent="." instance=ExtResource("2_j23ab")]
 transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -7.112715, 6.9946356, -18.443748)
+
+[node name="SpawnPoint8" parent="." instance=ExtResource("2_j23ab")]
+transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -7.112715, 6.9946356, -9.736591)
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, 17.54002, 5.7173796, -1.4282513)
