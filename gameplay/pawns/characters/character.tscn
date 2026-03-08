@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://ckn5b0j16otei"]
 
-[ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://levels/Character.cs" id="1_4ffih"]
+[ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://gameplay/pawns/characters/Character.cs" id="1_4ffih"]
 [ext_resource type="Material" uid="uid://dfwluwkwpcsjl" path="res://assets/materials/orange_material.tres" id="2_smvd3"]
 [ext_resource type="PackedScene" uid="uid://b708cmx0cac5h" path="res://gameplay/weapons/weapon.tscn" id="2_u04n7"]
 [ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/linear_projectile.tscn" id="3_7lgj7"]
