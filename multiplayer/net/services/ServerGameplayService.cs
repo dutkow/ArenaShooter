@@ -19,26 +19,7 @@ public static class ServerGameplayService
 
 
                     // Handle client tick
-                    if (MatchState.Instance.LastProcessedTickByPlayerID.TryGetValue(playerID, out var lastProcessedTick))
-                    {
-                        if (NetUtils.IsNewerTick(cmd.ClientTick, lastProcessedTick))
-                        {
-                            GD.Print("receive client command ran");
-                            character.ReceiveClientCommand(cmd);
-                            MatchState.Instance.LastProcessedTickByPlayerID[playerID] = cmd.ClientTick;
-                        }
-                        else
-                        {
-                            GD.Print($"receive client command DID NOT run. because {cmd.ClientTick} is newer than {lastProcessedTick}");
-
-                        }
-                    }
-                    else
-                    {
-                        GD.Print("receive client command ran");
-                        character.ReceiveClientCommand(cmd);
-                        MatchState.Instance.LastProcessedTickByPlayerID[playerID] = cmd.ClientTick;
-                    }
+                    character.ReceiveClientCommand(cmd);
 
                     if (MatchState.Instance.LastReceivedServerTickByPlayerID.TryGetValue(playerID, out var lastReceivedServerTick))
                     {

@@ -55,8 +55,6 @@ public class ServerTickManager
             byte playerID = kvp.Key;
             ushort lastProcessedClientTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
 
-            GD.Print($"sending snapshot and saying the last processed tick is {lastProcessedClientTick}");
-
             if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
             {
                 GD.Print($"not found. Peer id: {playerID}. Peer: {peer}");

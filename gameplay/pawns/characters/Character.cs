@@ -127,11 +127,9 @@ public partial class Character : Pawn
             _lastAckedClientCommandTick = tickToProcess;
 
             MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = tickToProcess;
-            GD.Print($"setting last processed tick of player id {PlayerState.PlayerID} to {tickToProcess}");
         }
         else
         {
-            GD.Print($"unprocessed client inputs is empty");
             cmd = _lastProcessedClientCommand;
         }
 
@@ -299,7 +297,6 @@ public partial class Character : Pawn
 
         if (IsLocal)
         {
-            GD.Print($"unacked client input count: {_unacknowledgedClientInputs.Count}. last processed client tick = {MatchState.Instance.LastProcessedClientTick}");
             _unacknowledgedClientInputs.RemoveAll(cmd => cmd.ClientTick <= MatchState.Instance.LastProcessedClientTick);
             var reconciledState = snapshotMoveState;
 
@@ -372,18 +369,11 @@ public partial class Character : Pawn
 
     public void ReceiveClientCommand(ClientCommand command)
     {
-        GD.Print($"receive client command ran. tick: {command.ClientTick}. num commands: {command.Commands.Length}");
-
         foreach (var cmd in command.Commands)
         {
             if (!_unprocessedClientInputs.ContainsKey(cmd.ClientTick))
             {
                 _unprocessedClientInputs.Add(cmd.ClientTick, cmd);
-                GD.Print($"adding unprocessed input on server for {cmd.ClientTick}");
-            }
-            else
-            {
-                GD.Print($"we already have a cmd w/ {cmd.ClientTick}");
             }
         }
     }
@@ -398,9 +388,6 @@ public partial class Character : Pawn
             Pitch = _thirdPersonWeaponSocket.Rotation.X,
             LaunchVelocity = MovementComp.State.LaunchVelocity
         };
-
-
-        GD.Print($"sending client input and saying tick is {inputCommand.ClientTick}");
 
         _unacknowledgedClientInputs.Add(inputCommand);
         var commandsToSend = _unacknowledgedClientInputs
