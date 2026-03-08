@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://ckn5b0j16otei"]
+[gd_scene load_steps=9 format=3 uid="uid://ckn5b0j16otei"]
 
 [ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://levels/Character.cs" id="1_4ffih"]
 [ext_resource type="Material" uid="uid://dfwluwkwpcsjl" path="res://assets/materials/orange_material.tres" id="2_smvd3"]
@@ -12,9 +12,7 @@
 
 [sub_resource type="BoxMesh" id="BoxMesh_4ueed"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_u04n7"]
-
-[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_cameraPivot", "_weapon", "_visualContainer", "_thirdPersonWeaponSocket")]
+[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_cameraPivot", "_weapon", "_visualContainer")]
 script = ExtResource("1_4ffih")
 Area = NodePath("Area3D")
 CollisionShape = NodePath("Area3D/CollisionShape3D")
@@ -24,7 +22,6 @@ _thirdPersonWeaponMesh = NodePath("Area3D/CollisionShape3D/VisualContainer/Chara
 _cameraPivot = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot")
 _weapon = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D/Weapon")
 _visualContainer = NodePath("Area3D/CollisionShape3D/VisualContainer")
-_thirdPersonWeaponSocket = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket")
 
 [node name="Area3D" type="Area3D" parent="."]
 
@@ -55,8 +52,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4623046, -0.34713352)
 [node name="Weapon" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D" instance=ExtResource("2_u04n7")]
 transform = Transform3D(-1.3637659e-08, 0, 0.59218806, 0, 1, 0, -0.31199327, 0, -2.5885361e-08, 0, -0.31457317, 0)
 _projectileScene = ExtResource("3_7lgj7")
-
-[node name="RigidBody3D" type="RigidBody3D" parent="."]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
-shape = SubResource("BoxShape3D_u04n7")
