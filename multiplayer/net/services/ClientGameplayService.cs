@@ -29,6 +29,9 @@ public static class ClientGameplayService
         MatchState.Instance.LastReceivedServerTick = msg.ServerTick;
         MatchState.Instance.LastProcessedClientTick = msg.LastProcessedClientTick;
 
+        GD.Print($"receiving server snapshot. sever tick = {msg.ServerTick}, last processed client tick {msg.LastProcessedClientTick}");
+
+
         var snapshots = msg.GetCharacterSnapshots();
 
         for (int i = 0; i < snapshots.Length; i++)
@@ -39,7 +42,7 @@ public static class ClientGameplayService
             {
                 if (playerState.Pawn != null && playerState.Pawn is Character character)
                 {
-                    character.ApplyServerSnapshot(snapshot, msg.LastProcessedClientTick);
+                    character.ApplyServerSnapshot(snapshot);
                 }
                 else
                 {

@@ -17,12 +17,10 @@ public partial class MatchState : Node
 {
     public static MatchState Instance { get; private set; }
 
-    public ushort CurrentTick { get; private set; } = 0;
 
 
     private double _clientTickAccumulator = 0;
 
-    public ushort LastProcessedClientTick = ushort.MaxValue;
 
     public void AdvanceTick()
     {
@@ -82,10 +80,17 @@ public partial class MatchState : Node
 
     public ServerTickManager ServerTickManager;
 
+    // base tick
+    public ushort CurrentTick { get; private set; } = 0;
+
+
+    // server trackers
     public Dictionary<byte, ushort> LastProcessedTickByPlayerID = new();
     public Dictionary<byte, ushort> LastReceivedServerTickByPlayerID = new();
 
+    // cilen trackers
     public ushort LastReceivedServerTick;
+    public ushort LastProcessedClientTick = ushort.MaxValue;
 
 
     public override void _EnterTree()

@@ -47,7 +47,6 @@ public partial class Character : Pawn
 
     private SortedDictionary<ushort, ClientInputCommand> _unprocessedClientInputs = new();
 
-    private ushort _lastAckedClientCommandTick;
 
     private ClientInputCommand _lastProcessedClientCommand;
 
@@ -124,7 +123,6 @@ public partial class Character : Pawn
             cmd = _unprocessedClientInputs[tickToProcess];
             _lastProcessedClientCommand = cmd;
             _unprocessedClientInputs.Remove(tickToProcess);
-            _lastAckedClientCommandTick = tickToProcess;
 
             MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = tickToProcess;
         }
@@ -257,15 +255,13 @@ public partial class Character : Pawn
         _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
-    public void ApplyServerSnapshot(CharacterSnapshot snapshot, ushort lastProcessedClientTick)
+    public void ApplyServerSnapshot(CharacterSnapshot snapshot)
     {
-        MatchState.Instance.LastProcessedClientTick = lastProcessedClientTick;
-
         // Reset any values which haven't changed
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
         {
-            snapshot.Position = MovementComp.State.Position;        }
-
+            snapshot.Position = MovementComp.State.Position;        
+        }
 
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
         {
@@ -282,7 +278,6 @@ public partial class Character : Pawn
             snapshot.Pitch = MovementComp.State.Pitch;
         }
 
-
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))
         {
             snapshot.MoveMode = MovementComp.State.MoveMode;
@@ -293,13 +288,14 @@ public partial class Character : Pawn
             snapshot.LaunchVelocity = MovementComp.State.LaunchVelocity;
         }
 
-            var snapshotMoveState = snapshot.GetMoveState();
+        var snapshotMoveState = snapshot.GetMoveState();
 
         if (IsLocal)
         {
             _unacknowledgedClientInputs.RemoveAll(cmd => cmd.ClientTick <= MatchState.Instance.LastProcessedClientTick);
             var reconciledState = snapshotMoveState;
 
+            GD.Print($"unacked client inputs = {_unacknowledgedClientInputs.Count}");
             foreach (var cmd in _unacknowledgedClientInputs)
             {
                 reconciledState = MovementComp.Step(reconciledState, cmd.Input, cmd.LaunchVelocity, NetworkConstants.SERVER_TICK_INTERVAL, true);
@@ -339,12 +335,16 @@ public partial class Character : Pawn
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
+                        GD.Print($"state position = {MovementComp.State.Position} and predicted position = {newPredictedState.Position}");
+
             GD.Print($"Snapping horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
+            GD.Print($"state position = {MovementComp.State.Position} and predicted position = {newPredictedState.Position}");
+
             GD.Print($"Lepring horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
@@ -408,11 +408,6 @@ public partial class Character : Pawn
         if (Input.IsActionPressed("move_right")) cmd |= InputCommand.MOVE_RIGHT;
         if (Input.IsActionPressed("jump")) cmd |= InputCommand.JUMP;
         if (Input.IsActionPressed("primary_fire")) cmd |= InputCommand.FIRE_PRIMARY;
-
-        //LastInputCommand = cmd;
-
-        //Weapon.HandleInput(cmd);
-
         return cmd;
     }
 

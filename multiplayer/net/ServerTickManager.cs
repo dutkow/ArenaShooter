@@ -9,9 +9,8 @@ using System.Collections.Generic;
 public class ServerTickManager
 {
     private double _accumulator = 0f;
-    public ushort ServerTick { get; private set; }
 
-    private const int MaxSnapshotHistory = 200;
+    private const int MaxSnapshotHistory = 250;
 
     // History of snapshots, keyed by server tick
     private readonly Dictionary<ushort, WorldSnapshot> _snapshotHistory = new();
@@ -28,9 +27,8 @@ public class ServerTickManager
         {
             _accumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
             TickServer();
-            ServerTick++;
 
-            if (ServerTick % NetworkConstants.SERVER_TICK_RATE == 0)
+            if (MatchState.Instance.CurrentTick % NetworkConstants.SERVER_TICK_RATE == 0)
             {
                 float mbps = (_bytesSentThisPeriod * 8f) / 1_000_000f;
                 GD.Print($"Traffic: ~{mbps:F4} Mbps, {_bytesSentThisPeriod} bytes/sec (~{_bytesSentThisPeriod / 64.0f} bytes/tick)");
@@ -43,7 +41,7 @@ public class ServerTickManager
     {
         var newSnapshot = WorldSnapshot.Build();
         SendWorldSnapshotDeltas(newSnapshot);
-        AddSnapshotToHistory(ServerTick, newSnapshot);
+        AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
     }
 
     private void SendWorldSnapshotDeltas(WorldSnapshot newSnapshot)
@@ -53,6 +51,7 @@ public class ServerTickManager
         foreach (var kvp in MatchState.Instance.LastReceivedServerTickByPlayerID)
         {
             byte playerID = kvp.Key;
+            ushort lastReceivedServerTick = kvp.Value;
             ushort lastProcessedClientTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
 
             if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
@@ -61,22 +60,17 @@ public class ServerTickManager
                 continue;
             }
 
-
-            if (snapshotDeltas.TryGetValue(lastProcessedClientTick, out var deltaSnapshot))
+            if (snapshotDeltas.TryGetValue(lastReceivedServerTick, out var deltaSnapshot))
             {
                 newSnapshot = deltaSnapshot;
             }
-            else if (_snapshotHistory.TryGetValue((ushort)lastProcessedClientTick, out var previousSnapshot))
+            else if (_snapshotHistory.TryGetValue((ushort)lastReceivedServerTick, out var previousSnapshot))
             {
                 newSnapshot = newSnapshot.BuildDelta(previousSnapshot);
-                newSnapshot.LastProcessedClientTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
-                snapshotDeltas[lastProcessedClientTick] = newSnapshot;
+                snapshotDeltas[lastReceivedServerTick] = newSnapshot;
             }
 
-            // Write message to calculate bytes
             var bytes = newSnapshot.WriteMessage();
-
-            // ---- Accumulate bytes sent ----
             _bytesSentThisPeriod += bytes.Length;
 
             newSnapshot.LastProcessedClientTick = lastProcessedClientTick;
