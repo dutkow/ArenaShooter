@@ -264,6 +264,16 @@ public partial class Character : Pawn
             snapshot.Position = MovementComp.State.Position;
         }
 
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
+        {
+            snapshot.Velocity = MovementComp.State.Velocity;
+        }
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))
+        {
+            snapshot.MoveMode = MovementComp.State.MoveMode;
+        }
+
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))
         {
             snapshot.Yaw = MovementComp.State.Yaw;
@@ -274,10 +284,6 @@ public partial class Character : Pawn
             snapshot.Pitch = MovementComp.State.Pitch;
         }
 
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
-        {
-            snapshot.Velocity = MovementComp.State.Velocity;
-        }
 
         var snapshotMoveState = snapshot.GetMoveState();
 
@@ -302,23 +308,54 @@ public partial class Character : Pawn
 
     public void ReconcileMoveState(CharacterMoveState newPredictedState)
     {
-        float positionDelta = (MovementComp.State.Position - newPredictedState.Position).Length();
+        Vector3 delta = MovementComp.State.Position - newPredictedState.Position;
 
-        const float SNAP_THRESHOLD = 1.0f;
-        const float INTERP_THRESHOLD = 0.05f;
-        const float INTER_CORRECTION_SPEED = 0.25f;
+        // Thresholds
+        const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
+        const float SNAP_THRESHOLD_V = 4.0f;        // Vertical snap (Y)
+        const float INTERP_THRESHOLD_H = 0.1f;      // Horizontal lerp start
+        const float INTERP_THRESHOLD_V = 0.25f;     // Vertical lerp start
 
-        if (positionDelta > SNAP_THRESHOLD)
+        // Lerp speeds
+        const float INTERP_SPEED_H = 0.15f;
+        const float INTERP_SPEED_V = 0.15f;
+
+        Vector3 targetPos = newPredictedState.Position;
+        Vector3 currentPos = MovementComp.State.Position;
+
+        Vector2 deltaXZ = new Vector2(delta.X, delta.Z);
+        float distXZ = deltaXZ.Length();
+
+        float deltaY = Math.Abs(delta.Y);
+
+        // --- Horizontal correction ---
+        if (distXZ > SNAP_THRESHOLD_H)
         {
-            MovementComp.State.Position = newPredictedState.Position;
-            MovementComp.State.Velocity = newPredictedState.Velocity;
+            GD.Print($"Snapping horizontal, error {distXZ}");
+            currentPos.X = targetPos.X;
+            currentPos.Z = targetPos.Z;
         }
-        else if (positionDelta > INTERP_THRESHOLD)
+        else if (distXZ > INTERP_THRESHOLD_H)
         {
-            GD.Print($"lerping correction, error is {positionDelta}");
-            MovementComp.State.Position = MovementComp.State.Position.Lerp(newPredictedState.Position, INTER_CORRECTION_SPEED);
-            MovementComp.State.Velocity = newPredictedState.Velocity;
+            currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
+            currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }
+
+        // --- Vertical correction ---
+        if (deltaY > SNAP_THRESHOLD_V)
+        {
+            GD.Print($"Snapping vertical, error {deltaY}");
+            currentPos.Y = targetPos.Y;
+        }
+        else if (deltaY > INTERP_THRESHOLD_V)
+        {
+            GD.Print($"Lerping vertical, error {deltaY}");
+            currentPos.Y = Mathf.Lerp(currentPos.Y, targetPos.Y, INTERP_SPEED_V);
+        }
+
+        // Apply the corrected position and velocity
+        MovementComp.State.Position = currentPos;
+        MovementComp.State.Velocity = newPredictedState.Velocity;
     }
 
     public void ReceiveClientCommand(ClientCommand command)
