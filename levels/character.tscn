@@ -12,7 +12,7 @@
 
 [sub_resource type="BoxMesh" id="BoxMesh_4ueed"]
 
-[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_cameraPivot", "_weapon", "_visualContainer")]
+[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_cameraPivot", "_weapon", "_visualContainer", "_thirdPersonWeaponSocket")]
 script = ExtResource("1_4ffih")
 Area = NodePath("Area3D")
 CollisionShape = NodePath("Area3D/CollisionShape3D")
@@ -22,6 +22,7 @@ _thirdPersonWeaponMesh = NodePath("Area3D/CollisionShape3D/VisualContainer/Chara
 _cameraPivot = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot")
 _weapon = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D/Weapon")
 _visualContainer = NodePath("Area3D/CollisionShape3D/VisualContainer")
+_thirdPersonWeaponSocket = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket")
 
 [node name="Area3D" type="Area3D" parent="."]
 

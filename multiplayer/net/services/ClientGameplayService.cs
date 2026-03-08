@@ -12,7 +12,7 @@ public static class ClientGameplayService
 
         GD.Print($"Client received: {msg.MessageType}");
 
-        SpawnManager.Instance.LocalSpawnPlayer(msg.PlayerID, msg.SpawnPosition, msg.SpawnRotationY);
+        //SpawnManager.Instance.LocalSpawnPlayer(msg.PlayerID, msg.SpawnPosition, msg.SpawnRotationY);
     }
 
     public static void HandleWorldSnapshot(byte[] data)
@@ -21,15 +21,17 @@ public static class ClientGameplayService
         msg.ReadMessage(data);
 
         ushort lastProcessedClientTick = msg.LastProcessedClientTick;
+
         if (!NetUtils.IsNewerTick(lastProcessedClientTick, MatchState.Instance.LastProcessedClientTick))
         {
             return;
         }
-        
+
+
+
         MatchState.Instance.LastProcessedClientTick = lastProcessedClientTick;
 
         var snapshots = msg.GetCharacterSnapshots();
-
 
         for (int i = 0; i < snapshots.Length; i++)
         {

@@ -192,7 +192,6 @@ public partial class Character : Pawn
 
         _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
         _thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
-        _thirdPersonWeaponMesh.Visible = true;
     }
 
     public void HideThirdPersonView()
