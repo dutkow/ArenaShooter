@@ -336,6 +336,7 @@ public partial class Character : Pawn
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
+            GD.Print($"Lepring horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }

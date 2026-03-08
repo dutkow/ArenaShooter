@@ -124,7 +124,7 @@ mesh = SubResource("PrismMesh_7q2dv")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.8535771, 0)
 
 [node name="StaticBody3D2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.9874735, 36.382656)
+transform = Transform3D(0.9828614, 0, 0.18434592, 0, 1, 0, -0.18434592, 0, 0.9828614, 0, 3.9874735, 16.166216)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2"]
 mesh = SubResource("BoxMesh_m0y5v")
