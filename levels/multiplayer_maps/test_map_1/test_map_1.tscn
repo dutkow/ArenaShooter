@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://byrsxq2i83b2a"]
+[gd_scene load_steps=14 format=3 uid="uid://byrsxq2i83b2a"]
 
 [ext_resource type="Script" uid="uid://cxmw8aq3awmhi" path="res://levels/Level.cs" id="1_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_j23ab"]
@@ -22,8 +22,6 @@ size = Vector3(200, 0.1, 200)
 size = Vector2(200, 200)
 
 [sub_resource type="BoxMesh" id="BoxMesh_f7g2b"]
-
-[sub_resource type="PrismMesh" id="PrismMesh_7q2dv"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_m0y5v"]
 size = Vector3(10, 10, 10)
@@ -91,34 +89,6 @@ transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55
 
 [node name="SpawnPoint8" parent="." instance=ExtResource("2_j23ab")]
 transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -7.112715, 6.9946356, -9.736591)
-
-[node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, 17.54002, 5.7173796, -1.4282513)
-mesh = SubResource("PrismMesh_7q2dv")
-
-[node name="MeshInstance3D6" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, -28.267666, 5.7173796, -1.4282513)
-mesh = SubResource("PrismMesh_7q2dv")
-
-[node name="MeshInstance3D11" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, -0.17777443, 5.7173796, -1.4282513)
-mesh = SubResource("PrismMesh_7q2dv")
-
-[node name="MeshInstance3D7" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, -28.267666, 5.7173796, -19.367321)
-mesh = SubResource("PrismMesh_7q2dv")
-
-[node name="MeshInstance3D8" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, 17.528522, 5.7173796, -19.367321)
-mesh = SubResource("PrismMesh_7q2dv")
-
-[node name="MeshInstance3D9" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, 17.528522, 5.7173796, 18.219795)
-mesh = SubResource("PrismMesh_7q2dv")
-
-[node name="MeshInstance3D10" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 3.1750164, 0, 0, 0, 1, -23.93961, 5.7173796, 18.219795)
-mesh = SubResource("PrismMesh_7q2dv")
 
 [node name="JumpPad" parent="." instance=ExtResource("6_m0y5v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.1323514, 0)

@@ -42,9 +42,6 @@ transform = Transform3D(-0.9917632, 0, 0.12808594, 0, 1, 0, -0.12808594, 0, -0.9
 
 [node name="Player" parent="." instance=ExtResource("3_psdie")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6006985, 0)
-_airControlAcceleration = null
-MouseSens = null
-MouseSmooth = null
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 
