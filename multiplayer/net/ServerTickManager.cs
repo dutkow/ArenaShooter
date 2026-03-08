@@ -68,14 +68,9 @@ public class ServerTickManager
             }
             else if (_snapshotHistory.TryGetValue((ushort)lastProcessedClientTick, out var previousSnapshot))
             {
-                GD.Print("build delta ran");
                 newSnapshot = newSnapshot.BuildDelta(previousSnapshot);
-                newSnapshot.LastProcessedClientTick = kvp.Value;
+                newSnapshot.LastProcessedClientTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
                 snapshotDeltas[lastProcessedClientTick] = newSnapshot;
-            }
-            else
-            {
-                GD.Print($"build ran because we did not find {lastProcessedClientTick} snapshot.");
             }
 
             // Write message to calculate bytes

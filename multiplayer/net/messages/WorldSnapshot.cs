@@ -337,7 +337,7 @@ public class WorldSnapshot : Message
         return new WorldSnapshot
         {
             ENetFlags = ENetPacketFlags.UnreliableFragment,
-            LastProcessedClientTick = LastProcessedClientTick,
+            ServerTick = MatchState.Instance.CurrentTick,
             Characters = deltaList.ToArray(),
             MessageType = Msg.S2C_WORLD_SNAPSHOT,
         };

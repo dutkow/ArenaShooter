@@ -261,17 +261,6 @@ public partial class Character : Pawn
     {
         _lastAckedClientCommandTick = lastProcessedClientTick;
 
-        /*
-        GD.Print($"Snapshot DirtyFlags for player {snapshot.PlayerID}: {snapshot.DirtyFlags} " +
-            $"(POSITION={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))}, " +
-            $"VELOCITY={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))}, " +
-            $"YAW={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))}, " +
-            $"PITCH={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))}, " +
-            $"MOVE_MODE={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))}, " +
-            $"LAUNCH_VELOCITY={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY))}, " +
-            $"HEALTH={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH))}, " +
-            $"SHIELD={(snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD))})");*/
-
         // Reset any values which haven't changed
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
         {
@@ -302,7 +291,6 @@ public partial class Character : Pawn
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY))
         {
             snapshot.LaunchVelocity = MovementComp.State.LaunchVelocity;
-            GD.Print("launch velocity unchanged");
         }
 
             var snapshotMoveState = snapshot.GetMoveState();
