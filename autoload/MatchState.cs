@@ -77,14 +77,6 @@ public partial class MatchState : Node
     public ushort CurrentTick { get; private set; } = 0;
 
 
-    // server trackers
-    public Dictionary<byte, ushort> LastProcessedTickByPlayerID = new();
-    public Dictionary<byte, ushort> LastReceivedServerTickByPlayerID = new();
-
-    // cilen trackers
-    public ushort LastReceivedServerTick;
-    public ushort LastProcessedClientTick = ushort.MaxValue;
-
 
     public override void _EnterTree()
     {

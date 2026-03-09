@@ -21,16 +21,16 @@ public static class ServerGameplayService
                     // Handle client tick
                     character.ReceiveClientCommand(cmd);
 
-                    if (MatchState.Instance.LastReceivedServerTickByPlayerID.TryGetValue(playerID, out var lastReceivedServerTick))
+                    if (ServerGame.Instance.LastProcessedServerTicksByPlayerID.TryGetValue(playerID, out var lastReceivedServerTick))
                     {
                         if (NetUtils.IsNewerTick(cmd.LastReceivedServerTick, lastReceivedServerTick))
                         {
-                            MatchState.Instance.LastReceivedServerTickByPlayerID[playerID] = cmd.LastReceivedServerTick;
+                            ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = cmd.LastReceivedServerTick;
                         }
                     }
                     else
                     {
-                        MatchState.Instance.LastReceivedServerTickByPlayerID[playerID] = cmd.LastReceivedServerTick;
+                        ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = cmd.LastReceivedServerTick;
                     }
                 }
             }

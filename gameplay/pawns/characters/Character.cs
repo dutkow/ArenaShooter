@@ -124,7 +124,7 @@ public partial class Character : Pawn
             _lastProcessedClientCommand = cmd;
             _unprocessedClientInputs.Remove(tickToProcess);
 
-            MatchState.Instance.LastProcessedTickByPlayerID[PlayerState.PlayerID] = tickToProcess;
+            ServerGame.Instance.LastProcessedServerTicksByPlayerID[PlayerState.PlayerID] = tickToProcess;
         }
         else
         {
@@ -292,7 +292,7 @@ public partial class Character : Pawn
 
         if (IsLocal)
         {
-            _unacknowledgedClientInputs.RemoveAll(cmd => cmd.ClientTick <= MatchState.Instance.LastProcessedClientTick);
+            _unacknowledgedClientInputs.RemoveAll(cmd => cmd.ClientTick <= ClientGame.Instance.LastClientTickProcessedByServer);
             var reconciledState = snapshotMoveState;
 
             GD.Print($"unacked client inputs = {_unacknowledgedClientInputs.Count}");

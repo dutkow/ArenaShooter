@@ -21,13 +21,13 @@ public static class ClientGameplayService
         msg.ReadMessage(data);
 
 
-        if (!NetUtils.IsNewerTick(msg.ServerTick, MatchState.Instance.LastReceivedServerTick))
+        if (!NetUtils.IsNewerTick(msg.ServerTick, ClientGame.Instance.LastServerTickProcessedByClient))
         {
             return;
         }
 
-        MatchState.Instance.LastReceivedServerTick = msg.ServerTick;
-        MatchState.Instance.LastProcessedClientTick = msg.LastProcessedClientTick;
+        ClientGame.Instance.LastServerTickProcessedByClient = msg.ServerTick;
+        ClientGame.Instance.LastClientTickProcessedByServer = msg.LastProcessedClientTick;
 
         GD.Print($"receiving server snapshot. sever tick = {msg.ServerTick}, last processed client tick {msg.LastProcessedClientTick}");
 

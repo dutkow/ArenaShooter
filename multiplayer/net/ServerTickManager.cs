@@ -53,11 +53,11 @@ public partial class ServerTickManager : Node
     {
         var snapshotDeltas = new Dictionary<uint, WorldSnapshot>();
 
-        foreach (var kvp in MatchState.Instance.LastReceivedServerTickByPlayerID)
+        foreach (var kvp in ServerGame.Instance.LastProcessedServerTicksByPlayerID)
         {
             byte playerID = kvp.Key;
             ushort lastReceivedServerTick = kvp.Value;
-            ushort lastProcessedClientTick = MatchState.Instance.LastProcessedTickByPlayerID[playerID];
+            ushort lastProcessedClientTick = ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID];
 
             if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
             {

@@ -10,8 +10,8 @@ public class ServerGame
 
     // Client-server synchronization
     public ushort LastClientTickProcessedByServer;
-    public Dictionary<byte, ushort> LastProcessedServerTicksByPeerID = new();
-    public Dictionary<byte, ushort> LastProcessedClientTicksByPeerID = new();
+    public Dictionary<byte, ushort> LastProcessedServerTicksByPlayerID = new();
+    public Dictionary<byte, ushort> LastProcessedClientTicksByPlayerID = new();
 
 
     // Snapshots
@@ -41,11 +41,11 @@ public class ServerGame
     {
         var snapshotDeltas = new Dictionary<uint, WorldSnapshot>();
 
-        foreach (var kvp in LastProcessedServerTicksByPeerID)
+        foreach (var kvp in LastProcessedServerTicksByPlayerID)
         {
             byte peerID = kvp.Key;
             ushort lastProcessedServerTick = kvp.Value;
-            ushort lastProcessedClientTick = LastProcessedClientTicksByPeerID[peerID];
+            ushort lastProcessedClientTick = LastProcessedClientTicksByPlayerID[peerID];
 
             if (!NetworkSession.Instance.PeerIDsToPeers.TryGetValue(peerID, out var peer))
             {

@@ -98,7 +98,7 @@ public class ClientCommand : Message
             ENetFlags = ENetPacketFlags.Unsequenced,
             Commands = commands,
             ClientTick = MatchState.Instance.CurrentTick,
-            LastReceivedServerTick = MatchState.Instance.LastReceivedServerTick
+            LastReceivedServerTick = ClientGame.Instance.LastServerTickProcessedByClient
         };
         NetworkSender.ToServer(msg);
     }

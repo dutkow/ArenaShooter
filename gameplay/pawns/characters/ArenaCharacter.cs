@@ -296,7 +296,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
 
                 Vector3 startingPosition = GlobalPosition;
                 GlobalPosition = _predictedPosition;
-                foreach (var cmd in _commandHistory.Where(c => c.ClientTick > MatchState.Instance.LastProcessedClientTick))
+                foreach (var cmd in _commandHistory.Where(c => c.ClientTick > ClientGame.Instance.LastClientTickProcessedByServer))
                 {
                     // Apply movement inputs to your movement component manually
                     MovementComp.Tick(cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, CameraPivot);
