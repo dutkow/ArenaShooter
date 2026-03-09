@@ -40,8 +40,6 @@ public partial class Character : Pawn
 
     private Vector3 _visualContainerPosition;
 
-    private InputCommand _forcedInput = 0;
-
     public CharacterMovement MovementComp { get; private set; } = new();
 
     public HealthComponent HealthComp { get; private set; } = new();
@@ -329,20 +327,13 @@ public partial class Character : Pawn
     {
         base.AddInput(cmd);
 
-        if (_forcedInput != 0)
-        {
-            cmd.Input = _forcedInput;
-        }
-        else
-        {
-            // Otherwise, use real input
-            if (Input.IsActionPressed("move_forward")) cmd.Input |= InputCommand.MOVE_FORWARD;
-            if (Input.IsActionPressed("move_back")) cmd.Input |= InputCommand.MOVE_BACK;
-            if (Input.IsActionPressed("move_left")) cmd.Input |= InputCommand.MOVE_LEFT;
-            if (Input.IsActionPressed("move_right")) cmd.Input |= InputCommand.MOVE_RIGHT;
-            if (Input.IsActionPressed("jump")) cmd.Input |= InputCommand.JUMP;
-            if (Input.IsActionPressed("primary_fire")) cmd.Input |= InputCommand.FIRE_PRIMARY;
-        }
+        // Otherwise, use real input
+        if (Input.IsActionPressed("move_forward")) cmd.Input |= InputCommand.MOVE_FORWARD;
+        if (Input.IsActionPressed("move_back")) cmd.Input |= InputCommand.MOVE_BACK;
+        if (Input.IsActionPressed("move_left")) cmd.Input |= InputCommand.MOVE_LEFT;
+        if (Input.IsActionPressed("move_right")) cmd.Input |= InputCommand.MOVE_RIGHT;
+        if (Input.IsActionPressed("jump")) cmd.Input |= InputCommand.JUMP;
+        if (Input.IsActionPressed("primary_fire")) cmd.Input |= InputCommand.FIRE_PRIMARY;
 
         cmd.Yaw = GlobalRotation.Y;
         cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
@@ -404,13 +395,4 @@ public partial class Character : Pawn
         MovementComp.QueueLaunch(MovementComp.State, velocity);
     }
 
-    public void SetForcedInput(InputCommand forcedInput)
-    {
-        _forcedInput = forcedInput;
-    }
-
-    public void ClearForcedInput()
-    {
-        _forcedInput = 0;
-    }
 }

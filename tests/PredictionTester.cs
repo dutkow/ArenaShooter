@@ -69,9 +69,6 @@ public partial class PredictionTester : Node3D
         InputCommand testInput = new();
         testInput |= InputCommand.MOVE_FORWARD;
 
-
-        _character1.SetForcedInput(testInput);
-
     }
 
     public override void _PhysicsProcess(double delta)
