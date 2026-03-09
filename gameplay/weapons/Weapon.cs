@@ -18,7 +18,7 @@ public partial class Weapon : Node3D
     private bool _hasFiredSincePress = false;
     private float _cooldownTimer = 0f;
 
-    [Export] public MeshInstance3D FirstPersonWeaponMesh;
+    [Export] public Node3D FirstPersonWeaponMesh;
     [Export] public float PrimaryFireCooldown = 0.5f;
     [Export] PackedScene _projectileScene;
 
@@ -48,6 +48,7 @@ public partial class Weapon : Node3D
     public void HandleInput(InputCommand cmd)
     {
         bool wantsPrimaryFire = cmd.HasFlag(InputCommand.FIRE_PRIMARY);
+        GD.Print($"wantsPrimaryFire = {wantsPrimaryFire}");
 
         if (wantsPrimaryFire)
         {
@@ -60,7 +61,7 @@ public partial class Weapon : Node3D
     }
 
 
-    public void TickWeapon(double delta, Vector3 origin, Vector3 direction)
+    public void Tick(double delta, Vector3 origin, Vector3 direction)
     {
         if (_cooldownTimer > 0.0f)
         {

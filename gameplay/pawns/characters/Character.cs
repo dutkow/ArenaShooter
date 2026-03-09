@@ -31,7 +31,7 @@ public partial class Character : Pawn
 
     // Components
     [Export] MeshInstance3D _characterMesh;
-    [Export] MeshInstance3D _thirdPersonWeaponMesh;
+    [Export] Node3D _thirdPersonWeaponMesh;
     [Export] Node3D _cameraPivot;
     [Export] Weapon _weapon;
     [Export] Node3D _visualContainer;
@@ -66,6 +66,15 @@ public partial class Character : Pawn
         Area.Owner = this;
     }
 
+    public override void _PhysicsProcess(double delta)
+    {
+        base._PhysicsProcess(delta);
+
+        Vector3 dir = -Camera.GlobalTransform.Basis.Z;
+        _weapon.Tick(delta, Camera.GlobalPosition, dir);
+
+    }
+
     public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
     {
         GlobalPosition = spawnPosition;
@@ -84,6 +93,7 @@ public partial class Character : Pawn
         base.ApplyInput(cmd);
 
         MovementComp.HandleInput(cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+        _weapon.HandleInput(cmd.Input);
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
@@ -149,13 +159,16 @@ public partial class Character : Pawn
         HideFirstPersonView();
 
         _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
-        _thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
+        //_thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
+        _thirdPersonWeaponMesh.Visible = true;
     }
 
     public void HideThirdPersonView()
     {
         _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
-        _thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
+        //_thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
+        _thirdPersonWeaponMesh.Visible = false;
+
     }
 
     float LOCAL_SV_INTERP_RATE = 0.5f;
@@ -337,6 +350,7 @@ public partial class Character : Pawn
         cmd.LaunchVelocity = MovementComp.LaunchVector;
 
         MovementComp.LaunchVector = Vector3.Zero;
+
         return cmd;
     }
 

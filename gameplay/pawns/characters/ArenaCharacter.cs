@@ -405,7 +405,7 @@ public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedO
             }
 
             Vector3 dir = -Camera.GlobalTransform.Basis.Z;
-            Weapon.TickWeapon(delta, Camera.GlobalPosition, dir);
+            Weapon.Tick(delta, Camera.GlobalPosition, dir);
         }
 
         if (NetworkedComponent.IsLocal && !NetworkedComponent.IsAuthority)
