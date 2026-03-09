@@ -20,12 +20,6 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
-
-        if (!NetUtils.IsNewerTick(msg.ServerTick, ClientGame.Instance.LastServerTickProcessedByClient))
-        {
-            return;
-        }
-
         ClientGame.Instance.ApplyWorldSnapshot(msg);
     }
 

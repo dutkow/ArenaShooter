@@ -17,7 +17,7 @@ public class ClientGame
     // Client-server synchronization
     public ushort LastServerTickProcessedByClient;
     public ushort LastClientTickProcessedByServer;
-    List<ClientInputCommand> _unacknowledgedClientInputs = new();
+    public List<ClientInputCommand> UnprocessedClientInputs = new();
     const int REDUNDANT_INPUTS = 4;
 
 
@@ -55,8 +55,8 @@ public class ClientGame
 
     public void SendClientCommand(ClientInputCommand cmd)
     {
-        _unacknowledgedClientInputs.Add(cmd);
-        var commandsToSend = _unacknowledgedClientInputs.Skip(Math.Max(0, _unacknowledgedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
+        UnprocessedClientInputs.Add(cmd);
+        var commandsToSend = UnprocessedClientInputs.Skip(Math.Max(0, UnprocessedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
         ClientCommand.Send(commandsToSend);
     }
 
@@ -77,10 +77,17 @@ public class ClientGame
 
     public void ApplyWorldSnapshot(WorldSnapshot snapshot)
     {
+        if (!NetUtils.IsNewerTick(snapshot.ServerTick, LastServerTickProcessedByClient))
+        {
+            return;
+        }
+
         LastServerTickProcessedByClient = snapshot.ServerTick;
         LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
 
         var characterSnapshots = snapshot.GetCharacterSnapshots();
+
+        UnprocessedClientInputs.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
 
         for (int i = 0; i < characterSnapshots.Length; i++)
         {
@@ -88,9 +95,10 @@ public class ClientGame
 
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(characterSnapshot.PlayerID, out var playerState))
             {
-                if (playerState.Pawn != null && playerState.Pawn is Character character)
+                Pawn pawn = playerState.Pawn;
+                if (pawn != null)
                 {
-                    character.ApplyServerSnapshot(characterSnapshot);
+                    pawn.ApplySnapshot(characterSnapshot);
                 }
                 else
                 {

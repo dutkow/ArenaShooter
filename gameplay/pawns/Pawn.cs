@@ -62,4 +62,6 @@ public partial class Pawn : Actor
     public virtual void ApplyInput(ClientInputCommand cmd) { }
     public virtual void ProcessClientInput(ClientInputCommand cmd) { }
 
+    public virtual void ApplySnapshot(CharacterSnapshot snapshot) { }
+
 }

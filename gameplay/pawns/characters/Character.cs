@@ -249,7 +249,7 @@ public partial class Character : Pawn
         _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
-    public void ApplyServerSnapshot(CharacterSnapshot snapshot)
+    public override void ApplySnapshot(CharacterSnapshot snapshot)
     {
         // Reset any values which haven't changed
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
@@ -286,11 +286,10 @@ public partial class Character : Pawn
 
         if (IsLocal)
         {
-            _unacknowledgedClientInputs.RemoveAll(cmd => cmd.ClientTick <= ClientGame.Instance.LastClientTickProcessedByServer);
             var reconciledState = snapshotMoveState;
-
-            GD.Print($"unacked client inputs = {_unacknowledgedClientInputs.Count}");
-            foreach (var cmd in _unacknowledgedClientInputs)
+            var unprocessedInputs = ClientGame.Instance.UnprocessedClientInputs;
+            GD.Print($"unprocessed client inputs = {unprocessedInputs.Count}");
+            foreach (var cmd in unprocessedInputs)
             {
                 reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, true);
             }
