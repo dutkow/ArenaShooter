@@ -21,8 +21,11 @@ public partial class PhysicsVolume : Area3D
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qskwt"]
 
-[node name="JumpPad" type="Node3D"]
+[node name="JumpPad" type="Node3D" node_paths=PackedStringArray("_area3D", "_collisionShape")]
 script = ExtResource("1_thlnv")
+_area3D = NodePath("Area3D")
+JumpStrength = 18.0
+_collisionShape = NodePath("Area3D/CollisionShape3D")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 material_override = ExtResource("2_m60fg")

@@ -20,7 +20,6 @@ public struct ClientInputCommand
     public InputCommand Input;
     public float Yaw;
     public float Pitch;
-
     public Vector3 LaunchVelocity;
 }
 
@@ -45,6 +44,7 @@ public class ClientCommand : Message
             Add((byte)cmd.Input);
             Add(cmd.Yaw);
             Add(cmd.Pitch);
+            Add(cmd.LaunchVelocity);
         }
         return _dataSize;
     }
@@ -61,6 +61,7 @@ public class ClientCommand : Message
             Write((byte)cmd.Input);
             Write(cmd.Yaw);
             Write(cmd.Pitch);
+            Write(cmd.LaunchVelocity);
         }
         return _data;
     }
@@ -85,7 +86,7 @@ public class ClientCommand : Message
 
             Read(out cmd.Yaw);
             Read(out cmd.Pitch);
-
+            Read(out cmd.LaunchVelocity);
             Commands[i] = cmd;
         }
     }

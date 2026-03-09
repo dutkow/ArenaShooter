@@ -83,7 +83,7 @@ public partial class Character : Pawn
     {
         base.ApplyInput(cmd);
 
-        MovementComp.HandleInput(cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
+        MovementComp.HandleInput(cmd, NetworkConstants.SERVER_TICK_INTERVAL);
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
@@ -93,7 +93,7 @@ public partial class Character : Pawn
         MovementComp.State.Yaw = cmd.Yaw;
         MovementComp.State.Pitch = cmd.Pitch;
 
-        MovementComp.State = MovementComp.Step(MovementComp.State, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
+        MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
     }
 
     public override void _Process(double delta)
@@ -218,6 +218,7 @@ public partial class Character : Pawn
     {
         base.ApplySnapshot(snapshot);
 
+
         // Reset any values which haven't changed
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
         {
@@ -244,10 +245,6 @@ public partial class Character : Pawn
             snapshot.MoveMode = MovementComp.State.MoveMode;
         }
 
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY))
-        {
-            snapshot.LaunchVelocity = MovementComp.State.LaunchVelocity;
-        }
 
         var snapshotMoveState = snapshot.GetMoveState();
 
@@ -257,7 +254,7 @@ public partial class Character : Pawn
 
             foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
             {
-                reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, true);
+                reconciledState = MovementComp.Step(reconciledState, cmd, NetworkConstants.SERVER_TICK_INTERVAL, true);
             }
 
             ReconcileMoveState(reconciledState);
@@ -294,13 +291,13 @@ public partial class Character : Pawn
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
-            GD.Print($"Snapping horizontal, error {distXZ}");
+            GD.Print($"snap correction horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
-            GD.Print($"Lepring horizontal, error {distXZ}");
+            GD.Print($"lerp correction horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }
@@ -308,12 +305,12 @@ public partial class Character : Pawn
         // --- Vertical correction ---
         if (deltaY > SNAP_THRESHOLD_V)
         {
-            GD.Print($"Snapping vertical, error {deltaY}");
+            GD.Print($"snap correction vertical, error {deltaY}");
             currentPos.Y = targetPos.Y;
         }
         else if (deltaY > INTERP_THRESHOLD_V)
         {
-            GD.Print($"Lerping vertical, error {deltaY}");
+            GD.Print($"lerp correction vertical, error {deltaY}");
             currentPos.Y = Mathf.Lerp(currentPos.Y, targetPos.Y, INTERP_SPEED_V);
         }
 
@@ -337,8 +334,9 @@ public partial class Character : Pawn
 
         cmd.Yaw = GlobalRotation.Y;
         cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
-        cmd.LaunchVelocity = MovementComp.State.LaunchVelocity;
+        cmd.LaunchVelocity = MovementComp.LaunchVector;
 
+        MovementComp.LaunchVector = Vector3.Zero;
         return cmd;
     }
 
@@ -392,7 +390,7 @@ public partial class Character : Pawn
 
     public void Launch(Vector3 velocity)
     {
-        MovementComp.QueueLaunch(MovementComp.State, velocity);
+        MovementComp.QueueLaunch(velocity);
     }
 
 }

@@ -13,9 +13,8 @@ public enum CharacterSnapshotFlags : ushort
     YAW = 1 << 2,
     PITCH = 1 << 3,
     MOVE_MODE = 1 << 4,
-    LAUNCH_VELOCITY = 1 << 5,
-    HEALTH = 1 << 6,
-    SHIELD = 1 << 7,
+    HEALTH = 1 << 5,
+    SHIELD = 1 << 6,
 }
 
 public struct CharacterSnapshot
@@ -28,7 +27,6 @@ public struct CharacterSnapshot
     public float Yaw;
     public float Pitch;
     public CharacterMoveMode MoveMode;
-    public Vector3 LaunchVelocity;
     public byte Health;
     public byte Shield;
 
@@ -40,12 +38,11 @@ public struct CharacterSnapshot
         state.Yaw = Yaw;
         state.Pitch = Pitch;
         state.MoveMode = MoveMode;
-        state.LaunchVelocity = LaunchVelocity;
         return state;
     }
 
     public CharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
-                             float yaw, float pitch, CharacterMoveMode moveMode, Vector3 launchVelocity,
+                             float yaw, float pitch, CharacterMoveMode moveMode,
                              byte health, byte shield,
                              CharacterSnapshotFlags dirtyFlags)
     {
@@ -55,7 +52,6 @@ public struct CharacterSnapshot
         Yaw = yaw;
         Pitch = pitch;
         MoveMode = moveMode;
-        LaunchVelocity = launchVelocity;
         Health = health;
         Shield = shield;
         DirtyFlags = dirtyFlags;
@@ -69,7 +65,6 @@ public struct CharacterSnapshot
                    CharacterSnapshotFlags.YAW |
                    CharacterSnapshotFlags.PITCH |
                    CharacterSnapshotFlags.MOVE_MODE |
-                   CharacterSnapshotFlags.LAUNCH_VELOCITY |
                    CharacterSnapshotFlags.HEALTH |
                    CharacterSnapshotFlags.SHIELD;
 
@@ -88,9 +83,6 @@ public struct CharacterSnapshot
 
         if (Mathf.Abs(current.Pitch - previous.Value.Pitch) > EPSILON_SQ)
             flags |= CharacterSnapshotFlags.PITCH;
-
-        if ((current.LaunchVelocity - previous.Value.LaunchVelocity).LengthSquared() > EPSILON_SQ)
-            flags |= CharacterSnapshotFlags.LAUNCH_VELOCITY;
 
         if (current.MoveMode != previous.Value.MoveMode)
             flags |= CharacterSnapshotFlags.MOVE_MODE;
@@ -140,7 +132,6 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Add(c.Yaw);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Add(c.Pitch);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Add(c.MoveMode);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY)) Add(c.LaunchVelocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Add(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Add(c.Shield);
         }
@@ -166,7 +157,6 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Write(c.Yaw);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Write(c.Pitch);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Write(c.MoveMode);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY)) Write(c.LaunchVelocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Write(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Write(c.Shield);
         }
@@ -208,11 +198,10 @@ public class WorldSnapshot : Message
             if (flags.HasFlag(CharacterSnapshotFlags.YAW)) Read(out yaw);
             if (flags.HasFlag(CharacterSnapshotFlags.PITCH)) Read(out pitch);
             if (flags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Read(out moveMode);
-            if (flags.HasFlag(CharacterSnapshotFlags.LAUNCH_VELOCITY)) Read(out launchVelocity);
             if (flags.HasFlag(CharacterSnapshotFlags.HEALTH)) Read(out health);
             if (flags.HasFlag(CharacterSnapshotFlags.SHIELD)) Read(out shield);
 
-            Characters[i] = new CharacterSnapshot(id, pos, vel, yaw, pitch, moveMode, launchVelocity, health, shield, flags);
+            Characters[i] = new CharacterSnapshot(id, pos, vel, yaw, pitch, moveMode, health, shield, flags);
         }
     }
 
@@ -251,7 +240,6 @@ public class WorldSnapshot : Message
                 yaw = character.MovementComp.State.Yaw;
                 pitch = character.MovementComp.State.Pitch;
                 moveMode = character.MovementComp.State.MoveMode;
-                launchVelocity = character.MovementComp.State.LaunchVelocity;
                 health = (byte)character.HealthComp.Health;
                 shield = (byte)character.HealthComp.Shield;
             }
@@ -261,11 +249,10 @@ public class WorldSnapshot : Message
                                                 CharacterSnapshotFlags.YAW |
                                                 CharacterSnapshotFlags.PITCH |
                                                 CharacterSnapshotFlags.MOVE_MODE |
-                                                CharacterSnapshotFlags.LAUNCH_VELOCITY |
                                                 CharacterSnapshotFlags.HEALTH |
                                                 CharacterSnapshotFlags.SHIELD;
 
-            characters[i++] = new CharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, moveMode, launchVelocity, health, shield, allFlags);
+            characters[i++] = new CharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, moveMode, health, shield, allFlags);
         }
 
         newSnapshot.ServerTick = MatchState.Instance.CurrentTick;
@@ -306,7 +293,6 @@ public class WorldSnapshot : Message
                         current.Yaw,
                         current.Pitch,
                         current.MoveMode,
-                        current.LaunchVelocity,
                         current.Health,
                         current.Shield,
                         flags
@@ -325,7 +311,6 @@ public class WorldSnapshot : Message
                     current.Yaw,
                     current.Pitch,
                     current.MoveMode,
-                    current.LaunchVelocity,
                     current.Health,
                     current.Shield,
                     flags

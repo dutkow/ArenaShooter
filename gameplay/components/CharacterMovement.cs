@@ -17,8 +17,6 @@ public class CharacterMoveState
     public float Yaw;
     public float Pitch;
     public CharacterMoveMode MoveMode;
-
-    public Vector3 LaunchVelocity;
 }
 
 public class CharacterMovement
@@ -48,6 +46,8 @@ public class CharacterMovement
     public float MaxWalkableSlopeAngle = 45f;
     public bool PreserveHorizontalSpeedOnSlope = true;
 
+    public Vector3 LaunchVector;
+
     public void Initialize(Character character)
     {
         _character = character;
@@ -63,14 +63,14 @@ public class CharacterMovement
         }
     }
 
-    public CharacterMoveState Step(CharacterMoveState state, InputCommand inputCommand, float delta, bool isSimulating = false)
+    public CharacterMoveState Step(CharacterMoveState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
         // --- Movement input ---
         Vector3 move = Vector3.Zero;
-        if (inputCommand.HasFlag(InputCommand.MOVE_FORWARD)) move.Z -= 1;
-        if (inputCommand.HasFlag(InputCommand.MOVE_BACK)) move.Z += 1;
-        if (inputCommand.HasFlag(InputCommand.MOVE_LEFT)) move.X -= 1;
-        if (inputCommand.HasFlag(InputCommand.MOVE_RIGHT)) move.X += 1;
+        if (cmd.Input.HasFlag(InputCommand.MOVE_FORWARD)) move.Z -= 1;
+        if (cmd.Input.HasFlag(InputCommand.MOVE_BACK)) move.Z += 1;
+        if (cmd.Input.HasFlag(InputCommand.MOVE_LEFT)) move.X -= 1;
+        if (cmd.Input.HasFlag(InputCommand.MOVE_RIGHT)) move.X += 1;
 
         move = move.Normalized();
         var basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
@@ -81,7 +81,7 @@ public class CharacterMovement
        
 
         // Jump
-        if (inputCommand.HasFlag(InputCommand.JUMP) && _isGrounded)
+        if (cmd.Input.HasFlag(InputCommand.JUMP) && _isGrounded)
         {
             state.Velocity.Y += JumpSpeed;
             _isGrounded = false;
@@ -108,12 +108,7 @@ public class CharacterMovement
                 break;
         }
 
-        if(state.LaunchVelocity != Vector3.Zero)
-        {
-            //state.Velocity += state.LaunchVelocity;
-            //state.LaunchVelocity = Vector3.Zero;
-            //GD.Print($"applying launch velocity {state.LaunchVelocity}. {NetworkSession.Instance.NetworkMode}. is simulating {isSimulating}");
-        }
+        state.Velocity += cmd.LaunchVelocity;
 
         Vector3 safeMotion = HandleCollision(state, delta);
 
@@ -239,9 +234,9 @@ public class CharacterMovement
         _isGrounded = grounded;
     }
 
-    public void HandleInput(InputCommand input, float delta)
+    public void HandleInput(ClientInputCommand cmd, float delta)
     {
-        State = Step(State, input, delta);
+        State = Step(State, cmd, delta);
     }
 
     private void HandleGroundedMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
@@ -304,8 +299,8 @@ public class CharacterMovement
         state.Velocity.Z = horizontalVel.Z;
     }
 
-    public void QueueLaunch(CharacterMoveState state, Vector3 vector)
+    public void QueueLaunch(Vector3 vector)
     {
-        state.LaunchVelocity = vector;
+        LaunchVector = vector;
     }
 }
