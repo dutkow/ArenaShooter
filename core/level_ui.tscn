@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bmtkb45r7yy6j"]
 
-[ext_resource type="Script" uid="uid://b26jro34k27i4" path="res://LevelUI.cs" id="1_elndm"]
+[ext_resource type="Script" uid="uid://b26jro34k27i4" path="res://ui/LevelUI.cs" id="1_elndm"]
 [ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/player_hud.tscn" id="2_j2gkt"]
 
 [node name="LevelUI" type="CanvasLayer"]
