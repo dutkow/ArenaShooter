@@ -61,7 +61,7 @@ public class ClientGame
     {
         var cmd = new ClientInputCommand();
 
-        cmd = LocalPlayerController.AddInput(cmd);
+        //cmd = LocalPlayerController.AddInput(cmd);
 
         if (LocalPlayerPawn != null)
         {
