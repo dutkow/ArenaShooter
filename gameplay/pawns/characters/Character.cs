@@ -40,6 +40,7 @@ public partial class Character : Pawn
 
     private Vector3 _visualContainerPosition;
 
+    private InputCommand _forcedInput = 0;
 
     public CharacterMovement MovementComp { get; private set; } = new();
 
@@ -84,7 +85,7 @@ public partial class Character : Pawn
     {
         base.ApplyInput(cmd);
 
-        MovementComp.HandleInput(cmd.Input, Game.Instance.ServerTickInterval);
+        MovementComp.HandleInput(cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
@@ -277,8 +278,8 @@ public partial class Character : Pawn
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
         const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
-        const float INTERP_THRESHOLD_H = 0.1f;      // Horizontal lerp start
-        const float INTERP_THRESHOLD_V = 0.2f;     // Vertical lerp start
+        const float INTERP_THRESHOLD_H = 0.025f;      // Horizontal lerp start
+        const float INTERP_THRESHOLD_V = 0.025f;     // Vertical lerp start
 
         // Lerp speeds
         const float INTERP_SPEED_H = 0.15f;
@@ -328,12 +329,20 @@ public partial class Character : Pawn
     {
         base.AddInput(cmd);
 
-        if (Input.IsActionPressed("move_forward")) cmd.Input |= InputCommand.MOVE_FORWARD;
-        if (Input.IsActionPressed("move_back")) cmd.Input |= InputCommand.MOVE_BACK;
-        if (Input.IsActionPressed("move_left")) cmd.Input |= InputCommand.MOVE_LEFT;
-        if (Input.IsActionPressed("move_right")) cmd.Input |= InputCommand.MOVE_RIGHT;
-        if (Input.IsActionPressed("jump")) cmd.Input |= InputCommand.JUMP;
-        if (Input.IsActionPressed("primary_fire")) cmd.Input |= InputCommand.FIRE_PRIMARY;
+        if (_forcedInput != 0)
+        {
+            cmd.Input = _forcedInput;
+        }
+        else
+        {
+            // Otherwise, use real input
+            if (Input.IsActionPressed("move_forward")) cmd.Input |= InputCommand.MOVE_FORWARD;
+            if (Input.IsActionPressed("move_back")) cmd.Input |= InputCommand.MOVE_BACK;
+            if (Input.IsActionPressed("move_left")) cmd.Input |= InputCommand.MOVE_LEFT;
+            if (Input.IsActionPressed("move_right")) cmd.Input |= InputCommand.MOVE_RIGHT;
+            if (Input.IsActionPressed("jump")) cmd.Input |= InputCommand.JUMP;
+            if (Input.IsActionPressed("primary_fire")) cmd.Input |= InputCommand.FIRE_PRIMARY;
+        }
 
         cmd.Yaw = GlobalRotation.Y;
         cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
@@ -393,5 +402,15 @@ public partial class Character : Pawn
     public void Launch(Vector3 velocity)
     {
         MovementComp.QueueLaunch(MovementComp.State, velocity);
+    }
+
+    public void SetForcedInput(InputCommand forcedInput)
+    {
+        _forcedInput = forcedInput;
+    }
+
+    public void ClearForcedInput()
+    {
+        _forcedInput = 0;
     }
 }

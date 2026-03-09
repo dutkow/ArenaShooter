@@ -75,21 +75,21 @@ public struct CharacterSnapshot
 
         CharacterSnapshotFlags flags = CharacterSnapshotFlags.NONE;
 
-        const float EPSILON = 0.0001f;
+        const float EPSILON_SQ = 0.0001f;
 
-        if ((current.Position - previous.Value.Position).LengthSquared() > EPSILON)
+        if ((current.Position - previous.Value.Position).LengthSquared() > EPSILON_SQ)
             flags |= CharacterSnapshotFlags.POSITION;
 
-        if ((current.Velocity - previous.Value.Velocity).LengthSquared() > EPSILON)
+        if ((current.Velocity - previous.Value.Velocity).LengthSquared() > EPSILON_SQ)
             flags |= CharacterSnapshotFlags.VELOCITY;
 
-        if (Mathf.Abs(current.Yaw - previous.Value.Yaw) > EPSILON)
+        if (Mathf.Abs(current.Yaw - previous.Value.Yaw) > EPSILON_SQ)
             flags |= CharacterSnapshotFlags.YAW;
 
-        if (Mathf.Abs(current.Pitch - previous.Value.Pitch) > EPSILON)
+        if (Mathf.Abs(current.Pitch - previous.Value.Pitch) > EPSILON_SQ)
             flags |= CharacterSnapshotFlags.PITCH;
 
-        if ((current.LaunchVelocity - previous.Value.LaunchVelocity).LengthSquared() > EPSILON)
+        if ((current.LaunchVelocity - previous.Value.LaunchVelocity).LengthSquared() > EPSILON_SQ)
             flags |= CharacterSnapshotFlags.LAUNCH_VELOCITY;
 
         if (current.MoveMode != previous.Value.MoveMode)
@@ -194,12 +194,12 @@ public class WorldSnapshot : Message
             Read(out rawFlags);
             var flags = (CharacterSnapshotFlags)rawFlags;
 
-            Vector3 pos = default;
-            Vector3 vel = default;
+            Vector3 pos = Vector3.Zero;
+            Vector3 vel = Vector3.Zero;
             float yaw = 0f;
             float pitch = 0f;
-            CharacterMoveMode moveMode = default;
-            Vector3 launchVelocity = default;
+            CharacterMoveMode moveMode = CharacterMoveMode.GROUNDED;
+            Vector3 launchVelocity = Vector3.Zero;
             byte health = 0;
             byte shield = 0;
 
@@ -238,8 +238,8 @@ public class WorldSnapshot : Message
             Vector3 vel = Vector3.Zero;
             float yaw = 0f;
             float pitch = 0f;
-            CharacterMoveMode moveMode = default;
-            Vector3 launchVelocity = default;
+            CharacterMoveMode moveMode = CharacterMoveMode.GROUNDED;
+            Vector3 launchVelocity = Vector3.Zero;
 
             byte health = 0;
             byte shield = 0;

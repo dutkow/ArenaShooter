@@ -36,11 +36,12 @@ public class ServerGame
 
     public void Tick()
     {
-        ProcessNextClientInputs();
 
         var newSnapshot = WorldSnapshot.Build();
         SendWorldSnapshotDeltas(newSnapshot); // in this we send the snapshot prior to updating the next client input. we could alternatively, process client inputs, then update?
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
+
+        ProcessNextClientInputs();
 
     }
 

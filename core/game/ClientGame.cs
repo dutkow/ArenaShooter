@@ -34,7 +34,8 @@ public class ClientGame
 
     public void Tick()
     {
-        var cmd = GetClientInputCommand();
+        var cmd = GetClientInputCommand(); // client generates input and applies it locally
+
         LocalPlayerController?.ApplyInput(cmd);
         LocalPlayerPawn?.ApplyInput(cmd);
 
@@ -52,7 +53,6 @@ public class ClientGame
     public void SendClientCommand(ClientInputCommand cmd)
     {
         UnprocessedClientInputs.Add(cmd);
-
         var commandsToSend = UnprocessedClientInputs.Skip(Math.Max(0, UnprocessedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
         ClientCommand.Send(commandsToSend);
     }
@@ -80,14 +80,15 @@ public class ClientGame
             return;
         }
 
-        LastClientTickProcessedByServer = snapshot.LastProcessedClientTick; // this has already happened, so makes sense first
+        LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
+        LastServerTickProcessedByClient = snapshot.ServerTick;
 
         var characterSnapshots = snapshot.GetCharacterSnapshots();
 
         UnprocessedClientInputs.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
 
 
-        for (int i = 0; i < characterSnapshots.Length; i++)
+        for (int i = 0; i < characterSnapshots.Length; ++i)
         {
             var characterSnapshot = characterSnapshots[i];
 
@@ -109,7 +110,6 @@ public class ClientGame
                 GD.Print($"player not found in ConnectedPlayers: {characterSnapshot.PlayerID}");
             }
         }
-        LastServerTickProcessedByClient = snapshot.ServerTick; // this has not happened yet, so should go after
 
     }
 }

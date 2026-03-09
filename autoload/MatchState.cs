@@ -18,11 +18,6 @@ public partial class MatchState : Node
     public static MatchState Instance { get; private set; }
 
 
-
-    private double _clientTickAccumulator = 0;
-
-
-
     // ----------------------
     // Match phase
     // ----------------------
@@ -116,7 +111,6 @@ public partial class MatchState : Node
             byte playerID = initialMatchState.PlayerIDs[i];
 
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
-
         }
     }
 

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.ComponentModel;
 
 public partial class PredictionTester : Node3D
 {
@@ -21,6 +22,9 @@ public partial class PredictionTester : Node3D
 
     public void Initialize()
     {
+        MatchState matchState = new();
+        AddChild(matchState);
+        matchState.Initialize();
 
         ServerTickManager serverTickManager = new();
         AddChild(serverTickManager);
@@ -32,6 +36,15 @@ public partial class PredictionTester : Node3D
 
         ClientGame clientGame1 = new();
         ClientGame clientGame2 = new();
+
+        NetworkSession networkSession1 = new();
+        NetworkSession networkSession2 = new();
+
+        networkSession1.SetMode(NetworkMode.LISTEN_SERVER);
+        networkSession2.SetMode(NetworkMode.CLIENT);
+
+        clientGame1.Initialize(0);
+        clientGame2.Initialize(1);
 
         PlayerState playerState1 = new(0);
         PlayerState playerState2 = new(1);
@@ -53,6 +66,18 @@ public partial class PredictionTester : Node3D
         clientGame1.LocalPlayerController.Possess(_character1);
         clientGame2.LocalPlayerController.Possess(_character2);
 
+        InputCommand testInput = new();
+        testInput |= InputCommand.MOVE_FORWARD;
 
+
+        _character1.SetForcedInput(testInput);
+
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        base._PhysicsProcess(delta);
+
+        GD.Print($"Character 1 position = {_character1.GlobalPosition}");
     }
 }
