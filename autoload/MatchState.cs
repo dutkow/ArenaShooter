@@ -135,6 +135,7 @@ public partial class MatchState : Node
             byte playerID = initialMatchState.PlayerIDs[i];
 
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
+
         }
     }
 
@@ -223,7 +224,7 @@ public partial class MatchState : Node
             return; // Already added
         }
 
-        var player = new PlayerState(playerID)
+        var playerState = new PlayerState(playerID)
         {
             PlayerName = playerName,
             Score = 0,
@@ -234,12 +235,12 @@ public partial class MatchState : Node
             Pawn = null
         };
 
-        ConnectedPlayers[playerID] = player;
+        ConnectedPlayers[playerID] = playerState;
 
         try
         {
-            PlayerJoined?.Invoke(player);
-            GD.Print($"Played joined ran invoked on match state. player name: {player.PlayerName}. Network Mode = {NetworkSession.Instance.NetworkMode}");
+            PlayerJoined?.Invoke(playerState);
+            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PlayerName}. Network Mode = {NetworkSession.Instance.NetworkMode}");
 
         }
         catch (Exception e)
@@ -247,8 +248,12 @@ public partial class MatchState : Node
             GD.PrintErr("PlayerJoined event crashed: ", e);
         }
 
-        
-        if(NetworkSession.Instance.IsServer)
+        if(ClientGame.Instance != null && playerID == ClientGame.Instance.LocalPlayerID)
+        {
+            ClientGame.Instance.AssignPlayerState(playerState);
+        }
+
+        if (NetworkSession.Instance.IsServer)
         {
             PlayerController playerController = GameMode.Instance.PlayerControllers[playerID];
             AddChild(playerController);

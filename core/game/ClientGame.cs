@@ -27,13 +27,28 @@ public class ClientGame
 
         LocalPlayerID = localPlayerID;
 
+        LocalPlayerController = new();
+
         GD.Print($"Starting client. NetworkMode = {NetworkSession.Instance.NetworkMode}");
 
     }
 
     public void Tick()
     {
-        SendClientInput();
+
+        if(NetworkSession.Instance.IsClient)
+        {
+            SendClientInput();
+        }
+        else
+        {
+            // apply client input, etc.
+        }
+    }
+
+    public void AssignPlayerState(PlayerState playerState)
+    {
+        LocalPlayerState = playerState;
     }
 
     public void SendClientInput()
