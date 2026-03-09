@@ -15,7 +15,8 @@ public class ServerGame
     public Dictionary<byte, ushort> LastProcessedServerTicksByPlayerID = new();
     public Dictionary<byte, ushort> LastProcessedClientTicksByPlayerID = new();
     private readonly Dictionary<byte, SortedDictionary<ushort, ClientInputCommand>> _unprocessedClientInputs = new();
-    private ClientInputCommand _lastProcessedClientCommand;
+
+    private Dictionary<byte, ClientInputCommand> LastProcessedClientCommandsByPlayerID = new();
 
     // Snapshots
     private int _maxSnapshotHistory = 250;
@@ -66,7 +67,7 @@ public class ServerGame
                 queue = new SortedDictionary<ushort, ClientInputCommand>();
             }
 
-            ClientInputCommand cmd;
+            ClientInputCommand cmd = new();
 
             if (queue.Count > 0)
             {
@@ -75,16 +76,14 @@ public class ServerGame
                 queue.Remove(tickToProcess);
 
                 LastProcessedClientTicksByPlayerID[playerID] = tickToProcess;
+                LastProcessedClientCommandsByPlayerID[playerID] = cmd;
             }
-            else
+            else if (LastProcessedClientCommandsByPlayerID.TryGetValue(playerID, out var lastCommand))
             {
-                cmd = _lastProcessedClientCommand;
+                cmd = lastCommand;
             }
-
-            _lastProcessedClientCommand = cmd;
 
             pawn.ProcessClientInput(cmd);
-
             _unprocessedClientInputs[playerID] = queue;
         }
     }

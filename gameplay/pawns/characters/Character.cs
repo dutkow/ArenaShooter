@@ -80,40 +80,6 @@ public partial class Character : Pawn
 
     }
 
-    // Ticking using physics process for now for simplicity, will move to server tick
-    public override void _PhysicsProcess(double delta)
-    {
-        base._PhysicsProcess(delta);
-
-        Tick((float)delta);
-    }
-
-    public override void Tick(float delta)
-    {
-        base.Tick(delta);
-
-        if (IsAuthority)
-        {
-            if (IsLocal)
-            {
-                //MovementComp.HandleInput(CaptureInput(), delta);
-            }
-            else
-            {
-                //ProcessNextClientInput();
-            }
-        }
-        else if (IsLocal)
-        {
-            /*
-            var input = CaptureInput();
-            SendClientInput(input);
-            MovementComp.HandleInput(input, delta);*/
-        }
-
-        //MovementComp.State.LaunchVelocity = Vector3.Zero;
-    }
-
     public override void ApplyInput(ClientInputCommand cmd)
     {
         base.ApplyInput(cmd);
@@ -290,7 +256,7 @@ public partial class Character : Pawn
         {
             var reconciledState = snapshotMoveState;
             var unprocessedInputs = ClientGame.Instance.UnprocessedClientInputs;
-            GD.Print($"unprocessed client inputs = {unprocessedInputs.Count}");
+
             foreach (var cmd in unprocessedInputs)
             {
                 reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, true);
@@ -330,16 +296,12 @@ public partial class Character : Pawn
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
-                        GD.Print($"state position = {MovementComp.State.Position} and predicted position = {newPredictedState.Position}");
-
             GD.Print($"Snapping horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
-            GD.Print($"state position = {MovementComp.State.Position} and predicted position = {newPredictedState.Position}");
-
             GD.Print($"Lepring horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
@@ -362,25 +324,6 @@ public partial class Character : Pawn
         MovementComp.State.Velocity = newPredictedState.Velocity;
     }
 
-    public void SendClientInput(InputCommand newInput)
-    {
-        var inputCommand = new ClientInputCommand
-        {
-            ClientTick = MatchState.Instance.CurrentTick,
-            Input = newInput,
-            Yaw = GlobalRotation.Y,
-            Pitch = _thirdPersonWeaponSocket.Rotation.X,
-            LaunchVelocity = MovementComp.State.LaunchVelocity
-        };
-
-        _unacknowledgedClientInputs.Add(inputCommand);
-        var commandsToSend = _unacknowledgedClientInputs
-            .Skip(Math.Max(0, _unacknowledgedClientInputs.Count - REDUNDANT_INPUTS))
-            .ToArray();
-
-
-        ClientCommand.Send(commandsToSend);
-    }
 
     public InputCommand CaptureInput()
     {
@@ -392,6 +335,7 @@ public partial class Character : Pawn
         if (Input.IsActionPressed("move_right")) cmd |= InputCommand.MOVE_RIGHT;
         if (Input.IsActionPressed("jump")) cmd |= InputCommand.JUMP;
         if (Input.IsActionPressed("primary_fire")) cmd |= InputCommand.FIRE_PRIMARY;
+
         return cmd;
     }
 
@@ -406,8 +350,9 @@ public partial class Character : Pawn
         if (Input.IsActionPressed("jump")) cmd.Input |= InputCommand.JUMP;
         if (Input.IsActionPressed("primary_fire")) cmd.Input |= InputCommand.FIRE_PRIMARY;
 
-        cmd.Yaw = _cameraPivot.GlobalRotation.Y;
-        cmd.Pitch = _cameraPivot.Rotation.X;
+        cmd.Yaw = GlobalRotation.Y;
+        cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
+        cmd.LaunchVelocity = MovementComp.State.LaunchVelocity;
 
         return cmd;
     }

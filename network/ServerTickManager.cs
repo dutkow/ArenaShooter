@@ -23,6 +23,7 @@ public partial class ServerTickManager : Node
     {
         base._PhysicsProcess(delta);
 
+
         _accumulator += delta;
 
         while (_accumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
@@ -31,6 +32,7 @@ public partial class ServerTickManager : Node
 
             MatchState.Instance.Tick();
 
+            /*
             if (MatchState.Instance.CurrentTick % NetworkConstants.SERVER_TICK_RATE == 0)
             {
                 float mbps = (_bytesSentThisPeriod * 8f) / 1_000_000f;
@@ -38,7 +40,7 @@ public partial class ServerTickManager : Node
                 GD.Print($"Traffic: ~{mbps:F4} Mbps, {_bytesSentThisPeriod} bytes/sec (~{_bytesSentThisPeriod / 64.0f} bytes/tick)");
 
                 _bytesSentThisPeriod = 0;
-            }
+            }*/
         }
     }
 

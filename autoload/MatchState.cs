@@ -101,14 +101,6 @@ public partial class MatchState : Node
         }
     }
 
-    public override void _PhysicsProcess(double delta)
-    {
-        base._PhysicsProcess(delta);
-
-
-
-    }
-
     public void Tick()
     {
         CurrentTick++;

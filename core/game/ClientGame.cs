@@ -59,6 +59,8 @@ public class ClientGame
 
         var commandsToSend = UnprocessedClientInputs.Skip(Math.Max(0, UnprocessedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
         ClientCommand.Send(commandsToSend);
+
+        GD.Print($"sending client command. Client tick = {cmd.ClientTick}");
     }
 
     public ClientInputCommand GetClientInputCommand()
@@ -71,7 +73,9 @@ public class ClientGame
         {
             cmd = LocalPlayerPawn.AddInput(cmd);
         }
+
         cmd.ClientTick = MatchState.Instance.CurrentTick;
+
         return cmd;
     }
 
@@ -81,13 +85,12 @@ public class ClientGame
         {
             return;
         }
-
         LastServerTickProcessedByClient = snapshot.ServerTick;
-        LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
 
         var characterSnapshots = snapshot.GetCharacterSnapshots();
 
         UnprocessedClientInputs.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
+
 
         for (int i = 0; i < characterSnapshots.Length; i++)
         {
@@ -111,5 +114,7 @@ public class ClientGame
                 GD.Print($"player not found in ConnectedPlayers: {characterSnapshot.PlayerID}");
             }
         }
+
+        LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
     }
 }
