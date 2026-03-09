@@ -1,12 +1,13 @@
 using Godot;
 using System;
+using System.Linq;
+using System.Security.Cryptography;
 
 /// <summary>
 /// Linear projectile that moves manually and triggers OnCollision when hitting a body.
 /// </summary>
 public partial class LinearProjectile : Projectile
 {
-    [Export] public Area3D CollisionArea;
     [Export] public float Speed = 50f;
     [Export] public float Gravity = 0f;
 
@@ -21,25 +22,68 @@ public partial class LinearProjectile : Projectile
         _gravityVector = new Vector3(0, -Gravity, 0);
     }
 
-    public override void _Ready()
-    {
-        base._Ready();
-
-        if(NetworkSession.Instance.IsServer && CollisionArea != null)
-        {
-            CollisionArea.BodyEntered += OnCollision;
-        }
-    }
 
     public override void _PhysicsProcess(double delta)
     {
-        float deltaF = (float)delta;
-
-        _velocity += _gravityVector * deltaF;
-
-        GlobalTranslate(_velocity * deltaF);
-
         base._PhysicsProcess(delta);
+
+        var space = GetWorld3D().DirectSpaceState;
+        Vector3 motion = _velocity * (float)delta;
+
+        var query = new PhysicsShapeQueryParameters3D
+        {
+            Shape = CollisionShape.Shape, // e.g., CapsuleShape3D or SphereShape3D
+            Transform = new Transform3D(Basis.Identity, GlobalPosition),
+            Motion = motion,
+            CollideWithBodies = true,
+            CollideWithAreas = true
+        };
+
+        // Cast motion
+        var result = space.CastMotion(query);
+
+        float safeFraction = result[0];
+        float unsafeFraction = result[1];
+
+        if (unsafeFraction < 1.0f)
+        {
+            // We hit something, figure out what it was
+            Vector3 unsafeMotion = motion * unsafeFraction;
+            var newQuery = query;
+            newQuery.Transform = newQuery.Transform.Translated(unsafeMotion);
+
+            var restInfo = space.GetRestInfo(newQuery);
+
+            if (restInfo.TryGetValue("collider_id", out var colliderIDObj))
+            {
+                ulong colliderID = (ulong)colliderIDObj;
+
+                var obj = GodotObject.InstanceFromId(colliderID);
+                var colliderNode = obj as Node3D;
+
+                if (colliderNode.Owner != null && colliderNode.Owner is IDamageable damageable)
+                {
+                    GD.Print($"Collided with: {colliderNode.Name}. apply damage");
+                    damageable.ApplyDamage(Damage);
+                }
+                else
+                {
+                    GD.Print($"Collided with: {colliderNode?.Name ?? "unknown"}. not damageable");
+                }
+
+                Destroy();
+            }
+        }
+        else
+        {
+            GlobalPosition += motion;
+        }
     }
 
+    public override void Destroy()
+    {
+        base.Destroy();
+
+        QueueFree();
+    }
 }

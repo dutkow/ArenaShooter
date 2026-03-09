@@ -9,9 +9,10 @@ radius = 0.2
 radius = 0.125
 height = 0.25
 
-[node name="LinearProjectile" type="Node3D" node_paths=PackedStringArray("CollisionArea")]
+[node name="LinearProjectile" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape")]
 script = ExtResource("1_ei5g4")
-CollisionArea = NodePath("Area3D")
+Area = NodePath("Area3D")
+CollisionShape = NodePath("Area3D/CollisionShape3D")
 
 [node name="Area3D" type="Area3D" parent="."]
 

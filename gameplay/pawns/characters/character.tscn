@@ -1,10 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://ckn5b0j16otei"]
+[gd_scene load_steps=7 format=3 uid="uid://ckn5b0j16otei"]
 
 [ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://gameplay/pawns/characters/Character.cs" id="1_4ffih"]
 [ext_resource type="Material" uid="uid://dfwluwkwpcsjl" path="res://assets/materials/orange_material.tres" id="2_smvd3"]
 [ext_resource type="PackedScene" uid="uid://b708cmx0cac5h" path="res://gameplay/weapons/weapon.tscn" id="2_u04n7"]
-[ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/linear_projectile.tscn" id="3_7lgj7"]
-[ext_resource type="PackedScene" uid="uid://b5wso687w8de5" path="res://assets/external/super_shotgun/super_shotgun.tscn" id="3_p3qyi"]
+[ext_resource type="PackedScene" uid="uid://cdr127jylj4u" path="res://assets/external/ion_gun/ion_ray_gun_animations_final_2.tscn" id="3_p3qyi"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sbyc8"]
 
@@ -16,7 +15,7 @@ Area = NodePath("Area3D")
 CollisionShape = NodePath("Area3D/CollisionShape3D")
 Camera = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D")
 _characterMesh = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh")
-_thirdPersonWeaponMesh = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket/SuperShotgun")
+_thirdPersonWeaponMesh = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket/IonRayGunAnimationsFinal2")
 _cameraPivot = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot")
 _weapon = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D/Weapon")
 _visualContainer = NodePath("Area3D/CollisionShape3D/VisualContainer")
@@ -37,8 +36,8 @@ skeleton = NodePath("../../../..")
 [node name="ThirdPersonWeaponSocket" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.26758337, -0.43688428)
 
-[node name="SuperShotgun" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket" instance=ExtResource("3_p3qyi")]
-transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0.13356411, 0.3255583, 0.18631065)
+[node name="IonRayGunAnimationsFinal2" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket" instance=ExtResource("3_p3qyi")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.2215538, 0.26775348, 0.21408409)
 
 [node name="CameraPivot" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4623046, -0.34713352)
@@ -46,5 +45,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4623046, -0.34713352)
 [node name="Camera3D" type="Camera3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot"]
 
 [node name="Weapon" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D" instance=ExtResource("2_u04n7")]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.045393333, 0.03443864, 0.18178016)
-_projectileScene = ExtResource("3_7lgj7")
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.08669387, -0.01097849, 0.18178016)

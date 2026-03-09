@@ -7,7 +7,6 @@ using System;
 public partial class PhysicsProjectile : Projectile
 {
     [Export] public RigidBody3D RigidBody; // assign in editor
-    [Export] public Area3D CollisionArea;  // assign in editor
     [Export] public float InitialSpeed = 50f;
 
     public override void Initialize(Vector3 origin, Vector3 direction)
@@ -21,13 +20,7 @@ public partial class PhysicsProjectile : Projectile
             RigidBody.LinearVelocity = direction.Normalized() * InitialSpeed;
         }
 
-        if(NetworkSession.Instance.IsServer)
-        {
-            if (NetworkSession.Instance.IsServer && CollisionArea != null)
-            {
-                CollisionArea.BodyEntered += OnCollision;
-            }
-        }
+
     }
 
 }

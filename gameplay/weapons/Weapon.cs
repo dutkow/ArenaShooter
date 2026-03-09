@@ -48,7 +48,6 @@ public partial class Weapon : Node3D
     public void HandleInput(InputCommand cmd)
     {
         bool wantsPrimaryFire = cmd.HasFlag(InputCommand.FIRE_PRIMARY);
-        GD.Print($"wantsPrimaryFire = {wantsPrimaryFire}");
 
         if (wantsPrimaryFire)
         {
@@ -59,7 +58,6 @@ public partial class Weapon : Node3D
             StopPrimaryFire();
         }
     }
-
 
     public void Tick(double delta, Vector3 origin, Vector3 direction)
     {

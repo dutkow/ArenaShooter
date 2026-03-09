@@ -5,7 +5,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Linq;
 
 
-public partial class Character : Pawn
+public partial class Character : Pawn, IDamageable
 {
     CharacterMoveMode _mode;
 
@@ -64,6 +64,11 @@ public partial class Character : Pawn
         _visualContainerPosition = _visualContainer.Position;
 
         Area.Owner = this;
+    }
+
+    public void ApplyDamage(int damage)
+    {
+        HealthComp.ApplyDamage(damage);
     }
 
     public override void _PhysicsProcess(double delta)
