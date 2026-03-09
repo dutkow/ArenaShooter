@@ -432,6 +432,9 @@ public partial class Character : Pawn
         if (Input.IsActionPressed("jump")) cmd.Input |= InputCommand.JUMP;
         if (Input.IsActionPressed("primary_fire")) cmd.Input |= InputCommand.FIRE_PRIMARY;
 
+        cmd.Yaw = _cameraPivot.GlobalRotation.Y;
+        cmd.Pitch = _cameraPivot.Rotation.X;
+
         return cmd;
     }
 
