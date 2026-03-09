@@ -8,7 +8,7 @@ public partial class Game : Node
     public ServerGame _serverGame;
     public ClientGame _clientGame;
 
-
+    public float ServerTickInterval = 1.0f / 100.0f;
     public NetworkMode NetworkMode { get; private set; }
 
     public bool IsAuthority => NetworkMode != NetworkMode.CLIENT;

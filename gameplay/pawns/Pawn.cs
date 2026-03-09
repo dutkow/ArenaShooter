@@ -58,4 +58,8 @@ public partial class Pawn : Actor
     {
         return cmd;
     }
+
+    public virtual void ApplyInput(ClientInputCommand cmd) { }
+    public virtual void ProcessNextClientInput() { }
+
 }

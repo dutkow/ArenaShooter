@@ -96,25 +96,35 @@ public partial class Character : Pawn
         {
             if (IsLocal)
             {
-                MovementComp.HandleInput(CaptureInput(), delta);
+                //MovementComp.HandleInput(CaptureInput(), delta);
             }
             else
             {
-                ProcessNextClientInput();
+                //ProcessNextClientInput();
             }
         }
         else if (IsLocal)
         {
+            /*
             var input = CaptureInput();
             SendClientInput(input);
-            MovementComp.HandleInput(input, delta);
+            MovementComp.HandleInput(input, delta);*/
         }
 
-        MovementComp.State.LaunchVelocity = Vector3.Zero;
+        //MovementComp.State.LaunchVelocity = Vector3.Zero;
     }
 
-    public void ProcessNextClientInput()
+    public override void ApplyInput(ClientInputCommand cmd)
     {
+        base.ApplyInput(cmd);
+
+        MovementComp.HandleInput(cmd.Input, Game.Instance.ServerTickInterval);
+    }
+
+    public override void ProcessNextClientInput()
+    {
+        base.ProcessNextClientInput();
+
         ClientInputCommand cmd = new();
 
         if (_unprocessedClientInputs.Count > 0)
@@ -134,7 +144,7 @@ public partial class Character : Pawn
         MovementComp.State.Yaw = cmd.Yaw;
         MovementComp.State.Pitch = cmd.Pitch;
 
-        MovementComp.State = MovementComp.Step(MovementComp.State, cmd.Input, MovementComp.State.LaunchVelocity, NetworkConstants.SERVER_TICK_INTERVAL);
+        MovementComp.State = MovementComp.Step(MovementComp.State, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL);
     }
 
     public override void _Process(double delta)
@@ -298,7 +308,7 @@ public partial class Character : Pawn
             GD.Print($"unacked client inputs = {_unacknowledgedClientInputs.Count}");
             foreach (var cmd in _unacknowledgedClientInputs)
             {
-                reconciledState = MovementComp.Step(reconciledState, cmd.Input, cmd.LaunchVelocity, NetworkConstants.SERVER_TICK_INTERVAL, true);
+                reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, true);
             }
 
             ReconcileMoveState(reconciledState);

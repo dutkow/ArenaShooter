@@ -29,7 +29,7 @@ public static class ClientGameplayService
         ClientGame.Instance.LastServerTickProcessedByClient = msg.ServerTick;
         ClientGame.Instance.LastClientTickProcessedByServer = msg.LastProcessedClientTick;
 
-        GD.Print($"receiving server snapshot. sever tick = {msg.ServerTick}, last processed client tick {msg.LastProcessedClientTick}");
+        GD.Print($"receiving server snapshot. server tick = {msg.ServerTick}, last processed client tick {msg.LastProcessedClientTick}");
 
 
         var snapshots = msg.GetCharacterSnapshots();

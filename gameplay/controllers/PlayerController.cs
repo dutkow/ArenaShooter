@@ -47,5 +47,9 @@ public partial class PlayerController : Controller
         return cmd;
     }
 
+    public virtual void ApplyInput(ClientInputCommand cmd)
+    {
+
+    }
 }
 

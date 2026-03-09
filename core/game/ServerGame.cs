@@ -35,6 +35,18 @@ public class ServerGame
         var newSnapshot = WorldSnapshot.Build();
         SendWorldSnapshotDeltas(newSnapshot);
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
+
+        foreach(var kvp in MatchState.Instance.ConnectedPlayers)
+        {
+            Pawn pawn = kvp.Value.Pawn;
+            if (pawn != null)
+            {
+                if(NetworkSession.Instance.IsDedicatedServer || pawn != ClientGame.Instance.LocalPlayerPawn)
+                {
+                    pawn.ProcessNextClientInput();
+                }
+            }
+        }
     }
 
     private void SendWorldSnapshotDeltas(WorldSnapshot newSnapshot)
@@ -47,9 +59,9 @@ public class ServerGame
             ushort lastProcessedServerTick = kvp.Value;
             ushort lastProcessedClientTick = LastProcessedClientTicksByPlayerID[peerID];
 
-            if (!NetworkSession.Instance.PeerIDsToPeers.TryGetValue(peerID, out var peer))
+            if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(peerID, out var peer))
             {
-                GD.Print($"not found. Peer ID: {peerID}. Peer: {peer}");
+                GD.Print($"Peer not found. Peer ID: {peerID}. Peer: {peer}");
                 continue;
             }
 

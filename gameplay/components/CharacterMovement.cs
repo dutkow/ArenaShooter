@@ -63,7 +63,7 @@ public class CharacterMovement
         }
     }
 
-    public CharacterMoveState Step(CharacterMoveState state, InputCommand inputCommand, Vector3 launchVelocity, float delta, bool isSimulating = false)
+    public CharacterMoveState Step(CharacterMoveState state, InputCommand inputCommand, float delta, bool isSimulating = false)
     {
         // --- Movement input ---
         Vector3 move = Vector3.Zero;
@@ -108,10 +108,11 @@ public class CharacterMovement
                 break;
         }
 
-        if(launchVelocity != Vector3.Zero)
+        if(state.LaunchVelocity != Vector3.Zero)
         {
-            state.Velocity += launchVelocity;
-            GD.Print($"applying launch velocity {launchVelocity}. {NetworkSession.Instance.NetworkMode}. is simulating {isSimulating}");
+            state.Velocity += state.LaunchVelocity;
+            state.LaunchVelocity = Vector3.Zero;
+            GD.Print($"applying launch velocity {state.LaunchVelocity}. {NetworkSession.Instance.NetworkMode}. is simulating {isSimulating}");
         }
 
         Vector3 safeMotion = HandleCollision(state, delta);
@@ -240,7 +241,7 @@ public class CharacterMovement
 
     public void HandleInput(InputCommand input, float delta)
     {
-        State = Step(State, input, State.LaunchVelocity, delta);
+        State = Step(State, input, delta);
     }
 
     private void HandleGroundedMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
