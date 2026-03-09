@@ -255,9 +255,8 @@ public partial class Character : Pawn
         if (IsLocal)
         {
             var reconciledState = snapshotMoveState;
-            var unprocessedInputs = ClientGame.Instance.UnprocessedClientInputs;
 
-            foreach (var cmd in unprocessedInputs)
+            foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
             {
                 reconciledState = MovementComp.Step(reconciledState, cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, true);
             }
@@ -324,20 +323,6 @@ public partial class Character : Pawn
         MovementComp.State.Velocity = newPredictedState.Velocity;
     }
 
-
-    public InputCommand CaptureInput()
-    {
-        InputCommand cmd = InputCommand.NONE;
-
-        if (Input.IsActionPressed("move_forward")) cmd |= InputCommand.MOVE_FORWARD;
-        if (Input.IsActionPressed("move_back")) cmd |= InputCommand.MOVE_BACK;
-        if (Input.IsActionPressed("move_left")) cmd |= InputCommand.MOVE_LEFT;
-        if (Input.IsActionPressed("move_right")) cmd |= InputCommand.MOVE_RIGHT;
-        if (Input.IsActionPressed("jump")) cmd |= InputCommand.JUMP;
-        if (Input.IsActionPressed("primary_fire")) cmd |= InputCommand.FIRE_PRIMARY;
-
-        return cmd;
-    }
 
     public override ClientInputCommand AddInput(ClientInputCommand cmd)
     {

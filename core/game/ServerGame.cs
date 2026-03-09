@@ -36,11 +36,12 @@ public class ServerGame
 
     public void Tick()
     {
+        ProcessNextClientInputs();
+
         var newSnapshot = WorldSnapshot.Build();
-        SendWorldSnapshotDeltas(newSnapshot);
+        SendWorldSnapshotDeltas(newSnapshot); // in this we send the snapshot prior to updating the next client input. we could alternatively, process client inputs, then update?
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
 
-        ProcessNextClientInputs();
     }
 
     public void ProcessNextClientInputs()
@@ -96,7 +97,6 @@ public class ServerGame
         {
             byte playerID = kvp.Key;
             ushort lastProcessedServerTick = kvp.Value;
-
             ushort lastProcessedClientTick = LastProcessedClientTicksByPlayerID[playerID];
 
 
@@ -116,10 +116,10 @@ public class ServerGame
                 snapshotDeltas[lastProcessedServerTick] = newSnapshot;
             }
 
+            newSnapshot.LastProcessedClientTick = lastProcessedClientTick;
+
             var bytes = newSnapshot.WriteMessage();
             _bytesSentThisPeriod += bytes.Length;
-
-            newSnapshot.LastProcessedClientTick = lastProcessedClientTick;
 
             NetworkSender.ToClient(peer, newSnapshot);
         }

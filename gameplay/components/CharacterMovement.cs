@@ -110,9 +110,9 @@ public class CharacterMovement
 
         if(state.LaunchVelocity != Vector3.Zero)
         {
-            state.Velocity += state.LaunchVelocity;
-            state.LaunchVelocity = Vector3.Zero;
-            GD.Print($"applying launch velocity {state.LaunchVelocity}. {NetworkSession.Instance.NetworkMode}. is simulating {isSimulating}");
+            //state.Velocity += state.LaunchVelocity;
+            //state.LaunchVelocity = Vector3.Zero;
+            //GD.Print($"applying launch velocity {state.LaunchVelocity}. {NetworkSession.Instance.NetworkMode}. is simulating {isSimulating}");
         }
 
         Vector3 safeMotion = HandleCollision(state, delta);

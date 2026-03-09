@@ -26,7 +26,6 @@ public class ClientGame
         Instance = this;
 
         LocalPlayerID = localPlayerID;
-
         LocalPlayerController = new();
 
         GD.Print($"Starting client. NetworkMode = {NetworkSession.Instance.NetworkMode}");
@@ -35,14 +34,11 @@ public class ClientGame
 
     public void Tick()
     {
-
         var cmd = GetClientInputCommand();
-        if(NetworkSession.Instance.IsListenServer)
-        {
-            LocalPlayerController?.ApplyInput(cmd);
-            LocalPlayerPawn?.ApplyInput(cmd);
-        }
-        else
+        LocalPlayerController?.ApplyInput(cmd);
+        LocalPlayerPawn?.ApplyInput(cmd);
+
+        if(!NetworkSession.Instance.IsListenServer)
         {
             SendClientCommand(cmd);
         }
@@ -59,8 +55,6 @@ public class ClientGame
 
         var commandsToSend = UnprocessedClientInputs.Skip(Math.Max(0, UnprocessedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
         ClientCommand.Send(commandsToSend);
-
-        GD.Print($"sending client command. Client tick = {cmd.ClientTick}");
     }
 
     public ClientInputCommand GetClientInputCommand()
@@ -85,7 +79,8 @@ public class ClientGame
         {
             return;
         }
-        LastServerTickProcessedByClient = snapshot.ServerTick;
+
+        LastClientTickProcessedByServer = snapshot.LastProcessedClientTick; // this has already happened, so makes sense first
 
         var characterSnapshots = snapshot.GetCharacterSnapshots();
 
@@ -114,7 +109,7 @@ public class ClientGame
                 GD.Print($"player not found in ConnectedPlayers: {characterSnapshot.PlayerID}");
             }
         }
+        LastServerTickProcessedByClient = snapshot.ServerTick; // this has not happened yet, so should go after
 
-        LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
     }
 }
