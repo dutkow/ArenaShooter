@@ -83,7 +83,7 @@ public class ServerGame
 
             _lastProcessedClientCommand = cmd;
 
-            pawn.ApplyInput(cmd);
+            pawn.ProcessClientInput(cmd);
 
             _unprocessedClientInputs[playerID] = queue;
         }

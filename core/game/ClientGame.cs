@@ -56,6 +56,7 @@ public class ClientGame
     public void SendClientCommand(ClientInputCommand cmd)
     {
         UnprocessedClientInputs.Add(cmd);
+
         var commandsToSend = UnprocessedClientInputs.Skip(Math.Max(0, UnprocessedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
         ClientCommand.Send(commandsToSend);
     }
@@ -70,7 +71,6 @@ public class ClientGame
         {
             cmd = LocalPlayerPawn.AddInput(cmd);
         }
-
         cmd.ClientTick = MatchState.Instance.CurrentTick;
         return cmd;
     }

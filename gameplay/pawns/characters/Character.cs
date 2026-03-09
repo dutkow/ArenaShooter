@@ -251,6 +251,8 @@ public partial class Character : Pawn
 
     public override void ApplySnapshot(CharacterSnapshot snapshot)
     {
+        base.ApplySnapshot(snapshot);
+
         // Reset any values which haven't changed
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
         {

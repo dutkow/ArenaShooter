@@ -17,7 +17,6 @@ public static class ServerGameplayService
                     var cmd = new ClientCommand();
                     cmd.ReadMessage(data);
 
-                    GD.Print($"receiving client command.  client tick {cmd.ClientTick}");
                     ServerGame.Instance.ReceiveClientCommand(cmd, playerID);
 
                 }
