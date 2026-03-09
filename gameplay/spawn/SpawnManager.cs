@@ -33,8 +33,8 @@ public partial class SpawnManager : Node3D
     public Pawn ServerSpawnPlayer(byte playerID)
     {
         var spawnPoint = GetSpawnPoint();
-
         Pawn spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
+
         PlayerSpawned.Send(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
         return spawnedPlayer;
@@ -62,10 +62,10 @@ public partial class SpawnManager : Node3D
 
         spawnedPlayer.SetIsAuthority(NetworkSession.Instance.IsServer);
 
-        if(playerID == NetworkSession.Instance.LocalPlayerID)
+        if(playerID == ClientGame.Instance.LocalPlayerID)
         {
             GD.Print($"running possess when spawning player on {NetworkSession.Instance.NetworkMode}. spawned player ID = {playerID} and local player ID = {NetworkSession.Instance.LocalPlayerID}");
-            GameMode.Instance.LocalPlayerController.Possess(spawnedPlayer);
+            ClientGame.Instance.LocalPlayerController.Possess(spawnedPlayer);
         }
         else
         {

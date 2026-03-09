@@ -100,14 +100,12 @@ public partial class MatchState : Node
         //NetworkHandler.Instance.OnPeerConnected += HandlePlayerJoined;
         //NetworkHandler.Instance.OnPeerDisconnected += HandlePeerDisconnected;
 
-        if (NetworkSession.Instance.IsServer)
+        if (NetworkSession.Instance.IsListenServer)
         {
-            if (NetworkSession.Instance.IsListenServer)
-            {
-                byte serverPlayerID = NetworkSession.Instance.LocalPlayerID;
-                AddPlayer(serverPlayerID, Settings.Instance.PlayerName);
-                var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(serverPlayerID);
-            }
+            GD.Print("running init listen server stuff on match state");
+            byte playerID = ClientGame.Instance.LocalPlayerID;
+            AddPlayer(playerID, Settings.Instance.PlayerName);
+            var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
         }
     }
 
@@ -123,7 +121,6 @@ public partial class MatchState : Node
     {
         CurrentTick++;
 
-        GD.Print($"ticking match state. {CurrentTick}");
         ServerGame.Instance?.Tick();
         ClientGame.Instance?.Tick();
     }
@@ -251,12 +248,6 @@ public partial class MatchState : Node
         if(ClientGame.Instance != null && playerID == ClientGame.Instance.LocalPlayerID)
         {
             ClientGame.Instance.AssignPlayerState(playerState);
-        }
-
-        if (NetworkSession.Instance.IsServer)
-        {
-            PlayerController playerController = GameMode.Instance.PlayerControllers[playerID];
-            AddChild(playerController);
         }
     }
 
