@@ -361,17 +361,6 @@ public partial class Character : Pawn
         MovementComp.State.Velocity = newPredictedState.Velocity;
     }
 
-    public void ReceiveClientCommand(ClientCommand command)
-    {
-        foreach (var cmd in command.Commands)
-        {
-            if (!_unprocessedClientInputs.ContainsKey(cmd.ClientTick))
-            {
-                _unprocessedClientInputs.Add(cmd.ClientTick, cmd);
-            }
-        }
-    }
-
     public void SendClientInput(InputCommand newInput)
     {
         var inputCommand = new ClientInputCommand

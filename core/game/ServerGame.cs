@@ -138,7 +138,7 @@ public class ServerGame
         }
     }
 
-    public void AddUnprocessedClientInput(ClientInputCommand cmd, byte playerID)
+    public void ReceiveClientCommand(ClientCommand cmd, byte playerID)
     {
         if (!_unprocessedClientInputs.ContainsKey(playerID))
         {
@@ -147,10 +147,12 @@ public class ServerGame
 
         var queue = _unprocessedClientInputs[playerID];
 
-        if (!queue.ContainsKey(cmd.ClientTick))
+        foreach(var inputCommand in cmd.Commands)
         {
-            queue[cmd.ClientTick] = cmd;
+            if(!queue.ContainsKey(cmd.ClientTick))
+            {
+                queue.Add(cmd.ClientTick, inputCommand);
+            }
         }
     }
-
 }

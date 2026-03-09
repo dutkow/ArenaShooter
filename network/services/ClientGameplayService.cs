@@ -26,35 +26,7 @@ public static class ClientGameplayService
             return;
         }
 
-        ClientGame.Instance.LastServerTickProcessedByClient = msg.ServerTick;
-        ClientGame.Instance.LastClientTickProcessedByServer = msg.LastProcessedClientTick;
-
-        GD.Print($"receiving server snapshot. server tick = {msg.ServerTick}, last processed client tick {msg.LastProcessedClientTick}");
-
-
-        var snapshots = msg.GetCharacterSnapshots();
-
-        for (int i = 0; i < snapshots.Length; i++)
-        {
-            var snapshot = snapshots[i];
-
-            if (MatchState.Instance.ConnectedPlayers.TryGetValue(snapshot.PlayerID, out var playerState))
-            {
-                if (playerState.Pawn != null && playerState.Pawn is Character character)
-                {
-                    character.ApplyServerSnapshot(snapshot);
-                }
-                else
-                {
-                    SpawnManager.Instance.LocalSpawnPlayer(snapshot.PlayerID, snapshot.Position, snapshot.Yaw);
-                    GD.Print($"Player not found so spawning player at position {snapshot.Position}");
-                }
-            }
-            else
-            {
-                GD.Print($"player not found in ConnectedPlayers: {snapshot.PlayerID}");
-            }
-        }
+        ClientGame.Instance.ApplyWorldSnapshot(msg);
     }
 
     public static void HandleProjectileSpawned(byte[] data)

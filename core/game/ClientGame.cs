@@ -74,4 +74,34 @@ public class ClientGame
         cmd.ClientTick = MatchState.Instance.CurrentTick;
         return cmd;
     }
+
+    public void ApplyWorldSnapshot(WorldSnapshot snapshot)
+    {
+        LastServerTickProcessedByClient = snapshot.ServerTick;
+        LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
+
+        var characterSnapshots = snapshot.GetCharacterSnapshots();
+
+        for (int i = 0; i < characterSnapshots.Length; i++)
+        {
+            var characterSnapshot = characterSnapshots[i];
+
+            if (MatchState.Instance.ConnectedPlayers.TryGetValue(characterSnapshot.PlayerID, out var playerState))
+            {
+                if (playerState.Pawn != null && playerState.Pawn is Character character)
+                {
+                    character.ApplyServerSnapshot(characterSnapshot);
+                }
+                else
+                {
+                    SpawnManager.Instance.LocalSpawnPlayer(characterSnapshot.PlayerID, characterSnapshot.Position, characterSnapshot.Yaw);
+                    GD.Print($"Player not found so spawning player at position {characterSnapshot.Position}");
+                }
+            }
+            else
+            {
+                GD.Print($"player not found in ConnectedPlayers: {characterSnapshot.PlayerID}");
+            }
+        }
+    }
 }
