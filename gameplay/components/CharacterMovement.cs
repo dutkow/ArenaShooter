@@ -30,7 +30,7 @@ public class CharacterMovement
     public float MaxStepHeight = 0.25f;
 
     public float GroundAcceleration = 60.0f;
-    public float AirAcceleration = 1.0f;
+    public float AirAcceleration = 0.5f;
 
     public float GroundDeceleration = 100f;
     public float AirDeceleration = 5f;

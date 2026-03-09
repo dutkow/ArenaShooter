@@ -48,7 +48,7 @@ public partial class NetworkSession : Node
 
     private NetworkHandler _networkHandler;
     private MessageRouter _router;
-    private LanServerBroadcaster _lanBroadcaster;
+    private LanServerAdvertiser _lanBroadcaster;
 
     public ServerInfo ServerInfo;
     private bool _isHosting = false;
