@@ -132,7 +132,7 @@ public class HealthComponent : Component
 
     public void ApplyHealthDamage(int amount)
     {
-        if (amount <= 0 || IsAlive)
+        if (!IsAlive)
         {
             return;
         }
@@ -194,7 +194,9 @@ public class HealthComponent : Component
 
             int remainingDamage = amount - shieldDamage;
             if (remainingDamage > 0)
+            {
                 ApplyHealthDamage(remainingDamage);
+            }
         }
         else
         {

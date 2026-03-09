@@ -35,9 +35,10 @@ public partial class LinearProjectile : Projectile
             Shape = CollisionShape.Shape, // e.g., CapsuleShape3D or SphereShape3D
             Transform = new Transform3D(Basis.Identity, GlobalPosition),
             Motion = motion,
-            CollideWithBodies = true,
+            CollideWithBodies = false,
             CollideWithAreas = true
         };
+        query.Exclude = new Godot.Collections.Array<Rid> { Area.GetRid() };
 
         // Cast motion
         var result = space.CastMotion(query);
