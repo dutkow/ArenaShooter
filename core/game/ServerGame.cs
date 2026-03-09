@@ -142,16 +142,18 @@ public class ServerGame
     {
         if (!_unprocessedClientInputs.ContainsKey(playerID))
         {
+            // Create a new sorted dictionary for this player
             _unprocessedClientInputs[playerID] = new SortedDictionary<ushort, ClientInputCommand>();
         }
 
         var queue = _unprocessedClientInputs[playerID];
 
-        foreach(var inputCommand in cmd.Commands)
+        foreach (var clientCmd in cmd.Commands)
         {
-            if(!queue.ContainsKey(cmd.ClientTick))
+            // Only add if we don’t already have this tick
+            if (!queue.ContainsKey(clientCmd.ClientTick))
             {
-                queue.Add(cmd.ClientTick, inputCommand);
+                queue.Add(clientCmd.ClientTick, clientCmd);
             }
         }
     }

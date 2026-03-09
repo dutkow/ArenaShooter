@@ -100,8 +100,8 @@ public partial class MatchState : Node
     {
         CurrentTick++;
 
-        ServerGame.Instance?.Tick();
         ClientGame.Instance?.Tick();
+        ServerGame.Instance?.Tick();
     }
 
     public void OnReceivedInitialMatchState(InitialMatchState initialMatchState)
