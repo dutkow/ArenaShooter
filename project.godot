@@ -22,7 +22,7 @@ config/icon="res://assets/textures/icon.svg"
 [autoload]
 
 GameData="*res://autoload/game_data.tscn"
-NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
+NetworkHandler="*res://network/NetworkHandler.cs"
 Settings="*res://autoload/Settings.cs"
 GameManagers="*res://autoload/game_managers.tscn"
 NetManager="*res://autoload/NetManager.cs"
