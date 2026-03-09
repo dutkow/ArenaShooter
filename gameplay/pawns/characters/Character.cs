@@ -411,6 +411,20 @@ public partial class Character : Pawn
         return cmd;
     }
 
+    public override ClientInputCommand AddInput(ClientInputCommand cmd)
+    {
+        base.AddInput(cmd);
+
+        if (Input.IsActionPressed("move_forward")) cmd.Input |= InputCommand.MOVE_FORWARD;
+        if (Input.IsActionPressed("move_back")) cmd.Input |= InputCommand.MOVE_BACK;
+        if (Input.IsActionPressed("move_left")) cmd.Input |= InputCommand.MOVE_LEFT;
+        if (Input.IsActionPressed("move_right")) cmd.Input |= InputCommand.MOVE_RIGHT;
+        if (Input.IsActionPressed("jump")) cmd.Input |= InputCommand.JUMP;
+        if (Input.IsActionPressed("primary_fire")) cmd.Input |= InputCommand.FIRE_PRIMARY;
+
+        return cmd;
+    }
+
     public override void _Input(InputEvent @event)
     {
         base._Input(@event);

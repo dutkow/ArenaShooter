@@ -1,14 +1,25 @@
 using Godot;
 using System;
 
-public class Game
+public partial class Game : Node
 {
     public static Game Instance { get; private set; }
 
     public ServerGame _serverGame;
     public ClientGame _clientGame;
 
+
     public NetworkMode NetworkMode { get; private set; }
+
+    public bool IsAuthority => NetworkMode != NetworkMode.CLIENT;
+    public bool IsClient => NetworkMode != NetworkMode.DEDICATED_SERVER;
+
+    public override void _Ready()
+    {
+        base._Ready();
+
+        Instance = this;
+    }
 
     public void Initialize(NetworkMode mode, byte localPlayerID = 0)
     {
@@ -31,6 +42,7 @@ public class Game
             case NetworkMode.CLIENT:
                 InitializeClient(localPlayerID);
                 break;
+
             case NetworkMode.OFFLINE:
 
                 break;
@@ -47,8 +59,5 @@ public class Game
     {
         _clientGame = new();
         _clientGame.Initialize(localPlayerID);
-
     }
-
-
 }

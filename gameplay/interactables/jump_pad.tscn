@@ -24,7 +24,6 @@ public partial class PhysicsVolume : Area3D
 [node name="JumpPad" type="Node3D" node_paths=PackedStringArray("_area3D", "_collisionShape")]
 script = ExtResource("1_thlnv")
 _area3D = NodePath("Area3D")
-JumpStrength = 8.0
 _collisionShape = NodePath("Area3D/CollisionShape3D")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

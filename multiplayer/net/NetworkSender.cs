@@ -9,11 +9,11 @@ public static class NetworkSender
     // -------------------------------------------------
     public static bool EmulationEnabled = true;
 
-    public static float ClientToServerBasePingMs = 500.0f;
+    public static float ClientToServerBasePingMs = 50.0f;
     public static float ClientToServerVarianceMs = 5.0f;
     public static float ClientToServerPacketLossPercent = 0.0f;
 
-    public static float ServerToClientBasePingMs = 500.0f;
+    public static float ServerToClientBasePingMs = 50.0f;
     public static float ServerToClientVarianceMs = 5.0f;
     public static float ServerToClientPacketLossPercent = 0.0f;
 

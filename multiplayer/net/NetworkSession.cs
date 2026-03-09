@@ -95,9 +95,9 @@ public partial class NetworkSession : Node
         _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
     }
 
-    public void SetRole(NetworkMode role)
+    public void SetMode(NetworkMode mode)
     {
-        if (NetworkMode == role)
+        if (NetworkMode == mode)
         {
             return;
         }
@@ -107,8 +107,20 @@ public partial class NetworkSession : Node
             LocalPlayerID = 0;
         }
 
-        NetworkMode = role;
-        _router.Initialize(role);
+        NetworkMode = mode;
+
+        switch (NetworkMode)
+        {
+            case NetworkMode.DEDICATED_SERVER:
+                Game.Instance.Initialize(NetworkMode);
+                break;
+
+            case NetworkMode.LISTEN_SERVER:
+                Game.Instance.Initialize(NetworkMode, 0);
+                break;;
+        }
+
+        _router.Initialize(mode);
         OnRoleChanged?.Invoke(NetworkMode);
     }
 
@@ -117,7 +129,7 @@ public partial class NetworkSession : Node
     // ----------------------
     public void HostLanServer(ServerInfo info)
     {
-        SetRole(NetworkMode.LISTEN_SERVER);
+        SetMode(NetworkMode.LISTEN_SERVER);
 
         ServerInfo = info;
 
@@ -137,7 +149,7 @@ public partial class NetworkSession : Node
 
     public void StopHosting()
     {
-        SetRole(NetworkMode.OFFLINE);
+        SetMode(NetworkMode.OFFLINE);
 
         if (!_isHosting)
         {
@@ -152,6 +164,7 @@ public partial class NetworkSession : Node
     private void HandleServerStarted()
     {
         OnSessionStarted?.Invoke(ServerInfo);
+
     }
 
     private void HandlePeerDisconnected(int _peerID)
@@ -183,7 +196,7 @@ public partial class NetworkSession : Node
     // ----------------------
     public void JoinServer(ServerInfo serverInfo)
     {
-        SetRole(NetworkMode.CLIENT);
+        SetMode(NetworkMode.CLIENT);
 
         ServerInfo = serverInfo;
 

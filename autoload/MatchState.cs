@@ -124,16 +124,16 @@ public partial class MatchState : Node
     {
         base._PhysicsProcess(delta);
 
+
+
+    }
+
+    public void Tick()
+    {
         CurrentTick++;
 
-        if (NetworkSession.Instance.IsServer)
-        {
-            if (ServerTickManager != null)
-            {
-                ServerTickManager.PhysicsTick(delta);
-            }
-        }
-
+        ServerGame.Instance?.Tick();
+        ClientGame.Instance?.Tick();
     }
 
     public void OnReceivedInitialMatchState(InitialMatchState initialMatchState)

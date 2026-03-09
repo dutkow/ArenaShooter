@@ -53,4 +53,9 @@ public partial class Pawn : Actor
     }
 
     public virtual void OnDeath() { }
+
+    public virtual ClientInputCommand AddInput(ClientInputCommand cmd)
+    {
+        return cmd;
+    }
 }

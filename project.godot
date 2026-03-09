@@ -26,6 +26,7 @@ NetworkHandler="*res://multiplayer/net/NetworkHandler.cs"
 Settings="*res://autoload/Settings.cs"
 GameManagers="*res://autoload/game_managers.tscn"
 NetManager="*res://autoload/NetManager.cs"
+Game="*res://autoload/Game.cs"
 
 [display]
 

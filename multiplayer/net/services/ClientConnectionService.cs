@@ -11,8 +11,13 @@ public static class ClientConnectionService
         var msg = new ConnectionAccepted();
         msg.ReadMessage(data);
 
-        NetworkSession.Instance.LocalPlayerID = msg.AssignedPlayerID;
+        byte playerID = msg.AssignedPlayerID;
+        NetworkSession.Instance.LocalPlayerID = playerID;
+        Game.Instance.Initialize(NetworkMode.CLIENT, playerID);
+
         Main.Instance.OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);
+
+
 
         GD.Print($"Client received: {msg.MessageType}");
     }
