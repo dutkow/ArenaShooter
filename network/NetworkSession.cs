@@ -133,8 +133,8 @@ public partial class NetworkSession : Node
 
         ServerInfo = info;
 
-        _networkHandler.StartServer(info.HostIP, info.Port);
-        ServerInfo.Players++;
+        _networkHandler.StartServer(info.IP, info.Port);
+        //ServerInfo.Players++;
 
 
         if (_lanBroadcaster == null)
@@ -183,7 +183,7 @@ public partial class NetworkSession : Node
             GD.Print($"Player disconnected: _peerID={_peerID}, _playerID={_playerID}");
             OnPlayerLeft?.Invoke(_playerID);
 
-            ServerInfo.Players--;
+            //ServerInfo.Players--;
         }
         else
         {
@@ -208,7 +208,7 @@ public partial class NetworkSession : Node
             return;
         }
 
-        _networkHandler.StartClient(serverInfo.HostIP, serverInfo.Port);
+        _networkHandler.StartClient(serverInfo.IP, serverInfo.Port);
     }
 
     private void HandleFailedToConnect()
@@ -268,48 +268,6 @@ public partial class NetworkSession : Node
         OnConnectionToServerAccepted?.Invoke();
     }
 
-    // ----------------------
-    // LAN Discovery
-    // ----------------------
-    public async void RefreshLanServers(float listenSeconds = 0.3f)
-    {
-        var servers = await ListenForLanServersAsync(listenSeconds);
-        OnServerRefreshFinished?.Invoke(servers);
-    }
-
-    private async Task<List<ServerInfo>> ListenForLanServersAsync(float listenSeconds)
-    {
-        var discoveredServers = new List<ServerInfo>();
-        var seenServerIDs = new HashSet<string>();
-
-        using (var listener = new UdpClient(_networkHandler.LanBroadcastPort))
-        {
-            listener.EnableBroadcast = true;
-
-            var timeout = DateTime.Now.AddSeconds(listenSeconds);
-
-            while (DateTime.Now < timeout)
-            {
-                if (listener.Available > 0)
-                {
-                    var result = await listener.ReceiveAsync();
-                    var data = Encoding.UTF8.GetString(result.Buffer);
-                    var serverInfo = ServerInfo.FromString(data);
-
-                    if (!seenServerIDs.Contains(serverInfo.ServerID))
-                    {
-                        discoveredServers.Add(serverInfo);
-                        seenServerIDs.Add(serverInfo.ServerID);
-                    }
-                }
-
-                await Task.Delay(50);
-            }
-        }
-
-        return discoveredServers;
-    }
-
     public void HandleConnectionRequest(ENetPacketPeer peer, string playerName)
     {
         int peerID = (int)peer.GetMeta("id");
@@ -340,7 +298,7 @@ public partial class NetworkSession : Node
 
         ConnectionAccepted.Send(peer, playerID);
 
-        ServerInfo.Players++;
+        //ServerInfo.Players++;
     }
 
     public void HandlePlayerJoined(byte playerID, string playerName)

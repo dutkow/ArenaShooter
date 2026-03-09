@@ -23,8 +23,8 @@ public static class NetworkConstants
     public const string SERVER_KEY_IP_ADDRESS = "ip";
     public const string SERVER_KEY_PORT = "port";
     public const string SERVER_KEY_NAME = "name";
-    public const string SERVER_KEY_GAME_MODE = "game_mode";
-    public const string SERVER_KEY_MAP = "map";
+    public const string SERVER_KEY_GAME_MODE_ID = "game_mode";
+    public const string SERVER_KEY_MAP_ID = "map";
     public const string SERVER_KEY_MAX_PLAYERS = "max_players";
     public const string SERVER_KEY_NUM_CONNECTED_PLAYERS = "num_connected_players";
     public const string SERVER_KEY_CONNECTED_PLAYER_NAMES = "connected_player_names";

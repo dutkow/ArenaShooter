@@ -1,19 +1,21 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using static NetworkConstants;
 
-public class ServerAdvertisement
+public class ServerInfo
 {
-    public ServerAdvertisement() { }
+    public ServerInfo() { }
 
-    public ServerAdvertisement(ServerParams serverParams)
+    public ServerInfo(ServerParams serverParams)
     {
         Port = serverParams.Port;
-        ServerName = serverParams.Name;
-        Map = serverParams.Map;
-        GameMode = serverParams.GameMode;
+        Name = serverParams.Name;
+        MapID = serverParams.MapID;
+        GameModeID = serverParams.GameModeID;
         MaxPlayers = serverParams.MaxPlayers;
         IsPasswordProtected = serverParams.Password != null && serverParams.Password.Length > 0;
 
@@ -31,13 +33,13 @@ public class ServerAdvertisement
     public int Port { get; set; }
 
     [JsonPropertyName(SERVER_KEY_NAME)]
-    public string ServerName { get; set; }
+    public string Name { get; set; }
 
-    [JsonPropertyName(SERVER_KEY_MAP)]
-    public string Map { get; set; }
+    [JsonPropertyName(SERVER_KEY_MAP_ID)]
+    public string MapID { get; set; }
 
-    [JsonPropertyName(SERVER_KEY_GAME_MODE)]
-    public GameMode GameMode { get; set; }
+    [JsonPropertyName(SERVER_KEY_GAME_MODE_ID)]
+    public string GameModeID { get; set; }
 
     [JsonPropertyName(SERVER_KEY_MAX_PLAYERS)]
     public int MaxPlayers { get; set; }
@@ -81,4 +83,24 @@ public class ServerAdvertisement
     {
         ConnectedPlayers.Remove(playerName);
     }
+
+
+    public static ServerInfo FromJson(string json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<ServerInfo>(json);
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr($"Failed to deserialize ServerInfo: {e.Message}");
+            return null;
+        }
+    }
+
+    public string ToJson()
+    {
+        return JsonSerializer.Serialize(this);
+    }
 }
+

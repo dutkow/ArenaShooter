@@ -1,24 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-public class MasterServerHttpRequests
+public class ServerBrowserRequests
 {
-    public static MasterServerHttpRequests Instance { get; } = new MasterServerHttpRequests();
+    public static ServerBrowserRequests Instance { get; } = new ServerBrowserRequests();
 
     private readonly HttpClient _httpClient = new HttpClient();
 
     public event Action RefreshServersStarted;
-    public event Action<List<ServerAdvertisement>> RefreshServersCompleted;
+    public event Action<List<ServerInfo>> RefreshInternetServersFinished;
+    public event Action<List<ServerInfo>> RefreshLanServersFinished;
 
     /// <summary>
     /// Refreshes the lobby list from the given URL.
     /// </summary>
-    public async Task RefreshLobbiesAsync()
+    public async Task RefreshInternetServersAsync()
     {
         RefreshServersStarted?.Invoke();
 
@@ -28,7 +30,7 @@ public class MasterServerHttpRequests
 
             if (!response.IsSuccessStatusCode)
             {
-                RefreshServersCompleted?.Invoke(new List<ServerAdvertisement>());
+                RefreshInternetServersFinished?.Invoke(new List<ServerInfo>());
                 return;
             }
 
@@ -46,42 +48,42 @@ public class MasterServerHttpRequests
 
             try
             {
-                var lobbies = JsonSerializer.Deserialize<List<ServerAdvertisement>>(text, options);
+                var servers = JsonSerializer.Deserialize<List<ServerInfo>>(text, options);
 
-                if (lobbies != null)
+                if (servers != null)
                 {
                     // Ensure ConnectedPlayers is not null
-                    foreach (var lobby in lobbies)
+                    foreach (var server in servers)
                     {
-                        if (lobby.ConnectedPlayers == null)
-                            lobby.ConnectedPlayers = new List<string>();
+                        if (server.ConnectedPlayers == null)
+                            server.ConnectedPlayers = new List<string>();
                     }
 
-                    RefreshServersCompleted?.Invoke(lobbies);
+                    RefreshInternetServersFinished?.Invoke(servers);
                 }
                 else
                 {
-                    RefreshServersCompleted?.Invoke(new List<ServerAdvertisement>());
+                    RefreshInternetServersFinished?.Invoke(new List<ServerInfo>());
                 }
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine($"Failed to parse server JSON: {e.Message}");
-                RefreshServersCompleted?.Invoke(new List<ServerAdvertisement>());
+                RefreshInternetServersFinished?.Invoke(new List<ServerInfo>());
             }
         }
         catch (Exception e)
         {
             Console.Error.WriteLine($"Failed to fetch servers: {e.Message}");
-            RefreshServersCompleted?.Invoke(new List<ServerAdvertisement>());
+            RefreshInternetServersFinished?.Invoke(new List<ServerInfo>());
         }
     }
 
 
     /// <summary>
-    /// Posts a lobby to the server.
+    /// Posts a server to the master server.
     /// </summary>
-    public async Task PostLobbyAsync(ServerAdvertisement serverAdvertisement, string url)
+    public async Task PostServerAsync(ServerInfo serverAdvertisement, string url)
     {
         try
         {
@@ -91,19 +93,19 @@ public class MasterServerHttpRequests
             var response = await _httpClient.PostAsync(url, content);
             if (!response.IsSuccessStatusCode)
             {
-                Console.Error.WriteLine($"Failed to POST lobby: {response.StatusCode}");
+                Console.Error.WriteLine($"Failed to post server: {response.StatusCode}");
             }
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"HTTP POST failed: {e.Message}");
+            Console.Error.WriteLine($"HTTP post failed: {e.Message}");
         }
     }
 
     /// <summary>
-    /// Removes (unregisters) a lobby from the server browser.
+    /// Removes (unregisters) a server from the master server.
     /// </summary>
-    public async Task RemoveLobbyAsync(ServerAdvertisement serverAdvertisement, string url)
+    public async Task RemoveInternetServerAsync(ServerInfo serverAdvertisement, string url)
     {
         try
         {
@@ -130,5 +132,49 @@ public class MasterServerHttpRequests
         {
             Console.Error.WriteLine($"HTTP remove failed: {e.Message}");
         }
+    }
+
+
+    // ----------------------
+    // LAN Discovery
+    // ----------------------
+    public async void RefreshLanServersAsync(float listenSeconds = 0.3f)
+    {
+        var servers = await ListenForLanServersAsync(listenSeconds);
+        RefreshLanServersFinished?.Invoke(servers);
+    }
+
+    private async Task<List<ServerInfo>> ListenForLanServersAsync(float listenSeconds)
+    {
+        var discoveredServers = new List<ServerInfo>();
+        var seenServerIDs = new HashSet<string>();
+
+        using (var listener = new UdpClient(NetworkHandler.Instance.LanBroadcastPort))
+        {
+            listener.EnableBroadcast = true;
+
+            var timeout = DateTime.Now.AddSeconds(listenSeconds);
+
+            while (DateTime.Now < timeout)
+            {
+                if (listener.Available > 0)
+                {
+                    var result = await listener.ReceiveAsync();
+
+                    var data = Encoding.UTF8.GetString(result.Buffer);
+                    var serverInfo = ServerInfo.FromJson(data);
+
+                    if (serverInfo != null && !seenServerIDs.Contains(serverInfo.Name)) // or use a unique ID
+                    {
+                        discoveredServers.Add(serverInfo);
+                        seenServerIDs.Add(serverInfo.Name);
+                    }
+                }
+
+                await Task.Delay(50);
+            }
+        }
+
+        return discoveredServers;
     }
 }

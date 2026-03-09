@@ -28,10 +28,10 @@ public partial class ServerResultEntry : Control
 
         _serverNameLabel.Text = _serverInfo.Name;
         _mapLabel.Text = GameData.Instance.MultiplayerMapsByID[serverInfo.MapID].Name;
-        _playerCountLabel.Text = $"{serverInfo.Players}/{serverInfo.MaxPlayers}";
+        _playerCountLabel.Text = $"{serverInfo.ConnectedPlayersCount}/{serverInfo.MaxPlayers}";
         _pingLabel.Text = "999";
 
-        _serverInfo.PrintInfo();
+        //_serverInfo.PrintInfo();
     }
 
     public void OnJoinButtonPressed()

@@ -17,6 +17,7 @@ public partial class MatchState : Node
 {
     public static MatchState Instance { get; private set; }
 
+    public ServerInfo ServerInfo { get; private set; }
 
     // ----------------------
     // Match phase

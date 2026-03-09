@@ -33,6 +33,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="LanButton" type="Button" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "LAN"
+
+[node name="InternetButton" type="Button" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "INTERNET"
+
 [node name="Label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 text = "Server Browser"

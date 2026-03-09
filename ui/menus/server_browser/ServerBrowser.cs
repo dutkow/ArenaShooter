@@ -7,6 +7,11 @@ using System.Collections.Generic;
 /// </summary>
 public partial class ServerBrowser : Control
 {
+    // top bar buttons
+    [Export] Button _lanButton;
+    [Export] Button _internetButton;
+
+
     [Export] VBoxContainer _serverResultsContainer;
     [Export] Label _serverRefreshLabel;
 
@@ -32,23 +37,36 @@ public partial class ServerBrowser : Control
     {
         base._Ready();
 
+        _lanButton.Pressed += OnLanButtonPressed;
+        _internetButton.Pressed += OnInternetButtonPressed;
+
         _backButton.Pressed += OnBackButtonPressed;
     }
 
     public void Open()
     {
         Show();
-        RefreshServers();
+        RefreshLanServers();
     }
 
-    public void RefreshServers()
+    public void RefreshLanServers()
     {
         ClearServerResults();
 
-        _serverRefreshLabel.Text = "Refreshing servers...";
+        _serverRefreshLabel.Text = "Refreshing LAN servers...";
         _serverRefreshLabel.Show();
 
-        NetworkSession.Instance.RefreshLanServers();
+        ServerBrowserRequests.Instance.RefreshLanServersAsync();
+    }
+
+    public void RefreshInternetServers()
+    {
+        ClearServerResults();
+
+        _serverRefreshLabel.Text = "Refreshing internet servers...";
+        _serverRefreshLabel.Show();
+
+        ServerBrowserRequests.Instance.RefreshInternetServersAsync();
     }
 
     public void ClearServerResults()
@@ -89,4 +107,13 @@ public partial class ServerBrowser : Control
         Hide();
     }
 
+    public void OnLanButtonPressed()
+    {
+
+    }
+
+    public void OnInternetButtonPressed()
+    {
+
+    }
 }
