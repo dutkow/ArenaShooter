@@ -13,6 +13,7 @@ public static class ClientConnectionService
 
         byte playerID = msg.AssignedPlayerID;
         NetworkSession.Instance.LocalPlayerID = playerID;
+
         Game.Instance.Initialize(NetworkMode.CLIENT, playerID);
 
         Main.Instance.OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);

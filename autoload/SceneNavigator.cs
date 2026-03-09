@@ -1,3 +1,4 @@
+using Godot;
 using System;
 using System.Threading.Tasks;
 
@@ -26,6 +27,7 @@ public class SceneNavigator
     // Delay optional, purely logic
     public async void OpenMultiplayerMap(string mapID, float delayBeforeLoad = 0.5f)
     {
+        GD.Print($"open multiplayer map ran on {NetworkSession.Instance.NetworkMode}");
         if (!GameData.Instance.MultiplayerMapsByID.TryGetValue(mapID, out var mapInfo))
         {
             Console.WriteLine($"[SceneNavigator] Map ID {mapID} not found");
@@ -54,6 +56,7 @@ public class SceneNavigator
 
         // Swap scenes via Main
         Main.Instance.SetMainScene(newScene);
+        GD.Print($"set main scene ran on {NetworkSession.Instance.NetworkMode}");
 
         Console.WriteLine("[SceneNavigator] Multiplayer map fully loaded!");
     }

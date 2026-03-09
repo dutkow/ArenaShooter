@@ -22,11 +22,6 @@ public partial class MatchState : Node
     private double _clientTickAccumulator = 0;
 
 
-    public void AdvanceTick()
-    {
-        CurrentTick++;
-    }
-
 
     // ----------------------
     // Match phase
@@ -78,8 +73,6 @@ public partial class MatchState : Node
     public event Action<PlayerState>? PlayerJoined;
     public event Action<int, PlayerState>? PlayerLeft;
 
-    public ServerTickManager ServerTickManager;
-
     // base tick
     public ushort CurrentTick { get; private set; } = 0;
 
@@ -109,8 +102,6 @@ public partial class MatchState : Node
 
         if (NetworkSession.Instance.IsServer)
         {
-            ServerTickManager = new();
-
             if (NetworkSession.Instance.IsListenServer)
             {
                 byte serverPlayerID = NetworkSession.Instance.LocalPlayerID;
@@ -132,6 +123,7 @@ public partial class MatchState : Node
     {
         CurrentTick++;
 
+        GD.Print($"ticking match state. {CurrentTick}");
         ServerGame.Instance?.Tick();
         ClientGame.Instance?.Tick();
     }

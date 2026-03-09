@@ -28,7 +28,6 @@ public class ServerGame
     {
         Instance = this;
 
-        GD.Print($"Starting server. NetworkMode = {NetworkSession.Instance.NetworkMode}");
     }
 
     public void Tick()

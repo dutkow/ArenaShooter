@@ -26,6 +26,9 @@ public partial class Level : Node3D
         MatchState matchState = new();
         AddChild(matchState);
 
+        ServerTickManager serverTickManager = new();
+        AddChild(serverTickManager);
+
         SpawnManager spawnManager = new();
         AddChild(spawnManager);
 
@@ -52,6 +55,7 @@ public partial class Level : Node3D
         else if (NetworkSession.Instance.IsClient)
         {
             ClientLoaded.Send();
+            GD.Print($"sending client loaded");
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// Handles server-side ticking and snapshot sending for the match.
 /// Manages its own snapshot history dictionary and queue.
 /// </summary>
-public class ServerTickManager
+public partial class ServerTickManager : Node
 {
     private double _accumulator = 0f;
 
@@ -19,8 +19,10 @@ public class ServerTickManager
     // ---- For traffic tracking ----
     private int _bytesSentThisPeriod = 0;
 
-    public void PhysicsTick(double delta)
+    public override void _PhysicsProcess(double delta)
     {
+        base._PhysicsProcess(delta);
+
         _accumulator += delta;
 
         while (_accumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
