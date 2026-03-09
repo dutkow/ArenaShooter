@@ -1,7 +1,10 @@
 # General notes
 - Need to figure out what borked prediction
 - need to refactor server/client tick related mgmt. it's getting convoluted in match state
-
+- get launch prediction working well
+- teleporter prediction
+- make a physics volume type class for jump pad collision. move those to a server tick type class.
+- eventually, remove everything from server tick
 
 # Short term
 - Hitscan weapons
