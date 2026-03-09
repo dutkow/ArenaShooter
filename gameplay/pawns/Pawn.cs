@@ -60,6 +60,6 @@ public partial class Pawn : Actor
     }
 
     public virtual void ApplyInput(ClientInputCommand cmd) { }
-    public virtual void ProcessNextClientInput() { }
+    public virtual void ProcessClientInput(ClientInputCommand cmd) { }
 
 }

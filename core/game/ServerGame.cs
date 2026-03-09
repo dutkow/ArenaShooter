@@ -1,6 +1,8 @@
 using Godot;
 using System.Collections.Generic;
 using System;
+using System.Linq;
+
 
 public class ServerGame
 {
@@ -12,7 +14,8 @@ public class ServerGame
     public ushort LastClientTickProcessedByServer;
     public Dictionary<byte, ushort> LastProcessedServerTicksByPlayerID = new();
     public Dictionary<byte, ushort> LastProcessedClientTicksByPlayerID = new();
-
+    private readonly Dictionary<byte, SortedDictionary<ushort, ClientInputCommand>> _unprocessedClientInputs = new();
+    private ClientInputCommand _lastProcessedClientCommand;
 
     // Snapshots
     private int _maxSnapshotHistory = 250;
@@ -36,16 +39,53 @@ public class ServerGame
         SendWorldSnapshotDeltas(newSnapshot);
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
 
-        foreach(var kvp in MatchState.Instance.ConnectedPlayers)
+        ProcessNextClientInputs();
+    }
+
+    public void ProcessNextClientInputs()
+    {
+        foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
-            Pawn pawn = kvp.Value.Pawn;
-            if (pawn != null)
+            byte playerID = kvp.Key;
+            var playerState = kvp.Value;
+            var pawn = playerState.Pawn;
+
+            if (pawn == null)
             {
-                if(NetworkSession.Instance.IsDedicatedServer || pawn != ClientGame.Instance.LocalPlayerPawn)
-                {
-                    pawn.ProcessNextClientInput();
-                }
+                continue;
             }
+
+            // Skip local player on listen server
+            if (ClientGame.Instance != null && ClientGame.Instance.LocalPlayerID == playerID)
+            {
+                continue;
+            }
+
+            if (!_unprocessedClientInputs.TryGetValue(playerID, out var queue))
+            {
+                queue = new SortedDictionary<ushort, ClientInputCommand>();
+            }
+
+            ClientInputCommand cmd;
+
+            if (queue.Count > 0)
+            {
+                ushort tickToProcess = queue.Keys.Min();
+                cmd = queue[tickToProcess];
+                queue.Remove(tickToProcess);
+
+                LastProcessedClientTicksByPlayerID[playerID] = tickToProcess;
+            }
+            else
+            {
+                cmd = _lastProcessedClientCommand;
+            }
+
+            _lastProcessedClientCommand = cmd;
+
+            pawn.ApplyInput(cmd);
+
+            _unprocessedClientInputs[playerID] = queue;
         }
     }
 
@@ -55,13 +95,15 @@ public class ServerGame
 
         foreach (var kvp in LastProcessedServerTicksByPlayerID)
         {
-            byte peerID = kvp.Key;
+            byte playerID = kvp.Key;
             ushort lastProcessedServerTick = kvp.Value;
-            ushort lastProcessedClientTick = LastProcessedClientTicksByPlayerID[peerID];
 
-            if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(peerID, out var peer))
+            ushort lastProcessedClientTick = LastProcessedClientTicksByPlayerID[playerID];
+
+
+            if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
             {
-                GD.Print($"Peer not found. Peer ID: {peerID}. Peer: {peer}");
+                GD.Print($"Peer not found. Peer ID: {playerID}. Peer: {peer}");
                 continue;
             }
 
@@ -95,4 +137,20 @@ public class ServerGame
             _snapshotHistory.Remove(oldTick);
         }
     }
+
+    public void AddUnprocessedClientInput(ClientInputCommand cmd, byte playerID)
+    {
+        if (!_unprocessedClientInputs.ContainsKey(playerID))
+        {
+            _unprocessedClientInputs[playerID] = new SortedDictionary<ushort, ClientInputCommand>();
+        }
+
+        var queue = _unprocessedClientInputs[playerID];
+
+        if (!queue.ContainsKey(cmd.ClientTick))
+        {
+            queue[cmd.ClientTick] = cmd;
+        }
+    }
+
 }

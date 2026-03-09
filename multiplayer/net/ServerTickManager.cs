@@ -44,9 +44,10 @@ public partial class ServerTickManager : Node
 
     private void TickServer()
     {
+        /*
         var newSnapshot = WorldSnapshot.Build();
         SendWorldSnapshotDeltas(newSnapshot);
-        AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
+        AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);*/
     }
 
     private void SendWorldSnapshotDeltas(WorldSnapshot newSnapshot)

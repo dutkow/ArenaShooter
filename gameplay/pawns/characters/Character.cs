@@ -121,25 +121,9 @@ public partial class Character : Pawn
         MovementComp.HandleInput(cmd.Input, Game.Instance.ServerTickInterval);
     }
 
-    public override void ProcessNextClientInput()
+    public override void ProcessClientInput(ClientInputCommand cmd)
     {
-        base.ProcessNextClientInput();
-
-        ClientInputCommand cmd = new();
-
-        if (_unprocessedClientInputs.Count > 0)
-        {
-            ushort tickToProcess = _unprocessedClientInputs.Keys.Min();
-            cmd = _unprocessedClientInputs[tickToProcess];
-            _lastProcessedClientCommand = cmd;
-            _unprocessedClientInputs.Remove(tickToProcess);
-
-            ServerGame.Instance.LastProcessedServerTicksByPlayerID[PlayerState.PlayerID] = tickToProcess;
-        }
-        else
-        {
-            cmd = _lastProcessedClientCommand;
-        }
+        base.ProcessClientInput(cmd);
 
         MovementComp.State.Yaw = cmd.Yaw;
         MovementComp.State.Pitch = cmd.Pitch;
