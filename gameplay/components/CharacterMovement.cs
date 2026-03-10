@@ -256,6 +256,7 @@ public class CharacterMovement
         if(_isGrounded)
         {
             float horizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
+            GD.Print($"Horizontal velo = {horizontalVelocity * 32.0f}");
 
             if(horizontalVelocity == 0.0f)
             {
@@ -316,6 +317,7 @@ public class CharacterMovement
         }
     }
 
+
     private void HandleAerialMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
     {
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
@@ -354,6 +356,83 @@ public class CharacterMovement
     {
         float slopeAngle = Mathf.RadToDeg(Mathf.Acos(_groundNormal.Dot(Vector3.Up)));
         return slopeAngle > 0.0f && slopeAngle < MaxWalkableSlopeAngle;
+    }
+
+    // Quake approximations
+
+
+    private void HandleQuakeGroundMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
+    {
+        const float frictionFactor = 10.0f;
+
+        // --- Horizontal velocity ---
+        Vector3 velocity = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
+
+        float wishSpeed = MaxGroundSpeed + 1.0f / (1.0f - frictionFactor * delta);
+        Vector3 wishDir = desiredMoveDirection.Normalized();
+
+        if (desiredMoveDirection.LengthSquared() > 0)
+        {
+            // --- Quake-style acceleration ---
+            float accel = GroundAcceleration;
+            float currentSpeed = velocity.Dot(wishDir);
+            float addSpeed = wishSpeed - currentSpeed;
+            if (addSpeed > 0)
+            {
+                float accelSpeed = accel * delta * wishSpeed;
+                if (accelSpeed > addSpeed) accelSpeed = addSpeed;
+                velocity += wishDir * accelSpeed;
+            }
+        }
+
+        // --- Apply ground friction ---
+        float speed = velocity.Length();
+        if (speed > 0)
+        {
+            float drop = speed * frictionFactor * delta; // friction coefficient, tweakable
+            float newSpeed = speed - drop;
+            if (newSpeed < 0) newSpeed = 0;
+            velocity *= newSpeed / speed;
+        }
+
+        // --- Update final velocity ---
+        state.Velocity.X = velocity.X;
+        state.Velocity.Z = velocity.Z;
+
+        // --- Project on slope ---
+        if (_isOnSlope)
+        {
+            state.Velocity = ProjectVelocityOnSlope(state.Velocity);
+        }
+        else
+        {
+            state.Velocity.Y = Mathf.Max(state.Velocity.Y, 0.0f);
+        }
+    }
+    private void HandleQuakeAerialMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
+    {
+        // --- Horizontal velocity ---
+        Vector3 velocity = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
+
+        if (desiredMoveDirection.LengthSquared() > 0)
+        {
+            Vector3 wishDir = desiredMoveDirection.Normalized();
+            float currentSpeed = velocity.Dot(wishDir);
+            float addSpeed = MaxGroundSpeed - currentSpeed; // base "max speed" reference
+
+            if (addSpeed > 0)
+            {
+                float accelSpeed = AirAcceleration * MaxGroundSpeed * delta;
+                if (accelSpeed > addSpeed) accelSpeed = addSpeed;
+                velocity += wishDir * accelSpeed;
+            }
+        }
+
+        // --- Update final velocity ---
+        state.Velocity.X = velocity.X;
+        state.Velocity.Z = velocity.Z;
+
+        // Keep vertical velocity untouched
     }
 
 }
