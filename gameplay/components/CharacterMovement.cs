@@ -3,6 +3,7 @@ using Godot.Collections;
 using System;
 using System.Linq;
 using static Godot.Image;
+using static Godot.WebSocketPeer;
 
 public enum CharacterMoveMode : byte
 {
@@ -48,6 +49,11 @@ public class CharacterMovement
 
     public Vector3 LaunchVector;
 
+    private float _jumpDelay = 0.2f;
+    private float _jumpAccumulator;
+
+    private bool _jumpCooldownReady => _jumpAccumulator >= _jumpDelay;
+
     public void Initialize(Character character)
     {
         _character = character;
@@ -65,6 +71,8 @@ public class CharacterMovement
 
     public CharacterMoveState Step(CharacterMoveState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
+        _jumpAccumulator += delta;
+
         // --- Movement input ---
         Vector3 move = Vector3.Zero;
         if (cmd.Input.HasFlag(InputCommand.MOVE_FORWARD)) move.Z -= 1;
@@ -78,13 +86,12 @@ public class CharacterMovement
 
         // --- Gravity & jump ---
         CheckGrounded(state);
-       
+
 
         // Jump
-        if (cmd.Input.HasFlag(InputCommand.JUMP) && _isGrounded)
+        if (cmd.Input.HasFlag(InputCommand.JUMP) && _isGrounded && _jumpCooldownReady)
         {
-            state.Velocity.Y += JumpSpeed;
-            _isGrounded = false;
+            Jump(state);
         }
         else if (!_isGrounded)
         {
@@ -115,6 +122,14 @@ public class CharacterMovement
         state.Position += safeMotion;
 
         return state;
+    }
+
+    private void Jump(CharacterMoveState state)
+    {
+        state.Velocity.Y = Math.Max(state.Velocity.Y, 0f);
+        state.Velocity.Y += JumpSpeed;
+        _isGrounded = false;
+        _jumpAccumulator = 0.0f;
     }
 
     private Vector3 HandleCollision(CharacterMoveState state, float delta)

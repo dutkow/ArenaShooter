@@ -27,8 +27,6 @@ public partial class LanServerAdvertiser
         _timer.Elapsed += (sender, e) => Broadcast();
         _timer.AutoReset = true;
         _timer.Start();
-
-        GD.Print("LAN broadcast started!");
     }
 
     private void Broadcast()
@@ -43,8 +41,6 @@ public partial class LanServerAdvertiser
             IPEndPoint endPoint = new IPEndPoint(IP, _info.Port);
 
             _udp.Send(data, data.Length, endPoint);
-
-            GD.Print($"broadcasting. IP string: {_info.IP}. port = {_info.Port}");
         }
         catch (Exception ex)
         {

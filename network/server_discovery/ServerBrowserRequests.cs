@@ -153,7 +153,6 @@ public class ServerBrowserRequests
 
         using (var listener = new UdpClient(new IPEndPoint(IPAddress.Any, NetworkConstants.DEFAULT_PORT)))
         {
-            GD.Print($"listening to {NetworkConstants.DEFAULT_PORT}");
             listener.EnableBroadcast = true;
 
             var timeout = DateTime.Now.AddSeconds(listenSeconds);
