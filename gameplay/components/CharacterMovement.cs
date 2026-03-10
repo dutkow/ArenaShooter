@@ -56,6 +56,10 @@ public class CharacterMovement
 
     private bool _jumpCooldownReady => _jumpAccumulator >= _jumpDelay;
 
+    // private move state variables
+    Vector3 _groundNormal;
+
+
     public void Initialize(Character character)
     {
         _character = character;
@@ -75,7 +79,7 @@ public class CharacterMovement
     {
         _jumpAccumulator += delta;
 
-        // --- Movement input ---
+        // Movement input
         Vector3 move = Vector3.Zero;
         if (cmd.Input.HasFlag(InputCommand.MOVE_FORWARD)) move.Z -= 1;
         if (cmd.Input.HasFlag(InputCommand.MOVE_BACK)) move.Z += 1;
@@ -86,7 +90,6 @@ public class CharacterMovement
         var basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
         Vector3 desiredMoveDirection = (basis.Z * move.Z + basis.X * move.X).Normalized() * MaxGroundSpeed;
 
-        // --- Gravity & jump ---
         if(_jumpCooldownReady)
         {
             CheckGrounded(state);
@@ -108,7 +111,6 @@ public class CharacterMovement
         {
             case CharacterMoveMode.GROUNDED:
                 HandleGroundedMovement(state, desiredMoveDirection, delta);
-
                 break;
 
             case CharacterMoveMode.FALLING:
@@ -117,23 +119,7 @@ public class CharacterMovement
         }
 
         state.Velocity += cmd.LaunchVelocity;
-
         Vector3 safeMotion = HandleCollision(state, delta);
-
-        if(_isGrounded)
-        {
-            if(_isOnSlope)
-            {
-                state.Velocity = ProjectVelocityOnSlope(state.Velocity);
-            }
-            else
-            {
-                if (state.Velocity.Y < 0) state.Velocity.Y = 0;
-
-            }
-        }
-
-
         state.Position += safeMotion;
 
 
@@ -245,8 +231,6 @@ public class CharacterMovement
         return safeMotion;
     }
 
-    private bool _slopeDirectionIsDown = false;
-
     private void CheckGrounded(CharacterMoveState state)
     {
         var spaceState = _character.GetWorld3D().DirectSpaceState;
@@ -280,9 +264,7 @@ public class CharacterMovement
             if (result.TryGetValue("normal", out var normal))
             {
                 _groundNormal = (Vector3)normal;
-
                 _isOnSlope = OnSlope();
-                _slopeDirectionIsDown = IsMovingDownSlope(state.Velocity);
             }
         }
         else
@@ -323,7 +305,17 @@ public class CharacterMovement
 
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;
+
+        if (_isOnSlope)
+        {
+            state.Velocity = ProjectVelocityOnSlope(state.Velocity);
+        }
+        else
+        {
+            state.Velocity.Y = Mathf.Max(state.Velocity.Y, 0.0f);
+        }
     }
+
     private void HandleAerialMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)
     {
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
@@ -358,29 +350,10 @@ public class CharacterMovement
         LaunchVector = vector;
     }
 
-    Vector3 _groundNormal;
-
-
-    public void CalculateGroundNormal(Vector3 something)
-    {
-
-    }
-
     public bool OnSlope()
     {
         float slopeAngle = Mathf.RadToDeg(Mathf.Acos(_groundNormal.Dot(Vector3.Up)));
         return slopeAngle > 0.0f && slopeAngle < MaxWalkableSlopeAngle;
     }
 
-    private bool IsMovingDownSlope(Vector3 velocity)
-    {
-        if (!_isOnSlope)
-            return false;
-
-        // Project velocity onto the slope plane
-        Vector3 slopeDirection = velocity - _groundNormal * velocity.Dot(_groundNormal);
-
-        // Compare the slope direction with the downward direction along the slope
-        return slopeDirection.Dot(Vector3.Down) > 0;
-    }
 }
