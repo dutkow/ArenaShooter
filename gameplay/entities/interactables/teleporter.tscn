@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://cbaahdrba8jrc"]
+
+[ext_resource type="Material" uid="uid://b57cqo0mh8b60" path="res://assets/materials/blue_material.tres" id="1_650hi"]
+[ext_resource type="Script" uid="uid://bgraeel3vfyjv" path="res://gameplay/entities/interactables/Teleporter.cs" id="1_nqtv7"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_nqtv7"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g0y16"]
+
+[node name="Teleporter" type="Node3D" unique_id=752010719 node_paths=PackedStringArray("_area", "_collisionShape")]
+script = ExtResource("1_nqtv7")
+_area = NodePath("Area3D")
+_collisionShape = NodePath("Area3D/CollisionShape3D")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1194730729]
+material_override = ExtResource("1_650hi")
+mesh = SubResource("BoxMesh_nqtv7")
+skeleton = NodePath("")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=233010531]
+collision_layer = 512
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=372153836]
+shape = SubResource("BoxShape3D_g0y16")

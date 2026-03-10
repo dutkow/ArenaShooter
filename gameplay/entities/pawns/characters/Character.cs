@@ -428,4 +428,9 @@ public partial class Character : Pawn, IDamageable
         MovementComp.QueueLaunch(velocity);
     }
 
+    public void Teleport(Vector3 position, float yawRotation)
+    {
+        MovementComp.State.Position = position;
+        MovementComp.State.Yaw = yawRotation;
+    }
 }

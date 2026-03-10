@@ -7,6 +7,7 @@
 [ext_resource type="Material" uid="uid://dv7m4nprffc73" path="res://assets/materials/yellow_material.tres" id="6_j45q0"]
 [ext_resource type="PackedScene" uid="uid://c7v5l5n1d2ri" path="res://gameplay/entities/interactables/jump_pad.tscn" id="6_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://ij2ubjvy7ffe" path="res://gameplay/entities/pickups/pickup.tscn" id="7_j45q0"]
+[ext_resource type="PackedScene" uid="uid://cbaahdrba8jrc" path="res://gameplay/entities/interactables/teleporter.tscn" id="8_pc4o5"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hsoxx"]
 
@@ -41,7 +42,7 @@ transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76
 shadow_enabled = true
 
 [node name="SpawnPoint" parent="." unique_id=802920205 instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 12.648947, 3.9694695, -20.762333)
+transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 20.382608, 7.500254, -17.91249)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1490177417]
 
@@ -64,15 +65,6 @@ transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.864
 
 [node name="SpawnPoint6" parent="." unique_id=1609247714 instance=ExtResource("2_j23ab")]
 transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 4.138729, 1.3986387, 6.186696)
-
-[node name="SpawnPoint7" parent="." unique_id=854656249 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 4.138729, 1.3986387, -21.01632)
-
-[node name="SpawnPoint4" parent="." unique_id=798974585 instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -7.112715, 6.9946356, -18.443748)
-
-[node name="SpawnPoint8" parent="." unique_id=64594257 instance=ExtResource("2_j23ab")]
-transform = Transform3D(-0.55336285, 0, -0.8329407, 0, 1, 0, 0.8329407, 0, -0.55336285, -7.112715, 6.9946356, -9.736591)
 
 [node name="JumpPad" parent="." unique_id=655431875 instance=ExtResource("6_m0y5v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.1323514, 0)
@@ -122,3 +114,11 @@ shape = SubResource("BoxShape3D_j45q0")
 
 [node name="Pickup" parent="." unique_id=990092975 instance=ExtResource("7_j45q0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7501488, 0)
+
+[node name="Teleporter" parent="." unique_id=752010719 node_paths=PackedStringArray("_targetDestination") instance=ExtResource("8_pc4o5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.728748, 0.9635496, 16.201115)
+_targetDestination = NodePath("Marker3D")
+
+[node name="Marker3D" type="Marker3D" parent="Teleporter" unique_id=419338207]
+transform = Transform3D(-0.703804, 0, 0.71039426, 0, 1, 0, -0.71039426, 0, -0.703804, 52.72905, 0.6987195, 7.0514946)
+gizmo_extents = 5.0
