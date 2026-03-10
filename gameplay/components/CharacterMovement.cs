@@ -122,7 +122,6 @@ public class CharacterMovement
         {
             if (_isOnSlope && _slopeDirectionIsDown)
             {
-                GD.Print("projecting velo on slope!");
                 state.Velocity = ProjectVelocityOnSlope(state.Velocity);
             }
             else
@@ -282,23 +281,6 @@ public class CharacterMovement
 
                 _isOnSlope = OnSlope();
                 _slopeDirectionIsDown = IsMovingDownSlope(state.Velocity);
-
-                // ad
-                if (_isOnSlope)
-                {
-                    if(_slopeDirectionIsDown)
-                    {
-                        GD.Print($"we are moving on a slope, going down!");
-                    }
-                    else
-                    {
-                        GD.Print($"we are moving on a slope, going up!");
-                    }
-                }
-                else
-                {
-                    GD.Print($"we are not on a slope!");
-                }
             }
         }
         else
@@ -391,10 +373,12 @@ public class CharacterMovement
     private bool IsMovingDownSlope(Vector3 velocity)
     {
         if (!_isOnSlope)
-        {
             return false;
-        }
 
-        return velocity.Dot(_groundNormal) > 0.0f;
+        // Project velocity onto the slope plane
+        Vector3 slopeDirection = velocity - _groundNormal * velocity.Dot(_groundNormal);
+
+        // Compare the slope direction with the downward direction along the slope
+        return slopeDirection.Dot(Vector3.Down) > 0;
     }
 }
