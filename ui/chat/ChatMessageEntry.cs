@@ -26,7 +26,7 @@ public partial class ChatMessageEntry : Control
 
         if(MatchState.Instance.ConnectedPlayers.TryGetValue(chatMessageInfo.PlayerID, out var playerState))
         {
-            _senderNameLabel.Text = playerState.PlayerName;
+            _senderNameLabel.Text = playerState.PlayerName + ":";
         }
         else
         {

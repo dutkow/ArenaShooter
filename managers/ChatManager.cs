@@ -28,7 +28,7 @@ public class ChatManager
 
     public static ChatManager Instance { get; private set; }
 
-    public event Action<ChatMessageInfo>? NewChatMessage;
+    public event Action<ChatMessageInfo>? ChatMessageReceived;
 
     // Server -> client validated chat message that should appear in chat log.
 
@@ -60,7 +60,7 @@ public class ChatManager
         var msg = new ChatMessage();
         msg.ReadMessage(data);
 
-        NewChatMessage?.Invoke(msg.ToInfo());
+        ChatMessageReceived?.Invoke(msg.ToInfo());
     }
 
     // Client -> server chat message request

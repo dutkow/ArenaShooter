@@ -5,8 +5,8 @@ public partial class ChatLog : ScrollContainer
 {
     const int MAX_CHAT_MESSAGES_IN_LOG = 100;
 
-    [Export] private PackedScene _chatEntryScene;
-    [Export] private VBoxContainer _vBoxContainer;
+    [Export] private PackedScene _chatMessageEntryScene;
+    [Export] private VBoxContainer _chatMessagesContainer;
 
     private bool _isScrolledToBottom = true;
 
@@ -14,14 +14,14 @@ public partial class ChatLog : ScrollContainer
     {
         base._Ready();
 
-        ChatManager.Instance.NewChatMessage += AddChatMessage;
+        ChatManager.Instance.ChatMessageReceived += OnChatMessageReceived;
     }
 
-    public void AddChatMessage(ChatMessageInfo info)
+    public void OnChatMessageReceived(ChatMessageInfo info)
     {
-        _vBoxContainer.AddChild(ChatMessageEntry.Create(_chatEntryScene, info));
+        _chatMessagesContainer.AddChild(ChatMessageEntry.Create(_chatMessageEntryScene, info));
 
-        if (_vBoxContainer.GetChildCount() > MAX_CHAT_MESSAGES_IN_LOG)
+        if (_chatMessagesContainer.GetChildCount() > MAX_CHAT_MESSAGES_IN_LOG)
         {
             RemoveOldestMessage();
         }
@@ -34,7 +34,7 @@ public partial class ChatLog : ScrollContainer
 
     public void RemoveOldestMessage()
     {
-        _vBoxContainer.GetChild(0).QueueFree();
+        _chatMessagesContainer.GetChild(0).QueueFree();
     }
 
     public void ScrollToBottom()

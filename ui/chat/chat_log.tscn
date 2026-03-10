@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://cv8e7uwtlq1lq"]
+
+[ext_resource type="Script" uid="uid://d1na2uriqb0j6" path="res://ui/chat/ChatLog.cs" id="1_wdv4d"]
+[ext_resource type="PackedScene" uid="uid://dastj3mb6lt4j" path="res://ui/chat/chat_message_entry.tscn" id="2_eeh83"]
+
+[node name="ChatLog" type="ScrollContainer" unique_id=1747456559 node_paths=PackedStringArray("_chatMessagesContainer")]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_wdv4d")
+_chatMessageEntryScene = ExtResource("2_eeh83")
+_chatMessagesContainer = NodePath("ChatMessagesContainer")
+
+[node name="ChatMessagesContainer" type="VBoxContainer" parent="." unique_id=557885442]
+layout_mode = 2
