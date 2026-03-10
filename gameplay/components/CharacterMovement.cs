@@ -2,6 +2,7 @@ using Godot;
 using Godot.Collections;
 using System;
 using System.Linq;
+using System.Resources;
 using static Godot.Image;
 using static Godot.WebSocketPeer;
 
@@ -38,6 +39,7 @@ public class CharacterMovement
 
     // Only used for server-side grounded logic
     private bool _isGrounded = false;
+    private bool _isOnSlope = false;
 
     public CharacterMoveState State = new();
 
@@ -225,6 +227,8 @@ public class CharacterMovement
         return safeMotion;
     }
 
+    private bool _slopeDirectionIsDown = false;
+
     private void CheckGrounded(CharacterMoveState state)
     {
         var spaceState = _character.GetWorld3D().DirectSpaceState;
@@ -245,9 +249,47 @@ public class CharacterMovement
         query.SetExclude(_characterCollisionRids);
 
         var result = spaceState.IntersectRay(query);
-        bool grounded = result.Count > 0;
+        _isGrounded = result.Count > 0;
 
-        _isGrounded = grounded;
+        if(_isGrounded)
+        {
+            float horizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
+
+            if(horizontalVelocity == 0.0f)
+            {
+                return;
+            }
+            if (result.TryGetValue("normal", out var normal))
+            {
+                _groundNormal = (Vector3)normal;
+
+                _isOnSlope = OnSlope();
+                _slopeDirectionIsDown = IsMovingDownSlope(state.Velocity);
+
+                // ad
+                if (_isOnSlope)
+                {
+                    if(_slopeDirectionIsDown)
+                    {
+                        GD.Print($"we are moving on a slope, going down!");
+                    }
+                    else
+                    {
+                        GD.Print($"we are moving on a slope, going up!");
+                    }
+                }
+                else
+                {
+                    GD.Print($"we are not on a slope!");
+                }
+            }
+        }
+        else
+        {
+            _groundNormal = Vector3.Zero;
+            _isOnSlope = false;
+        }
+        
     }
 
     public void HandleInput(ClientInputCommand cmd, float delta)
@@ -263,16 +305,11 @@ public class CharacterMovement
         {
             Vector3 desiredDir = desiredMoveDirection.Normalized();
 
-            float forwardSpeed = horizontalVel.Dot(desiredDir);
-            Vector3 forwardVel = desiredDir * forwardSpeed;
-            Vector3 perpVel = horizontalVel - forwardVel;
+            float speed = horizontalVel.Length();
 
-            horizontalVel = forwardVel; // cancel perpendicular momentum
+            Vector3 newVel = horizontalVel.MoveToward(desiredDir * MaxGroundSpeed, GroundAcceleration * delta);
 
-            float accelAmount = GroundAcceleration * delta;
-            float newForwardSpeed = Math.Min(forwardSpeed + accelAmount, MaxGroundSpeed);
-
-            horizontalVel = desiredDir * newForwardSpeed;
+            horizontalVel = newVel;
         }
         else
         {
@@ -318,5 +355,29 @@ public class CharacterMovement
     public void QueueLaunch(Vector3 vector)
     {
         LaunchVector = vector;
+    }
+
+    Vector3 _groundNormal;
+
+
+    public void CalculateGroundNormal(Vector3 something)
+    {
+
+    }
+
+    public bool OnSlope()
+    {
+        float slopeAngle = Mathf.RadToDeg(Mathf.Acos(_groundNormal.Dot(Vector3.Up)));
+        return slopeAngle > 0.0f && slopeAngle < MaxWalkableSlopeAngle;
+    }
+
+    private bool IsMovingDownSlope(Vector3 velocity)
+    {
+        if (!_isOnSlope)
+        {
+            return false;
+        }
+
+        return velocity.Dot(_groundNormal) > 0.0f;
     }
 }
