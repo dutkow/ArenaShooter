@@ -1,0 +1,12 @@
+[gd_scene load_steps=5 format=3 uid="uid://k5kltmpuefyd"]
+
+[ext_resource type="PackedScene" uid="uid://cegtosboea0rx" path="res://settings_tab.tscn" id="1_1s1ly"]
+[ext_resource type="Script" uid="uid://ba823at8saeoa" path="res://ui/settings_menu/input_bindings/InputBindingsTab.cs" id="2_hiov8"]
+[ext_resource type="PackedScene" uid="uid://cmrx2qve6x5td" path="res://ui/settings_menu/input_bindings/input_binding_settings_entry.tscn" id="3_hiov8"]
+[ext_resource type="PackedScene" uid="uid://b6tffji8uoout" path="res://ui/settings_menu/input_bindings/input_category_panel.tscn" id="3_ij663"]
+
+[node name="InputBindingsTab" node_paths=PackedStringArray("_inputBindingsContainer") instance=ExtResource("1_1s1ly")]
+script = ExtResource("2_hiov8")
+_inputCategoryPanelScene = ExtResource("3_ij663")
+_inputBindingSettingEntryScene = ExtResource("3_hiov8")
+_inputBindingsContainer = NodePath("MarginContainer/ScrollContainer/VBoxContainer")

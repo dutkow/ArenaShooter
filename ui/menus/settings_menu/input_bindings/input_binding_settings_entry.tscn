@@ -1,0 +1,102 @@
+[gd_scene load_steps=3 format=3 uid="uid://cmrx2qve6x5td"]
+
+[ext_resource type="PackedScene" uid="uid://dho6ke6v32vuk" path="res://settings_entry.tscn" id="1_437yo"]
+[ext_resource type="Script" uid="uid://bbgo3esd8mtgt" path="res://ui/settings_menu/input_bindings/InputBindingSettingsEntry.cs" id="2_7hf2t"]
+
+[node name="InputBindingSettingsEntry" node_paths=PackedStringArray("_primaryInputButton", "_secondaryInputButton", "_clearPrimaryInputButton", "_clearSecondaryInputButton", "_resetToDefaultsButton", "SettingNameLabel") instance=ExtResource("1_437yo")]
+script = ExtResource("2_7hf2t")
+_primaryInputButton = NodePath("HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer/PrimaryInputButton")
+_secondaryInputButton = NodePath("HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer2/SecondaryInputButton")
+_clearPrimaryInputButton = NodePath("HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer/Control/ClearPrimaryInputButton")
+_clearSecondaryInputButton = NodePath("HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer2/Control/ClearSecondaryInputButton")
+_resetToDefaultsButton = NodePath("HBoxContainer/HBoxContainer/HBoxContainer/Control/ResetToDefaultsButton")
+SettingNameLabel = NodePath("HBoxContainer/SettingNameLabel")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/HBoxContainer" index="0"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 32
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/HBoxContainer/HBoxContainer" index="0"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PrimaryInputButton" type="Button" parent="HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer" index="0"]
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 4
+text = "[Input]"
+
+[node name="Control" type="Control" parent="HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer" index="1"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="ClearPrimaryInputButton" type="Button" parent="HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer/Control" index="0"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -15.5
+offset_right = 9.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 4
+text = "X"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/HBoxContainer/HBoxContainer" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SecondaryInputButton" type="Button" parent="HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer2" index="0"]
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 4
+text = "[Input]"
+
+[node name="Control" type="Control" parent="HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer2" index="1"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="ClearSecondaryInputButton" type="Button" parent="HBoxContainer/HBoxContainer/HBoxContainer/HBoxContainer2/Control" index="0"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -15.5
+offset_right = 9.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 4
+text = "X"
+
+[node name="Control" type="Control" parent="HBoxContainer/HBoxContainer/HBoxContainer" index="2"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+
+[node name="ResetToDefaultsButton" type="Button" parent="HBoxContainer/HBoxContainer/HBoxContainer/Control" index="0"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -27.0
+offset_top = -15.5
+offset_right = 27.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 4
+text = "RESET"

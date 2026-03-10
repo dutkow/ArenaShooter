@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://b6tffji8uoout"]
+
+[ext_resource type="Script" uid="uid://5dsnipioglwd" path="res://ui/settings_menu/input_bindings/InputCategoryPanel.cs" id="1_ohu7v"]
+[ext_resource type="PackedScene" uid="uid://cmrx2qve6x5td" path="res://ui/settings_menu/input_bindings/input_binding_settings_entry.tscn" id="2_n8a1i"]
+
+[node name="InputCategoryPanel" type="VBoxContainer" node_paths=PackedStringArray("_categoryLabel", "_inputBindingsContainer")]
+offset_right = 492.0
+offset_bottom = 393.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_ohu7v")
+_categoryLabel = NodePath("CategoryLabel")
+_inputBindingsContainer = NodePath("InputBindingsContainer")
+_inputBindingSettingEntryScene = ExtResource("2_n8a1i")
+
+[node name="CategoryLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_vertical = 1
+theme_type_variation = &"HeaderMedium"
+text = "Category"
+vertical_alignment = 1
+
+[node name="InputBindingsContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="InputBindingSettingsEntry" parent="InputBindingsContainer" instance=ExtResource("2_n8a1i")]
+layout_mode = 2
+
+[node name="InputBindingSettingsEntry2" parent="InputBindingsContainer" instance=ExtResource("2_n8a1i")]
+layout_mode = 2
+
+[node name="InputBindingSettingsEntry3" parent="InputBindingsContainer" instance=ExtResource("2_n8a1i")]
+layout_mode = 2
+
+[node name="InputBindingSettingsEntry4" parent="InputBindingsContainer" instance=ExtResource("2_n8a1i")]
+layout_mode = 2

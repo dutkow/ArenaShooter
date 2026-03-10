@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://b8e26wpcn2xos"]
+
+[ext_resource type="PackedScene" uid="uid://cegtosboea0rx" path="res://settings_tab.tscn" id="1_fh1px"]
+[ext_resource type="Script" uid="uid://bi7cybcw3a6vt" path="res://ui/settings_menu/interface/InterfaceTab.cs" id="2_6gi2t"]
+
+[node name="InterfaceTab" instance=ExtResource("1_fh1px")]
+script = ExtResource("2_6gi2t")

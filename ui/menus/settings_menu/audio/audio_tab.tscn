@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://dtgd6ksc6v6x1"]
+
+[ext_resource type="PackedScene" uid="uid://cegtosboea0rx" path="res://settings_tab.tscn" id="1_7a0hc"]
+[ext_resource type="Script" uid="uid://cdcqkgfo4sx20" path="res://ui/settings_menu/audio/AudioTab.cs" id="2_61e3m"]
+[ext_resource type="PackedScene" uid="uid://cvc1x0ahlvbok" path="res://slider_settings_entry.tscn" id="3_ywkqy"]
+
+[node name="AudioTab" instance=ExtResource("1_7a0hc")]
+script = ExtResource("2_61e3m")
+
+[node name="MasterVolume" parent="MarginContainer/ScrollContainer/VBoxContainer" index="0" instance=ExtResource("3_ywkqy")]
+layout_mode = 2
+SettingPath = "Audio.MasterVolume"
+
+[node name="MusicVolume" parent="MarginContainer/ScrollContainer/VBoxContainer" index="1" instance=ExtResource("3_ywkqy")]
+layout_mode = 2
+SettingPath = "Audio.MusicVolume"
+
+[node name="InterfaceVolume" parent="MarginContainer/ScrollContainer/VBoxContainer" index="2" instance=ExtResource("3_ywkqy")]
+layout_mode = 2
+SettingPath = "Audio.InterfaceVolume"
+
+[node name="WorldVolume" parent="MarginContainer/ScrollContainer/VBoxContainer" index="3" instance=ExtResource("3_ywkqy")]
+layout_mode = 2
+SettingPath = "Audio.WorldVolume"

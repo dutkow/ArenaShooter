@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://drg2arpgp7q37"]
+
+[ext_resource type="PackedScene" uid="uid://cegtosboea0rx" path="res://settings_tab.tscn" id="1_ak551"]
+[ext_resource type="Script" uid="uid://bgqqj5xsfxw8j" path="res://ui/settings_menu/controls/ControlsTab.cs" id="2_ceqdb"]
+[ext_resource type="PackedScene" uid="uid://cvc1x0ahlvbok" path="res://slider_settings_entry.tscn" id="3_jv8g3"]
+[ext_resource type="PackedScene" uid="uid://ckriv001qc5kn" path="res://dropdown_settings_entry.tscn" id="10_hfnus"]
+[ext_resource type="Script" uid="uid://btj2ebjckpjwc" path="res://CursorLockSettingsEntry.cs" id="11_5hqaw"]
+
+[node name="ControlsTab" instance=ExtResource("1_ak551")]
+script = ExtResource("2_ceqdb")
+
+[node name="PanSpeedSettingsEntry" parent="MarginContainer/ScrollContainer/VBoxContainer" index="0" instance=ExtResource("3_jv8g3")]
+layout_mode = 2
+SettingPath = "Controls.PanSpeed"
+
+[node name="DragPanSpeed" parent="MarginContainer/ScrollContainer/VBoxContainer" index="1" instance=ExtResource("3_jv8g3")]
+layout_mode = 2
+SettingPath = "Controls.DragPanSpeed"
+
+[node name="EdgeScrollSpeed" parent="MarginContainer/ScrollContainer/VBoxContainer" index="2" instance=ExtResource("3_jv8g3")]
+layout_mode = 2
+SettingPath = "Controls.EdgeScrollSpeed"
+
+[node name="PanSmoothing" parent="MarginContainer/ScrollContainer/VBoxContainer" index="3" instance=ExtResource("3_jv8g3")]
+layout_mode = 2
+SettingPath = "Controls.PanSmoothing"
+
+[node name="ZoomSpeed" parent="MarginContainer/ScrollContainer/VBoxContainer" index="4" instance=ExtResource("3_jv8g3")]
+layout_mode = 2
+SettingPath = "Controls.ZoomSpeed"
+
+[node name="ZoomSmoothing" parent="MarginContainer/ScrollContainer/VBoxContainer" index="5" instance=ExtResource("3_jv8g3")]
+layout_mode = 2
+SettingPath = "Controls.ZoomSmoothing"
+
+[node name="CursorLock" parent="MarginContainer/ScrollContainer/VBoxContainer" index="6" instance=ExtResource("10_hfnus")]
+layout_mode = 2
+script = ExtResource("11_5hqaw")
