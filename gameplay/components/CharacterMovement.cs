@@ -99,10 +99,6 @@ public class CharacterMovement
         {
             state.Velocity.Y += Gravity * delta;
         }
-        else
-        {
-            if (state.Velocity.Y < 0) state.Velocity.Y = 0;
-        }
 
         state.MoveMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
 
@@ -110,6 +106,7 @@ public class CharacterMovement
         {
             case CharacterMoveMode.GROUNDED:
                 HandleGroundedMovement(state, desiredMoveDirection, delta);
+
                 break;
 
             case CharacterMoveMode.FALLING:
@@ -121,10 +118,30 @@ public class CharacterMovement
 
         Vector3 safeMotion = HandleCollision(state, delta);
 
+        if(_isGrounded)
+        {
+            if (_isOnSlope && _slopeDirectionIsDown)
+            {
+                GD.Print("projecting velo on slope!");
+                state.Velocity = ProjectVelocityOnSlope(state.Velocity);
+            }
+            else
+            {
+                if (state.Velocity.Y < 0) state.Velocity.Y = 0;
+
+            }
+        }
+
+
         state.Position += safeMotion;
 
 
         return state;
+    }
+
+    private Vector3 ProjectVelocityOnSlope(Vector3 velocity)
+    {
+        return velocity - _groundNormal * velocity.Dot(_groundNormal);
     }
 
     private void Jump(CharacterMoveState state)
