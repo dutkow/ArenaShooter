@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://ij2ubjvy7ffe"]
+
+[ext_resource type="Script" uid="uid://bpda86rv1vsen" path="res://gameplay/pickups/Pickup.cs" id="1_3gfqk"]
+[ext_resource type="Material" uid="uid://bldewyo7dokum" path="res://assets/materials/red_material.tres" id="2_gcb4p"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ahuoo"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gcb4p"]
+size = Vector3(3, 3, 3)
+
+[node name="Pickup" type="Node3D" unique_id=990092975 node_paths=PackedStringArray("_mesh")]
+script = ExtResource("1_3gfqk")
+_mesh = NodePath("MeshInstance3D")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=690221962]
+material_override = ExtResource("2_gcb4p")
+mesh = SubResource("BoxMesh_ahuoo")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=62793142]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1608276176]
+shape = SubResource("BoxShape3D_gcb4p")
