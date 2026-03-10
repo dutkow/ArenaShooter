@@ -56,4 +56,20 @@ public static class NetworkConstants
         catch { }
         return localIP;
     }
+
+    /// </summary>
+    public static string GetBroadcastIP()
+    {
+        try
+        {
+            var parts = GetLocalIP().Split('.');
+            if (parts.Length != 4) return "255.255.255.255"; // fallback
+
+            return $"{parts[0]}.{parts[1]}.{parts[2]}.255";
+        }
+        catch
+        {
+            return "255.255.255.255";
+        }
+    }
 }

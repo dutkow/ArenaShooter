@@ -1,5 +1,7 @@
+using Godot;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
@@ -11,7 +13,7 @@ public class ServerBrowserRequests
 {
     public static ServerBrowserRequests Instance { get; } = new ServerBrowserRequests();
 
-    private readonly HttpClient _httpClient = new HttpClient();
+    private readonly System.Net.Http.HttpClient _httpClient = new();
 
     public event Action RefreshServersStarted;
     public event Action<List<ServerInfo>> RefreshInternetServersFinished;
@@ -149,8 +151,9 @@ public class ServerBrowserRequests
         var discoveredServers = new List<ServerInfo>();
         var seenServerIDs = new HashSet<string>();
 
-        using (var listener = new UdpClient(NetworkConstants.DEFAULT_PORT))
+        using (var listener = new UdpClient(new IPEndPoint(IPAddress.Any, NetworkConstants.DEFAULT_PORT)))
         {
+            GD.Print($"listening to {NetworkConstants.DEFAULT_PORT}");
             listener.EnableBroadcast = true;
 
             var timeout = DateTime.Now.AddSeconds(listenSeconds);

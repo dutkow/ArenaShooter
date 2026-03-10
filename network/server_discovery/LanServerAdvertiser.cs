@@ -35,13 +35,16 @@ public partial class LanServerAdvertiser
     {
         try
         {
-            if (_udp == null)
-            {
-                return;
-            }
+            if (_udp == null) return;
 
-            byte[] data = Encoding.UTF8.GetBytes(_info.ToString());
-            _udp.Send(data, data.Length, new IPEndPoint(NetUtils.IPStringToLong(_info.IP), _info.Port));
+            byte[] data = Encoding.UTF8.GetBytes(_info.ToJson());
+
+            IPAddress IP = IPAddress.Parse(NetworkConstants.GetBroadcastIP());
+            IPEndPoint endPoint = new IPEndPoint(IP, _info.Port);
+
+            _udp.Send(data, data.Length, endPoint);
+
+            GD.Print($"broadcasting. IP string: {_info.IP}. port = {_info.Port}");
         }
         catch (Exception ex)
         {
