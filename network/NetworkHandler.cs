@@ -56,8 +56,6 @@ public partial class NetworkHandler : Node
 
     private double lanBroadcastTimer = 0.0;
 
-    public int LanBroadcastPort = 42070;
-
     public Action<ServerInfo>? OnLanServerDiscovered;
 
     private Dictionary<string, ServerInfo> _discoveredLanServers = new();
@@ -147,11 +145,11 @@ public partial class NetworkHandler : Node
     // ----------------------
     // Server functions
     // ----------------------
-    public void StartServer(string ipAddress = "127.0.0.1", int port = 42069)
+    public void StartLanServer(string IP = "127.0.0.1", int port = 42069)
     {
-        GD.Print($"Attempting to start server. IP = {ipAddress}. Port = {port}.");
+        GD.Print($"Attempting to start server. IP = {IP}. Port = {port}.");
         Connection = new ENetConnection();
-        var error = Connection.CreateHostBound(ipAddress, port);
+        var error = Connection.CreateHostBound(IP, port);
         if (error != Error.Ok)
         {
             GD.Print($"Server failed to start: {error}");
@@ -163,6 +161,8 @@ public partial class NetworkHandler : Node
         isServer = true;
 
         OnServerStarted?.Invoke();
+
+        GD.Print($"starting lan server on port = {IP}");
     }
 
     private void PeerConnected(ENetPacketPeer peer)
@@ -262,7 +262,7 @@ public partial class NetworkHandler : Node
         _discoveredLanServers.Clear();
 
         lanListenPeer = new PacketPeerUdp();
-        lanListenPeer.Bind(LanBroadcastPort);
+        lanListenPeer.Bind(NetworkConstants.DEFAULT_PORT);
 
         isListeningForLan = true;
         lanListenTimer = listenSeconds;

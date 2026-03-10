@@ -26,14 +26,18 @@ public partial class ServerBrowser : Control
     {
         base._EnterTree();
 
-        NetworkSession.Instance.OnServerRefreshFinished += OnServerRefreshFinished;
+        ServerBrowserRequests.Instance.RefreshLanServersFinished += OnLanServerRefreshFinished;
+        ServerBrowserRequests.Instance.RefreshInternetServersFinished += OnInternetServerRefreshFinished;
+
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
 
-        NetworkSession.Instance.OnServerRefreshFinished -= OnServerRefreshFinished;
+        ServerBrowserRequests.Instance.RefreshLanServersFinished -= OnLanServerRefreshFinished;
+        ServerBrowserRequests.Instance.RefreshInternetServersFinished += OnInternetServerRefreshFinished;
+
     }
 
     public override void _Ready()
@@ -96,11 +100,22 @@ public partial class ServerBrowser : Control
         }
     }
 
-    public void OnServerRefreshFinished(List<ServerInfo> serverResults)
+    public void OnLanServerRefreshFinished(List<ServerInfo> serverResults) // keeping this and internet as separate functions just in case for now
     {
-        GD.Print("on server refresh finished on server browser");
+        PopulateServerResults(serverResults);
 
-        if(serverResults.Count == 0)
+    }
+
+    public void OnInternetServerRefreshFinished(List<ServerInfo> serverResults)
+    {
+        PopulateServerResults(serverResults);
+    }
+
+    private void PopulateServerResults(List<ServerInfo> serverResults)
+    {
+        GD.Print("Server refresh finished on server browser");
+
+        if (serverResults.Count == 0)
         {
             _serverRefreshLabel.Text = "No servers found!";
             return;
@@ -109,10 +124,9 @@ public partial class ServerBrowser : Control
         _serverRefreshLabel.Hide();
 
         foreach (var serverInfo in serverResults)
-        {
             AddServerResult(serverInfo);
-        }
     }
+
 
     public void AddServerResult(ServerInfo serverInfo)
     {

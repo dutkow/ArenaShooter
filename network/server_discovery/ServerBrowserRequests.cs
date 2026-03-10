@@ -149,7 +149,7 @@ public class ServerBrowserRequests
         var discoveredServers = new List<ServerInfo>();
         var seenServerIDs = new HashSet<string>();
 
-        using (var listener = new UdpClient(NetworkHandler.Instance.LanBroadcastPort))
+        using (var listener = new UdpClient(NetworkConstants.DEFAULT_PORT))
         {
             listener.EnableBroadcast = true;
 
@@ -164,7 +164,7 @@ public class ServerBrowserRequests
                     var data = Encoding.UTF8.GetString(result.Buffer);
                     var serverInfo = ServerInfo.FromJson(data);
 
-                    if (serverInfo != null && !seenServerIDs.Contains(serverInfo.Name)) // or use a unique ID
+                    if (serverInfo != null && !seenServerIDs.Contains(serverInfo.Name))
                     {
                         discoveredServers.Add(serverInfo);
                         seenServerIDs.Add(serverInfo.Name);

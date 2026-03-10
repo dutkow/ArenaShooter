@@ -10,7 +10,6 @@ using System.Timers;
 /// </summary>
 public partial class LanServerAdvertiser
 {
-    private const int BroadcastPort = 42070;
     private UdpClient _udp;
     private ServerInfo _info;
     private System.Timers.Timer _timer;
@@ -42,7 +41,7 @@ public partial class LanServerAdvertiser
             }
 
             byte[] data = Encoding.UTF8.GetBytes(_info.ToString());
-            _udp.Send(data, data.Length, new IPEndPoint(IPAddress.Broadcast, BroadcastPort));
+            _udp.Send(data, data.Length, new IPEndPoint(NetUtils.IPStringToLong(_info.IP), _info.Port));
         }
         catch (Exception ex)
         {

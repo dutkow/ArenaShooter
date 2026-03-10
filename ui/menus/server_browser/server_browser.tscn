@@ -124,6 +124,7 @@ layout_mode = 2
 
 [node name="RefreshButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=950039132]
 layout_mode = 2
+text = "REFRESH"
 
 [node name="BackButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=1047237470]
 layout_mode = 2

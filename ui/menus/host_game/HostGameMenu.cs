@@ -35,7 +35,8 @@ public partial class HostGameMenu : Control
     public void OnHostGameButtonPressed()
     {
         var serverInfo = new ServerInfo();
-        serverInfo.IP = 
+        serverInfo.IP = NetworkConstants.GetLocalIP();
+        serverInfo.Port = NetworkConstants.DEFAULT_PORT;   
         serverInfo.Name = "Test Server";
         serverInfo.MapID = (string)_mapOptionButton.GetItemMetadata(_mapOptionButton.Selected);
         NetworkSession.Instance.HostLanServer(serverInfo);
