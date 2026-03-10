@@ -24,13 +24,16 @@ public partial class ChatPanel : Control
 
     public void SendChat()
     {
-        ChatMessageRequest.Send(new ChatMessageInfo(ChatChannel.ALL, _chatInputField.Text)); // keeping simple for now
-        _chatInputField.Clear();
+        if(_chatInputField.Text.Length > 0)
+        {
+            ChatMessageRequest.Send(new ChatMessageInfo(ChatChannel.ALL, _chatInputField.Text)); // keeping simple for now
+            _chatInputField.Clear();
+        }
         Close();
     }
 
     public void Close()
     {
-
+        _chatInputField.ReleaseFocus();
     }
 }
