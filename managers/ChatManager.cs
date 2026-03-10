@@ -24,7 +24,6 @@ public struct ChatMessageInfo
 }
 public class ChatManager
 {
-    public const int MAX_CHAT_MESSAGE_CHARACTERS = 20;
 
     public static ChatManager Instance { get; private set; }
 
@@ -55,30 +54,8 @@ public class ChatManager
         ChatMessageRequest.Send(info);
     }
 
-    public void HandleChatMessage(byte[] data)
+    public void BroadcastChatMessageReceived(ChatMessageInfo info)
     {
-        var msg = new ChatMessage();
-        msg.ReadMessage(data);
-
-        ChatMessageReceived?.Invoke(msg.ToInfo());
-    }
-
-    // Client -> server chat message request
-    public void HandleChatMessageRequest(ENetPacketPeer peer, byte[] data)
-    {
-        var chatMessageRequest = Message.FromData<ChatMessageRequest>(data);
-        byte peerID = (byte)peer.GetMeta("id");
-
-        var info = new ChatMessageInfo();
-        info.Channel = chatMessageRequest.Channel;
-        info.Text = chatMessageRequest.Text;
-        info.PlayerID = peerID;
-
-        if(info.Text.Length > MAX_CHAT_MESSAGE_CHARACTERS)
-        {
-            info.Text = info.Text.Substring(0, MAX_CHAT_MESSAGE_CHARACTERS);
-        }
-
-        ChatMessage.Send(info);
+        ChatMessageReceived?.Invoke(info);
     }
 }

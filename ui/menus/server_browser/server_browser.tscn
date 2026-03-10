@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://dmvq5swhuqelu"]
+[gd_scene format=3 uid="uid://dmvq5swhuqelu"]
 
 [ext_resource type="Script" uid="uid://ch7hcn0bc2af1" path="res://ui/menus/server_browser/ServerBrowser.cs" id="1_j2g02"]
 [ext_resource type="PackedScene" uid="uid://bxcaafo6blio2" path="res://ui/menus/server_browser/server_result_entry.tscn" id="2_oyqsf"]
 
-[node name="ServerBrowser" type="Control" node_paths=PackedStringArray("_serverResultsContainer", "_serverRefreshLabel", "_backButton")]
+[node name="ServerBrowser" type="Control" unique_id=1636699957 node_paths=PackedStringArray("_lanButton", "_internetButton", "_serverResultsContainer", "_serverRefreshLabel", "_backButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,12 +11,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_j2g02")
+_lanButton = NodePath("VBoxContainer/HBoxContainer2/LanButton")
+_internetButton = NodePath("VBoxContainer/HBoxContainer2/InternetButton")
 _serverResultsContainer = NodePath("VBoxContainer/Control/ScrollContainer/ServerResultsContainer")
 _serverRefreshLabel = NodePath("VBoxContainer/Control/ServerRefreshLabel")
 _serverResultEntryScene = ExtResource("2_oyqsf")
 _backButton = NodePath("VBoxContainer/BackButton")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1496516703]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,7 +27,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.16206557, 0.1620656, 0.16206557, 1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1380656655]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,78 +35,78 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1914439720]
 layout_mode = 2
 
-[node name="LanButton" type="Button" parent="VBoxContainer/HBoxContainer2"]
+[node name="LanButton" type="Button" parent="VBoxContainer/HBoxContainer2" unique_id=497419249]
 layout_mode = 2
 text = "LAN"
 
-[node name="InternetButton" type="Button" parent="VBoxContainer/HBoxContainer2"]
+[node name="InternetButton" type="Button" parent="VBoxContainer/HBoxContainer2" unique_id=671406551]
 layout_mode = 2
 text = "INTERNET"
 
-[node name="Label" type="Label" parent="VBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=785160946]
 layout_mode = 2
 text = "Server Browser"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1445839322]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=125350700]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Server Name"
 horizontal_alignment = 1
 
-[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=372832033]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Map"
 horizontal_alignment = 1
 
-[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=2001341625]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Players"
 horizontal_alignment = 1
 
-[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=2063875699]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Ping"
 horizontal_alignment = 1
 
-[node name="Control" type="Control" parent="VBoxContainer"]
+[node name="Control" type="Control" parent="VBoxContainer" unique_id=1541350405]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/Control"]
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/Control" unique_id=68224919]
 layout_mode = 0
 offset_top = 4.0
 offset_right = 800.0
 offset_bottom = 546.0
 size_flags_vertical = 3
 
-[node name="ServerResultsContainer" type="VBoxContainer" parent="VBoxContainer/Control/ScrollContainer"]
+[node name="ServerResultsContainer" type="VBoxContainer" parent="VBoxContainer/Control/ScrollContainer" unique_id=70439588]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ServerResultEntry" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" instance=ExtResource("2_oyqsf")]
+[node name="ServerResultEntry" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" unique_id=1734530069 instance=ExtResource("2_oyqsf")]
 layout_mode = 2
 
-[node name="ServerResultEntry2" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" instance=ExtResource("2_oyqsf")]
+[node name="ServerResultEntry2" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" unique_id=412537522 instance=ExtResource("2_oyqsf")]
 layout_mode = 2
 
-[node name="ServerResultEntry3" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" instance=ExtResource("2_oyqsf")]
+[node name="ServerResultEntry3" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" unique_id=1847784091 instance=ExtResource("2_oyqsf")]
 layout_mode = 2
 
-[node name="ServerResultEntry4" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" instance=ExtResource("2_oyqsf")]
+[node name="ServerResultEntry4" parent="VBoxContainer/Control/ScrollContainer/ServerResultsContainer" unique_id=1338315405 instance=ExtResource("2_oyqsf")]
 layout_mode = 2
 
-[node name="ServerRefreshLabel" type="Label" parent="VBoxContainer/Control"]
+[node name="ServerRefreshLabel" type="Label" parent="VBoxContainer/Control" unique_id=2072496012]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -116,6 +118,6 @@ text = "Refreshing servers..."
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BackButton" type="Button" parent="VBoxContainer"]
+[node name="BackButton" type="Button" parent="VBoxContainer" unique_id=1047237470]
 layout_mode = 2
 text = "BACK"

@@ -131,6 +131,8 @@ public partial class NetworkSession : Node
     {
         SetMode(NetworkMode.LISTEN_SERVER);
 
+        info.IP = NetworkConstants.GetLocalIP();
+
         ServerInfo = info;
 
         _networkHandler.StartServer(info.IP, info.Port);

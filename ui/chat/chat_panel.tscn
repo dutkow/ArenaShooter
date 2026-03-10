@@ -1,5 +1,8 @@
 [gd_scene format=3 uid="uid://8gi047ww2qwf"]
 
+[ext_resource type="PackedScene" uid="uid://cv8e7uwtlq1lq" path="res://ui/chat/chat_log.tscn" id="1_2hd0p"]
+[ext_resource type="PackedScene" uid="uid://dqieytl23qae7" path="res://ui/chat/chat_input_field.tscn" id="2_w03ao"]
+
 [node name="ChatPanel" type="Control" unique_id=1718592845]
 layout_mode = 3
 anchors_preset = 15
@@ -7,3 +10,33 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1110771437]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.29411766)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1731330000]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=336343587]
+layout_mode = 2
+size_flags_vertical = 0
+text = "Chat"
+
+[node name="ChatLog" parent="VBoxContainer" unique_id=1747456559 instance=ExtResource("1_2hd0p")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChatInputField" parent="VBoxContainer" unique_id=316644457 instance=ExtResource("2_w03ao")]
+layout_mode = 2
+size_flags_vertical = 8

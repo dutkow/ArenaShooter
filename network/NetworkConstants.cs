@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Net;
+using System.Net.Sockets;
 
 public static class NetworkConstants
 {
@@ -38,4 +40,20 @@ public static class NetworkConstants
     public const float INTERNET_SERVER_BROADCAST_INTERVAL = 2.0f;
     public const float LAN_SERVER_BROADCAST_INTERVAL = 1.0f;
 
+
+    public static string GetLocalIP()
+    {
+        string localIP = "127.0.0.1"; // fallback
+        try
+        {
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
+            {
+                socket.Connect("8.8.8.8", 65530); // Google DNS, won't actually send
+                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                localIP = endPoint.Address.ToString();
+            }
+        }
+        catch { }
+        return localIP;
+    }
 }

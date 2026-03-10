@@ -27,7 +27,7 @@ public class MessageRouter
             RegisterFromClient(Msg.C2S_CLIENT_COMMAND, ServerGameplayService.HandleClientCommand);
 
             // Chat
-            RegisterFromClient(Msg.C2S_CHAT_MESSAGE_REQUEST, ChatManager.Instance.HandleChatMessageRequest);
+            RegisterFromClient(Msg.C2S_CHAT_MESSAGE_REQUEST, ChatService.HandleChatMessageRequest);
 
         }
         else if (role == NetworkMode.CLIENT)
@@ -47,7 +47,7 @@ public class MessageRouter
             RegisterFromServer(Msg.S2C_PLAYER_DIED, ClientGameplayService.HandlePlayerDied);
 
             // Chat
-            RegisterFromServer(Msg.S2C_CHAT_MESSAGE, ChatManager.Instance.HandleChatMessage);
+            RegisterFromServer(Msg.S2C_CHAT_MESSAGE, ChatService.HandleChatMessage);
         }
     }
 

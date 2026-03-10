@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://m4y05jbaa545"]
+[gd_scene format=3 uid="uid://m4y05jbaa545"]
 
 [ext_resource type="Script" uid="uid://dx071qf2ibvq4" path="res://ui/hud/PlayerHud.cs" id="1_boqfv"]
 [ext_resource type="Texture2D" uid="uid://uue7f6y3spks" path="res://assets/textures/crosshair.png" id="2_y2gd1"]
@@ -7,8 +7,9 @@
 [ext_resource type="PackedScene" uid="uid://doyibe8885wuq" path="res://ui/hud/connected_players_list.tscn" id="5_tbnm7"]
 [ext_resource type="PackedScene" uid="uid://cqs5aptlgfj17" path="res://ui/hud/shield_bar.tscn" id="6_p1j4b"]
 [ext_resource type="PackedScene" uid="uid://fi4eb24dfgbv" path="res://ui/hud/health_bar.tscn" id="6_y2gd1"]
+[ext_resource type="PackedScene" uid="uid://8gi047ww2qwf" path="res://ui/chat/chat_panel.tscn" id="8_3hb5n"]
 
-[node name="PlayerHud" type="Control" node_paths=PackedStringArray("_shieldBar", "_healthBar")]
+[node name="PlayerHud" type="Control" unique_id=58829785 node_paths=PackedStringArray("_shieldBar", "_healthBar")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,7 +20,7 @@ script = ExtResource("1_boqfv")
 _shieldBar = NodePath("VBoxContainer/ShieldBar")
 _healthBar = NodePath("VBoxContainer/HealthBar")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1636130570]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -36,7 +37,7 @@ texture = ExtResource("2_y2gd1")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="MatchTimer" parent="." instance=ExtResource("3_p1j4b")]
+[node name="MatchTimer" parent="." unique_id=1517671925 instance=ExtResource("3_p1j4b")]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -47,7 +48,7 @@ offset_right = 0.0
 offset_bottom = 50.0
 grow_vertical = 1
 
-[node name="MatchDebugPanel" parent="." instance=ExtResource("4_3hb5n")]
+[node name="MatchDebugPanel" parent="." unique_id=809404943 instance=ExtResource("4_3hb5n")]
 layout_mode = 1
 anchors_preset = 0
 anchor_right = 0.0
@@ -57,14 +58,14 @@ offset_bottom = 52.0
 grow_horizontal = 1
 grow_vertical = 1
 
-[node name="ConnectedPlayersList" parent="." instance=ExtResource("5_tbnm7")]
+[node name="ConnectedPlayersList" parent="." unique_id=1533867789 instance=ExtResource("5_tbnm7")]
 layout_mode = 1
 offset_left = 7.0
 offset_top = 63.0
 offset_right = -647.0
 offset_bottom = -398.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=865524840]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -78,8 +79,15 @@ offset_bottom = -32.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="ShieldBar" parent="VBoxContainer" instance=ExtResource("6_p1j4b")]
+[node name="ShieldBar" parent="VBoxContainer" unique_id=545166775 instance=ExtResource("6_p1j4b")]
 layout_mode = 2
 
-[node name="HealthBar" parent="VBoxContainer" instance=ExtResource("6_y2gd1")]
+[node name="HealthBar" parent="VBoxContainer" unique_id=1752731492 instance=ExtResource("6_y2gd1")]
 layout_mode = 2
+
+[node name="ChatPanel" parent="." unique_id=1718592845 instance=ExtResource("8_3hb5n")]
+layout_mode = 1
+offset_left = 584.0
+offset_top = 421.0
+offset_right = -9.0
+offset_bottom = -12.0

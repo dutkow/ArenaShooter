@@ -14,6 +14,8 @@ public partial class ChatLog : ScrollContainer
     {
         base._Ready();
 
+        Clear();
+
         ChatManager.Instance.ChatMessageReceived += OnChatMessageReceived;
     }
 
@@ -40,5 +42,14 @@ public partial class ChatLog : ScrollContainer
     public void ScrollToBottom()
     {
         ScrollVertical = (int)GetVScrollBar().MaxValue;
+    }
+
+    public void Clear()
+    {
+        var children = _chatMessagesContainer.GetChildren();
+        foreach(var child in children)
+        {
+            child.QueueFree();
+        }
     }
 }

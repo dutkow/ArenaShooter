@@ -3,10 +3,13 @@
 [ext_resource type="Script" uid="uid://ca6h5bp54ss2x" path="res://ui/chat/ChatMessageEntry.cs" id="1_bdu2a"]
 
 [node name="ChatMessageEntry" type="Control" unique_id=134562744 node_paths=PackedStringArray("_senderNameLabel", "_messageTextLabel")]
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = -205.0
+offset_bottom = -540.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_bdu2a")
