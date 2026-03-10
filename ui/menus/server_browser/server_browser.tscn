@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ch7hcn0bc2af1" path="res://ui/menus/server_browser/ServerBrowser.cs" id="1_j2g02"]
 [ext_resource type="PackedScene" uid="uid://bxcaafo6blio2" path="res://ui/menus/server_browser/server_result_entry.tscn" id="2_oyqsf"]
 
-[node name="ServerBrowser" type="Control" unique_id=1636699957 node_paths=PackedStringArray("_lanButton", "_internetButton", "_serverResultsContainer", "_serverRefreshLabel", "_backButton")]
+[node name="ServerBrowser" type="Control" unique_id=1636699957 node_paths=PackedStringArray("_lanButton", "_internetButton", "_serverResultsContainer", "_serverRefreshLabel", "_refreshButton", "_backButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,7 +16,8 @@ _internetButton = NodePath("VBoxContainer/HBoxContainer2/InternetButton")
 _serverResultsContainer = NodePath("VBoxContainer/Control/ScrollContainer/ServerResultsContainer")
 _serverRefreshLabel = NodePath("VBoxContainer/Control/ServerRefreshLabel")
 _serverResultEntryScene = ExtResource("2_oyqsf")
-_backButton = NodePath("VBoxContainer/BackButton")
+_refreshButton = NodePath("VBoxContainer/HBoxContainer3/RefreshButton")
+_backButton = NodePath("VBoxContainer/HBoxContainer3/BackButton")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1496516703]
 layout_mode = 1
@@ -118,6 +119,12 @@ text = "Refreshing servers..."
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BackButton" type="Button" parent="VBoxContainer" unique_id=1047237470]
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer" unique_id=490353043]
+layout_mode = 2
+
+[node name="RefreshButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=950039132]
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=1047237470]
 layout_mode = 2
 text = "BACK"

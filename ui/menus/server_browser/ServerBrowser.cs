@@ -17,7 +17,10 @@ public partial class ServerBrowser : Control
 
     [Export] PackedScene _serverResultEntryScene;
 
+    [Export] Button _refreshButton;
     [Export] Button _backButton;
+
+    private bool _searchingLan;
 
     public override void _EnterTree()
     {
@@ -40,13 +43,28 @@ public partial class ServerBrowser : Control
         _lanButton.Pressed += OnLanButtonPressed;
         _internetButton.Pressed += OnInternetButtonPressed;
 
+        _refreshButton.Pressed += OnRefreshButtonPressed;
         _backButton.Pressed += OnBackButtonPressed;
     }
 
     public void Open()
     {
         Show();
+
+        _searchingLan = true;
         RefreshLanServers();
+    }
+
+    public void OnRefreshButtonPressed()
+    {
+        if(_searchingLan)
+        {
+            RefreshLanServers();
+        }
+        else
+        {
+            RefreshInternetServers();
+        }
     }
 
     public void RefreshLanServers()
@@ -58,6 +76,7 @@ public partial class ServerBrowser : Control
 
         ServerBrowserRequests.Instance.RefreshLanServersAsync();
     }
+
 
     public void RefreshInternetServers()
     {
@@ -109,11 +128,23 @@ public partial class ServerBrowser : Control
 
     public void OnLanButtonPressed()
     {
+        if(_searchingLan)
+        {
+            return;
+        }
+        _searchingLan = true;
 
+        RefreshLanServers();
     }
 
     public void OnInternetButtonPressed()
     {
+        if (!_searchingLan)
+        {
+            return;
+        }
+        _searchingLan = false;
 
+        RefreshInternetServers();
     }
 }
