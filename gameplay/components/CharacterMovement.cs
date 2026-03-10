@@ -87,8 +87,10 @@ public class CharacterMovement
         Vector3 desiredMoveDirection = (basis.Z * move.Z + basis.X * move.X).Normalized() * MaxGroundSpeed;
 
         // --- Gravity & jump ---
-        CheckGrounded(state);
-
+        if(_jumpCooldownReady)
+        {
+            CheckGrounded(state);
+        }
 
         // Jump
         if (cmd.Input.HasFlag(InputCommand.JUMP) && _isGrounded && _jumpCooldownReady)
@@ -120,7 +122,7 @@ public class CharacterMovement
 
         if(_isGrounded)
         {
-            if (_isOnSlope && _slopeDirectionIsDown)
+            if(_isOnSlope)
             {
                 state.Velocity = ProjectVelocityOnSlope(state.Velocity);
             }
