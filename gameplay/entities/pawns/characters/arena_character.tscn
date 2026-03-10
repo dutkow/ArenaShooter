@@ -1,6 +1,6 @@
-[gd_scene load_steps=9 format=3 uid="uid://chotxihbm38dv"]
+[gd_scene format=3 uid="uid://chotxihbm38dv"]
 
-[ext_resource type="Script" uid="uid://dejxjrbc1fo6q" path="res://gameplay/pawns/characters/ArenaCharacter.cs" id="1_60ybg"]
+[ext_resource type="Script" uid="uid://dejxjrbc1fo6q" path="res://gameplay/entities/pawns/characters/ArenaCharacter.cs" id="1_60ybg"]
 [ext_resource type="PackedScene" uid="uid://b708cmx0cac5h" path="res://gameplay/weapons/weapon.tscn" id="2_cqiiu"]
 [ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/linear_projectile.tscn" id="3_48rxd"]
 [ext_resource type="Material" uid="uid://5usfvqlgual7" path="res://assets/materials/gray_material.tres" id="4_xipnf"]

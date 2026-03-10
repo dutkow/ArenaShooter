@@ -79,11 +79,13 @@ public partial class MatchState : Node
         base._EnterTree();
 
         Instance = this;
+
+        PickupManager.Create();
+
     }
     public void Initialize()
     {
         ChatManager.Create();
-
 
 
         StartPhase(MatchPhase.WARMUP);
@@ -104,6 +106,7 @@ public partial class MatchState : Node
     public void Tick()
     {
         CurrentTick++;
+
 
         ClientGame.Instance?.Tick();
         ServerGame.Instance?.Tick();

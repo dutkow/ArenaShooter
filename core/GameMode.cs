@@ -14,8 +14,6 @@ public partial class GameMode : Node
 
     public System.Collections.Generic.Dictionary<byte, PlayerController> PlayerControllers = new();
 
-    public PlayerController LocalPlayerController => PlayerControllers[NetworkSession.Instance.LocalPlayerID];
-
     public override void _EnterTree()
     {
         base._EnterTree();

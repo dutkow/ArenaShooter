@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class Pawn : Actor
+public partial class Pawn : Entity
 {
     public Controller Controller { get; private set; }
 

@@ -78,6 +78,8 @@ public partial class Character : Pawn, IDamageable
         Vector3 dir = -Camera.GlobalTransform.Basis.Z;
         _weapon.Tick(delta, Camera.GlobalPosition, dir);
 
+        GlobalPosition = MovementComp.State.Position + new Vector3(0.0f, 0.0f, 0.1f);
+
     }
 
     public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
@@ -365,13 +367,12 @@ public partial class Character : Pawn, IDamageable
     {
         base._Input(@event);
 
-        if(!IsLocal || !_inputEnabled)
+        if(!IsLocal)
         {
             return;
         }
 
-        HandleMouseLook(@event);
-
+        // always process for debugging
         if (Input.IsActionJustPressed("toggle_cursor_lock"))
         {
             if(Input.MouseMode == Input.MouseModeEnum.Captured)
@@ -385,6 +386,13 @@ public partial class Character : Pawn, IDamageable
                 SetInputEnabled(true);
             }
         }
+
+        if(!_inputEnabled)
+        {
+            return;
+        }
+
+        HandleMouseLook(@event);
     }
 
 

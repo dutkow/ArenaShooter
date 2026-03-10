@@ -5,6 +5,7 @@ using System.Linq;
 using System.Resources;
 using static Godot.Image;
 using static Godot.WebSocketPeer;
+using static System.Net.Mime.MediaTypeNames;
 
 public enum CharacterMoveMode : byte
 {
@@ -126,6 +127,10 @@ public class CharacterMovement
         state.Position += safeMotion;
 
 
+        if(!isSimulating && _character.IsAuthority)
+        {
+            CheckCollidables(state);
+        }
         return state;
     }
 
@@ -358,6 +363,46 @@ public class CharacterMovement
         float slopeAngle = Mathf.RadToDeg(Mathf.Acos(_groundNormal.Dot(Vector3.Up)));
         return slopeAngle > 0.0f && slopeAngle < MaxWalkableSlopeAngle;
     }
+
+    private void CheckCollidables(CharacterMoveState state)
+    {
+        if (_character == null || _collisionCapsule == null)
+        {
+            return;
+        }
+
+        var space = _character.GetWorld3D().DirectSpaceState;
+
+        PhysicsShapeQueryParameters3D query = new PhysicsShapeQueryParameters3D
+        {
+            Shape = _collisionCapsule,
+            Transform = new Transform3D(Basis.Identity, state.Position),
+            CollideWithBodies = true,
+            CollideWithAreas = true,
+        };
+
+        query.CollisionMask = PhysicsConstants.CHARACTER_COLLIDABLES_MASK;
+
+
+        var results = space.IntersectShape(query, 8);
+
+        foreach (var result in results)
+        {
+            if(result.TryGetValue("collider_id", out var colliderIDObj))
+            {
+                ulong colliderID = (ulong)colliderIDObj;
+                var obj = GodotObject.InstanceFromId(colliderID);
+                var colliderNode = obj as Node3D;
+
+                if (colliderNode.Owner != null && colliderNode.Owner is ICharacterCollidable collidable)
+                {
+                    collidable.OnCollidedWith(_character);
+                }
+            }
+        }
+    }
+
+
 
     // Quake approximations
 

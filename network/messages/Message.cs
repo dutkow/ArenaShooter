@@ -82,6 +82,8 @@ public class Message
 
     protected void Add(short _) => _dataSize += 2;
     protected void Add(ushort _) => _dataSize += 2;
+
+    protected void Add(ulong _) => _dataSize += 8;
     protected void Add(string s) => _dataSize += 1 + (s != null ? Encoding.UTF8.GetByteCount(s) : 0);
 
     protected void Add(byte[] arr) => _dataSize += 1 + arr.Length;
@@ -126,6 +128,9 @@ public class Message
 
     protected void Write(short value) {_data[_dataPartIndex++] = (byte)(value & 0xFF); _data[_dataPartIndex++] = (byte)((value >> 8) & 0xFF); }
     protected void Write(ushort value) { _data[_dataPartIndex++] = (byte)(value & 0xFF); _data[_dataPartIndex++] = (byte)((value >> 8) & 0xFF); }
+
+    protected void Write(ulong value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 8); _dataPartIndex += 8; }
+
     protected void Write(string value)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(value);
@@ -168,6 +173,8 @@ public class Message
     protected void Read(out float value) { value = BitConverter.ToSingle(_data, _dataPartIndex); _dataPartIndex += 4; }
     protected void Read(out short value) { value = (short)(_data[_dataPartIndex] | (_data[_dataPartIndex + 1] << 8)); _dataPartIndex += 2; }
     protected void Read(out ushort value) { value = (ushort)(_data[_dataPartIndex] | (_data[_dataPartIndex + 1] << 8)); _dataPartIndex += 2; }
+
+    protected void Read(out ulong value) { value = BitConverter.ToUInt64(_data, _dataPartIndex); _dataPartIndex += 8; }
     protected void Read(out string value)
     {
         byte length = _data[_dataPartIndex++];

@@ -48,19 +48,4 @@ public class PlayerSpawned : Message
         };
         NetworkSender.Broadcast(msg);
     }
-
-    public static void Execute(byte playerID, Vector3 spawnPosition, float spawnRotationY)
-    {
-        var pawn = (Pawn)GameMode.Instance.DefaultPawnScene.Instantiate();
-
-        pawn.GlobalPosition = spawnPosition;
-        pawn.GlobalRotation = new Vector3(0.0f, spawnRotationY, 0.0f);
-
-        var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
-
-        if (playerID == NetworkSession.Instance.LocalPlayerID)
-        {
-            GameMode.Instance.LocalPlayerController.Possess(spawnedPlayer);
-        }
-    }
 }

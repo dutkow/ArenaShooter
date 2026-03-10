@@ -19,8 +19,6 @@ public partial class PhysicsProjectile : Projectile
             RigidBody.LookAt(origin + direction, Vector3.Up);
             RigidBody.LinearVelocity = direction.Normalized() * InitialSpeed;
         }
-
-
     }
 
 }

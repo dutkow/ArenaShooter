@@ -1,6 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://ckn5b0j16otei"]
+[gd_scene format=3 uid="uid://ckn5b0j16otei"]
 
-[ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://gameplay/pawns/characters/Character.cs" id="1_4ffih"]
+[ext_resource type="Script" uid="uid://c38ireqsulnhy" path="res://gameplay/entities/pawns/characters/Character.cs" id="1_4ffih"]
 [ext_resource type="Material" uid="uid://dfwluwkwpcsjl" path="res://assets/materials/orange_material.tres" id="2_smvd3"]
 [ext_resource type="PackedScene" uid="uid://b708cmx0cac5h" path="res://gameplay/weapons/weapon.tscn" id="2_u04n7"]
 [ext_resource type="PackedScene" uid="uid://cdr127jylj4u" path="res://assets/external/ion_gun/ion_ray_gun_animations_final_2.tscn" id="3_p3qyi"]
@@ -9,7 +9,7 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_tcfo8"]
 
-[node name="Character" type="Node3D" node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_cameraPivot", "_weapon", "_visualContainer", "_thirdPersonWeaponSocket")]
+[node name="Character" type="Node3D" unique_id=611887419 node_paths=PackedStringArray("Area", "CollisionShape", "Camera", "_characterMesh", "_thirdPersonWeaponMesh", "_cameraPivot", "_weapon", "_visualContainer", "_thirdPersonWeaponSocket")]
 script = ExtResource("1_4ffih")
 Area = NodePath("Area3D")
 CollisionShape = NodePath("Area3D/CollisionShape3D")
@@ -21,28 +21,28 @@ _weapon = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/Camera
 _visualContainer = NodePath("Area3D/CollisionShape3D/VisualContainer")
 _thirdPersonWeaponSocket = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket")
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="Area3D" type="Area3D" parent="." unique_id=391929960]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=739677258]
 shape = SubResource("CapsuleShape3D_sbyc8")
 
-[node name="VisualContainer" type="Node3D" parent="Area3D/CollisionShape3D"]
+[node name="VisualContainer" type="Node3D" parent="Area3D/CollisionShape3D" unique_id=2046479173]
 
-[node name="CharacterMesh" type="MeshInstance3D" parent="Area3D/CollisionShape3D/VisualContainer"]
+[node name="CharacterMesh" type="MeshInstance3D" parent="Area3D/CollisionShape3D/VisualContainer" unique_id=1494249995]
 material_override = ExtResource("2_smvd3")
 mesh = SubResource("CapsuleMesh_tcfo8")
 skeleton = NodePath("../../../..")
 
-[node name="ThirdPersonWeaponSocket" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh"]
+[node name="ThirdPersonWeaponSocket" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh" unique_id=509591268]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.26758337, -0.43688428)
 
-[node name="IonRayGunAnimationsFinal2" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket" instance=ExtResource("3_p3qyi")]
+[node name="IonRayGunAnimationsFinal2" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket" unique_id=779974022 instance=ExtResource("3_p3qyi")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.2215538, 0.26775348, 0.21408409)
 
-[node name="CameraPivot" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh"]
+[node name="CameraPivot" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh" unique_id=1782343330]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4623046, -0.34713352)
 
-[node name="Camera3D" type="Camera3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot"]
+[node name="Camera3D" type="Camera3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot" unique_id=669569284]
 
-[node name="Weapon" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D" instance=ExtResource("2_u04n7")]
+[node name="Weapon" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D" unique_id=239277268 instance=ExtResource("2_u04n7")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.08669387, -0.01097849, 0.18178016)

@@ -88,6 +88,7 @@ public class ClientGame
 
         UnprocessedClientInputs.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
 
+        PickupManager.Instance.ApplyPickupMask(snapshot.PickupMask);
 
         for (int i = 0; i < characterSnapshots.Length; ++i)
         {
@@ -111,6 +112,5 @@ public class ClientGame
                 GD.Print($"player not found in ConnectedPlayers: {characterSnapshot.PlayerID}");
             }
         }
-
     }
 }
