@@ -18,7 +18,6 @@ public static class ServerGameplayService
                     cmd.ReadMessage(data);
 
                     ServerGame.Instance.ReceiveClientCommand(cmd, playerID);
-
                 }
             }
         }

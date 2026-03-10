@@ -100,7 +100,11 @@ public partial class Character : Pawn, IDamageable
         base.ApplyInput(cmd);
 
         MovementComp.HandleInput(cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-        _weapon.HandleInput(cmd.Input);
+
+        if(IsAuthority)
+        {
+            _weapon.HandleInput(cmd.Input);
+        }
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
@@ -111,6 +115,8 @@ public partial class Character : Pawn, IDamageable
         MovementComp.State.Pitch = cmd.Pitch;
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+
+        _weapon.HandleInput(cmd.Input);
     }
 
     public override void _Process(double delta)

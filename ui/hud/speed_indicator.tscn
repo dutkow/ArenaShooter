@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://br2pp11aighc"]
 
-[ext_resource type="Script" uid="uid://qppgjafprsaj" path="res://SpeedIndicator.cs" id="1_blch4"]
+[ext_resource type="Script" uid="uid://qppgjafprsaj" path="res://ui/hud/SpeedIndicator.cs" id="1_blch4"]
 
 [node name="SpeedIndicator" type="Control" unique_id=1613452437 node_paths=PackedStringArray("SpeedLabel")]
 layout_mode = 3
