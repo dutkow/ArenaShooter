@@ -21,12 +21,19 @@ public partial class Pickup : Node3D
     [Export] MeshInstance3D _mesh;
     private Vector3 _baseMeshPosition;
 
-    public bool _isSpawned;
+    [Export] private bool _startSpawned = true;
+    public bool _isSpawned = true;
 
 
     public override void _Ready()
     {
         base._Ready();
+
+        if(!_startSpawned)
+        {
+            _isSpawned = false;
+            _mesh.Visible = false;
+        }
 
         _baseMeshPosition = _mesh.Position;
 

@@ -19,8 +19,6 @@ public partial class SpeedIndicator : Control
     {
         base._Process(delta);
 
-        Vector3 characterVelocity = _character.MovementComp.State.Velocity;
-        float horizontalVelocity = Mathf.RoundToInt(new Vector2(characterVelocity.X, characterVelocity.Z).Length() * 32.0f);
-        SpeedLabel.Text = horizontalVelocity.ToString();
+        SpeedLabel.Text = UnitConversion.ToQuake(Mathf.RoundToInt(_character.MovementComp.HorizontalVelocity)).ToString();
     }
 }

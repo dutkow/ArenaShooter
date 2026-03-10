@@ -59,6 +59,9 @@ public class CharacterMovement
     // private move state variables
     Vector3 _groundNormal;
 
+    public float HorizontalVelocity { get; private set; }
+
+
 
     public void Initialize(Character character)
     {
@@ -255,17 +258,15 @@ public class CharacterMovement
 
         if(_isGrounded)
         {
-            float horizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
-            GD.Print($"Horizontal velo = {horizontalVelocity * 32.0f}");
+            HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
 
-            if(horizontalVelocity == 0.0f)
+            if (HorizontalVelocity != 0.0f)
             {
-                return;
-            }
-            if (result.TryGetValue("normal", out var normal))
-            {
-                _groundNormal = (Vector3)normal;
-                _isOnSlope = OnSlope();
+                if (result.TryGetValue("normal", out var normal))
+                {
+                    _groundNormal = (Vector3)normal;
+                    _isOnSlope = OnSlope();
+                }
             }
         }
         else
