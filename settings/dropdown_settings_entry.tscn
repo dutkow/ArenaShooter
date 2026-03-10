@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://ckriv001qc5kn"]
+
+[ext_resource type="PackedScene" uid="uid://dho6ke6v32vuk" path="res://settings/settings_entry.tscn" id="1_45i0x"]
+[ext_resource type="Script" uid="uid://blejejqcho55w" path="res://settings/DropdownSettingsEntry.cs" id="2_hgqt4"]
+
+[node name="DropdownSettingsEntry" node_paths=PackedStringArray("Dropdown", "SettingNameLabel") instance=ExtResource("1_45i0x")]
+script = ExtResource("2_hgqt4")
+Dropdown = NodePath("HBoxContainer/OptionButton")
+SettingNameLabel = NodePath("HBoxContainer/SettingNameLabel")
+
+[node name="OptionButton" type="OptionButton" parent="HBoxContainer" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4

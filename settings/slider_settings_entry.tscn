@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://cvc1x0ahlvbok"]
+
+[ext_resource type="PackedScene" uid="uid://dho6ke6v32vuk" path="res://settings/settings_entry.tscn" id="1_0bjtf"]
+[ext_resource type="Script" uid="uid://baondsy0scmax" path="res://settings/SliderSettingsEntry.cs" id="2_5bra2"]
+
+[node name="SliderSettingsEntry" node_paths=PackedStringArray("Slider", "PercentageLabel", "IncreaseButton", "DecreaseButton", "SettingNameLabel") instance=ExtResource("1_0bjtf")]
+custom_minimum_size = Vector2(0, 50)
+script = ExtResource("2_5bra2")
+Slider = NodePath("HBoxContainer/HBoxContainer/Control/HSlider")
+PercentageLabel = NodePath("HBoxContainer/HBoxContainer/PercentageLabel")
+IncreaseButton = NodePath("HBoxContainer/HBoxContainer/IncreaseButton")
+DecreaseButton = NodePath("HBoxContainer/HBoxContainer/DecreaseButton")
+StepAmount = 0.01
+SettingNameLabel = NodePath("HBoxContainer/SettingNameLabel")
+
+[node name="SettingNameLabel" parent="HBoxContainer" index="0"]
+size_flags_vertical = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DecreaseButton" type="Button" parent="HBoxContainer/HBoxContainer" index="0"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 24
+text = "<"
+
+[node name="Control" type="Control" parent="HBoxContainer/HBoxContainer" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSlider" type="HSlider" parent="HBoxContainer/HBoxContainer/Control" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 1.0
+step = 0.01
+value = 0.5
+
+[node name="IncreaseButton" type="Button" parent="HBoxContainer/HBoxContainer" index="2"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 24
+text = ">"
+
+[node name="PercentageLabel" type="Label" parent="HBoxContainer/HBoxContainer" index="3"]
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 1
+vertical_alignment = 1

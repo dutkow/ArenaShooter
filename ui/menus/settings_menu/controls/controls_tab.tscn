@@ -1,10 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://drg2arpgp7q37"]
+[gd_scene format=3 uid="uid://drg2arpgp7q37"]
 
-[ext_resource type="PackedScene" uid="uid://cegtosboea0rx" path="res://settings_tab.tscn" id="1_ak551"]
-[ext_resource type="Script" uid="uid://bgqqj5xsfxw8j" path="res://ui/settings_menu/controls/ControlsTab.cs" id="2_ceqdb"]
-[ext_resource type="PackedScene" uid="uid://cvc1x0ahlvbok" path="res://slider_settings_entry.tscn" id="3_jv8g3"]
-[ext_resource type="PackedScene" uid="uid://ckriv001qc5kn" path="res://dropdown_settings_entry.tscn" id="10_hfnus"]
-[ext_resource type="Script" uid="uid://btj2ebjckpjwc" path="res://CursorLockSettingsEntry.cs" id="11_5hqaw"]
+[ext_resource type="PackedScene" uid="uid://cegtosboea0rx" path="res://settings/settings_tab.tscn" id="1_ak551"]
+[ext_resource type="Script" uid="uid://bgqqj5xsfxw8j" path="res://ui/menus/settings_menu/controls/ControlsTab.cs" id="2_ceqdb"]
+[ext_resource type="PackedScene" uid="uid://cvc1x0ahlvbok" path="res://settings/slider_settings_entry.tscn" id="3_jv8g3"]
+[ext_resource type="PackedScene" path="res://settings/dropdown_settings_entry.tscn" id="10_hfnus"]
+[ext_resource type="Script" uid="uid://cqckccc3o30da" path="res://settings/CursorLockSettingsEntry.cs" id="11_5hqaw"]
 
 [node name="ControlsTab" instance=ExtResource("1_ak551")]
 script = ExtResource("2_ceqdb")

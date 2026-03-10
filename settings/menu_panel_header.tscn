@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://btwyxhqtk24kj"]
+
+[ext_resource type="Script" uid="uid://ddi7h4cca0lv3" path="res://settings/MenuPanelHeader.cs" id="1_c3858"]
+
+[node name="PanelHeader" type="Control" node_paths=PackedStringArray("TitleLabel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1132.0
+offset_bottom = -1012.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_c3858")
+TitleLabel = NodePath("TitleLabel")
+TitleText = "Title"
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.45490196, 0.07450981, 0, 1)
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"HeaderLarge"
+text = "Title"
+horizontal_alignment = 1
+vertical_alignment = 1

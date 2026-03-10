@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3 uid="uid://c241gj4lmu3gv"]
+
+[ext_resource type="Script" uid="uid://i3wxtnx6bc7u" path="res://TextButton.cs" id="1_ah3is"]
+
+[node name="MainMenuButton" type="Control" node_paths=PackedStringArray("Button")]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1567.0
+offset_bottom = -1013.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ah3is")
+ButtonText = "Title"
+Button = NodePath("Button")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Title"

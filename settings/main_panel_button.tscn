@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3 uid="uid://d4cabideya21e"]
+
+[ext_resource type="Script" uid="uid://dnoml0qj5dm3n" path="res://MainPanelButton.cs" id="1_2r4wg"]
+[ext_resource type="Texture2D" uid="uid://b7jw7xuvgwaev" path="res://assets/textures/crane.png" id="2_2r4wg"]
+[ext_resource type="Texture2D" uid="uid://dg6ncaa5i057c" path="res://assets/textures/banging-gavel.png" id="2_r0t1w"]
+
+[node name="MainPanelButton" type="Control" node_paths=PackedStringArray("_button", "_iconTextureRect")]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1855.0
+offset_bottom = -1028.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2r4wg")
+_button = NodePath("Button")
+_iconTextureRect = NodePath("MarginContainer/IconTextureRect")
+_texture = ExtResource("2_r0t1w")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="IconTextureRect" type="TextureRect" parent="MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_2r4wg")
+expand_mode = 3
+stretch_mode = 5

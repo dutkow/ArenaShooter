@@ -1,0 +1,63 @@
+[gd_scene format=3 uid="uid://crojvus8xh3a6"]
+
+[ext_resource type="Script" uid="uid://cxmkvvnchv6s6" path="res://settings/menu_panel.tres" id="1_l6wg2"]
+[ext_resource type="PackedScene" uid="uid://btwyxhqtk24kj" path="res://settings/menu_panel_header.tscn" id="1_o6q6l"]
+[ext_resource type="PackedScene" path="res://settings/close_panel_button.tscn" id="3_jh463"]
+
+[node name="MenuPanel" type="Control" node_paths=PackedStringArray("MenuPanelHeader", "ClosePanelButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1213.0
+offset_bottom = -670.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_l6wg2")
+MenuPanelHeader = NodePath("MarginContainer/VBoxContainer/MenuPanelHeader")
+ClosePanelButton = NodePath("MarginContainer/VBoxContainer/MenuPanelHeader/ClosePanelButton")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.021434637, 0.021434635, 0.021434633, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ColorRect2" type="ColorRect" parent="MarginContainer"]
+layout_mode = 2
+color = Color(0.1728327, 0.17283267, 0.17283267, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="MenuPanelHeader" parent="MarginContainer/VBoxContainer" instance=ExtResource("1_o6q6l")]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="ClosePanelButton" parent="MarginContainer/VBoxContainer/MenuPanelHeader" instance=ExtResource("3_jh463")]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -20.0
+offset_right = 0.0
+offset_bottom = 20.0
+grow_horizontal = 0

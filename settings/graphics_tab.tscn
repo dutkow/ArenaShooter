@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://shdkwayx0vpf"]
+
+[ext_resource type="PackedScene" uid="uid://cegtosboea0rx" path="res://settings/settings_tab.tscn" id="1_okgty"]
+[ext_resource type="Script" uid="uid://d4epnbulmvdi2" path="res://settings/GraphicsTab.cs" id="2_udnyp"]
+[ext_resource type="PackedScene" path="res://settings/dropdown_settings_entry.tscn" id="3_bnukn"]
+[ext_resource type="Script" uid="uid://c63nwokqejgdh" path="res://ui/menus/settings_menu/video/ResolutionSettingsEntry.cs" id="4_aeya7"]
+[ext_resource type="Script" uid="uid://cagf2vem4dbqu" path="res://settings/DisplayModeSettingsEntry.cs" id="4_pa5ou"]
+
+[node name="GraphicsTab" instance=ExtResource("1_okgty")]
+script = ExtResource("2_udnyp")
+
+[node name="DisplayModeSettingsEntry" parent="MarginContainer/ScrollContainer/VBoxContainer" index="0" instance=ExtResource("3_bnukn")]
+layout_mode = 2
+script = ExtResource("4_pa5ou")
+
+[node name="ResolutionSettingsEntry" parent="MarginContainer/ScrollContainer/VBoxContainer" index="1" instance=ExtResource("3_bnukn")]
+layout_mode = 2
+script = ExtResource("4_aeya7")
