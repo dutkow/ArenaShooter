@@ -3,6 +3,15 @@ using System;
 
 public partial class PlayerController : Controller
 {
+    public ChatPanel ChatPanel; // TODO: want to rethink how we route player input to the UI and make a more modular setup
+
+
+    public override void _Ready()
+    {
+        base._Ready();
+
+        GD.Print("Player controller created");
+    }
 
     public override void _Input(InputEvent @event)
     {
@@ -32,6 +41,26 @@ public partial class PlayerController : Controller
         {
             NetworkSender.ToggleNetEmulation(!NetworkSender.EmulationEnabled);
             GD.Print($"Emulation enabled: {NetworkSender.EmulationEnabled}");
+        }
+
+        if(Input.IsActionJustPressed("chat_all"))
+        {
+            GD.Print($"open chat ran");
+
+            PossessedPawn?.SetInputEnabled(false);
+            ChatPanel.Open();
+        }
+
+        if (Input.IsActionJustPressed("chat_team"))
+        {
+            PossessedPawn?.SetInputEnabled(false);
+            ChatPanel.Open();
+        }
+
+        if (Input.IsActionJustPressed("send_chat"))
+        {
+            PossessedPawn?.SetInputEnabled(true);
+            ChatPanel.SendChat();
         }
     }
 

@@ -156,7 +156,9 @@ public static class NetworkSender
     public static void ToClient(ENetPacketPeer clientPeer, Message message)
     {
         if (clientPeer == null)
+        {
             return;
+        }
 
         SendInternal(clientPeer, 0, message.WriteMessage(), (int)message.Flags, false);
     }

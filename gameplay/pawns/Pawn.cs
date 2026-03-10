@@ -6,7 +6,7 @@ public partial class Pawn : Actor
 
     public bool IsPossessed => Controller != null;
 
-    private bool _inputEnabled = false;
+    protected bool _inputEnabled = false;
 
     public bool InputActive => IsLocal && !_inputEnabled;
 
@@ -29,6 +29,8 @@ public partial class Pawn : Actor
         {
             Role = NetworkRole.LOCAL;
         }
+
+        SetInputEnabled(true);
     }
 
     public virtual void OnUnpossessed()

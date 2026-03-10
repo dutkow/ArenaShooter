@@ -1,15 +1,18 @@
 [gd_scene format=3 uid="uid://8gi047ww2qwf"]
 
 [ext_resource type="PackedScene" uid="uid://cv8e7uwtlq1lq" path="res://ui/chat/chat_log.tscn" id="1_2hd0p"]
+[ext_resource type="Script" uid="uid://dxxrix11xona8" path="res://ui/chat/ChatPanel.cs" id="1_w03ao"]
 [ext_resource type="PackedScene" uid="uid://dqieytl23qae7" path="res://ui/chat/chat_input_field.tscn" id="2_w03ao"]
 
-[node name="ChatPanel" type="Control" unique_id=1718592845]
+[node name="ChatPanel" type="Control" unique_id=1718592845 node_paths=PackedStringArray("_chatInputField")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_w03ao")
+_chatInputField = NodePath("VBoxContainer/ChatInputField")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1110771437]
 layout_mode = 1

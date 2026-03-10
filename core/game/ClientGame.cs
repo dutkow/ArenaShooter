@@ -27,6 +27,7 @@ public class ClientGame
 
         LocalPlayerID = localPlayerID;
         LocalPlayerController = new();
+        Game.Instance.AddChild(LocalPlayerController);
 
         GD.Print($"Starting client. NetworkMode = {NetworkSession.Instance.NetworkMode}");
 

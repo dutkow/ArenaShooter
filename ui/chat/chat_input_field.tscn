@@ -2,19 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bb37x170g0x1x" path="res://ui/chat/ChatInputField.cs" id="1_lfsxv"]
 
-[node name="ChatInputField" type="Control" unique_id=316644457]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -91.0
-offset_bottom = -537.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="LineEdit" type="LineEdit" parent="." unique_id=461984892]
-layout_mode = 1
+[node name="ChatInputField" type="LineEdit" unique_id=461984892]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

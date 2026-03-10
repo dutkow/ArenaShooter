@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public enum ChatChannel
+public enum ChatChannel : byte
 {
     ALL,
     TEAM,
@@ -9,7 +9,7 @@ public enum ChatChannel
     SYSTEM,
 }
 
-public struct ChatMessageInfo
+public class ChatMessageInfo
 {
     public ChatChannel Channel;
     public string Text;
@@ -47,11 +47,6 @@ public class ChatManager
         {
             Instance = null;
         }
-    }
-
-    public void SendChatMessageRequest(ChatMessageInfo info)
-    {
-        ChatMessageRequest.Send(info);
     }
 
     public void BroadcastChatMessageReceived(ChatMessageInfo info)

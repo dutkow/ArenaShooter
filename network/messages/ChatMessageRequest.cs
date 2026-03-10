@@ -40,15 +40,21 @@ public class ChatMessageRequest : Message
 
     public static void Send(ChatMessageInfo info)
     {
-        var msg = new ChatMessageRequest
+        if (NetworkSession.Instance.IsServer)
         {
-            MessageType = Msg.C2S_CHAT_MESSAGE_REQUEST,
-            ENetFlags = ENetPacketFlags.Reliable,
-            Channel = info.Channel,
-            Text = info.Text,
-            TargetPlayerID = info.PlayerID,
-
-        };
-        NetworkSender.ToServer(msg);
+            info.PlayerID = 0;
+            if (ChatService.ValidateChatMessageRequest(info))
+            {
+                if(NetworkSession.Instance.IsListenServer)
+                {
+                    ChatManager.Instance.BroadcastChatMessageReceived(info);
+                }
+                ChatMessage.Send(info);
+            }
+        }
+        else
+        {
+            ChatMessageRequest.Send(info);
+        }
     }
 }

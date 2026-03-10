@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://c7v5l5n1d2ri"]
+[gd_scene format=3 uid="uid://c7v5l5n1d2ri"]
 
 [ext_resource type="Script" uid="uid://dduo3cjcxyo58" path="res://gameplay/interactables/JumpPad.cs" id="1_thlnv"]
 [ext_resource type="Material" uid="uid://b7r4qqw3vbs4t" path="res://assets/materials/purple_material.tres" id="2_m60fg"]
@@ -21,19 +21,19 @@ public partial class PhysicsVolume : Area3D
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qskwt"]
 
-[node name="JumpPad" type="Node3D" node_paths=PackedStringArray("_area3D", "_collisionShape")]
+[node name="JumpPad" type="Node3D" unique_id=854160674 node_paths=PackedStringArray("_area3D", "_collisionShape")]
 script = ExtResource("1_thlnv")
 _area3D = NodePath("Area3D")
 JumpStrength = 18.0
 _collisionShape = NodePath("Area3D/CollisionShape3D")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1076684502]
 material_override = ExtResource("2_m60fg")
 mesh = SubResource("BoxMesh_m60fg")
 skeleton = NodePath("")
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="Area3D" type="Area3D" parent="." unique_id=314998766]
 script = SubResource("CSharpScript_m60fg")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1978581302]
 shape = SubResource("BoxShape3D_qskwt")
