@@ -121,6 +121,7 @@ public class CharacterMovement
 
         state.Position += safeMotion;
 
+
         return state;
     }
 
