@@ -7,7 +7,12 @@ public partial class JumpPad : Node3D
 {
     [Export] private Area3D _area3D;
     [Export] public float JumpStrength = 8.0f;
+
+
+    [Export] public bool OverrideHorizontalVelocity = true;
     [Export] public Vector3 LaunchDirection = Vector3.Up;
+    
+
     public Vector3 LaunchVector;
 
     [Export] private CollisionShape3D _collisionShape;

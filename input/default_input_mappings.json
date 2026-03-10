@@ -1,0 +1,160 @@
+{
+	"categories": [
+		{
+			"localization_key": "forward",
+			"input_actions": [
+				{
+					"action": "move_up",
+					"input_bindings": [
+						{ "key": "w" },
+						{ "key": "up" }
+					]
+				},
+				{
+					"action": "backward",
+					"input_bindings": [
+						{ "key": "s" },
+						{ "key": "down" }
+					]
+				},
+				{
+					"action": "strafe_left",
+					"input_bindings": [
+						{ "key": "a" },
+						{ "key": "left" }
+					]
+				},
+				{
+					"action": "strafe_right",
+					"input_bindings": [
+						{ "key": "d" },
+						{ "key": "right" }
+					]
+				},
+				{
+					"action": "jump",
+					"input_bindings": [
+						{ "key": "space" },
+					]
+				}
+			]
+		},
+		{
+			"localization_key": "weapons",
+			"input_actions": [
+
+				{
+					"action": "primary_fire",
+					"input_bindings": [ { "key": "mouse_wheel_up" } ]
+				},
+				{
+					"action": "secondary_fire",
+					"input_bindings": [ { "key": "mouse_wheel_down" } ]
+				},
+				{
+					"action": "next_weapon",
+					"input_bindings": [
+						{
+							"key": "mouse_wheel_up"
+						}
+					]
+				},
+				{
+					"action": "previous_weapon",
+					"input_bindings": [
+						{
+							"key": "mouse_wheel_down"
+						}
+					]
+				},
+				{
+					"action": "best_weapon",
+					"input_bindings": [ { "key": "g" } ]
+				},
+				{
+					"action": "last_weapon",
+					"input_bindings": [ { "key": "b" } ]
+				},
+				{
+					"action": "weapon_1",
+					"input_bindings": [ { "key": "1" } ]
+				},
+				{
+					"action": "weapon_2",
+					"input_bindings": [ { "key": "2" } ]
+				},
+				{
+					"action": "weapon_3",
+					"input_bindings": [ { "key": "3" } ]
+				},
+				{
+					"action": "weapon_4",
+					"input_bindings": [ { "key": "4" } ]
+				},
+				{
+					"action": "weapon_5",
+					"input_bindings": [ { "key": "5" } ]
+				},
+				{
+					"action": "weapon_6",
+					"input_bindings": [ { "key": "6" } ]
+				},
+				{
+					"action": "weapon_7",
+					"input_bindings": [ { "key": "7" } ]
+				},
+				{
+					"action": "weapon_8",
+					"input_bindings": [ { "key": "8" } ]
+				},
+				{
+					"action": "weapon_9",
+					"input_bindings": [ { "key": "9" } ]
+				},
+				{
+					"action": "weapon_10",
+					"input_bindings": [ { "key": "10" } ]
+				}
+			]
+		},
+		{
+			"localization_key": "communication",
+			"input_actions": [
+				{
+					"action": "chat_all",
+					"input_bindings": [
+						{ "key": "t" }
+					]
+				},
+				{
+					"action": "chat_team",
+					"input_bindings": [
+						{ "key": "y" }
+					]
+				},
+				{
+					"action": "send_chat",
+					"input_bindings": [ { "enter": "]" } ]
+				}
+			]
+		},
+		{
+			"localization_key": "game",
+			"input_actions": [
+				{
+					"action": "interact",
+					"input_bindings": [ { "key": "e" } ]
+				}
+			]
+		},
+		{
+			"localization_key": "user_interface",
+			"input_actions": [
+				{
+					"action": "navigate_back",
+					"input_bindings": [ { "key": "escape" } ]
+				}
+			]
+		}
+	]
+}
