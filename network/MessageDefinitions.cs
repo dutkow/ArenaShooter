@@ -60,7 +60,7 @@ public enum Msg : byte
 
     // Chat
     S2C_CHAT_MESSAGE,
-    C2S_CHAT_MESSAGE,
+    C2S_CHAT_MESSAGE_REQUEST,
 
     // Game
     C2S_CLIENT_COMMAND,

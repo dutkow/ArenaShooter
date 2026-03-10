@@ -82,6 +82,10 @@ public partial class MatchState : Node
     }
     public void Initialize()
     {
+        ChatManager.Create();
+
+
+
         StartPhase(MatchPhase.WARMUP);
 
         // Hook network events

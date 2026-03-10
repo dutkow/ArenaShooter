@@ -12,14 +12,14 @@ public class ChatMessage : Message
 {
     public ChatChannel Channel;
     public string Text;
-    public byte PlayerID; // disregarded for system messages
+    public byte SenderPlayerID; // disregarded for system messages
 
     protected override int BufferSize()
     {
         base.BufferSize();
         Add(Channel);
         Add(Text);
-        Add(PlayerID);
+        Add(SenderPlayerID);
         return _dataSize;
     }
 
@@ -28,7 +28,7 @@ public class ChatMessage : Message
         base.WriteMessage();
         Write(Channel);
         Write(Text);
-        Write(PlayerID);
+        Write(SenderPlayerID);
         return _data;
     }
 
@@ -37,20 +37,29 @@ public class ChatMessage : Message
         base.ReadMessage(data);
         Read(out Channel);
         Read(out Text);
-        Read(out PlayerID);
+        Read(out SenderPlayerID);
     }
 
-    public static void Send(ENetPacketPeer client, ChatChannel channel, string text, byte playerID = 0)
+    public ChatMessageInfo ToInfo()
+    {
+        return new ChatMessageInfo(Channel, Text, SenderPlayerID);
+    }
+
+    public static void Send(ChatMessageInfo info)
     {
         var msg = new ChatMessage
         {
             MessageType = Msg.S2C_CHAT_MESSAGE,
             ENetFlags = ENetPacketFlags.Reliable,
-            Channel = channel,
-            Text = text,
-            PlayerID = playerID,
+            Channel = info.Channel,
+            Text = info.Text,
+            SenderPlayerID = info.PlayerID,
 
         };
-        NetworkSender.ToClient(client, msg);
+
+        // TODO: when team logic exists, make this not a broadcast and filter it accordingly by channel
+        NetworkSender.Broadcast(msg);
     }
+
+
 }

@@ -26,6 +26,9 @@ public class MessageRouter
             // Gameplay
             RegisterFromClient(Msg.C2S_CLIENT_COMMAND, ServerGameplayService.HandleClientCommand);
 
+            // Chat
+            RegisterFromClient(Msg.C2S_CHAT_MESSAGE_REQUEST, ChatManager.Instance.HandleChatMessageRequest);
+
         }
         else if (role == NetworkMode.CLIENT)
         {
@@ -42,6 +45,9 @@ public class MessageRouter
             RegisterFromServer(Msg.S2C_PROJECTILE_SPAWNED, ClientGameplayService.HandleProjectileSpawned);
             RegisterFromServer(Msg.S2C_HEALTH_CHANGED, ClientGameplayService.HandleHealthChanged);
             RegisterFromServer(Msg.S2C_PLAYER_DIED, ClientGameplayService.HandlePlayerDied);
+
+            // Chat
+            RegisterFromServer(Msg.S2C_CHAT_MESSAGE, ChatManager.Instance.HandleChatMessage);
         }
     }
 

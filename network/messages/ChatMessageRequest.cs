@@ -7,6 +7,11 @@ public class ChatMessageRequest : Message
     public string Text;
     public byte TargetPlayerID; // used only for private messages
 
+    public ChatMessageInfo ToInfo()
+    {
+        return new ChatMessageInfo(Channel, Text, TargetPlayerID);
+    }
+
     protected override int BufferSize()
     {
         base.BufferSize();
@@ -33,15 +38,15 @@ public class ChatMessageRequest : Message
         Read(out TargetPlayerID);
     }
 
-    public static void Send(ENetPacketPeer client, ChatChannel channel, string text, byte targetPlayerID = 0)
+    public static void Send(ChatMessageInfo info)
     {
-        var msg = new ChatMessage
+        var msg = new ChatMessageRequest
         {
-            MessageType = Msg.S2C_CHAT_MESSAGE,
+            MessageType = Msg.C2S_CHAT_MESSAGE_REQUEST,
             ENetFlags = ENetPacketFlags.Reliable,
-            Channel = channel,
-            Text = text,
-            PlayerID = targetPlayerID,
+            Channel = info.Channel,
+            Text = info.Text,
+            TargetPlayerID = info.PlayerID,
 
         };
         NetworkSender.ToServer(msg);

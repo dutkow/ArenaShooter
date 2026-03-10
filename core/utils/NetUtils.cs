@@ -3,6 +3,17 @@ using Godot;
 
 public static class NetUtils
 {
+    public static void SetPeerPlayerID(ENetPacketPeer peer, byte ID)
+    {
+        peer.SetMeta("player_id", ID);
+    }
+
+    public static byte GetPeerPlayerID(ENetPacketPeer peer)
+    {
+        return (byte)peer.GetMeta("player_id");
+    }
+
+
     public static bool IsNewerTick(ushort a, ushort b)
     {
         return (short)(a - b) > 0;
