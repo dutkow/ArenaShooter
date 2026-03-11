@@ -159,7 +159,7 @@ public class ServerGame
             }
         }
 
-        ServerProjectileManager.Instance.RemoveUnackedProjectilesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
+        ServerProjectileManager.Instance.ReceiveClientCommand(cmd, playerID);
     }
     
     public WorldSnapshot GetWorldSnapshotByTick(ushort tick)

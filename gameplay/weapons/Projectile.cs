@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// Base class for all projectiles. Handles lifetime, damage, and collision API.
 /// </summary>
-public abstract partial class Projectile : Node3D
+public abstract partial class Projectile : Entity
 {
     ProjectileState _state = new();
 
@@ -21,7 +21,7 @@ public abstract partial class Projectile : Node3D
         GlobalPosition = origin;
         LookAt(origin + direction, Vector3.Up);
 
-        if (NetworkSession.Instance.IsServer && Area != null)
+        if (IsAuthority && Area != null)
         {
             Area.AreaEntered += OnCollision;
         }
@@ -47,6 +47,15 @@ public abstract partial class Projectile : Node3D
         }
 
         QueueFree();
+
+        if(IsAuthority)
+        {
+            ServerDestroy();
+        }
+        else
+        {
+            LocalDestroy();
+        }
     }
 
 
@@ -59,5 +68,22 @@ public abstract partial class Projectile : Node3D
     public virtual void LocalDestroy()
     {
         QueueFree();
+    }
+
+    public virtual void ApplyState(ProjectileState state)
+    {
+        Destroy(); // no state info yet, just destruction
+    }
+
+    protected virtual void Destroy()
+    {
+        if (IsAuthority)
+        {
+            ServerDestroy();
+        }
+        else
+        {
+            //LocalDestroy();
+        }
     }
 }

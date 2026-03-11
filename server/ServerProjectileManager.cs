@@ -55,8 +55,8 @@ public class ServerProjectileManager
         {
             spawnData.ProjectileID = _nextAvailableProjectileID;
             _unackedProjectilesByPlayerID[playerID].Add(spawnData);
-            _nextAvailableProjectileID++;
         }
+        _nextAvailableProjectileID++;
     }
 
     public List<ProjectileSpawnData> GetUnackedProjectilesByPlayerID(byte playerID)
@@ -95,7 +95,6 @@ public class ServerProjectileManager
         var unackedProjectiles = GetUnackedProjectilesByPlayerID(playerID);
         if (unackedProjectiles.Count == 0)
         {
-            GD.Print($"no unacked projectiles, returning");
             return;
         }
 
@@ -179,5 +178,13 @@ public class ServerProjectileManager
 
         snapshot.UnacknowledgedProjectileStates = GetUnackedProjectileStatesByPlayerID(playerID).ToArray();
         AddUnackedProjectileStateHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectileStates);
+
+        GD.Print($"Num unacked projectiles: {snapshot.UnacknowledgedProjectiles.Length}. Num unacked projectile states: {snapshot.UnacknowledgedProjectileStates.Length}");
+    }
+
+    public void ReceiveClientCommand(ClientCommand cmd, byte playerID)
+    {
+        ServerProjectileManager.Instance.RemoveUnackedProjectilesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
+        ServerProjectileManager.Instance.RemoveUnackedProjectileStatesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
     }
 }

@@ -72,19 +72,12 @@ public partial class LinearProjectile : Projectile
                     GD.Print($"Collided with: {colliderNode?.Name ?? "unknown"}. not damageable");
                 }
 
-                ServerDestroy();
+                Destroy();
             }
         }
         else
         {
             GlobalPosition += motion;
         }
-    }
-
-    public override void ServerDestroy()
-    {
-        base.ServerDestroy();
-
-        QueueFree();
     }
 }
