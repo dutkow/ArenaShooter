@@ -19,6 +19,7 @@ public class WorldSnapshot : Message
 
     public CharacterSnapshot[] Characters;
     public ProjectileSpawnData[] UnacknowledgedProjectiles;
+    public ProjectileStateChangeData[] UnacknowledgedProjectileStateChanges;
 
     protected override int BufferSize()
     {
@@ -56,6 +57,15 @@ public class WorldSnapshot : Message
             Add(proj.ServerTickOnSpawn);
             Add(proj.SpawnLocation);
             Add(proj.SpawnRotation);
+        }
+
+        // --- Unacknowledged Projectile State Changes ---
+        ushort stateChangesCount = (ushort)(UnacknowledgedProjectileStateChanges?.Length ?? 0);
+        Add(stateChangesCount);
+        for (int i = 0; i < stateChangesCount; i++)
+        {
+            var change = UnacknowledgedProjectileStateChanges[i];
+            Add(change.ProjectileID);
         }
 
         return _dataSize;
@@ -99,6 +109,16 @@ public class WorldSnapshot : Message
             Write(proj.SpawnLocation);
             Write(proj.SpawnRotation);
         }
+
+        // --- Unacknowledged Projectile State Changes ---
+        ushort stateChangesCount = (ushort)(UnacknowledgedProjectileStateChanges?.Length ?? 0);
+        Write(stateChangesCount);
+        for (int i = 0; i < stateChangesCount; i++)
+        {
+            var change = UnacknowledgedProjectileStateChanges[i];
+            Write(change.ProjectileID);
+        }
+
 
         return _data;
     }
@@ -159,6 +179,16 @@ public class WorldSnapshot : Message
             Read(out proj.SpawnRotation);
 
             UnacknowledgedProjectiles[i] = proj;
+        }
+
+        // --- Unacknowledged Projectile State Changes ---
+        Read(out ushort stateChangesCount);
+        UnacknowledgedProjectileStateChanges = new ProjectileStateChangeData[stateChangesCount];
+        for (int i = 0; i < stateChangesCount; i++)
+        {
+            var change = new ProjectileStateChangeData();
+            Read(out change.ProjectileID);
+            UnacknowledgedProjectileStateChanges[i] = change;
         }
     }
 
