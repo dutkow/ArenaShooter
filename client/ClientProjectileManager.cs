@@ -35,9 +35,6 @@ public class ClientProjectileManager
         {
             if(!_knownProjectiles.ContainsKey(unackedProjectileSpawnData.ProjectileID))
             {
-                // This needs to be purely projectiles which the client didn't predict, if any.
-                // starting with fully predicted ones, we instead need to find projectiles and sync them to the client's predicted projectiles
-                //SpawnProjectile(unackedProjectileSpawnData);
                 SpawnAuthoritativeProjectile(unackedProjectileSpawnData);
             }
         }

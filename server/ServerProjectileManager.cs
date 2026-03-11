@@ -50,10 +50,6 @@ public class ServerProjectileManager
     {
         foreach (var playerID in _unackedProjectilesByPlayerID.Keys)
         {
-            if(playerID == spawnData.ownerPlayerID && wasPredicted)
-            {
-                continue; // need to handle logic for tracking predicted onesh ere
-            }
             _unackedProjectilesByPlayerID[playerID][spawnData.ProjectileID] = spawnData;
         }
         spawnData.ProjectileID = _nextAvailableProjectileID++;
