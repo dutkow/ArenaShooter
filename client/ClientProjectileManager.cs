@@ -9,6 +9,10 @@ public class ClientProjectileManager
 
 
     public Dictionary<ushort, Projectile> _knownProjectiles = new();
+    public Dictionary<ushort, Projectile> _knownPredictedProjectiles = new();
+
+    bool _firedPredictedProjectile = false;
+    public ushort _lastFiredPredictedProjectileID;
 
     public ushort _nextAvailableClientProjectileID;
 
@@ -35,9 +39,6 @@ public class ClientProjectileManager
         {
             if(!_knownProjectiles.ContainsKey(unackedProjectileSpawnData.ProjectileID))
             {
-                // This needs to be purely projectiles which the client didn't predict, if any.
-                // starting with fully predicted ones, we instead need to find projectiles and sync them to the client's predicted projectiles
-                //SpawnProjectile(unackedProjectileSpawnData);
                 SpawnAuthoritativeProjectile(unackedProjectileSpawnData);
             }
         }
@@ -56,15 +57,29 @@ public class ClientProjectileManager
         }
     }
 
+    public void HandleUnackedPredictedProjectiles(ProjectileSpawnData[] unackedPredictedProjectiles)
+    {
+        foreach(var unackedPredictedProjectile in unackedPredictedProjectiles)
+        {
+            if(_knownPredictedProjectiles.TryGetValue(unackedPredictedProjectile.ProjectileID, out var predictedProjectile))
+            {
+                // handle it eventually
+                predictedProjectile.Reconcile();
+            }
+        }
+    }
+
 
     public void SpawnPredictedProjectile(ProjectileSpawnData spawnData)
     {
         GD.Print($"Spawning projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
 
         var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(_nextAvailableClientProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
+        _knownPredictedProjectiles.Add(_nextAvailableClientProjectileID, spawnedProjectile);
+        _lastFiredPredictedProjectileID = _nextAvailableClientProjectileID;
         _nextAvailableClientProjectileID++;
-        //_knownProjectiles.Add(spawnData.ProjectileID, spawnedProjectile);
-        // we can't add predicted projeciltes that are our own
+
+        _firedPredictedProjectile = true;
     }
 
     public void SpawnAuthoritativeProjectile(ProjectileSpawnData spawnData)
@@ -92,5 +107,21 @@ public class ClientProjectileManager
     {
         GD.Print($"removing projectile with id: {projectileID}");
         _knownProjectiles.Remove(projectileID);
+    }
+
+    public ClientInputCommand AddInfoToClientInputCommand(ClientInputCommand cmd)
+    {
+        if(_firedPredictedProjectile)
+        {
+            cmd.Mask |= ClientCommandMask.FIRED_PREDICTED_PROJECTILE;
+            cmd.PredictedProjectileClientID = _lastFiredPredictedProjectileID;
+
+            GD.Print($"adding predicted projectile with client ID {cmd.PredictedProjectileClientID} to CL input cmd");
+
+        }
+
+        _firedPredictedProjectile = false;
+
+        return cmd;
     }
 }

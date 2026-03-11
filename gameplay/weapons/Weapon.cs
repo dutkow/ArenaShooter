@@ -77,7 +77,7 @@ public partial class Weapon : Entity
         }
     }
 
-    public void Tick(double delta, Vector3 origin, Vector3 direction)
+    public void Tick(double delta, Vector3 position, Vector3 direction)
     {
         if (_cooldownTimer > 0.0f)
         {
@@ -91,7 +91,7 @@ public partial class Weapon : Entity
 
         if (_fireMode == FireMode.FULL_AUTO)
         {
-            TryFire(origin, direction);
+            TryFire(position, direction);
         }
     }
 

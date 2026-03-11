@@ -184,5 +184,13 @@ public class ServerProjectileManager
     {
         RemoveUnackedProjectilesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
         RemoveUnackedProjectileStatesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
+
+        foreach(var inputCmd in cmd.Commands)
+        {
+            if(inputCmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
+            {
+                GD.Print($"server received input cmd with fired predicted projectile w/ projectileID {inputCmd.PredictedProjectileClientID}");
+            }
+        }
     }
 }

@@ -112,4 +112,9 @@ public abstract partial class Projectile : Entity
             LocalDestroy();
         }
     }
+
+    public void Reconcile()
+    {
+
+    }
 }
