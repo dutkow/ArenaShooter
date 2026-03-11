@@ -114,8 +114,15 @@ public partial class Character : Pawn, IDamageable
     {
         base.ProcessClientInput(cmd);
 
-        MovementComp.State.Yaw = cmd.Yaw;
-        MovementComp.State.Pitch = cmd.Pitch;
+        if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
+        {
+            MovementComp.State.Yaw = cmd.Yaw;
+        }
+
+        if(cmd.Mask.HasFlag(ClientCommandMask.PITCH))
+        {
+            MovementComp.State.Pitch = cmd.Pitch;
+        }
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
@@ -373,21 +380,21 @@ public partial class Character : Pawn, IDamageable
             if (Input.IsActionPressed("move_right")) cmd.Mask |= ClientCommandMask.STRAFE_RIGHT;
             if (Input.IsActionPressed("jump")) cmd.Mask |= ClientCommandMask.JUMP;
             if (Input.IsActionPressed("primary_fire")) cmd.Mask |= ClientCommandMask.FIRE_PRIMARY;
-        }
 
-        if (_yawDirty)
-        {
-            cmd.Mask |= ClientCommandMask.YAW;
-            cmd.Yaw = GlobalRotation.Y;
-            GD.Print($"sending dirty yaw {cmd.Yaw}");
-            _yawDirty = false;
-        }
+            if (_yawDirty)
+            {
+                cmd.Mask |= ClientCommandMask.YAW;
+                cmd.Yaw = GlobalRotation.Y;
+                GD.Print($"sending dirty yaw {cmd.Yaw}");
+                _yawDirty = false;
+            }
 
-        if (_pitchDirty)
-        {
-            cmd.Mask |= ClientCommandMask.PITCH;
-            cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
-            _pitchDirty = false;
+            if (_pitchDirty)
+            {
+                cmd.Mask |= ClientCommandMask.PITCH;
+                cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
+                _pitchDirty = false;
+            }
         }
 
         if (MovementComp.WasLaunched)
