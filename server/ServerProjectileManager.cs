@@ -194,44 +194,52 @@ public class ServerProjectileManager
         {
             if (inputCmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
             {
-                if (_unackedPrecitedProjectilesByPlayerID.TryGetValue(playerID, out var predictedProjectilesDict))
+                // Ensure dictionary exists for this player
+                if (!_unackedPrecitedProjectilesByPlayerID.TryGetValue(playerID, out var predictedProjectilesDict))
                 {
-                    if (!predictedProjectilesDict.ContainsKey(inputCmd.PredictedProjectileClientID))
+                    predictedProjectilesDict = new Dictionary<ushort, ProjectileSpawnData>();
+                    _unackedPrecitedProjectilesByPlayerID[playerID] = predictedProjectilesDict;
+                }
+
+                // Only add if this predicted projectile ID hasn't been added yet
+                if (!predictedProjectilesDict.ContainsKey(inputCmd.PredictedProjectileClientID))
+                {
+                    ProjectileSpawnData spawnData = new()
                     {
-                        ProjectileSpawnData spawnData = new();
-                        spawnData.ServerTickOnSpawn = cmd.LastServerTickProcessedByClient;
+                        ServerTickOnSpawn = cmd.LastServerTickProcessedByClient,
+                        ProjectileID = inputCmd.PredictedProjectileClientID,
+                        SpawnLocation = inputCmd.PredictedProjectileSpawnPosition,
+                        SpawnRotation = inputCmd.PredictedProjectileSpawnRotation
+                    };
 
-                        // at the moment, I don't send this information from the client
-                        // I am debating whether I should send or have the server reconstruct essentially the position from the snapshot since I have snapshot history
-                        spawnData.SpawnLocation = Vector3.Zero;
-                        spawnData.SpawnRotation = Vector3.Zero;
+                    GD.Print($"Server received client predicted projectile. client projectile ID: {inputCmd.PredictedProjectileClientID}. Server tick on spawn: {spawnData.ServerTickOnSpawn}");
 
-                        var snapshot = ServerGame.Instance.GetWorldSnapshotByTick(cmd.LastServerTickProcessedByClient);
-                        if (snapshot != null)
+                    /*
+                    var snapshot = ServerGame.Instance.GetWorldSnapshotByTick(cmd.LastServerTickProcessedByClient);
+                    if (snapshot != null)
+                    {
+                        bool foundSnapshot = false;
+                        CharacterSnapshot characterSnapshot = default;
+                        foreach(var characterSnap in snapshot.Characters)
                         {
-                            bool foundSnapshot = false;
-                            CharacterSnapshot characterSnapshot = default;
-                            foreach(var characterSnap in snapshot.Characters)
+                            if(characterSnap.PlayerID == playerID)
                             {
-                                if(characterSnap.PlayerID == playerID)
-                                {
-                                    characterSnapshot = characterSnap;
-                                    foundSnapshot = true;
-                                    break;
-                                }
+                                characterSnapshot = characterSnap;
+                                foundSnapshot = true;
+                                break;
                             }
-
-                            if(foundSnapshot)
-                            {
-                                //var fireTransform = playerCharacter.Weapon.GetFireTransform(playerCharacter.Position, character.Yaw, character.Pitch);
-                            }
-
-
-                            // I could theoretically just add it here. It might feel more brittle but it's also probably more efficient from a bandwidth perspective
                         }
 
-                        predictedProjectilesDict[inputCmd.PredictedProjectileClientID] = spawnData;
+                        if(foundSnapshot)
+                        {
+                            //var fireTransform = playerCharacter.Weapon.GetFireTransform(playerCharacter.Position, character.Yaw, character.Pitch);
+                        }
+
+                        // I could theoretically just add it here. It might feel more brittle but it's also probably more efficient from a bandwidth perspective
                     }
+                    */
+
+                    predictedProjectilesDict[inputCmd.PredictedProjectileClientID] = spawnData;
                 }
             }
         }

@@ -33,6 +33,10 @@ public struct ClientInputCommand
     public float Pitch;
     public Vector3 LaunchVelocity;
     public ushort PredictedProjectileClientID;
+
+    // Eventually we will reconstruct these from the snapshot but fire transform system should be cleaned up first
+    public Vector3 PredictedProjectileSpawnPosition;
+    public Vector3 PredictedProjectileSpawnRotation;
 }
 
 public class ClientCommand : Message
@@ -68,7 +72,18 @@ public class ClientCommand : Message
                 Add(cmd.LaunchVelocity.Z);
             }
             if (cmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
+            {
                 Add(cmd.PredictedProjectileClientID);
+
+                // Add 6 floats for spawn position + rotation
+                Add(cmd.PredictedProjectileSpawnPosition.X);
+                Add(cmd.PredictedProjectileSpawnPosition.Y);
+                Add(cmd.PredictedProjectileSpawnPosition.Z);
+
+                Add(cmd.PredictedProjectileSpawnRotation.X);
+                Add(cmd.PredictedProjectileSpawnRotation.Y);
+                Add(cmd.PredictedProjectileSpawnRotation.Z);
+            }
         }
 
         return _dataSize;
@@ -100,7 +115,19 @@ public class ClientCommand : Message
                 Write(cmd.LaunchVelocity.Z);
             }
             if (cmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
+            {
+                // Always send the client-side predicted projectile ID
                 Write(cmd.PredictedProjectileClientID);
+
+                // Now also send spawn transform
+                Write(cmd.PredictedProjectileSpawnPosition.X);
+                Write(cmd.PredictedProjectileSpawnPosition.Y);
+                Write(cmd.PredictedProjectileSpawnPosition.Z);
+
+                Write(cmd.PredictedProjectileSpawnRotation.X);
+                Write(cmd.PredictedProjectileSpawnRotation.Y);
+                Write(cmd.PredictedProjectileSpawnRotation.Z);
+            }
         }
 
         return _data;
@@ -137,8 +164,17 @@ public class ClientCommand : Message
                 Read(out cmd.LaunchVelocity.Z);
             }
             if (cmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
+            {
                 Read(out cmd.PredictedProjectileClientID);
 
+                Read(out cmd.PredictedProjectileSpawnPosition.X);
+                Read(out cmd.PredictedProjectileSpawnPosition.Y);
+                Read(out cmd.PredictedProjectileSpawnPosition.Z);
+
+                Read(out cmd.PredictedProjectileSpawnRotation.X);
+                Read(out cmd.PredictedProjectileSpawnRotation.Y);
+                Read(out cmd.PredictedProjectileSpawnRotation.Z);
+            }
             Commands[i] = cmd;
         }
     }

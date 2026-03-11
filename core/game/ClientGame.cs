@@ -38,7 +38,7 @@ public class ClientGame
 
     public void Tick()
     {
-        var cmd = GetClientInputCommand(); // client generates input and applies it locally
+        var cmd = GetClientInputCommand();
 
         LocalPlayerController?.ApplyInput(cmd);
         LocalPlayerPawn?.ApplyInput(cmd);
@@ -64,8 +64,6 @@ public class ClientGame
     public ClientInputCommand GetClientInputCommand()
     {
         var cmd = new ClientInputCommand();
-
-        //cmd = LocalPlayerController.AddInput(cmd);
 
         if (LocalPlayerPawn != null)
         {

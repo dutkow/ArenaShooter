@@ -399,8 +399,11 @@ public partial class Character : Pawn, IDamageable
             MovementComp.WasLaunched = false;
         }
 
-        cmd = ClientProjectileManager.Instance.AddInfoToClientInputCommand(cmd);
-
+        // Temporarily hacky way to ensure packets are only modified on client
+        if(!IsAuthority)
+        {
+            cmd = ClientProjectileManager.Instance.AddInfoToClientInputCommand(cmd);
+        }
 
         MovementComp.LaunchVector = Vector3.Zero;
 
