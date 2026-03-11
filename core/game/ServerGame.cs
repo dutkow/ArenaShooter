@@ -157,4 +157,9 @@ public class ServerGame
             }
         }
     }
+    
+    public WorldSnapshot GetWorldSnapshotByTick(ushort tick)
+    {
+        return _snapshotHistory[tick];
+    }
 }

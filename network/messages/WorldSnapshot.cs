@@ -18,7 +18,7 @@ public class WorldSnapshot : Message
     public ulong PickupMask;
 
     public CharacterSnapshot[] Characters;
-
+    public ProjectileSpawnData[] UnacknowledgedProjectiles;
 
     protected override int BufferSize()
     {

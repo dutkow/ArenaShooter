@@ -1,10 +1,7 @@
 using Godot;
 using System;
 
-public enum ProjectileType
-{
-    DEFAULT,
-}
+
 
 public class ProjectileSpawned : Message
 {
