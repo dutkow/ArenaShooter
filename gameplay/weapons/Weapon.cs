@@ -26,6 +26,9 @@ public partial class Weapon : Entity
 
     public bool IsPredictingProjectiles { get; private set; } = true;
 
+    public bool FiredPredictedProjectile;
+
+
     public override void _Process(double delta)
     {
         base._Process(delta);
@@ -36,7 +39,6 @@ public partial class Weapon : Entity
             {
                 _cooldownTimer -= (float)delta;
             }
-            GD.Print($"cool down time remaining = {_cooldownTimer}. networkmode = {NetworkSession.Instance.NetworkMode}");
         }
     }
 
@@ -57,7 +59,7 @@ public partial class Weapon : Entity
         _hasFiredSincePress = false;
     }
 
-    public void ProcessClientInput(InputCommand cmd)
+    public void ProcessClientInput(ClientCommandMask cmd)
     {
         if(!IsPredictingProjectiles)
         {
@@ -66,9 +68,9 @@ public partial class Weapon : Entity
         }
     }
 
-    public void HandleInput(InputCommand cmd)
+    public void HandleInput(ClientCommandMask cmd)
     {
-        bool wantsPrimaryFire = cmd.HasFlag(InputCommand.FIRE_PRIMARY);
+        bool wantsPrimaryFire = cmd.HasFlag(ClientCommandMask.FIRE_PRIMARY);
 
         if (wantsPrimaryFire)
         {

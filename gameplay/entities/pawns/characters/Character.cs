@@ -51,6 +51,9 @@ public partial class Character : Pawn, IDamageable
 
     private bool _useInterpolation = false;
 
+    private bool _yawDirty;
+    private bool _pitchDirty;
+
     public override void _Ready()
     {
         base._Ready();
@@ -103,7 +106,7 @@ public partial class Character : Pawn, IDamageable
 
         if(IsAuthority)
         {
-            _weapon.HandleInput(cmd.Input);
+            _weapon.HandleInput(cmd.Mask);
         }
     }
 
@@ -116,7 +119,7 @@ public partial class Character : Pawn, IDamageable
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-        _weapon.HandleInput(cmd.Input);
+        _weapon.HandleInput(cmd.Mask);
     }
 
     public override void _Process(double delta)
@@ -359,17 +362,40 @@ public partial class Character : Pawn, IDamageable
 
         if(_inputEnabled)
         {
-            if (Input.IsActionPressed("move_forward")) cmd.Input |= InputCommand.MOVE_FORWARD;
-            if (Input.IsActionPressed("move_back")) cmd.Input |= InputCommand.MOVE_BACK;
-            if (Input.IsActionPressed("move_left")) cmd.Input |= InputCommand.MOVE_LEFT;
-            if (Input.IsActionPressed("move_right")) cmd.Input |= InputCommand.MOVE_RIGHT;
-            if (Input.IsActionPressed("jump")) cmd.Input |= InputCommand.JUMP;
-            if (Input.IsActionPressed("primary_fire")) cmd.Input |= InputCommand.FIRE_PRIMARY;
+            if (Input.IsActionPressed("move_forward")) cmd.Mask |= ClientCommandMask.FORWARD;
+            if (Input.IsActionPressed("move_back")) cmd.Mask |= ClientCommandMask.BACKWARD;
+            if (Input.IsActionPressed("move_left")) cmd.Mask |= ClientCommandMask.STRAFE_LEFT;
+            if (Input.IsActionPressed("move_right")) cmd.Mask |= ClientCommandMask.STRAFE_RIGHT;
+            if (Input.IsActionPressed("jump")) cmd.Mask |= ClientCommandMask.JUMP;
+            if (Input.IsActionPressed("primary_fire")) cmd.Mask |= ClientCommandMask.FIRE_PRIMARY;
         }
 
-        cmd.Yaw = GlobalRotation.Y;
-        cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
-        cmd.LaunchVelocity = MovementComp.LaunchVector;
+        if (_yawDirty)
+        {
+            cmd.Mask |= ClientCommandMask.YAW;
+            _yawDirty = false;
+            cmd.Yaw = GlobalRotation.Y;
+        }
+
+        if (_pitchDirty)
+        {
+            cmd.Mask |= ClientCommandMask.PITCH;
+            _pitchDirty = false;
+            cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
+        }
+
+        if(MovementComp.WasLaunched)
+        {
+            cmd.Mask |= ClientCommandMask.WAS_LAUNCHED;
+            cmd.LaunchVelocity = MovementComp.LaunchVector;
+            MovementComp.WasLaunched = false;
+        }
+
+        if (_weapon.FiredPredictedProjectile)
+        {
+            cmd.Mask |= ClientCommandMask.FIRED_PREDICTED_PROJECTILE;
+            _weapon.FiredPredictedProjectile = false;
+        }
 
         MovementComp.LaunchVector = Vector3.Zero;
 
@@ -413,20 +439,29 @@ public partial class Character : Pawn, IDamageable
     {
         if (@event is InputEventMouseMotion mouseEvent)
         {
-            RotateY(Mathf.DegToRad(-mouseEvent.Relative.X * MouseSensitivity));
 
-            Pitch += -mouseEvent.Relative.Y * MouseSensitivity;
-            Pitch = Mathf.Clamp(Pitch, -90, 90);
-
-            if (_cameraPivot != null)
+            if(Mathf.Abs(mouseEvent.Relative.X) > 0.0f)
             {
-                _cameraPivot.RotationDegrees = new Vector3(Pitch, 0, 0);
+                RotateY(Mathf.DegToRad(-mouseEvent.Relative.X * MouseSensitivity));
+                MovementComp.State.Yaw = Yaw;
+                _yawDirty = true;
             }
 
-            MovementComp.State.Yaw = Yaw;
-            MovementComp.State.Pitch = _cameraPivot.Rotation.X;
+            if (Mathf.Abs(mouseEvent.Relative.Y) > 0.0f)
+            {
+                Pitch += -mouseEvent.Relative.Y * MouseSensitivity;
+                Pitch = Mathf.Clamp(Pitch, -90, 90);
 
-            _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;
+                if (_cameraPivot != null)
+                {
+                    _cameraPivot.RotationDegrees = new Vector3(Pitch, 0, 0);
+                }
+
+                MovementComp.State.Pitch = _cameraPivot.Rotation.X;
+                _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;
+
+                _pitchDirty = true;
+            }
         }
     }
 

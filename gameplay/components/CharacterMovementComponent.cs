@@ -19,7 +19,7 @@ public class CharacterMovementComponent
         _character = character;
     }
 
-    public void Tick(InputCommand cmd, double delta, Node3D cameraPivot)
+    public void Tick(ClientCommandMask cmd, double delta, Node3D cameraPivot)
     {
         ApplyInput(cmd, delta, cameraPivot);
 
@@ -30,14 +30,14 @@ public class CharacterMovementComponent
 
     }
 
-    public void ApplyInput(InputCommand cmd, double delta, Node3D cameraPivot)
+    public void ApplyInput(ClientCommandMask cmd, double delta, Node3D cameraPivot)
     {
         Vector3 moveDir = Vector3.Zero;
 
-        if (cmd.HasFlag(InputCommand.MOVE_FORWARD)) moveDir.Z -= 1f;
-        if (cmd.HasFlag(InputCommand.MOVE_BACK)) moveDir.Z += 1f;
-        if (cmd.HasFlag(InputCommand.MOVE_LEFT)) moveDir.X -= 1f;
-        if (cmd.HasFlag(InputCommand.MOVE_RIGHT)) moveDir.X += 1f;
+        if (cmd.HasFlag(ClientCommandMask.FORWARD)) moveDir.Z -= 1f;
+        if (cmd.HasFlag(ClientCommandMask.BACKWARD)) moveDir.Z += 1f;
+        if (cmd.HasFlag(ClientCommandMask.STRAFE_LEFT)) moveDir.X -= 1f;
+        if (cmd.HasFlag(ClientCommandMask.STRAFE_RIGHT)) moveDir.X += 1f;
 
         if (moveDir != Vector3.Zero)
         {
@@ -49,7 +49,7 @@ public class CharacterMovementComponent
 
         UpdateMovementState();
 
-        if (cmd.HasFlag(InputCommand.JUMP) && CanJump())
+        if (cmd.HasFlag(ClientCommandMask.JUMP) && CanJump())
         {
             TryJump();
         }

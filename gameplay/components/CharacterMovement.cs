@@ -62,6 +62,7 @@ public class CharacterMovement
 
     public float HorizontalVelocity { get; private set; }
 
+    public bool WasLaunched;
 
 
     public void Initialize(Character character)
@@ -85,10 +86,10 @@ public class CharacterMovement
 
         // Movement input
         Vector3 move = Vector3.Zero;
-        if (cmd.Input.HasFlag(InputCommand.MOVE_FORWARD)) move.Z -= 1;
-        if (cmd.Input.HasFlag(InputCommand.MOVE_BACK)) move.Z += 1;
-        if (cmd.Input.HasFlag(InputCommand.MOVE_LEFT)) move.X -= 1;
-        if (cmd.Input.HasFlag(InputCommand.MOVE_RIGHT)) move.X += 1;
+        if (cmd.Mask.HasFlag(ClientCommandMask.FORWARD)) move.Z -= 1;
+        if (cmd.Mask.HasFlag(ClientCommandMask.BACKWARD)) move.Z += 1;
+        if (cmd.Mask.HasFlag(ClientCommandMask.STRAFE_LEFT)) move.X -= 1;
+        if (cmd.Mask.HasFlag(ClientCommandMask.STRAFE_RIGHT)) move.X += 1;
 
         move = move.Normalized();
         var basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
@@ -100,7 +101,7 @@ public class CharacterMovement
         }
 
         // Jump
-        if (cmd.Input.HasFlag(InputCommand.JUMP) && _isGrounded && _jumpCooldownReady)
+        if (cmd.Mask.HasFlag(ClientCommandMask.JUMP) && _isGrounded && _jumpCooldownReady)
         {
             Jump(state);
         }
