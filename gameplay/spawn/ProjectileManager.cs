@@ -19,7 +19,7 @@ public partial class ProjectileManager : Node3D
     }
 
 
-    public Projectile LocalSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 rotation)
+    public Projectile LocalSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 rotation, bool isPredicted = false)
     {
         if(_projectilesByType.TryGetValue(type, out var projectileScene))
         {

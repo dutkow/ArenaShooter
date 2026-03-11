@@ -9,14 +9,9 @@ public class ClientProjectileManager
 
 
     public Dictionary<ushort, Projectile> _knownProjectiles = new();
-    public Dictionary<ushort, Projectile> _knownPredictedProjectiles = new();
 
     public List<Projectile> _predictedProjectiles = new();
 
-    bool _firedPredictedProjectile = false;
-    public ushort _lastFiredPredictedProjectileID;
-
-    public ushort _nextAvailableClientProjectileID;
 
     public static void Create()
     {
@@ -28,35 +23,27 @@ public class ClientProjectileManager
         Instance = new();
     }
 
-    public ushort GetNextAvailableClientProjectileID()
-    {
-        ushort nextAvailable = _nextAvailableClientProjectileID;
-        _nextAvailableClientProjectileID++;
-        return nextAvailable;
-    }
 
     public void HandleUnackedProjectiles(ProjectileSpawnData[] unackedProjectileSpawnDataArray)
     {
         if (unackedProjectileSpawnDataArray == null || unackedProjectileSpawnDataArray.Length == 0)
             return;
 
-        GD.Print($"num unacked projectiles received by CL = {unackedProjectileSpawnDataArray.Length}");
+        
 
         foreach (var unacked in unackedProjectileSpawnDataArray)
         {
-            // If it's ours
-            if (unacked.ownerPlayerID == ClientGame.Instance.LocalPlayerID)
+            GD.Print($"unacked proj on client has id: {unacked.ProjectileID}");
+            if (unacked.OwnerPlayerID == ClientGame.Instance.LocalPlayerID)
             {
                 var predicted = FindMatchingPredictedProjectile(unacked);
                 if (predicted != null)
                 {
-                    predicted.Reconcile();
+                    //predicted.Reconcile();
                     _predictedProjectiles.Remove(predicted);
                 }
             }
-
-            // If we don't already know about this projectile, spawn it
-            if (!_knownProjectiles.ContainsKey(unacked.ProjectileID))
+            else if (!_knownProjectiles.ContainsKey(unacked.ProjectileID))
             {
                 SpawnAuthoritativeProjectile(unacked);
             }
@@ -71,7 +58,7 @@ public class ClientProjectileManager
             var predicted = _predictedProjectiles[i];
 
             // Make sure owner matches
-            if (predicted.State.OwningPlayerID != serverProjectile.ownerPlayerID)
+            if (predicted.State.OwningPlayerID != serverProjectile.OwnerPlayerID)
                 continue;
 
             // Option 1: Match by order (first un-reconciled predicted projectile)
@@ -95,9 +82,6 @@ public class ClientProjectileManager
             return;
         }
 
-        GD.Print($"num unacked projectiles states received by CL = {unackedProjectileStatesArray.Length}");
-
-
         foreach (var state in unackedProjectileStatesArray)
         {
             if (!_knownProjectiles.ContainsKey(state.ProjectileID))
@@ -111,14 +95,7 @@ public class ClientProjectileManager
 
     public void SpawnPredictedProjectile(ProjectileSpawnData spawnData)
     {
-        GD.Print($"Spawning predicted projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
-
-        var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(_nextAvailableClientProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
-        _knownPredictedProjectiles.Add(_nextAvailableClientProjectileID, spawnedProjectile);
-        _lastFiredPredictedProjectileID = _nextAvailableClientProjectileID;
-        _nextAvailableClientProjectileID++;
-
-        _firedPredictedProjectile = true;
+        var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(0, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
     }
 
     public void SpawnAuthoritativeProjectile(ProjectileSpawnData spawnData)
@@ -154,12 +131,6 @@ public class ClientProjectileManager
 
     public ClientInputCommand AddInfoToClientInputCommand(ClientInputCommand cmd)
     {
-        if(_firedPredictedProjectile)
-        {
-            cmd.Mask |= ClientCommandMask.FIRED_PREDICTED_PROJECTILE;
-        }
-
-        _firedPredictedProjectile = false;
 
         return cmd;
     }

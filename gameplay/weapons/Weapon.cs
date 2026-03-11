@@ -116,7 +116,7 @@ public partial class Weapon : Entity
         Vector3 spawnPosition = origin + direction.Normalized() * 2.0f;
 
         ProjectileSpawnData spawnData = new();
-        spawnData.ownerPlayerID = OwnerPlayerID;
+        spawnData.OwnerPlayerID = OwnerPlayerID;
         spawnData.SpawnLocation = spawnPosition;
         spawnData.SpawnRotation = direction;
 
