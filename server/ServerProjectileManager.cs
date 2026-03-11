@@ -32,9 +32,6 @@ public class ServerProjectileManager
     public Dictionary<byte, Dictionary<ushort, ProjectileState>> _unackedProjectileStatesByPlayerID = new();
     public Dictionary<ushort, Dictionary<byte, ProjectileState[]>> _unackedProjectileStateHistory = new();
 
-    public Dictionary<byte, Dictionary<ushort, ProjectileSpawnData>> _unackedPredictedProjectilesByPlayerID = new();
-    public Dictionary<ushort, Dictionary<byte, ProjectileSpawnData[]>> _unackedPredictedProjectileHistory = new();
-
     private ushort _nextAvailableProjectileID;
 
     public static void Create()
@@ -80,15 +77,6 @@ public class ServerProjectileManager
         }
         return dict;
     }
-    public Dictionary<ushort, ProjectileSpawnData> GetUnackedPredictedProjectilesByPlayerID(byte playerID)
-    {
-        if (!_unackedPredictedProjectilesByPlayerID.TryGetValue(playerID, out var dict))
-        {
-            dict = new Dictionary<ushort, ProjectileSpawnData>();
-            _unackedPredictedProjectilesByPlayerID[playerID] = dict;
-        }
-        return dict;
-    }
 
     public void AddUnackedProjectileHistoryByPlayerID(ushort tick, byte playerID, ProjectileSpawnData[] projectileSpawnData)
     {
@@ -108,15 +96,6 @@ public class ServerProjectileManager
             _unackedProjectileStateHistory[tick] = playerHistory;
         }
         playerHistory[playerID] = states;
-    }
-    public void AddUnackedPredictedProjectileHistoryByPlayerID(ushort tick, byte playerID, ProjectileSpawnData[] predictedProjectiles)
-    {
-        if (!_unackedPredictedProjectileHistory.TryGetValue(tick, out var playerHistory))
-        {
-            playerHistory = new Dictionary<byte, ProjectileSpawnData[]>();
-            _unackedPredictedProjectileHistory[tick] = playerHistory;
-        }
-        playerHistory[playerID] = predictedProjectiles;
     }
 
     public void UpdateProjectileState(ProjectileState state)
@@ -173,9 +152,6 @@ public class ServerProjectileManager
 
         snapshot.UnacknowledgedProjectileStates = GetUnackedProjectileStatesByPlayerID(playerID).Values.ToArray();
         AddUnackedProjectileStateHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedProjectileStates);
-
-        snapshot.UnacknowledgedPredictedProjectiles = GetUnackedPredictedProjectilesByPlayerID(playerID).Values.ToArray();
-        AddUnackedPredictedProjectileHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedPredictedProjectiles);
     }
 
 
@@ -183,38 +159,5 @@ public class ServerProjectileManager
     {
         RemoveUnackedProjectilesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
         RemoveUnackedProjectileStatesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
-
-        RegisterPredictedProjectilesFromClient(cmd, playerID);
-    }
-
-    public void RegisterPredictedProjectilesFromClient(ClientCommand cmd, byte playerID)
-    {
-        foreach (var inputCmd in cmd.Commands)
-        {
-            if (inputCmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
-            {
-                // Ensure dictionary exists for this player
-                if (!_unackedPredictedProjectilesByPlayerID.TryGetValue(playerID, out var predictedProjectilesDict))
-                {
-                    predictedProjectilesDict = new Dictionary<ushort, ProjectileSpawnData>();
-                    _unackedPredictedProjectilesByPlayerID[playerID] = predictedProjectilesDict;
-                }
-
-                // Only add if this predicted projectile ID hasn't been added yet
-                if (!predictedProjectilesDict.ContainsKey(inputCmd.PredictedProjectileClientID))
-                {
-                    ProjectileSpawnData spawnData = new()
-                    {
-                        ServerTickOnSpawn = cmd.LastServerTickProcessedByClient,
-                        ProjectileID = inputCmd.PredictedProjectileClientID,
-                        SpawnLocation = inputCmd.PredictedProjectileSpawnPosition,
-                        SpawnRotation = inputCmd.PredictedProjectileSpawnRotation
-                    };
-
-                    GD.Print($"Server received client predicted projectile. client projectile ID: {inputCmd.PredictedProjectileClientID}. Server tick on spawn: {spawnData.ServerTickOnSpawn}");
-                    predictedProjectilesDict[inputCmd.PredictedProjectileClientID] = spawnData;
-                }
-            }
-        }
     }
 }
