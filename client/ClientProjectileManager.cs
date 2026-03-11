@@ -1,6 +1,7 @@
 using Godot;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using static Godot.WebSocketPeer;
 
 public class ClientProjectileManager
 {
@@ -24,7 +25,7 @@ public class ClientProjectileManager
     {
         foreach(var unackedProjectileSpawnData in unackedProjectileSpawnDataArray)
         {
-            if(!_knownProjectileStates.ContainsKey(unackedProjectileSpawnData.ProjectileID))
+            if(!_knownProjectiles.ContainsKey(unackedProjectileSpawnData.ProjectileID))
             {
                 SpawnProjectile(unackedProjectileSpawnData);
             }
@@ -42,12 +43,8 @@ public class ClientProjectileManager
                 continue;
             }
 
-            // Apply the state change — currently, your ProjectileState only tracks destruction
-            // So we can remove the projectile locally
-            _knownProjectileStates.Remove(state.ProjectileID);
-            ProjectileManager.Instance.DestroyProjectile(state.ProjectileID);
-
-            ApplyProjectileState(state);
+            ApplyState(state);
+            //_knownProjectileStates.Remove(state.ProjectileID);
         }
     }
 
@@ -67,15 +64,17 @@ public class ClientProjectileManager
 
     }
 
-    public void ApplyProjectileState(ProjectileState state)
+    public void ApplyState(ProjectileState state)
     {
         if(_knownProjectiles.TryGetValue(state.ProjectileID, out var projectile))
         {
             projectile.ApplyState(state);
         }
-        else
-        {
-            GD.Print($"didn't find projectile when trying to apply state");
-        }
+    }
+
+    public void OnLocalProjectileDestroyed(ushort projectileID)
+    {
+        _knownProjectiles.Remove(projectileID);
+        _knownProjectileStates.Remove(projectileID);
     }
 }

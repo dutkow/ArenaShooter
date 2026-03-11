@@ -1,14 +1,13 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using static Godot.WebSocketPeer;
 
 public enum ProjectileType
 {
     DEFAULT,
 }
+
 public class ProjectileSpawnData
 {
     public ushort ProjectileID;
@@ -16,120 +15,75 @@ public class ProjectileSpawnData
     public ProjectileType Type;
     public ushort ServerTickOnSpawn;
 
-    // potentially can be optimized out by making client reconstruct
     public Vector3 SpawnLocation;
     public Vector3 SpawnRotation;
-} 
+}
 
 public struct ProjectileState
 {
-    public ushort ProjectileID; // nothing for now yet, if you receive this, it means it was destroyed
+    public ushort ProjectileID; // destroyed if received
 }
 
 public class ServerProjectileManager
 {
     public static ServerProjectileManager Instance { get; private set; }
 
-    public Dictionary<byte, List<ProjectileSpawnData>> _unackedProjectilesByPlayerID = new();
+    // --- Dictionaries keyed by ProjectileID instead of List ---
+    public Dictionary<byte, Dictionary<ushort, ProjectileSpawnData>> _unackedProjectilesByPlayerID = new();
     public Dictionary<ushort, Dictionary<byte, ProjectileSpawnData[]>> _unackedProjectileHistory = new();
 
-    public Dictionary<byte, List<ProjectileState>> _unackedProjectileStatesByPlayerID = new();
+    public Dictionary<byte, Dictionary<ushort, ProjectileState>> _unackedProjectileStatesByPlayerID = new();
     public Dictionary<ushort, Dictionary<byte, ProjectileState[]>> _unackedProjectileStateHistory = new();
-
 
     private ushort _nextAvailableProjectileID;
 
     public static void Create()
     {
-        if(Instance != null)
+        if (Instance != null)
         {
             GD.PushError("Server projectile manager already exists!");
         }
-
         Instance = new();
     }
 
     public void CreateProjectilePendingSpawn(ProjectileSpawnData spawnData)
     {
+        spawnData.ProjectileID = _nextAvailableProjectileID++;
+
         foreach (var playerID in _unackedProjectilesByPlayerID.Keys)
         {
-            spawnData.ProjectileID = _nextAvailableProjectileID;
-            _unackedProjectilesByPlayerID[playerID].Add(spawnData);
+            _unackedProjectilesByPlayerID[playerID][spawnData.ProjectileID] = spawnData;
         }
-        _nextAvailableProjectileID++;
     }
 
-    public List<ProjectileSpawnData> GetUnackedProjectilesByPlayerID(byte playerID)
+    public Dictionary<ushort, ProjectileSpawnData> GetUnackedProjectilesByPlayerID(byte playerID)
     {
-        if (!_unackedProjectilesByPlayerID.TryGetValue(playerID, out var list))
+        if (!_unackedProjectilesByPlayerID.TryGetValue(playerID, out var dict))
         {
-            list = new List<ProjectileSpawnData>();
-            _unackedProjectilesByPlayerID[playerID] = list;
+            dict = new Dictionary<ushort, ProjectileSpawnData>();
+            _unackedProjectilesByPlayerID[playerID] = dict;
         }
-        return list;
+        return dict;
     }
 
-    public List<ProjectileState> GetUnackedProjectileStateChangesByPlayerID(byte playerID)
+    public Dictionary<ushort, ProjectileState> GetUnackedProjectileStatesByPlayerID(byte playerID)
     {
-        if (!_unackedProjectileStatesByPlayerID.TryGetValue(playerID, out var list))
+        if (!_unackedProjectileStatesByPlayerID.TryGetValue(playerID, out var dict))
         {
-            list = new List<ProjectileState>();
-            _unackedProjectileStatesByPlayerID[playerID] = list;
+            dict = new Dictionary<ushort, ProjectileState>();
+            _unackedProjectileStatesByPlayerID[playerID] = dict;
         }
-        return list;
+        return dict;
     }
 
     public void AddUnackedProjectileHistoryByPlayerID(ushort tick, byte playerID, ProjectileSpawnData[] projectileSpawnData)
     {
-        if (!_unackedProjectileHistory.TryGetValue(tick, out var playerHistoryDict))
+        if (!_unackedProjectileHistory.TryGetValue(tick, out var playerHistory))
         {
-            playerHistoryDict = new Dictionary<byte, ProjectileSpawnData[]>();
-            _unackedProjectileHistory[tick] = playerHistoryDict;
+            playerHistory = new Dictionary<byte, ProjectileSpawnData[]>();
+            _unackedProjectileHistory[tick] = playerHistory;
         }
-
-        playerHistoryDict[playerID] = projectileSpawnData;
-    }
-
-    public void RemoveUnackedProjectilesByPlayerID(byte playerID, ushort lastProcessedTick)
-    {
-        var unackedProjectiles = GetUnackedProjectilesByPlayerID(playerID);
-        if (unackedProjectiles.Count == 0)
-        {
-            return;
-        }
-
-        if (!_unackedProjectileHistory.TryGetValue(lastProcessedTick, out var playerProjectileHistoryAtTick))
-        {
-            return;
-        }
-
-        if (!playerProjectileHistoryAtTick.TryGetValue(playerID, out var playerUnackedProjectilesAtTick))
-        {
-            return;
-        }
-
-        if (playerUnackedProjectilesAtTick.Length == 0)
-        {
-            return;
-        }
-
-        ushort firstUnackedProjectileID = playerUnackedProjectilesAtTick[0].ProjectileID;
-        if(unackedProjectiles[0].ProjectileID != firstUnackedProjectileID)
-        {
-            return;
-        }
-
-        unackedProjectiles.RemoveRange(0, playerUnackedProjectilesAtTick.Length);
-    }
-
-    public List<ProjectileState> GetUnackedProjectileStatesByPlayerID(byte playerID)
-    {
-        if (!_unackedProjectileStatesByPlayerID.TryGetValue(playerID, out var list))
-        {
-            list = new List<ProjectileState>();
-            _unackedProjectileStatesByPlayerID[playerID] = list;
-        }
-        return list;
+        playerHistory[playerID] = projectileSpawnData;
     }
 
     public void AddUnackedProjectileStateHistoryByPlayerID(ushort tick, byte playerID, ProjectileState[] states)
@@ -146,45 +100,60 @@ public class ServerProjectileManager
     {
         foreach (var playerID in _unackedProjectileStatesByPlayerID.Keys)
         {
-            _unackedProjectileStatesByPlayerID[playerID].Add(state);
+            _unackedProjectileStatesByPlayerID[playerID][state.ProjectileID] = state;
+        }
+
+        // for now, the only state update is being destroyed
+        OnProjectileDestroyed(state.ProjectileID);
+    }
+
+    public void OnProjectileDestroyed(ushort projectileID)
+    {
+        foreach (var playerID in _unackedProjectilesByPlayerID.Keys)
+        {
+            _unackedProjectilesByPlayerID[playerID].Remove(projectileID);
+        }
+    }
+
+    public void RemoveUnackedProjectilesByPlayerID(byte playerID, ushort lastProcessedTick)
+    {
+        if (!_unackedProjectileHistory.TryGetValue(lastProcessedTick, out var tickHistory)) return;
+        if (!tickHistory.TryGetValue(playerID, out var snapshot)) return;
+        if (snapshot.Length == 0) return;
+
+        var unacked = GetUnackedProjectilesByPlayerID(playerID);
+        foreach (var proj in snapshot)
+        {
+            unacked.Remove(proj.ProjectileID);
         }
     }
 
     public void RemoveUnackedProjectileStatesByPlayerID(byte playerID, ushort lastProcessedTick)
     {
+        if (!_unackedProjectileStateHistory.TryGetValue(lastProcessedTick, out var tickHistory)) return;
+        if (!tickHistory.TryGetValue(playerID, out var snapshot)) return;
+        if (snapshot.Length == 0) return;
+
         var unacked = GetUnackedProjectileStatesByPlayerID(playerID);
-        if (!_unackedProjectileStateHistory.TryGetValue(lastProcessedTick, out var history) ||
-            !history.TryGetValue(playerID, out var snapshot) ||
-            snapshot.Length == 0 || unacked.Count == 0 ||
-            unacked[0].ProjectileID != snapshot[0].ProjectileID)
+        foreach (var state in snapshot)
         {
-            return;
+            unacked.Remove(state.ProjectileID);
         }
-
-        unacked.RemoveRange(0, snapshot.Length);
-    }
-
-    public void AddStateInfoToWorldSnapshot(WorldSnapshot snapshot, byte playerID)
-    {
-        var unackedStates = GetUnackedProjectileStatesByPlayerID(playerID);
-        snapshot.UnacknowledgedProjectileStates = unackedStates.ToArray();
-        AddUnackedProjectileStateHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectileStates);
     }
 
     public void AddInfoToWorldSnapshot(WorldSnapshot snapshot, byte playerID)
     {
-        snapshot.UnacknowledgedProjectiles = GetUnackedProjectilesByPlayerID(playerID).ToArray();
+        // --- convert dictionaries to arrays for sending ---
+        snapshot.UnacknowledgedProjectiles = new List<ProjectileSpawnData>(GetUnackedProjectilesByPlayerID(playerID).Values).ToArray();
         AddUnackedProjectileHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectiles);
 
-        snapshot.UnacknowledgedProjectileStates = GetUnackedProjectileStatesByPlayerID(playerID).ToArray();
+        snapshot.UnacknowledgedProjectileStates = new List<ProjectileState>(GetUnackedProjectileStatesByPlayerID(playerID).Values).ToArray();
         AddUnackedProjectileStateHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectileStates);
-
-        GD.Print($"Num unacked projectiles: {snapshot.UnacknowledgedProjectiles.Length}. Num unacked projectile states: {snapshot.UnacknowledgedProjectileStates.Length}");
     }
 
     public void ReceiveClientCommand(ClientCommand cmd, byte playerID)
     {
-        ServerProjectileManager.Instance.RemoveUnackedProjectilesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
-        ServerProjectileManager.Instance.RemoveUnackedProjectileStatesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
+        RemoveUnackedProjectilesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
+        RemoveUnackedProjectileStatesByPlayerID(playerID, cmd.LastServerTickProcessedByClient);
     }
 }

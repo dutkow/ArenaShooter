@@ -64,12 +64,12 @@ public partial class LinearProjectile : Projectile
 
                 if (colliderNode.Owner != null && colliderNode.Owner is IDamageable damageable)
                 {
-                    GD.Print($"Collided with: {colliderNode.Name}. apply damage");
+                    //GD.Print($"Collided with: {colliderNode.Name}. apply damage");
                     damageable.ApplyDamage(Damage);
                 }
                 else
                 {
-                    GD.Print($"Collided with: {colliderNode?.Name ?? "unknown"}. not damageable");
+                    //GD.Print($"Collided with: {colliderNode?.Name ?? "unknown"}. not damageable");
                 }
 
                 Destroy();
