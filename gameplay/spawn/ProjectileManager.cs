@@ -18,29 +18,10 @@ public partial class ProjectileManager : Node3D
         Instance = this;
     }
 
-    public void OldSpawnProjectile(ushort id, ProjectileType type, Vector3 position, Vector3 rotation)
-    {
-        LocalSpawnProjectile(id, type, position, rotation);
-
-        /*
-        if(NetworkSession.Instance.IsServer)
-        {
-            ServerSpawnProjectile(id, type, position, rotation);
-        }
-        else
-        {
-            LocalSpawnProjectile(id, type, position, rotation);
-        }*/
-    }
-
-    public void ServerSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 rotation)
-    {
-        LocalSpawnProjectile(projectileID, type, position, rotation);
-        //ProjectileSpawned.Send(projectileID, type, position, rotation);
-    }
 
     public Projectile LocalSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 rotation)
     {
+        GD.Print($"local spawn proj ran on {NetworkSession.Instance.NetworkMode}");
         if(_projectilesByType.TryGetValue(type, out var projectileScene))
         {
             var spawnedProjectile = (Projectile)projectileScene.Instantiate();

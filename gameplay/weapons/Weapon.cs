@@ -8,7 +8,7 @@ public enum FireMode
     BURST,       // optional later
 }
 
-public partial class Weapon : Node3D
+public partial class Weapon : Entity
 {
     public byte OwnerPlayerID;
 
@@ -21,13 +21,23 @@ public partial class Weapon : Node3D
     private float _cooldownTimer = 0f;
 
     [Export] public Node3D FirstPersonWeaponMesh;
-    [Export] public float PrimaryFireCooldown = 0.5f;
+    [Export] public float PrimaryFireCooldown = 5.0f;
     [Export] PackedScene _projectileScene;
+
+    public bool IsPredictingProjectiles { get; private set; } = true;
 
     public override void _Process(double delta)
     {
-        if (_cooldownTimer > 0f)
-            _cooldownTimer -= (float)delta;
+        base._Process(delta);
+
+        if(IsAuthority || IsPredictingProjectiles)
+        {
+            if (_cooldownTimer > 0f)
+            {
+                _cooldownTimer -= (float)delta;
+            }
+            GD.Print($"cool down time remaining = {_cooldownTimer}. networkmode = {NetworkSession.Instance.NetworkMode}");
+        }
     }
 
     public void StartPrimaryFire()
@@ -45,6 +55,15 @@ public partial class Weapon : Node3D
     {
         _isTriggerHeld = false;
         _hasFiredSincePress = false;
+    }
+
+    public void ProcessClientInput(InputCommand cmd)
+    {
+        if(!IsPredictingProjectiles)
+        {
+            GD.Print($"processing client input!");
+            HandleInput(cmd);
+        }
     }
 
     public void HandleInput(InputCommand cmd)
@@ -82,7 +101,9 @@ public partial class Weapon : Node3D
     private void TryFire(Vector3 origin = default, Vector3 direction = default)
     {
         if (!_readyToFire)
+        {
             return;
+        }
 
         if (_projectileScene != null)
         {
@@ -96,9 +117,8 @@ public partial class Weapon : Node3D
             spawnData.SpawnLocation = spawnPosition;
             spawnData.SpawnRotation = direction;
 
-            ServerProjectileManager.Instance.CreateProjectilePendingSpawn(spawnData);
-            ClientProjectileManager.Instance?.SpawnProjectile(spawnData);
-            //ProjectileManager.Instance.ServerSpawnProjectile(1, ProjectileType.DEFAULT, spawnPosition, direction);
+            ServerProjectileManager.Instance?.CreateProjectilePendingSpawn(spawnData);
+            ClientProjectileManager.Instance?.SpawnAuthoritativeProjectile(spawnData);
         }
 
         _cooldownTimer = PrimaryFireCooldown;

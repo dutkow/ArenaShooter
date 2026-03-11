@@ -66,8 +66,8 @@ public partial class PredictionTester : Node3D
         clientGame1.LocalPlayerController.Possess(_character1);
         clientGame2.LocalPlayerController.Possess(_character2);
 
-        InputCommand testInput = new();
-        testInput |= InputCommand.MOVE_FORWARD;
+        //ClientCommandMask testInput = new();
+        //testInput |= ClientCommandMask.MOVE_FORWARD;
 
     }
 

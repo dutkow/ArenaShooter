@@ -28,7 +28,7 @@ public static class ClientGameplayService
         var msg = new ProjectileSpawned();
         msg.ReadMessage(data);
 
-        ProjectileManager.Instance.LocalSpawnProjectile(msg.ID, msg.Type, msg.SpawnPosition, msg.SpawnRotation);
+        //ProjectileManager.Instance.LocalSpawnProjectile(msg.ID, msg.Type, msg.SpawnPosition, msg.SpawnRotation);
     }
 
     public static void HandleHealthChanged(byte[] data)

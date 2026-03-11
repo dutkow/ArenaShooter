@@ -1,12 +1,19 @@
 using Godot;
 using System;
 
+public class ProjectileState
+{
+    public ushort ProjectileID; // destroyed if received
+
+    public Vector3 Position;
+}
+
 /// <summary>
 /// Base class for all projectiles. Handles lifetime, damage, and collision API.
 /// </summary>
 public abstract partial class Projectile : Entity
 {
-    ProjectileState _state = new();
+    public ProjectileState State { get; private set; } = new();
 
     [Export] public int Damage = 75;
     [Export] public float LifeTime = 5f;
@@ -28,7 +35,7 @@ public abstract partial class Projectile : Entity
             Area.AreaEntered += OnCollision;
         }
 
-        _state.ProjectileID = projectileID;
+        State.ProjectileID = projectileID;
     }
 
     public override void _PhysicsProcess(double delta)
@@ -68,7 +75,7 @@ public abstract partial class Projectile : Entity
 
     public virtual void ServerDestroy()
     {
-        ServerProjectileManager.Instance.UpdateProjectileState(_state);
+        ServerProjectileManager.Instance.UpdateProjectileState(State);
         LocalDestroy();
         QueueFree();
     }
@@ -89,7 +96,7 @@ public abstract partial class Projectile : Entity
             LocalDestroy(); // play destroy stuff if still alive on the server
         }
 
-        ClientProjectileManager.Instance.OnLocalProjectileDestroyed(_state.ProjectileID);
+        ClientProjectileManager.Instance.OnLocalProjectileDestroyed(State.ProjectileID);
 
         QueueFree();
     }

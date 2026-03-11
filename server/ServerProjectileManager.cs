@@ -19,10 +19,6 @@ public class ProjectileSpawnData
     public Vector3 SpawnRotation;
 }
 
-public struct ProjectileState
-{
-    public ushort ProjectileID; // destroyed if received
-}
 
 public class ServerProjectileManager
 {

@@ -7,9 +7,10 @@ public class ClientProjectileManager
 {
     public static ClientProjectileManager Instance { get; private set; }
 
-    public Dictionary<ushort, ProjectileState> _knownProjectileStates = new();
 
     public Dictionary<ushort, Projectile> _knownProjectiles = new();
+
+    public ushort _nextAvailableClientProjectileID;
 
     public static void Create()
     {
@@ -27,7 +28,9 @@ public class ClientProjectileManager
         {
             if(!_knownProjectiles.ContainsKey(unackedProjectileSpawnData.ProjectileID))
             {
-                SpawnProjectile(unackedProjectileSpawnData);
+                // This needs to be purely projectiles which the client didn't predict, if any.
+                // starting with fully predicted ones, we instead need to find projectiles and sync them to the client's predicted projectiles
+                //SpawnProjectile(unackedProjectileSpawnData);
             }
         }
     }
@@ -36,23 +39,28 @@ public class ClientProjectileManager
     {
         foreach (var state in unackedProjectileStatesArray)
         {
-            if (!_knownProjectileStates.ContainsKey(state.ProjectileID))
+            if (!_knownProjectiles.ContainsKey(state.ProjectileID))
             {
-                // If the projectile doesn't exist on the client yet, maybe just skip?
-                GD.Print($"Warning: received state for unknown projectile ID {state.ProjectileID}");
                 continue;
             }
 
             ApplyState(state);
-            //_knownProjectileStates.Remove(state.ProjectileID);
         }
     }
 
-    public void SpawnProjectile(ProjectileSpawnData spawnData)
+    public void SpawnPredictedProjectile(ProjectileSpawnData spawnData)
     {
-        _knownProjectileStates[spawnData.ProjectileID] = new();
         GD.Print($"Spawning projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
 
+        var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(_nextAvailableClientProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
+        _nextAvailableClientProjectileID++;
+        //_knownProjectiles.Add(spawnData.ProjectileID, spawnedProjectile);
+        // we can't add predicted projeciltes that are our own
+    }
+
+    public void SpawnAuthoritativeProjectile(ProjectileSpawnData spawnData)
+    {
+        GD.Print($"Spawning projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
         var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(spawnData.ProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
         _knownProjectiles.Add(spawnData.ProjectileID, spawnedProjectile);
     }
@@ -61,7 +69,6 @@ public class ClientProjectileManager
     {
         HandleUnackedProjectiles(snapshot.UnacknowledgedProjectiles);
         HandleUnackedProjectileStates(snapshot.UnacknowledgedProjectileStates);
-
     }
 
     public void ApplyState(ProjectileState state)
@@ -74,7 +81,7 @@ public class ClientProjectileManager
 
     public void OnLocalProjectileDestroyed(ushort projectileID)
     {
+        GD.Print($"removing projectile with id: {projectileID}");
         _knownProjectiles.Remove(projectileID);
-        _knownProjectileStates.Remove(projectileID);
     }
 }
