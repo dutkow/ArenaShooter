@@ -16,6 +16,8 @@ public static class ClientConnectionService
 
         Game.Instance.Initialize(NetworkMode.CLIENT, playerID);
 
+        GD.Print($"initializing network mode as client on player");
+
         Main.Instance.OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);
 
 

@@ -117,7 +117,7 @@ public partial class NetworkSession : Node
 
             case NetworkMode.LISTEN_SERVER:
                 Game.Instance.Initialize(NetworkMode, 0);
-                break;;
+                break;
         }
 
         _router.Initialize(mode);
@@ -195,6 +195,7 @@ public partial class NetworkSession : Node
     public void JoinServer(ServerInfo serverInfo)
     {
         SetMode(NetworkMode.CLIENT);
+
 
         ServerInfo = serverInfo;
 

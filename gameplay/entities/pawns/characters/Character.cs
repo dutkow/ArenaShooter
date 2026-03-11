@@ -104,10 +104,8 @@ public partial class Character : Pawn, IDamageable
 
         MovementComp.HandleInput(cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-        if(IsAuthority)
-        {
-            _weapon.HandleInput(cmd.Mask);
-        }
+        _weapon.HandleInput(cmd.Mask);
+
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
@@ -128,7 +126,7 @@ public partial class Character : Pawn, IDamageable
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-        _weapon.HandleInput(cmd.Mask);
+        _weapon.ProcessClientInput(cmd.Mask);
     }
 
     public override void _Process(double delta)
@@ -162,6 +160,9 @@ public partial class Character : Pawn, IDamageable
             GD.Print($"player state is null");
         }
         _weapon.OwnerPlayerID = PlayerState.PlayerID;
+        _weapon.SetIsAuthority(IsAuthority);
+
+        GD.Print($"possessing player. setting is authority to: {IsAuthority}");
 
     }
 
