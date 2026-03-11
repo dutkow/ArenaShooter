@@ -145,7 +145,7 @@ public partial class Weapon : Entity
 
     public void Fire(ProjectileSpawnData spawnData)
     {
-        if (!IsAuthority && IsPredictingProjectiles)
+        if (IsPredictingProjectiles)
         {
             ClientProjectileManager.Instance?.SpawnPredictedProjectile(spawnData);
             FiredPredictedProjectile = true;

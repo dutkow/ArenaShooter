@@ -21,6 +21,7 @@ public partial class ProjectileManager : Node3D
 
     public Projectile LocalSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 rotation)
     {
+        GD.Print($"local spawn proj ran on {NetworkSession.Instance.NetworkMode}");
         if(_projectilesByType.TryGetValue(type, out var projectileScene))
         {
             var spawnedProjectile = (Projectile)projectileScene.Instantiate();

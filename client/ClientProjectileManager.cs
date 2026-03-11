@@ -72,7 +72,7 @@ public class ClientProjectileManager
 
     public void SpawnPredictedProjectile(ProjectileSpawnData spawnData)
     {
-        GD.Print($"Spawning predicted projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
+        GD.Print($"Spawning projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
 
         var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(_nextAvailableClientProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
         _knownPredictedProjectiles.Add(_nextAvailableClientProjectileID, spawnedProjectile);
@@ -84,13 +84,9 @@ public class ClientProjectileManager
 
     public void SpawnAuthoritativeProjectile(ProjectileSpawnData spawnData)
     {
+        GD.Print($"Spawning projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
         var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(spawnData.ProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
-
-        if(NetworkSession.Instance.IsClient)
-        {
-            GD.Print($"Spawning authoritative projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
-            _knownProjectiles.Add(spawnData.ProjectileID, spawnedProjectile);
-        }
+        _knownProjectiles.Add(spawnData.ProjectileID, spawnedProjectile);
     }
 
     public void ApplyWorldSnapshot(WorldSnapshot snapshot)
@@ -120,7 +116,7 @@ public class ClientProjectileManager
             cmd.Mask |= ClientCommandMask.FIRED_PREDICTED_PROJECTILE;
             cmd.PredictedProjectileClientID = _lastFiredPredictedProjectileID;
 
-            GD.Print($"adding predicted projectile with client ID {cmd.PredictedProjectileClientID} to CL input cmd. net mode = {NetworkSession.Instance.NetworkMode}");
+            GD.Print($"adding predicted projectile with client ID {cmd.PredictedProjectileClientID} to CL input cmd");
 
         }
 
