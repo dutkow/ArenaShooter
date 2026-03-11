@@ -33,7 +33,7 @@ public partial class Character : Pawn, IDamageable
     [Export] MeshInstance3D _characterMesh;
     [Export] Node3D _thirdPersonWeaponMesh;
     [Export] Node3D _cameraPivot;
-    [Export] Weapon _weapon;
+    [Export] public Weapon Weapon;
     [Export] Node3D _visualContainer;
 
     [Export] Node3D _thirdPersonWeaponSocket;
@@ -79,11 +79,11 @@ public partial class Character : Pawn, IDamageable
         base._PhysicsProcess(delta);
 
         Vector3 direction = -Camera.GlobalTransform.Basis.Z;
-        _weapon.Tick(delta, Camera.GlobalPosition, direction);
+        Weapon.Tick(delta, Camera.GlobalPosition, direction);
 
         GlobalPosition = MovementComp.State.Position + new Vector3(0.0f, 0.0f, 0.1f);
-
     }
+
 
     public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
     {
@@ -104,7 +104,7 @@ public partial class Character : Pawn, IDamageable
 
         MovementComp.HandleInput(cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-        _weapon.HandleInput(cmd.Mask);
+        Weapon.HandleInput(cmd.Mask);
 
     }
 
@@ -126,7 +126,7 @@ public partial class Character : Pawn, IDamageable
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-        _weapon.ProcessClientInput(cmd.Mask);
+        Weapon.ProcessClientInput(cmd.Mask);
     }
 
     public override void _Process(double delta)
@@ -159,8 +159,8 @@ public partial class Character : Pawn, IDamageable
         {
             GD.Print($"player state is null");
         }
-        _weapon.OwnerPlayerID = PlayerState.PlayerID;
-        _weapon.SetIsAuthority(IsAuthority);
+        Weapon.OwnerPlayerID = PlayerState.PlayerID;
+        Weapon.SetIsAuthority(IsAuthority);
 
     }
 
@@ -177,12 +177,12 @@ public partial class Character : Pawn, IDamageable
     public void ShowFirstPersonView()
     {
         HideThirdPersonView();
-        _weapon.FirstPersonWeaponMesh.Visible = true;
+        Weapon.FirstPersonWeaponMesh.Visible = true;
     }
 
     public void HideFirstPersonView()
     {
-        _weapon.FirstPersonWeaponMesh.Visible = false;
+        Weapon.FirstPersonWeaponMesh.Visible = false;
     }
 
     public void ShowThirdPersonView()
@@ -443,7 +443,7 @@ public partial class Character : Pawn, IDamageable
     {
         base.HandleRemoteSpawn(playerID);
 
-        _weapon.OwnerPlayerID = playerID;
+        Weapon.OwnerPlayerID = playerID;
     }
 
 
