@@ -123,7 +123,12 @@ public class CharacterMovement
                 break;
         }
 
-        state.Velocity += cmd.LaunchVelocity;
+        if(cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
+        {
+            state.Velocity += cmd.LaunchVelocity;
+            GD.Print($"launching!");
+        }
+
         Vector3 safeMotion = HandleCollision(state, delta);
         state.Position += safeMotion;
 
@@ -357,6 +362,7 @@ public class CharacterMovement
     public void QueueLaunch(Vector3 vector)
     {
         LaunchVector = vector;
+        WasLaunched = true;
     }
 
     public bool OnSlope()

@@ -37,36 +37,36 @@ public struct ClientInputCommand
 
 public class ClientCommand : Message
 {
-    public ClientInputCommand[] Commands;
-
     public ushort ClientTick;
     public ushort LastServerTickProcessedByClient;
+
+    public ClientInputCommand[] Commands;
 
     protected override int BufferSize()
     {
         base.BufferSize();
+
         Add(ClientTick);
         Add(LastServerTickProcessedByClient);
         Add((byte)Commands.Length);
 
         foreach (var cmd in Commands)
         {
-            Add(cmd.ClientTick);
-            AddEnum(cmd.Mask);
+            Write(cmd.ClientTick);
+            WriteEnum(cmd.Mask);
 
-            // Masked & Quantized
             if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
-                Add(Quantize.Angle(cmd.Yaw));
+                Write(cmd.Yaw);
             if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
-                Add(Quantize.Angle(cmd.Pitch));
+                Write(cmd.Pitch);
             if (cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
             {
-                Add(Quantize.Velocity(cmd.LaunchVelocity.X));
-                Add(Quantize.Velocity(cmd.LaunchVelocity.Y));
-                Add(Quantize.Velocity(cmd.LaunchVelocity.Z));
+                Write(cmd.LaunchVelocity.X);
+                Write(cmd.LaunchVelocity.Y);
+                Write(cmd.LaunchVelocity.Z);
             }
             if (cmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
-                Add(cmd.PredictedProjectileClientID);
+                Write(cmd.PredictedProjectileClientID);
         }
 
         return _dataSize;
@@ -75,6 +75,7 @@ public class ClientCommand : Message
     public override byte[] WriteMessage()
     {
         base.WriteMessage();
+
         Write(ClientTick);
         Write(LastServerTickProcessedByClient);
         Write((byte)Commands.Length);
@@ -116,36 +117,29 @@ public class ClientCommand : Message
         for (int i = 0; i < count; i++)
         {
             ClientInputCommand cmd = new ClientInputCommand();
+
             Read(out cmd.ClientTick);
 
             Read(out ushort mask);
             cmd.Mask = (ClientCommandMask)mask;
 
-            // Masked & Dequantized
             if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
             {
-                short qYaw;
-                Read(out qYaw);
-                cmd.Yaw = Quantize.Angle(qYaw);
+                Read(out cmd.Yaw);
             }
+
             if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
             {
-                short qPitch;
-                Read(out qPitch);
-                cmd.Pitch = Quantize.Angle(qPitch);
+                Read(out cmd.Pitch);
             }
+
             if (cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
             {
-                short vx, vy, vz;
-                Read(out vx);
-                Read(out vy);
-                Read(out vz);
-                cmd.LaunchVelocity = new Vector3(
-                    Quantize.Velocity(vx),
-                    Quantize.Velocity(vy),
-                    Quantize.Velocity(vz)
-                );
+                Read(out cmd.LaunchVelocity.X);
+                Read(out cmd.LaunchVelocity.Y);
+                Read(out cmd.LaunchVelocity.Z);
             }
+
             if (cmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
             {
                 Read(out cmd.PredictedProjectileClientID);

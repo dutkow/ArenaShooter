@@ -277,11 +277,6 @@ public partial class Character : Pawn, IDamageable
         {
             snapshot.Yaw = MovementComp.State.Yaw;
         }
-        else
-        {
-            GD.Print($"received snapshot yaw is dirty and yaw = {snapshot.Yaw}");
-
-        }
 
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))
         {
@@ -385,7 +380,6 @@ public partial class Character : Pawn, IDamageable
             {
                 cmd.Mask |= ClientCommandMask.YAW;
                 cmd.Yaw = GlobalRotation.Y;
-                GD.Print($"sending dirty yaw {cmd.Yaw}");
                 _yawDirty = false;
             }
 
