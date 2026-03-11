@@ -162,8 +162,6 @@ public partial class Character : Pawn, IDamageable
         _weapon.OwnerPlayerID = PlayerState.PlayerID;
         _weapon.SetIsAuthority(IsAuthority);
 
-        GD.Print($"possessing player. setting is authority to: {IsAuthority}");
-
     }
 
     public override void OnUnpossessed()

@@ -54,13 +54,11 @@ public class ServerProjectileManager
             {
                 continue; // need to handle logic for tracking predicted onesh ere
             }
-            else
-            {
-                GD.Print($"player id = {playerID} and owning player id = {spawnData.ownerPlayerID}");
-            }
             _unackedProjectilesByPlayerID[playerID][spawnData.ProjectileID] = spawnData;
         }
         spawnData.ProjectileID = _nextAvailableProjectileID++;
+
+        ClientProjectileManager.Instance?.SpawnAuthoritativeProjectile(spawnData);
     }
 
     public Dictionary<ushort, ProjectileSpawnData> GetUnackedProjectilesByPlayerID(byte playerID)

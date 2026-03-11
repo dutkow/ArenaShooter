@@ -56,17 +56,6 @@ public class ClientProjectileManager
         }
     }
 
-    public void SpawnProjectile(ProjectileSpawnData data, bool wasPredicted)
-    {
-        if(wasPredicted)
-        {
-            SpawnPredictedProjectile(data);
-        }
-        else
-        {
-            SpawnAuthoritativeProjectile(data);
-        }
-    }
 
     public void SpawnPredictedProjectile(ProjectileSpawnData spawnData)
     {

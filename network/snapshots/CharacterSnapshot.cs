@@ -5,13 +5,22 @@ using System;
 public enum CharacterSnapshotFlags : ushort
 {
     NONE = 0,
+
+    // MOVEMENT
     POSITION = 1 << 0,
     VELOCITY = 1 << 1,
     YAW = 1 << 2,
     PITCH = 1 << 3,
+
+    // I can actually remove move mode I think, but won't yet
     MOVE_MODE = 1 << 4,
-    HEALTH = 1 << 5,
-    SHIELD = 1 << 6,
+
+    // Events
+    FIRE_PRIMARY = 1 << 5,
+    FIRE_SECONDARY = 1 << 6,
+
+    HEALTH = 1 << 7,
+    SHIELD = 1 << 8,
 }
 
 public struct CharacterSnapshot

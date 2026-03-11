@@ -60,10 +60,7 @@ public partial class Weapon : Entity
 
     public void ProcessClientInput(ClientCommandMask cmd)
     {
-        if(IsPredictingProjectiles)
-        {
-            HandleInput(cmd);
-        }
+        HandleInput(cmd);
     }
 
     public void HandleInput(ClientCommandMask cmd)
@@ -96,8 +93,6 @@ public partial class Weapon : Entity
         {
             TryFire(origin, direction);
         }
-
-
     }
 
     private void TryFire(Vector3 origin = default, Vector3 direction = default)
@@ -107,23 +102,30 @@ public partial class Weapon : Entity
             return;
         }
 
-        if (_projectileScene != null)
+        if (_projectileScene == null)
         {
-            // Spawn 2 meters in front of origin along the direction
-            Vector3 spawnPosition = origin + direction.Normalized() * 2.0f;
-
-            // Call your projectile spawn function
-
-            ProjectileSpawnData spawnData = new();
-            spawnData.ownerPlayerID = OwnerPlayerID;
-            spawnData.SpawnLocation = spawnPosition;
-            spawnData.SpawnRotation = direction;
-
-            ClientProjectileManager.Instance?.SpawnProjectile(spawnData, IsPredictingProjectiles);
-            FiredPredictedProjectile = IsPredictingProjectiles;
-
-            ServerProjectileManager.Instance?.CreateProjectilePendingSpawn(spawnData, IsPredictingProjectiles);
+            return;
         }
+
+        Vector3 spawnPosition = origin + direction.Normalized() * 2.0f;
+
+        ProjectileSpawnData spawnData = new();
+        spawnData.ownerPlayerID = OwnerPlayerID;
+        spawnData.SpawnLocation = spawnPosition;
+        spawnData.SpawnRotation = direction;
+
+        Fire(spawnData);
+    }
+
+    public void Fire(ProjectileSpawnData spawnData)
+    {
+        if (IsPredictingProjectiles)
+        {
+            ClientProjectileManager.Instance?.SpawnPredictedProjectile(spawnData);
+            FiredPredictedProjectile = true;
+        }
+
+        ServerProjectileManager.Instance?.CreateProjectilePendingSpawn(spawnData, IsPredictingProjectiles);
 
         _cooldownTimer = PrimaryFireCooldown;
     }
