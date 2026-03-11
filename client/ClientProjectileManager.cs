@@ -35,7 +35,15 @@ public class ClientProjectileManager
 
     public void HandleUnackedProjectiles(ProjectileSpawnData[] unackedProjectileSpawnDataArray)
     {
-        foreach(var unackedProjectileSpawnData in unackedProjectileSpawnDataArray)
+        if(unackedProjectileSpawnDataArray == null)
+        {
+            return;
+        }
+
+        GD.Print($"num unacked projectiles received by CL = {unackedProjectileSpawnDataArray.Length}");
+
+
+        foreach (var unackedProjectileSpawnData in unackedProjectileSpawnDataArray)
         {
             if(!_knownProjectiles.ContainsKey(unackedProjectileSpawnData.ProjectileID))
             {
@@ -46,6 +54,14 @@ public class ClientProjectileManager
 
     public void HandleUnackedProjectileStates(ProjectileState[] unackedProjectileStatesArray)
     {
+        if (unackedProjectileStatesArray == null)
+        {
+            return;
+        }
+
+        GD.Print($"num unacked projectiles states received by CL = {unackedProjectileStatesArray.Length}");
+
+
         foreach (var state in unackedProjectileStatesArray)
         {
             if (!_knownProjectiles.ContainsKey(state.ProjectileID))
@@ -59,7 +75,14 @@ public class ClientProjectileManager
 
     public void HandleUnackedPredictedProjectiles(ProjectileSpawnData[] unackedPredictedProjectiles)
     {
-        foreach(var unackedPredictedProjectile in unackedPredictedProjectiles)
+        if (unackedPredictedProjectiles == null)
+        {
+            return;
+        }
+
+        GD.Print($"num unacked predicted projectiles received by CL = {unackedPredictedProjectiles.Length}");
+
+        foreach (var unackedPredictedProjectile in unackedPredictedProjectiles)
         {
             if(_knownPredictedProjectiles.TryGetValue(unackedPredictedProjectile.ProjectileID, out var predictedProjectile))
             {
@@ -85,8 +108,8 @@ public class ClientProjectileManager
     public void SpawnAuthoritativeProjectile(ProjectileSpawnData spawnData)
     {
         var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(spawnData.ProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
-
-        if(NetworkSession.Instance.IsClient)
+        
+        if (NetworkSession.Instance.IsClient)
         {
             GD.Print($"Spawning authoritative projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
             _knownProjectiles.Add(spawnData.ProjectileID, spawnedProjectile);
@@ -97,6 +120,7 @@ public class ClientProjectileManager
     {
         HandleUnackedProjectiles(snapshot.UnacknowledgedRemoteProjectiles);
         HandleUnackedProjectileStates(snapshot.UnacknowledgedProjectileStates);
+        HandleUnackedPredictedProjectiles(snapshot.UnacknowledgedPredictedProjectiles);
     }
 
     public void ApplyState(ProjectileState state)
@@ -128,4 +152,6 @@ public class ClientProjectileManager
 
         return cmd;
     }
+
+
 }

@@ -69,6 +69,20 @@ public class WorldSnapshot : Message
             Add(change.ProjectileID);
         }
 
+        // --- Unacknowledged Predicted Projectiles ---
+        ushort unackedPredictedCount = (ushort)(UnacknowledgedPredictedProjectiles?.Length ?? 0);
+        Add(unackedPredictedCount);
+        for (int i = 0; i < unackedPredictedCount; i++)
+        {
+            var proj = UnacknowledgedPredictedProjectiles[i];
+            Add(proj.ProjectileID);
+            Add(proj.ownerPlayerID);
+            Add((byte)proj.Type);
+            Add(proj.ServerTickOnSpawn);
+            Add(proj.SpawnLocation);
+            Add(proj.SpawnRotation);
+        }
+
         return _dataSize;
     }
 
@@ -120,6 +134,19 @@ public class WorldSnapshot : Message
             Write(change.ProjectileID);
         }
 
+        // --- Unacknowledged Predicted Projectiles ---
+        ushort unackedPredictedCount = (ushort)(UnacknowledgedPredictedProjectiles?.Length ?? 0);
+        Write(unackedPredictedCount);
+        for (int i = 0; i < unackedPredictedCount; i++)
+        {
+            var proj = UnacknowledgedPredictedProjectiles[i];
+            Write(proj.ProjectileID);
+            Write(proj.ownerPlayerID);
+            Write((byte)proj.Type);
+            Write(proj.ServerTickOnSpawn);
+            Write(proj.SpawnLocation);
+            Write(proj.SpawnRotation);
+        }
 
         return _data;
     }
@@ -190,6 +217,23 @@ public class WorldSnapshot : Message
             var change = new ProjectileState();
             Read(out change.ProjectileID);
             UnacknowledgedProjectileStates[i] = change;
+        }
+
+        // --- Unacknowledged Predicted Projectiles ---
+        Read(out ushort unackedPredictedCount);
+        UnacknowledgedPredictedProjectiles = new ProjectileSpawnData[unackedPredictedCount];
+        for (int i = 0; i < unackedPredictedCount; i++)
+        {
+            var proj = new ProjectileSpawnData();
+            Read(out proj.ProjectileID);
+            Read(out proj.ownerPlayerID);
+            Read(out byte type);
+            proj.Type = (ProjectileType)type;
+            Read(out proj.ServerTickOnSpawn);
+            Read(out proj.SpawnLocation);
+            Read(out proj.SpawnRotation);
+
+            UnacknowledgedPredictedProjectiles[i] = proj;
         }
     }
 

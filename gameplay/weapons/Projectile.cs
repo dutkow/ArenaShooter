@@ -115,6 +115,6 @@ public abstract partial class Projectile : Entity
 
     public void Reconcile()
     {
-
+        GD.Print($"reconcile ran on {State.ProjectileID}");
     }
 }
