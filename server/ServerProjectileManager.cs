@@ -28,6 +28,8 @@ public class ServerProjectileManager
     public Dictionary<ushort, List<ProjectileSpawnData>> _unackedProjectilesByPlayerID = new();
     public Dictionary<ushort, List<ProjectileStateChangeData>> _unackedProjectileStateChangesByPlayerID = new();
 
+    public Dictionary<ushort, Dictionary<byte, ProjectileSpawnData[]>> _unackedProjectileHistory = new();
+
     public void CreateProjectilePendingSpawn(ProjectileSpawnData spawnData)
     {
         foreach (var playerID in _unackedProjectilesByPlayerID.Keys)
@@ -54,6 +56,17 @@ public class ServerProjectileManager
         return _unackedProjectileStateChangesByPlayerID[playerID];
     }
 
+    public void AddUnackedProjectileHistoryByPlayerID(ushort tick, byte playerID, ProjectileSpawnData[] projectileSpawnData)
+    {
+        if (!_unackedProjectileHistory.TryGetValue(tick, out var playerHistoryDict))
+        {
+            playerHistoryDict = new Dictionary<byte, ProjectileSpawnData[]>();
+            _unackedProjectileHistory[tick] = playerHistoryDict;
+        }
+
+        playerHistoryDict[playerID] = projectileSpawnData;
+    }
+
     public void RemoveProjectileStateChangesByPlayerID(byte playerID, ushort lastProcessedTick)
     {
         // Ensure player has an unacked projectile
@@ -64,22 +77,22 @@ public class ServerProjectileManager
             return;
         }
 
-        // Ensure we have a delta snapshot to compare to (might be callable directly from snapshot but this is easier for flow for now
-        var lastReceivedSnapshot = ServerGame.Instance.GetWorldSnapshotByTick(lastProcessedTick);
-        if(lastReceivedSnapshot == null)
+        var lastReceivedProjectileHistory = _unackedProjectileHistory[lastProcessedTick];
+        lastReceivedProjectileHistory.TryGetValue(playerID, out var playerHistoryDict);
+        if(playerHistoryDict == null)
         {
             return;
         }
 
         // Ensure the client had an unacknowledged projectile on the last tick. If they didn't, then we don't have anything to remove
-        int numUnackedLastTick = lastReceivedSnapshot.UnacknowledgedProjectiles.Length;
+        int numUnackedLastTick = playerHistoryDict.Length;
         if(numUnackedLastTick == 0)
         {
             return;
         }
 
         // Ensure the newly acknowledged projectile has the same first entry, confirming the client's newly received list should be removed
-        ushort firstUnackedProjectileID = lastReceivedSnapshot.UnacknowledgedProjectiles[0].ProjectileID;
+        ushort firstUnackedProjectileID = playerHistoryDict[0].ProjectileID;
         
         if (unackedProjectiles[0].ProjectileID == firstUnackedProjectileID)
         {
