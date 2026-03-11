@@ -10,6 +10,8 @@ public enum FireMode
 
 public partial class Weapon : Node3D
 {
+    private Character _character;
+
     private FireMode _fireMode = FireMode.FULL_AUTO;
 
     private bool _readyToFire => _cooldownTimer <= 0.0f;
@@ -88,7 +90,15 @@ public partial class Weapon : Node3D
             Vector3 spawnPosition = origin + direction.Normalized() * 2.0f;
 
             // Call your projectile spawn function
-            ProjectileManager.Instance.ServerSpawnProjectile(1, ProjectileType.DEFAULT, spawnPosition, direction);
+
+            ProjectileSpawnData spawnData = new();
+            spawnData.ownerPlayerID = _character.PlayerState.PlayerID;
+            spawnData.SpawnLocation = spawnPosition;
+            spawnData.SpawnRotation = direction;
+
+            ServerProjectileManager.Instance.CreateProjectilePendingSpawn(spawnData);
+            ClientProjectileManager.Instance?.SpawnProjectile(spawnData);
+            //ProjectileManager.Instance.ServerSpawnProjectile(1, ProjectileType.DEFAULT, spawnPosition, direction);
         }
 
         _cooldownTimer = PrimaryFireCooldown;

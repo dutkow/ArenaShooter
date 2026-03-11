@@ -28,7 +28,8 @@ public class WorldSnapshot : Message
         Add(LastProcessedClientTick);
         Add(PickupMask);
 
-        Add(Characters.Length);
+        byte charactersLength = (byte)Characters.Length;
+        Add(charactersLength);
         for (int i = 0; i < Characters.Length; i++)
         {
             var c = Characters[i];
@@ -44,6 +45,19 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Add(c.Shield);
         }
         return _dataSize;
+
+        ushort unackedCount = (ushort)(UnacknowledgedProjectiles?.Length ?? 0);
+        Add(unackedCount);
+        for (int i = 0; i < unackedCount; i++)
+        {
+            var proj = UnacknowledgedProjectiles[i];
+            Add(proj.ProjectileID);
+            Add(proj.ownerPlayerID);
+            Add((byte)proj.Type);
+            Add(proj.ServerTickOnSpawn);
+            Add(proj.SpawnLocation);
+            Add(proj.SpawnRotation);
+        }
     }
 
     public override byte[] WriteMessage()
@@ -54,7 +68,8 @@ public class WorldSnapshot : Message
         Write(LastProcessedClientTick);
         Write(PickupMask);
 
-        Write(Characters.Length);
+        byte charactersLength = (byte)Characters.Length;
+        Write(charactersLength);
         for (int i = 0; i < Characters.Length; i++)
         {
             var c = Characters[i];
@@ -70,6 +85,20 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Write(c.Shield);
         }
 
+        // **Write unacked projectiles**
+        ushort unackedCount = (ushort)(UnacknowledgedProjectiles?.Length ?? 0);
+        Write(unackedCount);
+        for (int i = 0; i < unackedCount; i++)
+        {
+            var proj = UnacknowledgedProjectiles[i];
+            Write(proj.ProjectileID);
+            Write(proj.ownerPlayerID);
+            Write((byte)proj.Type);
+            Write(proj.ServerTickOnSpawn);
+            Write(proj.SpawnLocation);
+            Write(proj.SpawnRotation);
+        }
+
         return _data;
     }
 
@@ -81,7 +110,7 @@ public class WorldSnapshot : Message
         Read(out LastProcessedClientTick);
         Read(out PickupMask);
 
-        int count;
+        byte count;
         Read(out count);
         Characters = new CharacterSnapshot[count];
 
@@ -113,6 +142,23 @@ public class WorldSnapshot : Message
 
             Characters[i] = new CharacterSnapshot(id, pos, vel, yaw, pitch, moveMode, health, shield, flags);
         }
+
+        // **Read unacked projectiles**
+        Read(out ushort unackedCount);
+        UnacknowledgedProjectiles = new ProjectileSpawnData[unackedCount];
+        for (int i = 0; i < unackedCount; i++)
+        {
+            var proj = new ProjectileSpawnData();
+            Read(out proj.ProjectileID);
+            Read(out proj.ownerPlayerID);
+            Read(out byte type);
+            proj.Type = (ProjectileType)type;
+            Read(out proj.ServerTickOnSpawn);
+            Read(out proj.SpawnLocation);
+            Read(out proj.SpawnRotation);
+
+            UnacknowledgedProjectiles[i] = proj;
+        }
     }
 
     public static void Send(ENetPacketPeer peer, WorldSnapshot snapshot)
@@ -129,21 +175,18 @@ public class WorldSnapshot : Message
         newSnapshot.LastProcessedClientTick = 0;
         newSnapshot.PickupMask = PickupManager.Instance.PickupMask;
 
+        // Characters (existing code)
         var players = MatchState.Instance.ConnectedPlayers;
         var characters = new CharacterSnapshot[players.Count];
         int i = 0;
-
         foreach (var kvp in players)
         {
             var player = kvp.Value;
-
             Vector3 pos = Vector3.Zero;
             Vector3 vel = Vector3.Zero;
             float yaw = 0f;
             float pitch = 0f;
             CharacterMoveMode moveMode = CharacterMoveMode.GROUNDED;
-            Vector3 launchVelocity = Vector3.Zero;
-
             byte health = 0;
             byte shield = 0;
 
@@ -159,17 +202,18 @@ public class WorldSnapshot : Message
             }
 
             CharacterSnapshotFlags allFlags = CharacterSnapshotFlags.POSITION |
-                                                CharacterSnapshotFlags.VELOCITY |
-                                                CharacterSnapshotFlags.YAW |
-                                                CharacterSnapshotFlags.PITCH |
-                                                CharacterSnapshotFlags.MOVE_MODE |
-                                                CharacterSnapshotFlags.HEALTH |
-                                                CharacterSnapshotFlags.SHIELD;
+                                              CharacterSnapshotFlags.VELOCITY |
+                                              CharacterSnapshotFlags.YAW |
+                                              CharacterSnapshotFlags.PITCH |
+                                              CharacterSnapshotFlags.MOVE_MODE |
+                                              CharacterSnapshotFlags.HEALTH |
+                                              CharacterSnapshotFlags.SHIELD;
 
             characters[i++] = new CharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, moveMode, health, shield, allFlags);
         }
 
         newSnapshot.Characters = characters;
+
 
         return newSnapshot;
     }
@@ -245,4 +289,9 @@ public class WorldSnapshot : Message
     }
 
     public CharacterSnapshot[] GetCharacterSnapshots() => Characters;
+
+    public void AddPrivatePlayerInfo(byte playerID)
+    {
+        UnacknowledgedProjectiles = ServerProjectileManager.Instance.GetUnackedProjectilesByPlayerID(playerID).ToArray();
+    }
 }

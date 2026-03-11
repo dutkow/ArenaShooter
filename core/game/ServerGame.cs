@@ -32,6 +32,7 @@ public class ServerGame
     {
         Instance = this;
 
+        ServerProjectileManager.Create();
     }
 
     public void Tick()
@@ -121,6 +122,8 @@ public class ServerGame
 
             var bytes = newSnapshot.WriteMessage();
             _bytesSentThisPeriod += bytes.Length;
+
+            newSnapshot.AddPrivatePlayerInfo(playerID);
 
             NetworkSender.ToClient(peer, newSnapshot);
         }

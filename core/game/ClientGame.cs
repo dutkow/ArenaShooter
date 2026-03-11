@@ -31,6 +31,9 @@ public class ClientGame
 
         GD.Print($"Starting client. NetworkMode = {NetworkSession.Instance.NetworkMode}");
 
+        ClientProjectileManager.Create();
+
+
     }
 
     public void Tick()

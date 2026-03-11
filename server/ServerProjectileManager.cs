@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 public enum ProjectileType
 {
@@ -25,16 +26,32 @@ public struct ProjectileStateChangeData
 
 public class ServerProjectileManager
 {
+    public static ServerProjectileManager Instance { get; private set; }
+
     public Dictionary<ushort, List<ProjectileSpawnData>> _unackedProjectilesByPlayerID = new();
     public Dictionary<ushort, List<ProjectileStateChangeData>> _unackedProjectileStateChangesByPlayerID = new();
 
     public Dictionary<ushort, Dictionary<byte, ProjectileSpawnData[]>> _unackedProjectileHistory = new();
 
+    private ushort _nextAvailableProjectileID;
+
+    public static void Create()
+    {
+        if(Instance != null)
+        {
+            GD.PushError("Server projectile manager already exists!");
+        }
+
+        Instance = new();
+    }
+
     public void CreateProjectilePendingSpawn(ProjectileSpawnData spawnData)
     {
         foreach (var playerID in _unackedProjectilesByPlayerID.Keys)
         {
+            spawnData.ProjectileID = _nextAvailableProjectileID;
             _unackedProjectilesByPlayerID[playerID].Add(spawnData);
+            _nextAvailableProjectileID++;
         }
     }
 
@@ -77,22 +94,22 @@ public class ServerProjectileManager
             return;
         }
 
-        var lastReceivedProjectileHistory = _unackedProjectileHistory[lastProcessedTick];
-        lastReceivedProjectileHistory.TryGetValue(playerID, out var playerHistoryDict);
-        if(playerHistoryDict == null)
+        var playerProjectileHistoryAtTick = _unackedProjectileHistory[lastProcessedTick];
+        playerProjectileHistoryAtTick.TryGetValue(playerID, out var playerUnackedProjectilesAtTick);
+        if(playerUnackedProjectilesAtTick == null)
         {
             return;
         }
 
         // Ensure the client had an unacknowledged projectile on the last tick. If they didn't, then we don't have anything to remove
-        int numUnackedLastTick = playerHistoryDict.Length;
+        int numUnackedLastTick = playerUnackedProjectilesAtTick.Length;
         if(numUnackedLastTick == 0)
         {
             return;
         }
 
         // Ensure the newly acknowledged projectile has the same first entry, confirming the client's newly received list should be removed
-        ushort firstUnackedProjectileID = playerHistoryDict[0].ProjectileID;
+        ushort firstUnackedProjectileID = playerUnackedProjectilesAtTick[0].ProjectileID;
         
         if (unackedProjectiles[0].ProjectileID == firstUnackedProjectileID)
         {
