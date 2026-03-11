@@ -44,7 +44,6 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Add(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Add(c.Shield);
         }
-        return _dataSize;
 
         ushort unackedCount = (ushort)(UnacknowledgedProjectiles?.Length ?? 0);
         Add(unackedCount);
@@ -58,6 +57,8 @@ public class WorldSnapshot : Message
             Add(proj.SpawnLocation);
             Add(proj.SpawnRotation);
         }
+
+        return _dataSize;
     }
 
     public override byte[] WriteMessage()
@@ -292,6 +293,6 @@ public class WorldSnapshot : Message
 
     public void AddPrivatePlayerInfo(byte playerID)
     {
-        UnacknowledgedProjectiles = ServerProjectileManager.Instance.GetUnackedProjectilesByPlayerID(playerID).ToArray();
+        ServerProjectileManager.Instance.AddInfoToWorldSnapshot(this, playerID);
     }
 }

@@ -115,5 +115,7 @@ public class ClientGame
                 GD.Print($"player not found in ConnectedPlayers: {characterSnapshot.PlayerID}");
             }
         }
+
+        ClientProjectileManager.Instance.ApplyWorldSnapshot(snapshot);
     }
 }

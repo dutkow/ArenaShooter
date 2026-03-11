@@ -44,12 +44,6 @@ public partial class SpawnManager : Node3D
     {
         GD.Print($"Spawning player locally. PlayerID = {playerID}. Position = {spawnPosition}. Y rotation = {yRotation}");
         var spawnedPlayer = (Pawn)GameMode.Instance.DefaultPawnScene.Instantiate();
-        AddChild(spawnedPlayer);
-
-        if(spawnedPlayer is Character character)
-        {
-            character.HandleSpawn(spawnPosition, yRotation, 0.0f);
-        }
 
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
         {
@@ -59,6 +53,15 @@ public partial class SpawnManager : Node3D
         {
             GD.PushError($"Failed to assign character to player state because player state not found in connected players. PlayerID of character: {playerID}. Net role: {NetworkSession.Instance.NetworkMode}.");
         }
+
+        AddChild(spawnedPlayer);
+
+        if(spawnedPlayer is Character character)
+        {
+            character.HandleSpawn(spawnPosition, yRotation, 0.0f);
+        }
+
+
 
         spawnedPlayer.SetIsAuthority(NetworkSession.Instance.IsServer);
 

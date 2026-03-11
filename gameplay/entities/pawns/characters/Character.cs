@@ -144,6 +144,13 @@ public partial class Character : Pawn, IDamageable
 
         SetRole(NetworkRole.LOCAL);
         UIRoot.Instance.OnPossessedCharacter(this);
+
+        if(PlayerState == null)
+        {
+            GD.Print($"player state is null");
+        }
+        _weapon.OwnerPlayerID = PlayerState.PlayerID;
+
     }
 
     public override void OnUnpossessed()

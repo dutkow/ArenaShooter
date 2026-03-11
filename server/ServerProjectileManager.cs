@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -28,7 +29,7 @@ public class ServerProjectileManager
 {
     public static ServerProjectileManager Instance { get; private set; }
 
-    public Dictionary<ushort, List<ProjectileSpawnData>> _unackedProjectilesByPlayerID = new();
+    public Dictionary<byte, List<ProjectileSpawnData>> _unackedProjectilesByPlayerID = new();
     public Dictionary<ushort, List<ProjectileStateChangeData>> _unackedProjectileStateChangesByPlayerID = new();
 
     public Dictionary<ushort, Dictionary<byte, ProjectileSpawnData[]>> _unackedProjectileHistory = new();
@@ -65,12 +66,22 @@ public class ServerProjectileManager
 
     public List<ProjectileSpawnData> GetUnackedProjectilesByPlayerID(byte playerID)
     {
-        return _unackedProjectilesByPlayerID[playerID];
+        if (!_unackedProjectilesByPlayerID.TryGetValue(playerID, out var list))
+        {
+            list = new List<ProjectileSpawnData>();
+            _unackedProjectilesByPlayerID[playerID] = list;
+        }
+        return list;
     }
 
     public List<ProjectileStateChangeData> GetUnackedProjectileStateChangesByPlayerID(byte playerID)
     {
-        return _unackedProjectileStateChangesByPlayerID[playerID];
+        if (!_unackedProjectileStateChangesByPlayerID.TryGetValue(playerID, out var list))
+        {
+            list = new List<ProjectileStateChangeData>();
+            _unackedProjectileStateChangesByPlayerID[playerID] = list;
+        }
+        return list;
     }
 
     public void AddUnackedProjectileHistoryByPlayerID(ushort tick, byte playerID, ProjectileSpawnData[] projectileSpawnData)
@@ -84,36 +95,42 @@ public class ServerProjectileManager
         playerHistoryDict[playerID] = projectileSpawnData;
     }
 
-    public void RemoveProjectileStateChangesByPlayerID(byte playerID, ushort lastProcessedTick)
+    public void RemoveUnackedProjectilesByPlayerID(byte playerID, ushort lastProcessedTick)
     {
-        // Ensure player has an unacked projectile
         var unackedProjectiles = GetUnackedProjectilesByPlayerID(playerID);
-        int numUnackedProjectiles = unackedProjectiles.Count;
-        if (numUnackedProjectiles == 0)
+        if (unackedProjectiles.Count == 0)
+        {
+            GD.Print($"no unacked projectiles, returning");
+            return;
+        }
+
+        if (!_unackedProjectileHistory.TryGetValue(lastProcessedTick, out var playerProjectileHistoryAtTick))
         {
             return;
         }
 
-        var playerProjectileHistoryAtTick = _unackedProjectileHistory[lastProcessedTick];
-        playerProjectileHistoryAtTick.TryGetValue(playerID, out var playerUnackedProjectilesAtTick);
-        if(playerUnackedProjectilesAtTick == null)
+        if (!playerProjectileHistoryAtTick.TryGetValue(playerID, out var playerUnackedProjectilesAtTick))
         {
             return;
         }
 
-        // Ensure the client had an unacknowledged projectile on the last tick. If they didn't, then we don't have anything to remove
-        int numUnackedLastTick = playerUnackedProjectilesAtTick.Length;
-        if(numUnackedLastTick == 0)
+        if (playerUnackedProjectilesAtTick.Length == 0)
         {
             return;
         }
 
-        // Ensure the newly acknowledged projectile has the same first entry, confirming the client's newly received list should be removed
         ushort firstUnackedProjectileID = playerUnackedProjectilesAtTick[0].ProjectileID;
-        
-        if (unackedProjectiles[0].ProjectileID == firstUnackedProjectileID)
+        if(unackedProjectiles[0].ProjectileID != firstUnackedProjectileID)
         {
-            unackedProjectiles.RemoveRange(0, numUnackedLastTick - 1);
+            return;
         }
+
+        unackedProjectiles.RemoveRange(0, playerUnackedProjectilesAtTick.Length);
+    }
+
+    public void AddInfoToWorldSnapshot(WorldSnapshot snapshot, byte playerID)
+    {
+        snapshot.UnacknowledgedProjectiles = GetUnackedProjectilesByPlayerID(playerID).ToArray();
+        AddUnackedProjectileHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectiles);
     }
 }

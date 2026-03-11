@@ -19,5 +19,6 @@ public class PlayerState (byte playerID)
         GD.Print($"Assigning player state to character");
 
         Pawn = pawn;
+        pawn.PlayerState = this;
     }
 }

@@ -1,9 +1,14 @@
 using Godot;
+using System.Collections.Generic;
 using System;
 
 public class ClientProjectileManager
 {
     public static ClientProjectileManager Instance { get; private set; }
+
+    public Dictionary<ushort, ProjectileStateChangeData> _existingProjectileData = new();
+
+
 
     public static void Create()
     {
@@ -19,12 +24,23 @@ public class ClientProjectileManager
     {
         foreach(var unackedProjectileSpawnData in unackedProjectileSpawnDataArray)
         {
-            SpawnProjectile(unackedProjectileSpawnData);
+            if(!_existingProjectileData.ContainsKey(unackedProjectileSpawnData.ProjectileID))
+            {
+                SpawnProjectile(unackedProjectileSpawnData);
+            }
         }
     }
 
     public void SpawnProjectile(ProjectileSpawnData spawnData)
     {
-        GD.Print($"Spawning projectile on client!");
+        GD.Print($"Spawning projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}");
+        _existingProjectileData[spawnData.ProjectileID] = new();
+
+        ProjectileManager.Instance.SpawnProjectile(spawnData.ProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnRotation);
+    }
+
+    public void ApplyWorldSnapshot(WorldSnapshot snapshot)
+    {
+        HandleUnackedProjectiles(snapshot.UnacknowledgedProjectiles);
     }
 }

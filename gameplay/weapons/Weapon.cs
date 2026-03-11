@@ -10,7 +10,7 @@ public enum FireMode
 
 public partial class Weapon : Node3D
 {
-    private Character _character;
+    public byte OwnerPlayerID;
 
     private FireMode _fireMode = FireMode.FULL_AUTO;
 
@@ -92,7 +92,7 @@ public partial class Weapon : Node3D
             // Call your projectile spawn function
 
             ProjectileSpawnData spawnData = new();
-            spawnData.ownerPlayerID = _character.PlayerState.PlayerID;
+            spawnData.ownerPlayerID = OwnerPlayerID;
             spawnData.SpawnLocation = spawnPosition;
             spawnData.SpawnRotation = direction;
 

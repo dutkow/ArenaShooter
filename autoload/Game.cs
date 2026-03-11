@@ -19,6 +19,9 @@ public partial class Game : Node
         base._Ready();
 
         Instance = this;
+
+        ChatManager.Create();
+
     }
 
     public void Initialize(NetworkMode mode, byte localPlayerID = 0)

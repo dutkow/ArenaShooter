@@ -10,7 +10,7 @@ public partial class Pawn : Entity
 
     public bool InputActive => IsLocal && !_inputEnabled;
 
-    public PlayerState PlayerState { get; private set; }
+    public PlayerState PlayerState;
 
     public override void _Ready()
     {
