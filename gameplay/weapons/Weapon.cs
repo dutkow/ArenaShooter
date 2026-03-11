@@ -28,7 +28,6 @@ public partial class Weapon : Entity
 
     public bool FiredPredictedProjectile;
 
-
     public override void _Process(double delta)
     {
         base._Process(delta);
@@ -120,12 +119,10 @@ public partial class Weapon : Entity
             spawnData.SpawnLocation = spawnPosition;
             spawnData.SpawnRotation = direction;
 
-            if(IsPredictingProjectiles)
-            {
-                ClientProjectileManager.Instance?.SpawnPredictedProjectile(spawnData);
+            ClientProjectileManager.Instance?.SpawnProjectile(spawnData, IsPredictingProjectiles);
+            FiredPredictedProjectile = IsPredictingProjectiles;
 
-            }
-            ServerProjectileManager.Instance?.CreateProjectilePendingSpawn(spawnData);
+            ServerProjectileManager.Instance?.CreateProjectilePendingSpawn(spawnData, IsPredictingProjectiles);
         }
 
         _cooldownTimer = PrimaryFireCooldown;

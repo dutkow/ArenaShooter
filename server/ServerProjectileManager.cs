@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static Godot.WebSocketPeer;
 
 public enum ProjectileType
@@ -31,6 +32,9 @@ public class ServerProjectileManager
     public Dictionary<byte, Dictionary<ushort, ProjectileState>> _unackedProjectileStatesByPlayerID = new();
     public Dictionary<ushort, Dictionary<byte, ProjectileState[]>> _unackedProjectileStateHistory = new();
 
+    public Dictionary<byte, Dictionary<ushort, ProjectileSpawnData>> _unackedPrecitedProjectilesByPlayerID = new();
+    public Dictionary<ushort, Dictionary<byte, ProjectileSpawnData[]>> _unackedPredictedProjectileHistory = new();
+
     private ushort _nextAvailableProjectileID;
 
     public static void Create()
@@ -42,14 +46,21 @@ public class ServerProjectileManager
         Instance = new();
     }
 
-    public void CreateProjectilePendingSpawn(ProjectileSpawnData spawnData)
+    public void CreateProjectilePendingSpawn(ProjectileSpawnData spawnData, bool wasPredicted)
     {
-        spawnData.ProjectileID = _nextAvailableProjectileID++;
-
         foreach (var playerID in _unackedProjectilesByPlayerID.Keys)
         {
+            if(playerID == spawnData.ownerPlayerID && wasPredicted)
+            {
+                continue; // need to handle logic for tracking predicted onesh ere
+            }
+            else
+            {
+                GD.Print($"player id = {playerID} and owning player id = {spawnData.ownerPlayerID}");
+            }
             _unackedProjectilesByPlayerID[playerID][spawnData.ProjectileID] = spawnData;
         }
+        spawnData.ProjectileID = _nextAvailableProjectileID++;
     }
 
     public Dictionary<ushort, ProjectileSpawnData> GetUnackedProjectilesByPlayerID(byte playerID)
@@ -137,14 +148,38 @@ public class ServerProjectileManager
         }
     }
 
+    public Dictionary<ushort, ProjectileSpawnData> GetUnackedPredictedProjectilesByPlayerID(byte playerID)
+    {
+        if (!_unackedPrecitedProjectilesByPlayerID.TryGetValue(playerID, out var dict))
+        {
+            dict = new Dictionary<ushort, ProjectileSpawnData>();
+            _unackedPrecitedProjectilesByPlayerID[playerID] = dict;
+        }
+        return dict;
+    }
+
     public void AddInfoToWorldSnapshot(WorldSnapshot snapshot, byte playerID)
     {
-        // --- convert dictionaries to arrays for sending ---
-        snapshot.UnacknowledgedProjectiles = new List<ProjectileSpawnData>(GetUnackedProjectilesByPlayerID(playerID).Values).ToArray();
-        AddUnackedProjectileHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectiles);
+        ushort serverTick = snapshot.ServerTick;
 
-        snapshot.UnacknowledgedProjectileStates = new List<ProjectileState>(GetUnackedProjectileStatesByPlayerID(playerID).Values).ToArray();
-        AddUnackedProjectileStateHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectileStates);
+        snapshot.UnacknowledgedRemoteProjectiles = GetUnackedProjectilesByPlayerID(playerID).Values.ToArray();
+        AddUnackedProjectileHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedRemoteProjectiles);
+
+        snapshot.UnacknowledgedProjectileStates = GetUnackedProjectileStatesByPlayerID(playerID).Values.ToArray();
+        AddUnackedProjectileStateHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedProjectileStates);
+
+        snapshot.UnacknowledgedPredictedProjectiles = GetUnackedPredictedProjectilesByPlayerID(playerID).Values.ToArray();
+        AddUnackedPredictedProjectileHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedPredictedProjectiles);
+    }
+
+    public void AddUnackedPredictedProjectileHistoryByPlayerID(ushort tick, byte playerID, ProjectileSpawnData[] predictedProjectiles)
+    {
+        if (!_unackedPredictedProjectileHistory.TryGetValue(tick, out var playerHistory))
+        {
+            playerHistory = new Dictionary<byte, ProjectileSpawnData[]>();
+            _unackedPredictedProjectileHistory[tick] = playerHistory;
+        }
+        playerHistory[playerID] = predictedProjectiles;
     }
 
     public void ReceiveClientCommand(ClientCommand cmd, byte playerID)

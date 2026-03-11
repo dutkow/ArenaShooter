@@ -18,8 +18,9 @@ public class WorldSnapshot : Message
     public ulong PickupMask;
 
     public CharacterSnapshot[] Characters;
-    public ProjectileSpawnData[] UnacknowledgedProjectiles;
+    public ProjectileSpawnData[] UnacknowledgedRemoteProjectiles;
     public ProjectileState[] UnacknowledgedProjectileStates;
+    public ProjectileSpawnData[] UnacknowledgedPredictedProjectiles;
 
     protected override int BufferSize()
     {
@@ -46,11 +47,11 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Add(c.Shield);
         }
 
-        ushort unackedCount = (ushort)(UnacknowledgedProjectiles?.Length ?? 0);
+        ushort unackedCount = (ushort)(UnacknowledgedRemoteProjectiles?.Length ?? 0);
         Add(unackedCount);
         for (int i = 0; i < unackedCount; i++)
         {
-            var proj = UnacknowledgedProjectiles[i];
+            var proj = UnacknowledgedRemoteProjectiles[i];
             Add(proj.ProjectileID);
             Add(proj.ownerPlayerID);
             Add((byte)proj.Type);
@@ -97,11 +98,11 @@ public class WorldSnapshot : Message
         }
 
         // **Write unacked projectiles**
-        ushort unackedCount = (ushort)(UnacknowledgedProjectiles?.Length ?? 0);
+        ushort unackedCount = (ushort)(UnacknowledgedRemoteProjectiles?.Length ?? 0);
         Write(unackedCount);
         for (int i = 0; i < unackedCount; i++)
         {
-            var proj = UnacknowledgedProjectiles[i];
+            var proj = UnacknowledgedRemoteProjectiles[i];
             Write(proj.ProjectileID);
             Write(proj.ownerPlayerID);
             Write((byte)proj.Type);
@@ -166,7 +167,7 @@ public class WorldSnapshot : Message
 
         // **Read unacked projectiles**
         Read(out ushort unackedCount);
-        UnacknowledgedProjectiles = new ProjectileSpawnData[unackedCount];
+        UnacknowledgedRemoteProjectiles = new ProjectileSpawnData[unackedCount];
         for (int i = 0; i < unackedCount; i++)
         {
             var proj = new ProjectileSpawnData();
@@ -178,7 +179,7 @@ public class WorldSnapshot : Message
             Read(out proj.SpawnLocation);
             Read(out proj.SpawnRotation);
 
-            UnacknowledgedProjectiles[i] = proj;
+            UnacknowledgedRemoteProjectiles[i] = proj;
         }
 
         // --- Unacknowledged Projectile State Changes ---

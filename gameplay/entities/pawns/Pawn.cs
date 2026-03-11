@@ -47,7 +47,7 @@ public partial class Pawn : Entity
     public virtual void TeleportTo(Transform3D t) { GlobalTransform = t; }
     public virtual void SetWeaponsEnabled(bool enabled) { }
 
-    public virtual void HandleRemoteSpawn() { }
+    public virtual void HandleRemoteSpawn(byte playerID) { }
 
     public virtual void Initialize(PlayerState playerState)
     {

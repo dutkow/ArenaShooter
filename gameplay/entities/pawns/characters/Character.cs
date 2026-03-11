@@ -404,6 +404,7 @@ public partial class Character : Pawn, IDamageable
         if (_weapon.FiredPredictedProjectile)
         {
             cmd.Mask |= ClientCommandMask.FIRED_PREDICTED_PROJECTILE;
+            cmd.PredictedProjectileClientID = ClientProjectileManager.Instance.GetNextAvailableClientProjectileID();
             _weapon.FiredPredictedProjectile = false;
         }
 
@@ -442,6 +443,13 @@ public partial class Character : Pawn, IDamageable
         }
 
         HandleMouseLook(@event);
+    }
+
+    public override void HandleRemoteSpawn(byte playerID)
+    {
+        base.HandleRemoteSpawn(playerID);
+
+        _weapon.OwnerPlayerID = playerID;
     }
 
 

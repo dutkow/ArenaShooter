@@ -22,6 +22,13 @@ public class ClientProjectileManager
         Instance = new();
     }
 
+    public ushort GetNextAvailableClientProjectileID()
+    {
+        ushort nextAvailable = _nextAvailableClientProjectileID;
+        _nextAvailableClientProjectileID++;
+        return nextAvailable;
+    }
+
     public void HandleUnackedProjectiles(ProjectileSpawnData[] unackedProjectileSpawnDataArray)
     {
         foreach(var unackedProjectileSpawnData in unackedProjectileSpawnDataArray)
@@ -31,6 +38,7 @@ public class ClientProjectileManager
                 // This needs to be purely projectiles which the client didn't predict, if any.
                 // starting with fully predicted ones, we instead need to find projectiles and sync them to the client's predicted projectiles
                 //SpawnProjectile(unackedProjectileSpawnData);
+                SpawnAuthoritativeProjectile(unackedProjectileSpawnData);
             }
         }
     }
@@ -45,6 +53,18 @@ public class ClientProjectileManager
             }
 
             ApplyState(state);
+        }
+    }
+
+    public void SpawnProjectile(ProjectileSpawnData data, bool wasPredicted)
+    {
+        if(wasPredicted)
+        {
+            SpawnPredictedProjectile(data);
+        }
+        else
+        {
+            SpawnAuthoritativeProjectile(data);
         }
     }
 
@@ -67,7 +87,7 @@ public class ClientProjectileManager
 
     public void ApplyWorldSnapshot(WorldSnapshot snapshot)
     {
-        HandleUnackedProjectiles(snapshot.UnacknowledgedProjectiles);
+        HandleUnackedProjectiles(snapshot.UnacknowledgedRemoteProjectiles);
         HandleUnackedProjectileStates(snapshot.UnacknowledgedProjectileStates);
     }
 

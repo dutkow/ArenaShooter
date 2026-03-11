@@ -61,8 +61,6 @@ public partial class SpawnManager : Node3D
             character.HandleSpawn(spawnPosition, yRotation, 0.0f);
         }
 
-
-
         spawnedPlayer.SetIsAuthority(NetworkSession.Instance.IsServer);
 
         if(playerID == ClientGame.Instance.LocalPlayerID)
@@ -73,7 +71,7 @@ public partial class SpawnManager : Node3D
         else
         {
             GD.Print($"handling remote spawn on {NetworkSession.Instance.NetworkMode}");
-            spawnedPlayer.HandleRemoteSpawn();
+            spawnedPlayer.HandleRemoteSpawn(playerID);
         }
         
         spawnedPlayer.Initialize(playerState);
