@@ -21,7 +21,7 @@ public partial class Weapon : Entity
     private float _cooldownTimer = 0f;
 
     [Export] public Node3D FirstPersonWeaponMesh;
-    [Export] public float PrimaryFireCooldown = 5.0f;
+    [Export] public float PrimaryFireCooldown = 1.0f;
     [Export] PackedScene _projectileScene;
 
     public bool IsPredictingProjectiles { get; private set; } = true;
@@ -61,9 +61,8 @@ public partial class Weapon : Entity
 
     public void ProcessClientInput(ClientCommandMask cmd)
     {
-        if(!IsPredictingProjectiles)
+        if(IsPredictingProjectiles)
         {
-            GD.Print($"processing client input!");
             HandleInput(cmd);
         }
     }
@@ -98,6 +97,8 @@ public partial class Weapon : Entity
         {
             TryFire(origin, direction);
         }
+
+
     }
 
     private void TryFire(Vector3 origin = default, Vector3 direction = default)
@@ -119,8 +120,12 @@ public partial class Weapon : Entity
             spawnData.SpawnLocation = spawnPosition;
             spawnData.SpawnRotation = direction;
 
+            if(IsPredictingProjectiles)
+            {
+                ClientProjectileManager.Instance?.SpawnPredictedProjectile(spawnData);
+
+            }
             ServerProjectileManager.Instance?.CreateProjectilePendingSpawn(spawnData);
-            ClientProjectileManager.Instance?.SpawnAuthoritativeProjectile(spawnData);
         }
 
         _cooldownTimer = PrimaryFireCooldown;

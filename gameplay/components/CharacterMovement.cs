@@ -126,7 +126,7 @@ public class CharacterMovement
         if(cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
         {
             state.Velocity += cmd.LaunchVelocity;
-            GD.Print($"launching!");
+            WasLaunched = false;
         }
 
         Vector3 safeMotion = HandleCollision(state, delta);

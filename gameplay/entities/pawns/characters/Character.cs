@@ -117,11 +117,13 @@ public partial class Character : Pawn, IDamageable
         if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
         {
             MovementComp.State.Yaw = cmd.Yaw;
+            GlobalRotation = new Vector3(0.0f, cmd.Yaw, 0.0f);
         }
 
-        if(cmd.Mask.HasFlag(ClientCommandMask.PITCH))
+        if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
         {
             MovementComp.State.Pitch = cmd.Pitch;
+            _cameraPivot.Rotation = new Vector3(cmd.Pitch, 0.0f, 0.0f);
         }
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
@@ -334,13 +336,13 @@ public partial class Character : Pawn, IDamageable
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
-            GD.Print($"snap correction horizontal, error {distXZ}");
+            //GD.Print($"snap correction horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
-            GD.Print($"lerp correction horizontal, error {distXZ}");
+            //GD.Print($"lerp correction horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }
@@ -348,12 +350,12 @@ public partial class Character : Pawn, IDamageable
         // --- Vertical correction ---
         if (deltaY > SNAP_THRESHOLD_V)
         {
-            GD.Print($"snap correction vertical, error {deltaY}");
+            //GD.Print($"snap correction vertical, error {deltaY}");
             currentPos.Y = targetPos.Y;
         }
         else if (deltaY > INTERP_THRESHOLD_V)
         {
-            GD.Print($"lerp correction vertical, error {deltaY}");
+            //GD.Print($"lerp correction vertical, error {deltaY}");
             currentPos.Y = Mathf.Lerp(currentPos.Y, targetPos.Y, INTERP_SPEED_V);
         }
 

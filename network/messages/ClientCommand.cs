@@ -46,27 +46,29 @@ public class ClientCommand : Message
     {
         base.BufferSize();
 
+        var cmds = Commands ?? Array.Empty<ClientInputCommand>();
+
         Add(ClientTick);
         Add(LastServerTickProcessedByClient);
-        Add((byte)Commands.Length);
+        Add((byte)cmds.Length);
 
-        foreach (var cmd in Commands)
+        foreach (var cmd in cmds)
         {
-            Write(cmd.ClientTick);
-            WriteEnum(cmd.Mask);
+            Add(cmd.ClientTick);
+            AddEnum(cmd.Mask);
 
             if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
-                Write(cmd.Yaw);
+                Add(cmd.Yaw);
             if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
-                Write(cmd.Pitch);
+                Add(cmd.Pitch);
             if (cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
             {
-                Write(cmd.LaunchVelocity.X);
-                Write(cmd.LaunchVelocity.Y);
-                Write(cmd.LaunchVelocity.Z);
+                Add(cmd.LaunchVelocity.X);
+                Add(cmd.LaunchVelocity.Y);
+                Add(cmd.LaunchVelocity.Z);
             }
             if (cmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
-                Write(cmd.PredictedProjectileClientID);
+                Add(cmd.PredictedProjectileClientID);
         }
 
         return _dataSize;
@@ -76,25 +78,26 @@ public class ClientCommand : Message
     {
         base.WriteMessage();
 
+        var cmds = Commands ?? Array.Empty<ClientInputCommand>();
+
         Write(ClientTick);
         Write(LastServerTickProcessedByClient);
-        Write((byte)Commands.Length);
+        Write((byte)cmds.Length);
 
-        foreach (var cmd in Commands)
+        foreach (var cmd in cmds)
         {
             Write(cmd.ClientTick);
             WriteEnum(cmd.Mask);
 
-            // Masked & Quantized
             if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
-                Write(Quantize.Angle(cmd.Yaw));
+                Write(cmd.Yaw); // raw float
             if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
-                Write(Quantize.Angle(cmd.Pitch));
+                Write(cmd.Pitch); // raw float
             if (cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
             {
-                Write(Quantize.Velocity(cmd.LaunchVelocity.X));
-                Write(Quantize.Velocity(cmd.LaunchVelocity.Y));
-                Write(Quantize.Velocity(cmd.LaunchVelocity.Z));
+                Write(cmd.LaunchVelocity.X); // raw float
+                Write(cmd.LaunchVelocity.Y);
+                Write(cmd.LaunchVelocity.Z);
             }
             if (cmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
                 Write(cmd.PredictedProjectileClientID);
@@ -124,26 +127,17 @@ public class ClientCommand : Message
             cmd.Mask = (ClientCommandMask)mask;
 
             if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
-            {
-                Read(out cmd.Yaw);
-            }
-
+                Read(out cmd.Yaw); // raw float
             if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
-            {
-                Read(out cmd.Pitch);
-            }
-
+                Read(out cmd.Pitch); // raw float
             if (cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
             {
-                Read(out cmd.LaunchVelocity.X);
+                Read(out cmd.LaunchVelocity.X); // raw float
                 Read(out cmd.LaunchVelocity.Y);
                 Read(out cmd.LaunchVelocity.Z);
             }
-
             if (cmd.Mask.HasFlag(ClientCommandMask.FIRED_PREDICTED_PROJECTILE))
-            {
                 Read(out cmd.PredictedProjectileClientID);
-            }
 
             Commands[i] = cmd;
         }
@@ -155,7 +149,7 @@ public class ClientCommand : Message
         {
             MessageType = Msg.C2S_CLIENT_COMMAND,
             ENetFlags = ENetPacketFlags.Unsequenced,
-            Commands = commands,
+            Commands = commands ?? Array.Empty<ClientInputCommand>(),
             ClientTick = MatchState.Instance.CurrentTick,
             LastServerTickProcessedByClient = ClientGame.Instance.LastServerTickProcessedByClient
         };
