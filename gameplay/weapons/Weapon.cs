@@ -8,12 +8,6 @@ public enum FireMode
     BURST,       // optional later
 }
 
-public struct FireTransform
-{
-    public Vector3 Position;
-    public Vector3 Direction;
-}
-
 public partial class Weapon : Entity
 {
     public byte OwnerPlayerID;
@@ -123,26 +117,6 @@ public partial class Weapon : Entity
         Fire(spawnData);
     }
 
-    public static FireTransform GetFireTransform(Vector3 characterPosition, float yawDegrees, float pitchDegrees)
-    {
-        // Convert yaw/pitch to a forward vector
-        Vector3 direction = new Vector3(
-            Mathf.Cos(Mathf.DegToRad(pitchDegrees)) * Mathf.Sin(Mathf.DegToRad(yawDegrees)),
-            Mathf.Sin(Mathf.DegToRad(pitchDegrees)),
-            Mathf.Cos(Mathf.DegToRad(pitchDegrees)) * Mathf.Cos(Mathf.DegToRad(yawDegrees))
-        ).Normalized();
-
-        // Apply weapon muzzle offset if needed
-        // You can adjust 2.0f to whatever the weapon's barrel length / offset is
-        Vector3 spawnPosition = characterPosition + direction * 2.0f;
-
-        return new FireTransform
-        {
-            Position = spawnPosition,
-            Direction = direction
-        };
-    }
-
     public void Fire(ProjectileSpawnData spawnData)
     {
         if (IsPredictingProjectiles)
@@ -155,6 +129,4 @@ public partial class Weapon : Entity
 
         _cooldownTimer = PrimaryFireCooldown;
     }
-
-
 }
