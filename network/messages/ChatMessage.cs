@@ -17,7 +17,7 @@ public class ChatMessage : Message
     protected override int BufferSize()
     {
         base.BufferSize();
-        Add(Channel);
+        AddEnum(Channel);
         Add(Text);
         Add(SenderPlayerID);
         return _dataSize;
@@ -26,7 +26,7 @@ public class ChatMessage : Message
     public override byte[] WriteMessage()
     {
         base.WriteMessage();
-        Write(Channel);
+        WriteEnum(Channel);
         Write(Text);
         Write(SenderPlayerID);
         return _data;
@@ -35,7 +35,7 @@ public class ChatMessage : Message
     public override void ReadMessage(byte[] data)
     {
         base.ReadMessage(data);
-        Read(out Channel);
+        ReadEnum(out Channel);
         Read(out Text);
         Read(out SenderPlayerID);
     }
@@ -61,5 +61,53 @@ public class ChatMessage : Message
         NetworkSender.Broadcast(msg);
     }
 
+    protected void ReadEnum<T>(out T value) where T : Enum
+    {
+        Type underlying = Enum.GetUnderlyingType(typeof(T));
 
+        if (underlying == typeof(byte))
+        {
+            Read(out byte raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(ushort))
+        {
+            Read(out ushort raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(int))
+        {
+            Read(out int raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(uint))
+        {
+            Read(out uint raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(long))
+        {
+            Read(out long raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(ulong))
+        {
+            Read(out ulong raw);
+            value = (T)(object)raw;
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unsupported enum underlying type: {underlying}");
+        }
+    }
+
+    protected void ReadEnumArray<T>(out T[] arr) where T : Enum
+    {
+        Read(out byte count);
+        arr = new T[count];
+        for (int i = 0; i < count; i++)
+        {
+            ReadEnum(out arr[i]);
+        }
+    }
 }

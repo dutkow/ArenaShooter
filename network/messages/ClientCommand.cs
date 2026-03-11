@@ -52,7 +52,7 @@ public class ClientCommand : Message
         foreach (var cmd in Commands)
         {
             Add(cmd.ClientTick);
-            Add((ushort)cmd.Mask);
+            AddEnum(cmd.Mask);
 
             // Masked & Quantized
             if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
@@ -82,7 +82,7 @@ public class ClientCommand : Message
         foreach (var cmd in Commands)
         {
             Write(cmd.ClientTick);
-            Write((ushort)cmd.Mask);
+            WriteEnum(cmd.Mask);
 
             // Masked & Quantized
             if (cmd.Mask.HasFlag(ClientCommandMask.YAW))

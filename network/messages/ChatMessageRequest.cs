@@ -15,7 +15,7 @@ public class ChatMessageRequest : Message
     protected override int BufferSize()
     {
         base.BufferSize();
-        Add(Channel);
+        AddEnum(Channel);
         Add(Text);
         Add(TargetPlayerID);
         return _dataSize;
@@ -24,7 +24,7 @@ public class ChatMessageRequest : Message
     public override byte[] WriteMessage()
     {
         base.WriteMessage();
-        Write(Channel);
+        WriteEnum(Channel);
         Write(Text);
         Write(TargetPlayerID);
         return _data;
@@ -33,7 +33,7 @@ public class ChatMessageRequest : Message
     public override void ReadMessage(byte[] data)
     {
         base.ReadMessage(data);
-        Read(out Channel);
+        ReadEnum(out Channel);
         Read(out Text);
         Read(out TargetPlayerID);
     }

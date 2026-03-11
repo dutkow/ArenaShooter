@@ -33,8 +33,7 @@ public class Message
         _data = new byte[BufferSize()];
         _dataPartIndex = 0;
 
-        Write(MessageType); // always first
-
+        WriteEnum(MessageType); // always first
         return _data;
     }
 
@@ -43,8 +42,7 @@ public class Message
         _data = data ?? throw new ArgumentException("Data is null or empty");
         _dataPartIndex = 0;
 
-        byte raw;
-        Read(out raw);
+        Read(out byte raw);
         MessageType = (Msg)raw;
     }
 
@@ -77,12 +75,10 @@ public class Message
     protected void Add(bool _) => _dataSize += 1;
     protected void Add(int _) => _dataSize += 4;
     protected void Add(uint _) => _dataSize += 4;
-
     protected void Add(float _) => _dataSize += 4;
-
     protected void Add(short _) => _dataSize += 2;
     protected void Add(ushort _) => _dataSize += 2;
-
+    protected void Add(long _) => _dataSize += 8;
     protected void Add(ulong _) => _dataSize += 8;
     protected void Add(string s) => _dataSize += 1 + (s != null ? Encoding.UTF8.GetByteCount(s) : 0);
 
@@ -102,18 +98,28 @@ public class Message
     protected void Add(Quaternion value) => _dataSize += 16;
     protected void Add(Quaternion[] arr) => _dataSize += 4 + 16 * arr.Length;
 
-    // Generic enum Add
-    protected void Add<T>(T value) where T : Enum
+    // -------------------
+    // Generic enum Add (single & array)
+    // -------------------
+    protected void AddEnum<T>(T value) where T : Enum
     {
-        if (Enum.GetUnderlyingType(typeof(T)) != typeof(byte))
-            throw new InvalidOperationException($"{typeof(T)} is not a byte enum!");
-        _dataSize += 1;
+        Type underlying = Enum.GetUnderlyingType(typeof(T));
+        _dataSize += underlying switch
+        {
+            Type t when t == typeof(byte) => 1,
+            Type t when t == typeof(ushort) => 2,
+            Type t when t == typeof(int) => 4,
+            Type t when t == typeof(uint) => 4,
+            Type t when t == typeof(long) => 8,
+            Type t when t == typeof(ulong) => 8,
+            _ => throw new InvalidOperationException($"Unsupported enum underlying type: {underlying}")
+        };
     }
 
-    protected void Add<T>(T[] arr) where T : Enum
+    protected void AddEnumArray<T>(T[] arr) where T : Enum
     {
         _dataSize += 1; // for count
-        _dataSize += arr.Length; // each element is 1 byte
+        foreach (var e in arr) AddEnum(e);
     }
 
     // -------------------
@@ -122,13 +128,11 @@ public class Message
     protected void Write(byte value) => _data[_dataPartIndex++] = value;
     protected void Write(bool value) => Write((byte)(value ? 1 : 0));
     protected void Write(int value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 4); _dataPartIndex += 4; }
-
     protected void Write(uint value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 4); _dataPartIndex += 4; }
     protected void Write(float value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 4); _dataPartIndex += 4; }
-
-    protected void Write(short value) {_data[_dataPartIndex++] = (byte)(value & 0xFF); _data[_dataPartIndex++] = (byte)((value >> 8) & 0xFF); }
+    protected void Write(short value) { _data[_dataPartIndex++] = (byte)(value & 0xFF); _data[_dataPartIndex++] = (byte)((value >> 8) & 0xFF); }
     protected void Write(ushort value) { _data[_dataPartIndex++] = (byte)(value & 0xFF); _data[_dataPartIndex++] = (byte)((value >> 8) & 0xFF); }
-
+    protected void Write(long value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 8); _dataPartIndex += 8; }
     protected void Write(ulong value) { Array.Copy(BitConverter.GetBytes(value), 0, _data, _dataPartIndex, 8); _dataPartIndex += 8; }
 
     protected void Write(string value)
@@ -149,17 +153,25 @@ public class Message
     protected void Write(Quaternion value) { Write(value.X); Write(value.Y); Write(value.Z); Write(value.W); }
     protected void Write(Quaternion[] arr) { Write(arr.Length); foreach (var q in arr) Write(q); }
 
-    protected void Write<T>(T value) where T : Enum
+    protected void WriteEnum<T>(T value) where T : Enum
     {
-        if (Enum.GetUnderlyingType(typeof(T)) != typeof(byte))
-            throw new InvalidOperationException($"{typeof(T)} is not a byte enum!");
-        Write(Convert.ToByte(value));
+        Type underlying = Enum.GetUnderlyingType(typeof(T));
+        switch (Type.GetTypeCode(underlying))
+        {
+            case TypeCode.Byte: Write(Convert.ToByte(value)); break;
+            case TypeCode.UInt16: Write(Convert.ToUInt16(value)); break;
+            case TypeCode.Int32: Write(Convert.ToInt32(value)); break;
+            case TypeCode.UInt32: Write(Convert.ToUInt32(value)); break;
+            case TypeCode.Int64: Write(Convert.ToInt64(value)); break;
+            case TypeCode.UInt64: Write(Convert.ToUInt64(value)); break;
+            default: throw new InvalidOperationException($"Unsupported enum underlying type: {underlying}");
+        }
     }
 
-    protected void Write<T>(T[] arr) where T : Enum
+    protected void WriteEnumArray<T>(T[] arr) where T : Enum
     {
         Write((byte)arr.Length);
-        foreach (var e in arr) Write(e);
+        foreach (var e in arr) WriteEnum(e);
     }
 
     // -------------------
@@ -169,109 +181,76 @@ public class Message
     protected void Read(out bool value) { byte b = _data[_dataPartIndex++]; value = b != 0; }
     protected void Read(out int value) { value = BitConverter.ToInt32(_data, _dataPartIndex); _dataPartIndex += 4; }
     protected void Read(out uint value) { value = BitConverter.ToUInt32(_data, _dataPartIndex); _dataPartIndex += 4; }
-
     protected void Read(out float value) { value = BitConverter.ToSingle(_data, _dataPartIndex); _dataPartIndex += 4; }
     protected void Read(out short value) { value = (short)(_data[_dataPartIndex] | (_data[_dataPartIndex + 1] << 8)); _dataPartIndex += 2; }
     protected void Read(out ushort value) { value = (ushort)(_data[_dataPartIndex] | (_data[_dataPartIndex + 1] << 8)); _dataPartIndex += 2; }
-
+    protected void Read(out long value) { value = BitConverter.ToInt64(_data, _dataPartIndex); _dataPartIndex += 8; }
     protected void Read(out ulong value) { value = BitConverter.ToUInt64(_data, _dataPartIndex); _dataPartIndex += 8; }
+
     protected void Read(out string value)
     {
-        byte length = _data[_dataPartIndex++];
+        Read(out byte length);
         value = Encoding.UTF8.GetString(_data, _dataPartIndex, length);
         _dataPartIndex += length;
     }
 
-    protected void Read(out byte[] arr)
-    {
-        Read(out byte count);
-        arr = new byte[count];
-        for (int i = 0; i < count; i++) Read(out arr[i]);
-    }
+    protected void Read(out byte[] arr) { Read(out byte count); arr = new byte[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
+    protected void Read(out int[] arr) { Read(out int count); arr = new int[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
+    protected void Read(out bool[] arr) { Read(out byte count); arr = new bool[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
+    protected void Read(out string[] arr) { Read(out byte count); arr = new string[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
+    protected void Read(out Vector2[] arr) { Read(out int count); arr = new Vector2[count]; for (int i = 0; i < count; i++) { Read(out int x); Read(out int y); arr[i] = new Vector2(x, y); } }
+    protected void Read(out Vector3 value) { Read(out float x); Read(out float y); Read(out float z); value = new Vector3(x, y, z); }
+    protected void Read(out Vector3[] arr) { Read(out int count); arr = new Vector3[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
+    protected void Read(out Quaternion value) { Read(out float x); Read(out float y); Read(out float z); Read(out float w); value = new Quaternion(x, y, z, w); }
+    protected void Read(out Quaternion[] arr) { Read(out int count); arr = new Quaternion[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
 
-    protected void Read(out int[] arr)
+    protected void ReadEnum<T>(out T value) where T : Enum
     {
-        Read(out int count);
-        arr = new int[count];
-        for (int i = 0; i < count; i++) Read(out arr[i]);
-    }
+        Type underlying = Enum.GetUnderlyingType(typeof(T));
 
-    protected void Read(out bool[] arr)
-    {
-        Read(out byte count);
-        arr = new bool[count];
-        for (int i = 0; i < count; i++) Read(out arr[i]);
-    }
-
-    protected void Read(out string[] arr)
-    {
-        Read(out byte count);
-        arr = new string[count];
-        for (int i = 0; i < count; i++) Read(out arr[i]);
-    }
-
-    protected void Read(out Vector2[] arr)
-    {
-        Read(out int count);
-        arr = new Vector2[count];
-        for (int i = 0; i < count; i++)
+        if (underlying == typeof(byte))
         {
-            Read(out int x);
-            Read(out int y);
-            arr[i] = new Vector2(x, y);
+            Read(out byte raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(ushort))
+        {
+            Read(out ushort raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(int))
+        {
+            Read(out int raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(uint))
+        {
+            Read(out uint raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(long))
+        {
+            Read(out long raw);
+            value = (T)(object)raw;
+        }
+        else if (underlying == typeof(ulong))
+        {
+            Read(out ulong raw);
+            value = (T)(object)raw;
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unsupported enum underlying type: {underlying}");
         }
     }
 
-    protected void Read(out Vector3 value)
-    {
-        Read(out float x);
-        Read(out float y);
-        Read(out float z);
-        value = new Vector3(x, y, z);
-    }
-
-    protected void Read(out Vector3[] arr)
-    {
-        Read(out int count);
-        arr = new Vector3[count];
-        for (int i = 0; i < count; i++)
-        {
-            Read(out arr[i]);
-        }
-    }
-
-    protected void Read(out Quaternion value)
-    {
-        Read(out float x);
-        Read(out float y);
-        Read(out float z);
-        Read(out float w);
-        value = new Quaternion(x, y, z, w);
-    }
-
-    protected void Read(out Quaternion[] arr)
-    {
-        Read(out int count);
-        arr = new Quaternion[count];
-        for (int i = 0; i < count; i++)
-        {
-            Read(out arr[i]);
-        }
-    }
-
-    // Generic enum Read
-    protected void Read<T>(out T value) where T : Enum
-    {
-        if (Enum.GetUnderlyingType(typeof(T)) != typeof(byte))
-            throw new InvalidOperationException($"{typeof(T)} is not a byte enum!");
-        Read(out byte raw);
-        value = (T)(object)raw;
-    }
-
-    protected void Read<T>(out T[] arr) where T : Enum
+    protected void ReadEnumArray<T>(out T[] arr) where T : Enum
     {
         Read(out byte count);
         arr = new T[count];
-        for (int i = 0; i < count; i++) Read(out arr[i]);
+        for (int i = 0; i < count; i++)
+        {
+            ReadEnum(out arr[i]);
+        }
     }
 }

@@ -41,7 +41,7 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY)) Add(c.Velocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Add(c.Yaw);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Add(c.Pitch);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Add(c.MoveMode);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) AddEnum(c.MoveMode);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Add(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Add(c.Shield);
         }
@@ -91,7 +91,7 @@ public class WorldSnapshot : Message
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY)) Write(c.Velocity);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Write(c.Yaw);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Write(c.Pitch);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Write(c.MoveMode);
+            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) WriteEnum(c.MoveMode);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Write(c.Health);
             if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Write(c.Shield);
         }
@@ -157,7 +157,7 @@ public class WorldSnapshot : Message
             if (flags.HasFlag(CharacterSnapshotFlags.VELOCITY)) Read(out vel);
             if (flags.HasFlag(CharacterSnapshotFlags.YAW)) Read(out yaw);
             if (flags.HasFlag(CharacterSnapshotFlags.PITCH)) Read(out pitch);
-            if (flags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) Read(out moveMode);
+            if (flags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) ReadEnum(out moveMode);
             if (flags.HasFlag(CharacterSnapshotFlags.HEALTH)) Read(out health);
             if (flags.HasFlag(CharacterSnapshotFlags.SHIELD)) Read(out shield);
 

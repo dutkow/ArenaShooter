@@ -270,6 +270,11 @@ public partial class Character : Pawn, IDamageable
         {
             snapshot.Yaw = MovementComp.State.Yaw;
         }
+        else
+        {
+            GD.Print($"received snapshot yaw is dirty and yaw = {snapshot.Yaw}");
+
+        }
 
         if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))
         {
@@ -373,18 +378,19 @@ public partial class Character : Pawn, IDamageable
         if (_yawDirty)
         {
             cmd.Mask |= ClientCommandMask.YAW;
-            _yawDirty = false;
             cmd.Yaw = GlobalRotation.Y;
+            GD.Print($"sending dirty yaw {cmd.Yaw}");
+            _yawDirty = false;
         }
 
         if (_pitchDirty)
         {
             cmd.Mask |= ClientCommandMask.PITCH;
-            _pitchDirty = false;
             cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
+            _pitchDirty = false;
         }
 
-        if(MovementComp.WasLaunched)
+        if (MovementComp.WasLaunched)
         {
             cmd.Mask |= ClientCommandMask.WAS_LAUNCHED;
             cmd.LaunchVelocity = MovementComp.LaunchVector;
