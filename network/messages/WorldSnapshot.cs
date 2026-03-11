@@ -52,7 +52,7 @@ public class WorldSnapshot : Message
         {
             var proj = UnacknowledgedRemoteProjectiles[i];
             Add(proj.ProjectileID);
-            Add(proj.OwnerPlayerID);
+            Add(proj.ownerPlayerID);
             Add((byte)proj.Type);
             Add(proj.ServerTickOnSpawn);
             Add(proj.SpawnLocation);
@@ -102,7 +102,7 @@ public class WorldSnapshot : Message
         {
             var proj = UnacknowledgedRemoteProjectiles[i];
             Write(proj.ProjectileID);
-            Write(proj.OwnerPlayerID);
+            Write(proj.ownerPlayerID);
             Write((byte)proj.Type);
             Write(proj.ServerTickOnSpawn);
             Write(proj.SpawnLocation);
@@ -168,7 +168,7 @@ public class WorldSnapshot : Message
         {
             var proj = new ProjectileSpawnData();
             Read(out proj.ProjectileID);
-            Read(out proj.OwnerPlayerID);
+            Read(out proj.ownerPlayerID);
             Read(out byte type);
             proj.Type = (ProjectileType)type;
             Read(out proj.ServerTickOnSpawn);

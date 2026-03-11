@@ -12,7 +12,7 @@ public enum ProjectileType
 public class ProjectileSpawnData
 {
     public ushort ProjectileID;
-    public byte OwnerPlayerID;
+    public byte ownerPlayerID;
     public ProjectileType Type;
     public ushort ServerTickOnSpawn;
 
@@ -47,10 +47,13 @@ public class ServerProjectileManager
     {
         foreach (var playerID in _unackedProjectilesByPlayerID.Keys)
         {
+            if(playerID == spawnData.ownerPlayerID && wasPredicted)
+            {
+                continue; // need to handle logic for tracking predicted onesh ere
+            }
             _unackedProjectilesByPlayerID[playerID][spawnData.ProjectileID] = spawnData;
         }
-        spawnData.ProjectileID = _nextAvailableProjectileID;
-        _nextAvailableProjectileID++;
+        spawnData.ProjectileID = _nextAvailableProjectileID++;
 
         ClientProjectileManager.Instance?.SpawnAuthoritativeProjectile(spawnData);
     }
