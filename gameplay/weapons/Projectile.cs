@@ -5,8 +5,6 @@ public class ProjectileState
 {
     public ushort ProjectileID; // destroyed if received
 
-    public byte OwningPlayerID;
-
     public Vector3 Position;
 }
 

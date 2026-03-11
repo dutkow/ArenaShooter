@@ -11,8 +11,6 @@ public class ClientProjectileManager
     public Dictionary<ushort, Projectile> _knownProjectiles = new();
     public Dictionary<ushort, Projectile> _knownPredictedProjectiles = new();
 
-    public List<Projectile> _predictedProjectiles = new();
-
     bool _firedPredictedProjectile = false;
     public ushort _lastFiredPredictedProjectileID;
 
@@ -37,55 +35,21 @@ public class ClientProjectileManager
 
     public void HandleUnackedProjectiles(ProjectileSpawnData[] unackedProjectileSpawnDataArray)
     {
-        if (unackedProjectileSpawnDataArray == null || unackedProjectileSpawnDataArray.Length == 0)
+        if(unackedProjectileSpawnDataArray == null)
+        {
             return;
+        }
 
         GD.Print($"num unacked projectiles received by CL = {unackedProjectileSpawnDataArray.Length}");
 
-        foreach (var unacked in unackedProjectileSpawnDataArray)
-        {
-            // If it's ours
-            if (unacked.ownerPlayerID == ClientGame.Instance.LocalPlayerID)
-            {
-                var predicted = FindMatchingPredictedProjectile(unacked);
-                if (predicted != null)
-                {
-                    predicted.Reconcile();
-                    _predictedProjectiles.Remove(predicted);
-                }
-            }
 
-            // If we don't already know about this projectile, spawn it
-            if (!_knownProjectiles.ContainsKey(unacked.ProjectileID))
+        foreach (var unackedProjectileSpawnData in unackedProjectileSpawnDataArray)
+        {
+            if(!_knownProjectiles.ContainsKey(unackedProjectileSpawnData.ProjectileID))
             {
-                SpawnAuthoritativeProjectile(unacked);
+                SpawnAuthoritativeProjectile(unackedProjectileSpawnData);
             }
         }
-    }
-
-    private Projectile FindMatchingPredictedProjectile(ProjectileSpawnData serverProjectile)
-    {
-        // Only check our predicted projectiles
-        for (int i = 0; i < _predictedProjectiles.Count; i++)
-        {
-            var predicted = _predictedProjectiles[i];
-
-            // Make sure owner matches
-            if (predicted.State.OwningPlayerID != serverProjectile.ownerPlayerID)
-                continue;
-
-            // Option 1: Match by order (first un-reconciled predicted projectile)
-            // This is usually sufficient for arena FPS if server returns mostly ordered projectiles
-            return predicted;
-
-            // Option 2 (optional): Match by approximate position/velocity
-            // float maxDistance = 1.0f; // adjust to your scale
-            // if ((predicted.Position - serverProjectile.SpawnLocation).Length() <= maxDistance)
-            //     return predicted;
-        }
-
-        // No match found
-        return null;
     }
 
     public void HandleUnackedProjectileStates(ProjectileState[] unackedProjectileStatesArray)
@@ -108,6 +72,26 @@ public class ClientProjectileManager
             ApplyState(state);
         }
     }
+
+    public void HandleUnackedPredictedProjectiles(ProjectileSpawnData[] unackedPredictedProjectiles)
+    {
+        if (unackedPredictedProjectiles == null)
+        {
+            return;
+        }
+
+        GD.Print($"num unacked predicted projectiles received by CL = {unackedPredictedProjectiles.Length}");
+
+        foreach (var unackedPredictedProjectile in unackedPredictedProjectiles)
+        {
+            if(_knownPredictedProjectiles.TryGetValue(unackedPredictedProjectile.ProjectileID, out var predictedProjectile))
+            {
+                // handle it eventually
+                predictedProjectile.Reconcile();
+            }
+        }
+    }
+
 
     public void SpawnPredictedProjectile(ProjectileSpawnData spawnData)
     {
@@ -136,6 +120,7 @@ public class ClientProjectileManager
     {
         HandleUnackedProjectiles(snapshot.UnacknowledgedRemoteProjectiles);
         HandleUnackedProjectileStates(snapshot.UnacknowledgedProjectileStates);
+        HandleUnackedPredictedProjectiles(snapshot.UnacknowledgedPredictedProjectiles);
     }
 
     public void ApplyState(ProjectileState state)
@@ -157,6 +142,10 @@ public class ClientProjectileManager
         if(_firedPredictedProjectile)
         {
             cmd.Mask |= ClientCommandMask.FIRED_PREDICTED_PROJECTILE;
+            cmd.PredictedProjectileClientID = _lastFiredPredictedProjectileID;
+
+            GD.Print($"adding predicted projectile with client ID {cmd.PredictedProjectileClientID} to CL input cmd. net mode = {NetworkSession.Instance.NetworkMode}");
+
         }
 
         _firedPredictedProjectile = false;
