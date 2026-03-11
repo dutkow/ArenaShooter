@@ -19,7 +19,7 @@ public class WorldSnapshot : Message
 
     public CharacterSnapshot[] Characters;
     public ProjectileSpawnData[] UnacknowledgedProjectiles;
-    public ProjectileStateChangeData[] UnacknowledgedProjectileStateChanges;
+    public ProjectileState[] UnacknowledgedProjectileStates;
 
     protected override int BufferSize()
     {
@@ -60,11 +60,11 @@ public class WorldSnapshot : Message
         }
 
         // --- Unacknowledged Projectile State Changes ---
-        ushort stateChangesCount = (ushort)(UnacknowledgedProjectileStateChanges?.Length ?? 0);
+        ushort stateChangesCount = (ushort)(UnacknowledgedProjectileStates?.Length ?? 0);
         Add(stateChangesCount);
         for (int i = 0; i < stateChangesCount; i++)
         {
-            var change = UnacknowledgedProjectileStateChanges[i];
+            var change = UnacknowledgedProjectileStates[i];
             Add(change.ProjectileID);
         }
 
@@ -111,11 +111,11 @@ public class WorldSnapshot : Message
         }
 
         // --- Unacknowledged Projectile State Changes ---
-        ushort stateChangesCount = (ushort)(UnacknowledgedProjectileStateChanges?.Length ?? 0);
+        ushort stateChangesCount = (ushort)(UnacknowledgedProjectileStates?.Length ?? 0);
         Write(stateChangesCount);
         for (int i = 0; i < stateChangesCount; i++)
         {
-            var change = UnacknowledgedProjectileStateChanges[i];
+            var change = UnacknowledgedProjectileStates[i];
             Write(change.ProjectileID);
         }
 
@@ -183,12 +183,12 @@ public class WorldSnapshot : Message
 
         // --- Unacknowledged Projectile State Changes ---
         Read(out ushort stateChangesCount);
-        UnacknowledgedProjectileStateChanges = new ProjectileStateChangeData[stateChangesCount];
+        UnacknowledgedProjectileStates = new ProjectileState[stateChangesCount];
         for (int i = 0; i < stateChangesCount; i++)
         {
-            var change = new ProjectileStateChangeData();
+            var change = new ProjectileState();
             Read(out change.ProjectileID);
-            UnacknowledgedProjectileStateChanges[i] = change;
+            UnacknowledgedProjectileStates[i] = change;
         }
     }
 

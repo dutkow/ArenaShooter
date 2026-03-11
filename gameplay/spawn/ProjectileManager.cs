@@ -9,6 +9,8 @@ public partial class ProjectileManager : Node3D
 
     [Export] private Dictionary<ProjectileType, PackedScene> _projectilesByType = new();
 
+    private Dictionary<ushort, Projectile> _projectilesByID = new();
+
     public override void _EnterTree()
     {
         base._EnterTree();
@@ -28,13 +30,13 @@ public partial class ProjectileManager : Node3D
         }
     }
 
-    public void ServerSpawnProjectile(ushort id, ProjectileType type, Vector3 position, Vector3 rotation)
+    public void ServerSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 rotation)
     {
-        LocalSpawnProjectile(id, type, position, rotation);
-        ProjectileSpawned.Send(id, type, position, rotation);
+        LocalSpawnProjectile(projectileID, type, position, rotation);
+        ProjectileSpawned.Send(projectileID, type, position, rotation);
     }
 
-    public Projectile LocalSpawnProjectile(ushort id, ProjectileType type, Vector3 position, Vector3 rotation)
+    public Projectile LocalSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 rotation)
     {
         if(_projectilesByType.TryGetValue(type, out var projectileScene))
         {
@@ -52,13 +54,21 @@ public partial class ProjectileManager : Node3D
             spawnedProjectile.GlobalRotation = rotation;
 
 
-            spawnedProjectile.Initialize(position, rotation);
+            spawnedProjectile.Initialize(position, rotation, projectileID);
             return spawnedProjectile;
         }
         else
         {
             GD.PushError($"Projectile Type [{type}] not found in projectiles dictionary. It should be set in the editor.");
             return null;
+        }
+    }
+
+    public void DestroyProjectile(ushort projectileID)
+    {
+        if(_projectilesByID.TryGetValue(projectileID, out var projectile))
+        {
+            projectile.LocalDestroy();
         }
     }
 }

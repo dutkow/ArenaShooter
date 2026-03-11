@@ -14,9 +14,9 @@ public partial class LinearProjectile : Projectile
     private Vector3 _velocity;
     private Vector3 _gravityVector;
 
-    public override void Initialize(Vector3 origin, Vector3 direction)
+    public override void Initialize(Vector3 origin, Vector3 direction, ushort projectileID)
     {
-        base.Initialize(origin, direction);
+        base.Initialize(origin, direction, projectileID);
 
         _velocity = direction.Normalized() * Speed;
         _gravityVector = new Vector3(0, -Gravity, 0);
@@ -72,7 +72,7 @@ public partial class LinearProjectile : Projectile
                     GD.Print($"Collided with: {colliderNode?.Name ?? "unknown"}. not damageable");
                 }
 
-                Destroy();
+                ServerDestroy();
             }
         }
         else
@@ -81,9 +81,9 @@ public partial class LinearProjectile : Projectile
         }
     }
 
-    public override void Destroy()
+    public override void ServerDestroy()
     {
-        base.Destroy();
+        base.ServerDestroy();
 
         QueueFree();
     }

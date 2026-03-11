@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public enum ProjectileType
 {
@@ -20,7 +21,7 @@ public class ProjectileSpawnData
     public Vector3 SpawnRotation;
 } 
 
-public struct ProjectileStateChangeData
+public struct ProjectileState
 {
     public ushort ProjectileID; // nothing for now yet, if you receive this, it means it was destroyed
 }
@@ -30,9 +31,11 @@ public class ServerProjectileManager
     public static ServerProjectileManager Instance { get; private set; }
 
     public Dictionary<byte, List<ProjectileSpawnData>> _unackedProjectilesByPlayerID = new();
-    public Dictionary<ushort, List<ProjectileStateChangeData>> _unackedProjectileStateChangesByPlayerID = new();
-
     public Dictionary<ushort, Dictionary<byte, ProjectileSpawnData[]>> _unackedProjectileHistory = new();
+
+    public Dictionary<byte, List<ProjectileState>> _unackedProjectileStatesByPlayerID = new();
+    public Dictionary<ushort, Dictionary<byte, ProjectileState[]>> _unackedProjectileStateHistory = new();
+
 
     private ushort _nextAvailableProjectileID;
 
@@ -56,14 +59,6 @@ public class ServerProjectileManager
         }
     }
 
-    public void SetProjectileStateChange(ProjectileStateChangeData data)
-    {
-        foreach (var playerID in _unackedProjectileStateChangesByPlayerID.Keys)
-        {
-            _unackedProjectileStateChangesByPlayerID[playerID].Add(data);
-        }
-    }
-
     public List<ProjectileSpawnData> GetUnackedProjectilesByPlayerID(byte playerID)
     {
         if (!_unackedProjectilesByPlayerID.TryGetValue(playerID, out var list))
@@ -74,12 +69,12 @@ public class ServerProjectileManager
         return list;
     }
 
-    public List<ProjectileStateChangeData> GetUnackedProjectileStateChangesByPlayerID(byte playerID)
+    public List<ProjectileState> GetUnackedProjectileStateChangesByPlayerID(byte playerID)
     {
-        if (!_unackedProjectileStateChangesByPlayerID.TryGetValue(playerID, out var list))
+        if (!_unackedProjectileStatesByPlayerID.TryGetValue(playerID, out var list))
         {
-            list = new List<ProjectileStateChangeData>();
-            _unackedProjectileStateChangesByPlayerID[playerID] = list;
+            list = new List<ProjectileState>();
+            _unackedProjectileStatesByPlayerID[playerID] = list;
         }
         return list;
     }
@@ -128,9 +123,61 @@ public class ServerProjectileManager
         unackedProjectiles.RemoveRange(0, playerUnackedProjectilesAtTick.Length);
     }
 
+    public List<ProjectileState> GetUnackedProjectileStatesByPlayerID(byte playerID)
+    {
+        if (!_unackedProjectileStatesByPlayerID.TryGetValue(playerID, out var list))
+        {
+            list = new List<ProjectileState>();
+            _unackedProjectileStatesByPlayerID[playerID] = list;
+        }
+        return list;
+    }
+
+    public void AddUnackedProjectileStateHistoryByPlayerID(ushort tick, byte playerID, ProjectileState[] states)
+    {
+        if (!_unackedProjectileStateHistory.TryGetValue(tick, out var playerHistory))
+        {
+            playerHistory = new Dictionary<byte, ProjectileState[]>();
+            _unackedProjectileStateHistory[tick] = playerHistory;
+        }
+        playerHistory[playerID] = states;
+    }
+
+    public void UpdateProjectileState(ProjectileState state)
+    {
+        foreach (var playerID in _unackedProjectileStatesByPlayerID.Keys)
+        {
+            _unackedProjectileStatesByPlayerID[playerID].Add(state);
+        }
+    }
+
+    public void RemoveUnackedProjectileStatesByPlayerID(byte playerID, ushort lastProcessedTick)
+    {
+        var unacked = GetUnackedProjectileStatesByPlayerID(playerID);
+        if (!_unackedProjectileStateHistory.TryGetValue(lastProcessedTick, out var history) ||
+            !history.TryGetValue(playerID, out var snapshot) ||
+            snapshot.Length == 0 || unacked.Count == 0 ||
+            unacked[0].ProjectileID != snapshot[0].ProjectileID)
+        {
+            return;
+        }
+
+        unacked.RemoveRange(0, snapshot.Length);
+    }
+
+    public void AddStateInfoToWorldSnapshot(WorldSnapshot snapshot, byte playerID)
+    {
+        var unackedStates = GetUnackedProjectileStatesByPlayerID(playerID);
+        snapshot.UnacknowledgedProjectileStates = unackedStates.ToArray();
+        AddUnackedProjectileStateHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectileStates);
+    }
+
     public void AddInfoToWorldSnapshot(WorldSnapshot snapshot, byte playerID)
     {
         snapshot.UnacknowledgedProjectiles = GetUnackedProjectilesByPlayerID(playerID).ToArray();
         AddUnackedProjectileHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectiles);
+
+        snapshot.UnacknowledgedProjectileStates = GetUnackedProjectileStatesByPlayerID(playerID).ToArray();
+        AddUnackedProjectileStateHistoryByPlayerID(snapshot.ServerTick, playerID, snapshot.UnacknowledgedProjectileStates);
     }
 }

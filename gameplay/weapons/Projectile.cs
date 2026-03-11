@@ -6,6 +6,8 @@ using System;
 /// </summary>
 public abstract partial class Projectile : Node3D
 {
+    ProjectileState _state = new();
+
     [Export] public int Damage = 75;
     [Export] public float LifeTime = 5f;
 
@@ -14,7 +16,7 @@ public abstract partial class Projectile : Node3D
     [Export] public Area3D Area;
     [Export] public CollisionShape3D CollisionShape;
 
-    public virtual void Initialize(Vector3 origin, Vector3 direction)
+    public virtual void Initialize(Vector3 origin, Vector3 direction, ushort projectileID)
     {
         GlobalPosition = origin;
         LookAt(origin + direction, Vector3.Up);
@@ -23,6 +25,8 @@ public abstract partial class Projectile : Node3D
         {
             Area.AreaEntered += OnCollision;
         }
+
+        _state.ProjectileID = projectileID;
     }
 
     public override void _PhysicsProcess(double delta)
@@ -45,8 +49,15 @@ public abstract partial class Projectile : Node3D
         QueueFree();
     }
 
-    public virtual void Destroy()
-    {
 
+    public virtual void ServerDestroy()
+    {
+        ServerProjectileManager.Instance.UpdateProjectileState(_state);
+        LocalDestroy();
+    }
+
+    public virtual void LocalDestroy()
+    {
+        QueueFree();
     }
 }
