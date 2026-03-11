@@ -78,8 +78,8 @@ public partial class Character : Pawn, IDamageable
     {
         base._PhysicsProcess(delta);
 
-        Vector3 direction = -Camera.GlobalTransform.Basis.Z;
-        _weapon.Tick(delta, Camera.GlobalPosition, direction);
+        Vector3 dir = -Camera.GlobalTransform.Basis.Z;
+        _weapon.Tick(delta, Camera.GlobalPosition, dir);
 
         GlobalPosition = MovementComp.State.Position + new Vector3(0.0f, 0.0f, 0.1f);
 
@@ -399,8 +399,12 @@ public partial class Character : Pawn, IDamageable
             MovementComp.WasLaunched = false;
         }
 
-        cmd = ClientProjectileManager.Instance.AddInfoToClientInputCommand(cmd);
-
+        if (_weapon.FiredPredictedProjectile)
+        {
+            cmd.Mask |= ClientCommandMask.FIRED_PREDICTED_PROJECTILE;
+            cmd.PredictedProjectileClientID = ClientProjectileManager.Instance.GetNextAvailableClientProjectileID();
+            _weapon.FiredPredictedProjectile = false;
+        }
 
         MovementComp.LaunchVector = Vector3.Zero;
 
