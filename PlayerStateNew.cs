@@ -2,6 +2,16 @@ using Godot;
 using System;
 using System.Runtime.ExceptionServices;
 
+public static class WeaponConstants
+{
+    public const byte TOTAL_WEAPON_SLOTS = 10;
+
+    public static WeaponFlags MaskFromWeapon(WeaponType weapon)
+    {
+        return (WeaponFlags)(1 << (byte)weapon);
+    }
+}
+
 public enum WeaponType : byte
 {
     WEAPON_1,
@@ -16,9 +26,303 @@ public enum WeaponType : byte
     WEAPON_10,
 }
 
+[Flags]
+public enum PlayerStateFlags : byte
+{
+    NONE = 0,
+
+    KILLS_CHANGED = 1 << 0,
+    DEATHS_CHANGED = 1 << 1,
+    PING_CHANGED = 1 << 2,
+    IS_ALIVE_CHANGED = 1 << 3,
+}
+
+[Flags]
+public enum CharacterPublicFlags : ushort
+{
+    NONE = 0,
+
+    // movement replication
+    POSITION_CHANGED = 1 << 0,
+    ROTATION_CHANGED = 1 << 1,
+    VELOCITY_CHANGED = 1 << 2,
+    MOVEMENT_MODE_CHANGED = 1 << 3,
+
+    EQUIPPED_WEAPON_CHANGED = 1 << 4,
+
+    // eventually animation stuff, etc.
+}
+
+public enum WeaponFlags : ushort
+{
+    NONE = 0,
+
+    WEAPON_1_CHANGED = 1 << 0,
+    WEAPON_2_CHANGED = 1 << 1,
+    WEAPON_3_CHANGED = 1 << 2,
+    WEAPON_4_CHANGED  = 1 << 3,
+    WEAPON_5_CHANGED = 1 << 4,
+    WEAPON_6_CHANGED = 1 << 5,
+    WEAPON_7_CHANGED = 1 << 6,
+    WEAPON_8_CHANGED = 1 << 7,
+    WEAPON_9_CHANGED = 1 << 8,
+    WEAPON_10_CHANGED = 1 << 9,
+}
+
+[Flags]
+public enum CharacterPrivateFlags : byte
+{
+    NONE = 0,
+
+    HEALTH_CHANGED = 1 << 0,
+    MAX_HEALTH_CHANGED = 1 << 1,
+
+    ARMOR_CHANGED = 1 << 2,
+    MAX_ARMOR_CHANGED = 1 << 3,
+
+    WEAPONS_CHANGED = 1 << 4,
+    AMMO_CHANGED = 1 << 5,
+}
+
+public static class StateHelpers
+{
+    public static void SetAndFlag<TField, TFlag>(ref TField field, TField value, ref TFlag flags, TFlag flag)
+        where TField : struct, IEquatable<TField>
+        where TFlag : struct, Enum
+    {
+        if (!field.Equals(value))
+        {
+            field = value;
+            flags = (TFlag)(object)(((ushort)(object)flags) | ((ushort)(object)flag));
+        }
+    }
+}
+
+public class ExamplePlayerState
+{
+    public byte PlayerID;
+    public  string PlayerName;
+    public ExampleCharacter Character; // instance, not replicated
+
+    public PlayerStateFlags Flags;
+
+    public byte Kills;
+    public byte Deaths;
+    public ushort Ping;
+    public bool IsAlive; // Used so clients know who they need to spawn
+
+    public void ClearFlags()
+    {
+        Flags = 0;
+        if(Character != null)
+        {
+            Character.ClearFlags();
+        }
+    }
+} 
+
+public class CharacterPublicState
+{
+    public CharacterPublicFlags Flags;
+
+    public Vector3 Position;
+    public Vector2 Rotation; // global yaw, local pitch
+    public Vector3 Velocity;
+    public CharacterMoveMode MovementMode;
+    public WeaponType EquippedWeapon;
+}
+
+public class CharacterPrivateState
+{
+    public CharacterPrivateFlags Flags;
+
+    public byte Health;
+    public  byte MaxHealth;
+    public byte Armor;
+    public  byte MaxArmor;
+    public WeaponFlags HeldWeaponsFlags;
+    public WeaponFlags AmmoChangedFlags;
+    public byte[] Ammo = new byte[10]; // 10 weapons for now, like a classic arena FPS
+
+}
+
+public partial class ExampleCharacter : Node3D
+{
+    CharacterPublicState PublicState = new();
+    CharacterPrivateState PrivateState = new();
+
+    public void OnPositionChanged(Vector3 position)
+    {
+        PublicState.Position = position;
+        PublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+    }
+
+    public void OnRotationChanged(float globalYaw, float localPitch)
+    {
+        PublicState.Rotation = new Vector2(globalYaw, localPitch);
+        PublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
+    }
+
+    public void OnVelocityChanged(Vector3 velocity)
+    {
+        PublicState.Velocity = velocity;
+        PublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
+    }
+
+    public void OnMovementModeChanged(CharacterMoveMode movementMode)
+    {
+        PublicState.MovementMode = movementMode;
+        PublicState.Flags |= CharacterPublicFlags.MOVEMENT_MODE_CHANGED;
+    }
+
+    public void OnEquippedWeaponChanged(WeaponType weaponType)
+    {
+        PublicState.EquippedWeapon = weaponType;
+        PublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
+    }
+
+    public void OnHealthChanged(byte health)
+    {
+        PrivateState.Health = health;
+        PrivateState.Flags |= CharacterPrivateFlags.HEALTH_CHANGED;
+    }
+
+    public void OnMaxHealthChanged(byte maxHealth)
+    {
+        PrivateState.Health = maxHealth;
+        PrivateState.Flags |= CharacterPrivateFlags.MAX_HEALTH_CHANGED;
+    }
+
+    public void OnArmorChanged(byte armor)
+    {
+        PrivateState.Armor = armor;
+        PrivateState.Flags |= CharacterPrivateFlags.ARMOR_CHANGED;
+    }
+
+    public void OnMaxArmorChanged(byte maxArmor)
+    {
+        PrivateState.MaxArmor = maxArmor;
+        PrivateState.Flags |= CharacterPrivateFlags.MAX_ARMOR_CHANGED;
+    }
+    public void OnReceivedWeapon(WeaponType weaponType)
+    {
+        PrivateState.HeldWeaponsFlags |= WeaponConstants.MaskFromWeapon(weaponType);
+        PrivateState.Flags |= CharacterPrivateFlags.WEAPONS_CHANGED;
+    }
+
+    public void OnLostWeapon(WeaponType weaponType)
+    {
+        PrivateState.HeldWeaponsFlags &= ~WeaponConstants.MaskFromWeapon(weaponType);
+        PrivateState.Flags |= CharacterPrivateFlags.WEAPONS_CHANGED;
+    }
+
+    public void OnAmmoChanged(WeaponType weaponType, byte newAmmo)
+    {
+        int index = (int)weaponType;
+        if (index < WeaponConstants.TOTAL_WEAPON_SLOTS)
+        {
+            PrivateState.Ammo[index] = newAmmo;
+            PrivateState.AmmoChangedFlags |= WeaponConstants.MaskFromWeapon(weaponType);
+            PrivateState.Flags |= CharacterPrivateFlags.AMMO_CHANGED;
+        }
+    }
+
+    public void ApplyPublicState(CharacterPublicState publicState)
+    {
+        CharacterPublicFlags flags = publicState.Flags;
+
+        if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
+        {
+
+        }
+        if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
+        {
+
+        }
+        if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0)
+        {
+
+        }
+        if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0)
+        {
+        }
+        if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0)
+        {
+
+        }
+    }
+
+    public void ClearFlags()
+    {
+        PublicState.Flags = 0;
+        PrivateState.Flags = 0;
+    }
+
+    public void ApplyPrivateState(CharacterPrivateState privateState)
+    {
+        CharacterPrivateFlags flags = privateState.Flags;
+
+        if ((flags & CharacterPrivateFlags.HEALTH_CHANGED) != 0)
+        {
+
+        }
+        if ((flags & CharacterPrivateFlags.MAX_HEALTH_CHANGED) != 0)
+        {
+
+        }
+        if ((flags & CharacterPrivateFlags.ARMOR_CHANGED) != 0)
+        {
+
+        }
+        if ((flags & CharacterPrivateFlags.MAX_ARMOR_CHANGED) != 0)
+        {
+
+        }
+        if ((flags & CharacterPrivateFlags.WEAPONS_CHANGED) != 0)
+        {
+            WeaponFlags weaponFlags = privateState.HeldWeaponsFlags;
+            for (int i = 0; i < WeaponConstants.TOTAL_WEAPON_SLOTS; i++)
+            {
+                WeaponFlags mask = (WeaponFlags)(1 << i);
+                if ((weaponFlags & mask) != 0)
+                {
+                    bool isHeld = (privateState.HeldWeaponsFlags & mask) != 0;
+                }
+            }
+
+            PrivateState.HeldWeaponsFlags = privateState.HeldWeaponsFlags;
+        }
+        if ((flags & CharacterPrivateFlags.AMMO_CHANGED) != 0)
+        {
+            WeaponFlags ammoFlags = privateState.AmmoChangedFlags;
+            for (int i = 0; i < WeaponConstants.TotalWeaponSlots; i++)
+            {
+                WeaponFlags mask = (WeaponFlags)(1 << i);
+                if ((ammoFlags & mask) != 0)
+                {
+                    PrivateState.Ammo[i] = privateState.Ammo[i];
+                }
+            }
+
+            PrivateState.AmmoChangedFlags = privateState.AmmoChangedFlags;
+        }
+    }
+}
+
 
 public partial class PlayerStateNew
 {
+    byte PlayerID;
+    string PlayerName = string.Empty;
+
+
+
+
+
+
+
+
+
     public PublicPlayerState PublicState = new();
     public PrivatePlayerState PrivateState = new();
 
