@@ -38,7 +38,7 @@ public class ServerGame
     public void Tick()
     {
 
-        var newSnapshot = WorldSnapshot.Build();
+        var newSnapshot = WorldSnapshot.BuildNew();
         SendWorldSnapshotDeltas(newSnapshot); // in this we send the snapshot prior to updating the next client input. we could alternatively, process client inputs, then update?
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
         ProcessNextClientInputs();
@@ -47,47 +47,6 @@ public class ServerGame
 
     public void ProcessNextClientInputs()
     {
-        foreach (var kvp in MatchState.Instance.ConnectedPlayers)
-        {
-            byte playerID = kvp.Key;
-            var playerState = kvp.Value;
-            var pawn = playerState.Pawn;
-
-            if (pawn == null)
-            {
-                continue;
-            }
-
-            // Skip local player on listen server
-            if (ClientGame.Instance != null && ClientGame.Instance.LocalPlayerID == playerID)
-            {
-                continue;
-            }
-
-            if (!_unprocessedClientInputs.TryGetValue(playerID, out var queue))
-            {
-                queue = new SortedDictionary<ushort, ClientInputCommand>();
-            }
-
-            ClientInputCommand cmd = new();
-
-            if (queue.Count > 0)
-            {
-                ushort tickToProcess = queue.Keys.Min();
-                cmd = queue[tickToProcess];
-                queue.Remove(tickToProcess);
-
-                LastProcessedClientTicksByPlayerID[playerID] = tickToProcess;
-                LastProcessedClientCommandsByPlayerID[playerID] = cmd;
-            }
-            else if (LastProcessedClientCommandsByPlayerID.TryGetValue(playerID, out var lastCommand))
-            {
-                cmd = lastCommand;
-            }
-
-            pawn.ProcessClientInput(cmd);
-            _unprocessedClientInputs[playerID] = queue;
-        }
 
         // REFACTOR CODE
         foreach (var kvp in MatchState.Instance.NewConnectedPlayers)

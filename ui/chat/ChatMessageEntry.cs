@@ -23,16 +23,6 @@ public partial class ChatMessageEntry : Control
         {
             return; // handle later if and when this exists
         }
-
-        if(MatchState.Instance.ConnectedPlayers.TryGetValue(chatMessageInfo.PlayerID, out var playerState))
-        {
-            _senderNameLabel.Text = playerState.PlayerName + ":";
-        }
-        else
-        {
-            GD.PushError($"Player state not found for Player ID: {chatMessageInfo.PlayerID}");
-        }
-
         // REFACTOR CODE
         if (MatchState.Instance.NewConnectedPlayers.TryGetValue(chatMessageInfo.PlayerID, out var newPlayerState))
         {

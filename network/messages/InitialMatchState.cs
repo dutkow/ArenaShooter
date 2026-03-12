@@ -107,76 +107,10 @@ public class InitialMatchState : Message
     // Sending
     // ----------------------
 
-    public static void Send(ENetPacketPeer client)
-    {
-        var players = MatchState.Instance.ConnectedPlayers;
-        int count = players.Count;
 
-        byte[] playerIDs = new byte[count];
-        string[] playerNames = new string[count];
-        Vector3[] positions = new Vector3[count];
-        Vector3[] rotations = new Vector3[count];
-        bool[] isAlive = new bool[count];
-
-        int i = 0;
-        foreach (var kvp in players)
-        {
-            var player = kvp.Value;
-
-            playerIDs[i] = kvp.Key;
-            playerNames[i] = player.PlayerName;
-
-            if (player.Pawn != null)
-            {
-                positions[i] = player.Pawn.GlobalPosition;
-                rotations[i] = player.Pawn.GlobalRotation;
-                isAlive[i] = player.IsAlive;
-                GD.Print("is alive is true in initial match state");
-            }
-            else
-            {
-                positions[i] = Vector3.Zero;
-                rotations[i] = Vector3.Zero;
-                isAlive[i] = false;
-                GD.Print("is alive is false in initial match state");
-            }
-
-            i++;
-        }
-
-        var msg = new InitialMatchState
-        {
-            MessageType = Msg.S2C_INITIAL_MATCH_STATE,
-            ENetFlags = ENetPacketFlags.Reliable,
-            PlayerIDs = playerIDs,
-            PlayerNames = playerNames,
-            Positions = positions,
-            Rotations = rotations,
-            IsAlive = isAlive
-        };
-
-#if DEBUG
-        GD.Print("=== SENDING InitialMatchState ===");
-        GD.Print($"Player count: {count}");
-
-        for (int j = 0; j < count; j++)
-        {
-            GD.Print(
-                $"[{j}] ID={playerIDs[j]} " +
-                $"Name={playerNames[j]} " +
-                $"Pos={positions[j]} " +
-                $"RotY={rotations[j].Y} " +
-                $"Alive={isAlive[j]}"
-            );
-        }
-        GD.Print("=== END InitialMatchState ===");
-#endif
-
-        NetworkSender.ToClient(client, msg);
-    }
 
     // REFACTOR CODE
-    public static void SendNew(ENetPacketPeer client)
+    public static void Send(ENetPacketPeer client)
     {
         var players = MatchState.Instance.NewConnectedPlayers;
         int count = players.Count;

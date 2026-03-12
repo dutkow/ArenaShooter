@@ -200,56 +200,7 @@ public class WorldSnapshot : Message
         //NetworkSender.Broadcast(msg);
     }
 
-    public static WorldSnapshot Build()
-    {
-        WorldSnapshot newSnapshot = new();
-
-        newSnapshot.ServerTick = MatchState.Instance.CurrentTick;
-        newSnapshot.LastProcessedClientTick = 0;
-        newSnapshot.PickupMask = PickupManager.Instance.PickupMask;
-
-        // Characters (existing code)
-        var players = MatchState.Instance.ConnectedPlayers;
-        var characters = new CharacterSnapshot[players.Count];
-        int i = 0;
-        foreach (var kvp in players)
-        {
-            var player = kvp.Value;
-            Vector3 pos = Vector3.Zero;
-            Vector3 vel = Vector3.Zero;
-            float yaw = 0f;
-            float pitch = 0f;
-            CharacterMoveMode moveMode = CharacterMoveMode.GROUNDED;
-            byte health = 0;
-            byte shield = 0;
-
-            if (player.Pawn != null && player.Pawn is Character character)
-            {
-                pos = character.MovementComp.State.Position;
-                vel = character.MovementComp.State.Velocity;
-                yaw = character.MovementComp.State.Yaw;
-                pitch = character.MovementComp.State.Pitch;
-                moveMode = character.MovementComp.State.MoveMode;
-                health = (byte)character.HealthComp.Health;
-                shield = (byte)character.HealthComp.Shield;
-            }
-
-            CharacterSnapshotFlags allFlags = CharacterSnapshotFlags.POSITION |
-                                              CharacterSnapshotFlags.VELOCITY |
-                                              CharacterSnapshotFlags.YAW |
-                                              CharacterSnapshotFlags.PITCH |
-                                              CharacterSnapshotFlags.MOVE_MODE |
-                                              CharacterSnapshotFlags.HEALTH |
-                                              CharacterSnapshotFlags.SHIELD;
-
-            characters[i++] = new CharacterSnapshot(kvp.Key, pos, vel, yaw, pitch, moveMode, health, shield, allFlags);
-        }
-
-        newSnapshot.Characters = characters;
-
-
-        return newSnapshot;
-    }
+ 
 
     // REFACTOR
 

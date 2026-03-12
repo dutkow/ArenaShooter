@@ -104,18 +104,7 @@ public class ClientGame
         {
             var characterSnapshot = characterSnapshots[i];
 
-            if (MatchState.Instance.ConnectedPlayers.TryGetValue(characterSnapshot.PlayerID, out var playerState))
-            {
-                Pawn pawn = playerState.Pawn;
-                if (pawn != null)
-                {
-                    pawn.ApplySnapshot(characterSnapshot);
-                }
-                else
-                {
-                    SpawnManager.Instance.LocalSpawnPlayer(characterSnapshot.PlayerID, characterSnapshot.Position, characterSnapshot.Yaw);
-                }
-            }
+
 
             // REFACTOR CODE
             if (MatchState.Instance.NewConnectedPlayers.TryGetValue(characterSnapshot.PlayerID, out var playerStateNew))
@@ -127,7 +116,7 @@ public class ClientGame
                 }
                 else
                 {
-                    SpawnManager.Instance.LocalSpawnPlayer(characterSnapshot.PlayerID, characterSnapshot.Position, characterSnapshot.Yaw);
+                    SpawnManager.Instance.NewLocalSpawnPlayer(characterSnapshot.PlayerID, characterSnapshot.Position, characterSnapshot.Yaw);
                 }
             }
             //////////////

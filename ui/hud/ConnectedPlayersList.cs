@@ -22,10 +22,6 @@ public partial class ConnectedPlayersList : Control
             child.QueueFree();
         }
 
-        foreach(var kvp in MatchState.Instance.ConnectedPlayers)
-        {
-            AddPlayerToList(kvp.Value);
-        }
 
         // REFACTOR
         foreach (var kvp in MatchState.Instance.NewConnectedPlayers)

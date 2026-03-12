@@ -19,8 +19,8 @@ public enum WeaponType : byte
 
 public partial class PlayerStateNew
 {
-    public PublicPlayerState PublicState;
-    public PrivatePlayerState PrivateState;
+    public PublicPlayerState PublicState = new();
+    public PrivatePlayerState PrivateState = new();
 
     public void TickPlayerState()
     {

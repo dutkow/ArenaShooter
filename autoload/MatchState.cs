@@ -64,7 +64,6 @@ public partial class MatchState : Node
     // ----------------------
     // Player management
     // ----------------------
-    public Dictionary<byte, PlayerState> ConnectedPlayers = new();
     public Dictionary<byte, PlayerStateNew> NewConnectedPlayers = new();
 
     public event Action<PlayerState>? PlayerJoined;
@@ -98,7 +97,7 @@ public partial class MatchState : Node
         {
             GD.Print("running init listen server stuff on match state");
             byte playerID = ClientGame.Instance.LocalPlayerID;
-            AddPlayer(playerID, Settings.Instance.PlayerName);
+            NewAddPlayer(playerID, Settings.Instance.PlayerName);
             var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
         }
     }
@@ -118,7 +117,7 @@ public partial class MatchState : Node
         {
             byte playerID = initialMatchState.PlayerIDs[i];
 
-            AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
+            NewAddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
         }
     }
 
@@ -200,42 +199,7 @@ public partial class MatchState : Node
     // Player handling
     // ----------------------
     
-    public void AddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
-    {
-        if (ConnectedPlayers.ContainsKey(playerID))
-        {
-            return; // Already added
-        }
 
-        var playerState = new PlayerState(playerID)
-        {
-            PlayerName = playerName,
-            Score = 0,
-            Health = 100,
-            Shields = 100,
-            Ammo = 0,
-            TeamId = -1,
-            Pawn = null
-        };
-
-        ConnectedPlayers[playerID] = playerState;
-
-        try
-        {
-            PlayerJoined?.Invoke(playerState);
-            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PlayerName}. Network Mode = {NetworkSession.Instance.NetworkMode}");
-
-        }
-        catch (Exception e)
-        {
-            GD.PrintErr("PlayerJoined event crashed: ", e);
-        }
-
-        if(ClientGame.Instance != null && playerID == ClientGame.Instance.LocalPlayerID)
-        {
-            ClientGame.Instance.AssignPlayerState(playerState);
-        }
-    }
 
     // REFACTOR CODE
     public void NewAddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
@@ -269,6 +233,7 @@ public partial class MatchState : Node
 
     private void HandlePeerDisconnected(byte peerId)
     {
+        /*
         if (ConnectedPlayers.TryGetValue(peerId, out var player))
         {
             ConnectedPlayers.Remove(peerId);
@@ -279,15 +244,8 @@ public partial class MatchState : Node
 
             // TODO: Broadcast to other clients that a player left
             // NetworkHandler.Instance.BroadcastPlayerLeft(peerId);
-        }
+        }*/
     }
 
-    // ----------------------
-    // Optional helpers
-    // ----------------------
-    public IReadOnlyList<PlayerState> GetAllPlayers() => new List<PlayerState>(ConnectedPlayers.Values);
-
-    public IReadOnlyList<PlayerState> GetActivePlayers() =>
-        new List<PlayerState>(ConnectedPlayers.Values).FindAll(p => p.Pawn != null);
 
 }
