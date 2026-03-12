@@ -1,6 +1,18 @@
 using Godot;
 using System;
 
+public class ProjectileSpawnData
+{
+    public ushort ProjectileID;
+    public byte ownerPlayerID;
+    public ProjectileType Type;
+    public ushort ServerTickOnSpawn;
+
+    public Vector3 SpawnLocation;
+    public Vector3 SpawnDirection;
+}
+
+
 public class ProjectileState
 {
     public ushort ProjectileID; // destroyed if received
@@ -13,7 +25,7 @@ public class ProjectileState
 /// </summary>
 public abstract partial class Projectile : Entity
 {
-    public ProjectileState State { get; private set; } = new();
+    public ProjectileState State = new();
 
     [Export] public int Damage = 75;
     [Export] public float LifeTime = 5f;
@@ -23,9 +35,11 @@ public abstract partial class Projectile : Entity
     [Export] public Area3D Area;
     [Export] public CollisionShape3D CollisionShape;
 
-    bool _isAlive = true;
+    protected bool _isAlive = true;
 
-    public virtual void Initialize(Vector3 origin, Vector3 direction, ushort projectileID)
+    protected ushort _lastProcessedServerTickOnSpawn;
+
+    public virtual void Initialize(Vector3 origin, Vector3 direction, ushort projectileID, bool isPredicted)
     {
         GlobalPosition = origin;
         LookAt(origin + direction, Vector3.Up);
@@ -36,6 +50,11 @@ public abstract partial class Projectile : Entity
         }
 
         State.ProjectileID = projectileID;
+
+        if(isPredicted)
+        {
+            _lastProcessedServerTickOnSpawn = ClientGame.Instance.LastServerTickProcessedByClient;
+        }
     }
 
     public override void _PhysicsProcess(double delta)
@@ -111,5 +130,10 @@ public abstract partial class Projectile : Entity
         {
             LocalDestroy();
         }
+    }
+
+    public virtual void Reconcile(ProjectileSpawnData spawnData)
+    {
+
     }
 }

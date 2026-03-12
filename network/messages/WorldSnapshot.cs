@@ -57,7 +57,7 @@ public class WorldSnapshot : Message
             Add((byte)proj.Type);
             Add(proj.ServerTickOnSpawn);
             Add(proj.SpawnLocation);
-            Add(proj.SpawnRotation);
+            Add(proj.SpawnDirection);
         }
 
         // --- Unacknowledged Projectile State Changes ---
@@ -108,7 +108,7 @@ public class WorldSnapshot : Message
             Write((byte)proj.Type);
             Write(proj.ServerTickOnSpawn);
             Write(proj.SpawnLocation);
-            Write(proj.SpawnRotation);
+            Write(proj.SpawnDirection);
         }
 
         // --- Unacknowledged Projectile State Changes ---
@@ -177,7 +177,7 @@ public class WorldSnapshot : Message
             proj.Type = (ProjectileType)type;
             Read(out proj.ServerTickOnSpawn);
             Read(out proj.SpawnLocation);
-            Read(out proj.SpawnRotation);
+            Read(out proj.SpawnDirection);
 
             UnacknowledgedRemoteProjectiles[i] = proj;
         }

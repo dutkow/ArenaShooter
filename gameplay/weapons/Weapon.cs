@@ -112,7 +112,7 @@ public partial class Weapon : Entity
         ProjectileSpawnData spawnData = new();
         spawnData.ownerPlayerID = OwnerPlayerID;
         spawnData.SpawnLocation = spawnPosition;
-        spawnData.SpawnRotation = direction;
+        spawnData.SpawnDirection = direction;
 
         Fire(spawnData);
     }
@@ -125,7 +125,11 @@ public partial class Weapon : Entity
             FiredPredictedProjectile = true;
         }
 
-        ServerProjectileManager.Instance?.CreateProjectilePendingSpawn(spawnData, IsPredictingProjectiles);
+        if(NetworkSession.Instance.IsServer)
+        {
+            spawnData.ServerTickOnSpawn = MatchState.Instance.CurrentTick;
+            ServerProjectileManager.Instance.CreateProjectilePendingSpawn(spawnData, IsPredictingProjectiles);
+        }
 
         _cooldownTimer = PrimaryFireCooldown;
     }

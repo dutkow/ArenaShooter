@@ -19,31 +19,34 @@ public partial class ProjectileManager : Node3D
     }
 
 
-    public Projectile LocalSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 rotation)
+    public Projectile LocalSpawnProjectile(ushort projectileID, ProjectileType type, Vector3 position, Vector3 direction, bool isPredicted)
     {
-        GD.Print($"local spawn proj ran on {NetworkSession.Instance.NetworkMode}");
-        if(_projectilesByType.TryGetValue(type, out var projectileScene))
+        if (_projectilesByType.TryGetValue(type, out var projectileScene))
         {
             var spawnedProjectile = (Projectile)projectileScene.Instantiate();
-
-            if(spawnedProjectile == null)
+            if (spawnedProjectile == null)
             {
-                GD.PushError($"Projectile Type [{type}] was found in projectiles dictionary but no projectile spawned. Ensure the projectile scene has a projectile script attached to it.");
+                GD.PushError($"Projectile Type [{type}] found but no projectile spawned.");
                 return null;
             }
 
             Level.Instance.AddChild(spawnedProjectile);
 
             spawnedProjectile.GlobalPosition = position;
-            spawnedProjectile.GlobalRotation = rotation;
 
+            // Convert direction to rotation for visuals
+            if (direction.LengthSquared() > 0.001f)
+            {
+                spawnedProjectile.GlobalRotation = direction.Normalized().ToEuler();
+            }
 
-            spawnedProjectile.Initialize(position, rotation, projectileID);
+            // Initialize using direction
+            spawnedProjectile.Initialize(position, direction, projectileID, isPredicted);
             return spawnedProjectile;
         }
         else
         {
-            GD.PushError($"Projectile Type [{type}] not found in projectiles dictionary. It should be set in the editor.");
+            GD.PushError($"Projectile Type [{type}] not found in dictionary.");
             return null;
         }
     }

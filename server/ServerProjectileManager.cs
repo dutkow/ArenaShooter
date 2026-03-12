@@ -9,17 +9,6 @@ public enum ProjectileType
     DEFAULT,
 }
 
-public class ProjectileSpawnData
-{
-    public ushort ProjectileID;
-    public byte ownerPlayerID;
-    public ProjectileType Type;
-    public ushort ServerTickOnSpawn;
-
-    public Vector3 SpawnLocation;
-    public Vector3 SpawnRotation;
-}
-
 
 public class ServerProjectileManager
 {

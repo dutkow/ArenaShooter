@@ -9,9 +9,9 @@ public partial class PhysicsProjectile : Projectile
     [Export] public RigidBody3D RigidBody; // assign in editor
     [Export] public float InitialSpeed = 50f;
 
-    public override void Initialize(Vector3 origin, Vector3 direction, ushort projectileID)
+    public override void Initialize(Vector3 origin, Vector3 direction, ushort projectileID, bool isPredicted)
     {
-        base.Initialize(origin, direction, projectileID);
+        base.Initialize(origin, direction, projectileID, isPredicted);
 
         if (RigidBody != null)
         {
