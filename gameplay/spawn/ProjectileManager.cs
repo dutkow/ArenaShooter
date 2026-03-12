@@ -37,7 +37,7 @@ public partial class ProjectileManager : Node3D
             // Convert direction to rotation for visuals
             if (direction.LengthSquared() > 0.001f)
             {
-                spawnedProjectile.GlobalRotation = direction.Normalized().ToEuler();
+                //spawnedProjectile.GlobalRotation = direction.Normalized().ToEuler();
             }
 
             // Initialize using direction
