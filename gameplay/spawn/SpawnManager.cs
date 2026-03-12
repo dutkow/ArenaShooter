@@ -49,10 +49,6 @@ public partial class SpawnManager : Node3D
         {
             playerState.AssignPawn(spawnedPlayer);
         }
-        else
-        {
-            GD.PushError($"Failed to assign character to player state because player state not found in connected players. PlayerID of character: {playerID}. Net role: {NetworkSession.Instance.NetworkMode}.");
-        }
 
         AddChild(spawnedPlayer);
 
@@ -75,6 +71,42 @@ public partial class SpawnManager : Node3D
         }
         
         spawnedPlayer.Initialize(playerState);
+
+
+
+
+        return spawnedPlayer;
+    }
+
+    // REFACTOR CODE
+    public Pawn NewLocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
+    {
+        var spawnedPlayer = (Character)GameMode.Instance.DefaultPawnScene.Instantiate();
+
+        if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerID, out var playerState))
+        {
+            playerState.PublicState.Character = spawnedPlayer;
+        }
+
+        AddChild(spawnedPlayer);
+
+        spawnedPlayer.HandleSpawn(spawnPosition, yRotation, 0.0f);
+
+        spawnedPlayer.SetIsAuthority(NetworkSession.Instance.IsServer);
+
+        if (playerID == ClientGame.Instance.LocalPlayerID)
+        {
+            GD.Print($"running possess when spawning player on {NetworkSession.Instance.NetworkMode}. spawned player ID = {playerID} and local player ID = {NetworkSession.Instance.LocalPlayerID}");
+            ClientGame.Instance.LocalPlayerController.Possess(spawnedPlayer);
+        }
+        else
+        {
+            GD.Print($"handling remote spawn on {NetworkSession.Instance.NetworkMode}");
+            spawnedPlayer.HandleRemoteSpawn(playerID);
+        }
+
+        spawnedPlayer.InitializeNew(playerState);
+
 
         return spawnedPlayer;
     }

@@ -49,31 +49,104 @@ public partial class PublicPlayerState
     public bool IsAlive;
 
     public Vector3 Position;
+    public Vector3 Velocity;
     public float Yaw;
     public float Pitch;
+    public CharacterMoveMode MoveMode;
+
 
     public WeaponType EquippedWeapon;
 
     public void ApplyState(PublicPlayerState state)
     {
-        if (state.Flags.HasFlag(PublicPlayerFlags.KILLS)) Kills = state.Kills;
-        if (state.Flags.HasFlag(PublicPlayerFlags.DEATHS)) Deaths = state.Deaths;
-        if (state.Flags.HasFlag(PublicPlayerFlags.IS_ALIVE)) IsAlive = state.IsAlive;
-        if (state.Flags.HasFlag(PublicPlayerFlags.POSITION)) Position = state.Position;
-        if (state.Flags.HasFlag(PublicPlayerFlags.YAW)) Yaw = state.Yaw;
-        if (state.Flags.HasFlag(PublicPlayerFlags.PITCH)) Pitch = state.Pitch;
-        if (state.Flags.HasFlag(PublicPlayerFlags.EQUIPPED_WEAPON)) EquippedWeapon = state.EquippedWeapon;
+        var flags = state.Flags;
+
+        if ((flags & PublicPlayerFlags.KILLS) != 0)
+            Kills = state.Kills;
+
+        if ((flags & PublicPlayerFlags.DEATHS) != 0)
+            Deaths = state.Deaths;
+
+        if ((flags & PublicPlayerFlags.IS_ALIVE) != 0)
+            IsAlive = state.IsAlive;
+
+        if ((flags & PublicPlayerFlags.POSITION) != 0)
+            Position = state.Position;
+
+        if ((flags & PublicPlayerFlags.VELOCITY) != 0)
+            Velocity = state.Velocity;
+
+        if ((flags & PublicPlayerFlags.YAW) != 0)
+            Yaw = state.Yaw;
+
+        if ((flags & PublicPlayerFlags.PITCH) != 0)
+            Pitch = state.Pitch;
+
+        if ((flags & PublicPlayerFlags.MOVE_MODE) != 0)
+            MoveMode = state.MoveMode;
+
+        if ((flags & PublicPlayerFlags.EQUIPPED_WEAPON) != 0)
+            EquippedWeapon = state.EquippedWeapon;
     }
 
     public CharacterMoveState GetMoveState()
     {
         CharacterMoveState moveState = new();
         moveState.Position = Position;
-        //state.Velocity = Velocity;
+        moveState.Velocity = Velocity;
         moveState.Yaw = Yaw;
         moveState.Pitch = Pitch;
-        //state.MoveMode = MoveMode;
+        moveState.MoveMode = MoveMode;
         return moveState;
+    }
+
+    public static PublicPlayerFlags ComputeDirtyFlags(PublicPlayerState current, PublicPlayerState previous)
+    {
+        if (previous == null)
+        {
+            return PublicPlayerFlags.KILLS |
+                   PublicPlayerFlags.DEATHS |
+                   PublicPlayerFlags.IS_ALIVE |
+                   PublicPlayerFlags.POSITION |
+                   PublicPlayerFlags.VELOCITY |
+                   PublicPlayerFlags.YAW |
+                   PublicPlayerFlags.PITCH |
+                   PublicPlayerFlags.MOVE_MODE |
+                   PublicPlayerFlags.EQUIPPED_WEAPON;
+        }
+
+        PublicPlayerFlags flags = PublicPlayerFlags.NONE;
+
+        const float EPSILON_SQ = 0.0001f;
+
+        if (current.Kills != previous.Kills)
+            flags |= PublicPlayerFlags.KILLS;
+
+        if (current.Deaths != previous.Deaths)
+            flags |= PublicPlayerFlags.DEATHS;
+
+        if (current.IsAlive != previous.IsAlive)
+            flags |= PublicPlayerFlags.IS_ALIVE;
+
+        if ((current.Position - previous.Position).LengthSquared() > EPSILON_SQ)
+            flags |= PublicPlayerFlags.POSITION;
+
+        if ((current.Velocity - previous.Velocity).LengthSquared() > EPSILON_SQ)
+            flags |= PublicPlayerFlags.VELOCITY;
+
+        if (Mathf.Abs(current.Yaw - previous.Yaw) > EPSILON_SQ)
+            flags |= PublicPlayerFlags.YAW;
+
+        if (Mathf.Abs(current.Pitch - previous.Pitch) > EPSILON_SQ)
+            flags |= PublicPlayerFlags.PITCH;
+
+        if (current.MoveMode != previous.MoveMode)
+            flags |= PublicPlayerFlags.MOVE_MODE;
+
+        if (current.EquippedWeapon != previous.EquippedWeapon)
+            flags |= PublicPlayerFlags.EQUIPPED_WEAPON;
+
+        return flags;
     }
 }
 

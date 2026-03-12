@@ -174,4 +174,72 @@ public class InitialMatchState : Message
 
         NetworkSender.ToClient(client, msg);
     }
+
+    // REFACTOR CODE
+    public static void SendNew(ENetPacketPeer client)
+    {
+        var players = MatchState.Instance.NewConnectedPlayers;
+        int count = players.Count;
+
+        byte[] playerIDs = new byte[count];
+        string[] playerNames = new string[count];
+        Vector3[] positions = new Vector3[count];
+        Vector3[] rotations = new Vector3[count];
+        bool[] isAlive = new bool[count];
+
+        int i = 0;
+        foreach (var kvp in players)
+        {
+            var player = kvp.Value;
+
+            playerIDs[i] = kvp.Key;
+            playerNames[i] = player.PublicState.PlayerName;
+
+            Character character = player.PublicState.Character;
+            if (character != null)
+            {
+                positions[i] = character.GlobalPosition;
+                rotations[i] = character.GlobalRotation;
+                isAlive[i] = character.IsAlive();
+            }
+            else
+            {
+                positions[i] = Vector3.Zero;
+                rotations[i] = Vector3.Zero;
+                isAlive[i] = false;
+            }
+
+            i++;
+        }
+
+        var msg = new InitialMatchState
+        {
+            MessageType = Msg.S2C_INITIAL_MATCH_STATE,
+            ENetFlags = ENetPacketFlags.Reliable,
+            PlayerIDs = playerIDs,
+            PlayerNames = playerNames,
+            Positions = positions,
+            Rotations = rotations,
+            IsAlive = isAlive
+        };
+
+#if DEBUG
+        GD.Print("=== SENDING InitialMatchState ===");
+        GD.Print($"Player count: {count}");
+
+        for (int j = 0; j < count; j++)
+        {
+            GD.Print(
+                $"[{j}] ID={playerIDs[j]} " +
+                $"Name={playerNames[j]} " +
+                $"Pos={positions[j]} " +
+                $"RotY={rotations[j].Y} " +
+                $"Alive={isAlive[j]}"
+            );
+        }
+        GD.Print("=== END InitialMatchState ===");
+#endif
+
+        NetworkSender.ToClient(client, msg);
+    }
 }

@@ -12,13 +12,15 @@ public enum PublicPlayerFlags : ushort
     IS_ALIVE = 1 << 3,
 
     POSITION = 1 << 4,
-    YAW = 1 << 5,
-    PITCH = 1 << 6,
+    VELOCITY = 1 << 5,
+    YAW = 1 << 6,
+    PITCH = 1 << 7,
+    MOVE_MODE = 1 << 8,
 
-    EQUIPPED_WEAPON = 1 << 7,
+    EQUIPPED_WEAPON = 1 << 9,
 
-    FIRED_PRIMARY = 1 << 8,
-    FIRED_SECONDARY = 1 << 9,
+    FIRED_PRIMARY = 1 << 10,
+    FIRED_SECONDARY = 1 << 11,
 }
 
 

@@ -54,6 +54,8 @@ public partial class Character : Pawn, IDamageable
     private bool _yawDirty;
     private bool _pitchDirty;
 
+    public PlayerStateNew PlayerStateNew = new();
+
     public override void _Ready()
     {
         base._Ready();

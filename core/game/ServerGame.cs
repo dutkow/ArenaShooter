@@ -88,6 +88,49 @@ public class ServerGame
             pawn.ProcessClientInput(cmd);
             _unprocessedClientInputs[playerID] = queue;
         }
+
+        // REFACTOR CODE
+        foreach (var kvp in MatchState.Instance.NewConnectedPlayers)
+        {
+            byte playerID = kvp.Key;
+            var playerState = kvp.Value;
+            var character = playerState.PublicState.Character;
+
+            if (character == null)
+            {
+                continue;
+            }
+
+            if (ClientGame.Instance != null && ClientGame.Instance.LocalPlayerID == playerID)
+            {
+                continue;
+            }
+
+            if (!_unprocessedClientInputs.TryGetValue(playerID, out var queue))
+            {
+                queue = new SortedDictionary<ushort, ClientInputCommand>();
+            }
+
+            ClientInputCommand cmd = new();
+
+            if (queue.Count > 0)
+            {
+                ushort tickToProcess = queue.Keys.Min();
+                cmd = queue[tickToProcess];
+                queue.Remove(tickToProcess);
+
+                LastProcessedClientTicksByPlayerID[playerID] = tickToProcess;
+                LastProcessedClientCommandsByPlayerID[playerID] = cmd;
+            }
+            else if (LastProcessedClientCommandsByPlayerID.TryGetValue(playerID, out var lastCommand))
+            {
+                cmd = lastCommand;
+            }
+
+            character.ProcessClientInput(cmd);
+            _unprocessedClientInputs[playerID] = queue;
+        }
+        //////////////////
     }
 
     private void SendWorldSnapshotDeltas(WorldSnapshot newSnapshot)

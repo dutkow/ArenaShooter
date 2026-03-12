@@ -65,6 +65,7 @@ public partial class MatchState : Node
     // Player management
     // ----------------------
     public Dictionary<byte, PlayerState> ConnectedPlayers = new();
+    public Dictionary<byte, PlayerStateNew> NewConnectedPlayers = new();
 
     public event Action<PlayerState>? PlayerJoined;
     public event Action<int, PlayerState>? PlayerLeft;

@@ -11,6 +11,7 @@ public partial class Pawn : Entity
     public bool InputActive => IsLocal && !_inputEnabled;
 
     public PlayerState PlayerState;
+    public PlayerStateNew PlayerStateNew;
 
     public override void _Ready()
     {
@@ -52,6 +53,11 @@ public partial class Pawn : Entity
     public virtual void Initialize(PlayerState playerState)
     {
         PlayerState = playerState;
+    }
+
+    public virtual void InitializeNew(PlayerStateNew playerStateNew)
+    {
+        PlayerStateNew = playerStateNew;
     }
 
     public virtual void OnDeath() { }

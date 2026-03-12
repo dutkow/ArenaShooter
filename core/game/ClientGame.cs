@@ -107,13 +107,23 @@ public class ClientGame
                 else
                 {
                     SpawnManager.Instance.LocalSpawnPlayer(characterSnapshot.PlayerID, characterSnapshot.Position, characterSnapshot.Yaw);
-                    GD.Print($"Player not found so spawning player at position {characterSnapshot.Position}");
                 }
             }
-            else
+
+            // REFACTOR CODE
+            if (MatchState.Instance.NewConnectedPlayers.TryGetValue(characterSnapshot.PlayerID, out var playerStateNew))
             {
-                GD.Print($"player not found in ConnectedPlayers: {characterSnapshot.PlayerID}");
+                Character character = playerStateNew.PublicState.Character;
+                if (character != null)
+                {
+                    character.ApplySnapshot(characterSnapshot);
+                }
+                else
+                {
+                    SpawnManager.Instance.LocalSpawnPlayer(characterSnapshot.PlayerID, characterSnapshot.Position, characterSnapshot.Yaw);
+                }
             }
+            //////////////
         }
 
         ClientProjectileManager.Instance.ApplyWorldSnapshot(snapshot);
