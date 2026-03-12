@@ -68,6 +68,8 @@ public partial class MatchState : Node
     public Dictionary<byte, PlayerStateNew> NewConnectedPlayers = new();
 
     public event Action<PlayerState>? PlayerJoined;
+    public event Action<PlayerStateNew>? PlayerJoinedNew;
+
     public event Action<int, PlayerState>? PlayerLeft;
 
     // base tick
@@ -232,6 +234,36 @@ public partial class MatchState : Node
         if(ClientGame.Instance != null && playerID == ClientGame.Instance.LocalPlayerID)
         {
             ClientGame.Instance.AssignPlayerState(playerState);
+        }
+    }
+
+    // REFACTOR CODE
+    public void NewAddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
+    {
+        if (NewConnectedPlayers.ContainsKey(playerID))
+        {
+            return; // Already added
+        }
+
+        var playerState = new PlayerStateNew();
+        playerState.PublicState.PlayerName = playerName;
+  
+        NewConnectedPlayers[playerID] = playerState;
+
+        try
+        {
+            PlayerJoinedNew?.Invoke(playerState);
+            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PublicState.PlayerName}. Network Mode = {NetworkSession.Instance.NetworkMode}");
+
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr("PlayerJoined event crashed: ", e);
+        }
+
+        if (ClientGame.Instance != null && playerID == ClientGame.Instance.LocalPlayerID)
+        {
+            ClientGame.Instance.AssignPlayerStateNew(playerState);
         }
     }
 

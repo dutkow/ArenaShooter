@@ -11,6 +11,7 @@ public class ClientGame
     public byte LocalPlayerID { get; private set; }
     public PlayerController LocalPlayerController { get; private set; }
     public PlayerState LocalPlayerState { get; private set; }
+    public PlayerStateNew LocalPlayerStateNew { get; private set; }
 
     public Pawn LocalPlayerPawn => LocalPlayerController.PossessedPawn;
 
@@ -52,6 +53,12 @@ public class ClientGame
     public void AssignPlayerState(PlayerState playerState)
     {
         LocalPlayerState = playerState;
+    }
+
+    // REFACTOR CODE
+    public void AssignPlayerStateNew(PlayerStateNew playerState)
+    {
+        LocalPlayerStateNew = playerState;
     }
 
     public void SendClientCommand(ClientInputCommand cmd)

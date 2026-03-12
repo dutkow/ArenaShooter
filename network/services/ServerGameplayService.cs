@@ -13,7 +13,22 @@ public static class ServerGameplayService
                 var pawn = playerState.Pawn;
                 if (pawn != null && pawn is Character character)
                 {
-                    // Deserialize byte[] into ClientCommand
+                    var cmd = new ClientCommand();
+                    cmd.ReadMessage(data);
+
+                    ServerGame.Instance.ReceiveClientCommand(cmd, playerID);
+                }
+            }
+        }
+
+        // REFACTOR CODE
+        if (NetworkSession.Instance.PeerIDsToPlayerIDs.TryGetValue(peerID, out var playerIDNew))
+        {
+            if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerIDNew, out var playerState))
+            {
+                var character = playerState.PublicState.Character; // COULD USE IS ALIVE CHECK
+                if (character != null)
+                {
                     var cmd = new ClientCommand();
                     cmd.ReadMessage(data);
 

@@ -36,12 +36,7 @@ public static class ClientGameplayService
         var msg = new HealthUpdate();
         msg.ReadMessage(data);
 
-        var pawn = MatchState.Instance.ConnectedPlayers[NetworkSession.Instance.LocalPlayerID].Pawn;
-        if(pawn != null && pawn is Character character)
-        {
-            character.HealthComp.SetHealth(msg.Health);
-            character.HealthComp.SetShield(msg.Shield);
-        }
+
     }
 
     public static void HandlePlayerDied(byte[] data)
@@ -49,10 +44,6 @@ public static class ClientGameplayService
         var msg = new PlayerDied();
         msg.ReadMessage(data);
 
-        var character = MatchState.Instance.ConnectedPlayers[msg.PlayerID].Pawn;
-        if(character != null)
-        {
-            character.OnDeath();
-        }
+
     }
 };

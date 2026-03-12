@@ -57,8 +57,11 @@ public class ServerBrowserRequests
                     // Ensure ConnectedPlayers is not null
                     foreach (var server in servers)
                     {
+                        /*
                         if (server.ConnectedPlayers == null)
+                        {
                             server.ConnectedPlayers = new List<string>();
+                        }*/
                     }
 
                     RefreshInternetServersFinished?.Invoke(servers);
