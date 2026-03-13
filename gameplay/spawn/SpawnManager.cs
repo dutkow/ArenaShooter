@@ -44,6 +44,7 @@ public partial class SpawnManager : Node3D
     // REFACTOR CODE
     public Pawn NewLocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
     {
+        GD.Print($"new local spawn player ran on {NetworkSession.Instance.NetworkMode}");
         var spawnedPlayer = (Character)GameMode.Instance.DefaultPawnScene.Instantiate();
 
         if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerID, out var playerState))

@@ -91,7 +91,7 @@ public class Message
         foreach (var s in arr)
             _dataSize += 1 + (s != null ? Encoding.UTF8.GetByteCount(s) : 0);
     }
-
+    internal void Add(Vector2 value) => _dataSize += 8;
     internal void Add(Vector2[] arr) => _dataSize += 4 + 8 * arr.Length;
     internal void Add(Vector3 value) => _dataSize += 12;
     internal void Add(Vector3[] arr) => _dataSize += 4 + 12 * arr.Length;
@@ -147,6 +147,7 @@ public class Message
     internal void Write(int[] arr) { Write(arr.Length); foreach (var i in arr) Write(i); }
     internal void Write(bool[] arr) { Write((byte)arr.Length); foreach (var b in arr) Write(b); }
     internal void Write(string[] arr) { Write((byte)arr.Length); foreach (var s in arr) Write(s); }
+    internal void Write(Vector2 value) { Write(value.X); Write(value.Y); }
     internal void Write(Vector2[] arr) { Write(arr.Length); foreach (var v in arr) { Write((int)v.X); Write((int)v.Y); } }
     internal void Write(Vector3 value) { Write(value.X); Write(value.Y); Write(value.Z); }
     internal void Write(Vector3[] arr) { Write(arr.Length); foreach (var v in arr) Write(v); }
@@ -198,6 +199,7 @@ public class Message
     internal void Read(out int[] arr) { Read(out int count); arr = new int[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
     internal void Read(out bool[] arr) { Read(out byte count); arr = new bool[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
     internal void Read(out string[] arr) { Read(out byte count); arr = new string[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }
+    internal void Read(out Vector2 value) { Read(out float x); Read(out float y); value = new Vector2(x, y); }
     internal void Read(out Vector2[] arr) { Read(out int count); arr = new Vector2[count]; for (int i = 0; i < count; i++) { Read(out int x); Read(out int y); arr[i] = new Vector2(x, y); } }
     internal void Read(out Vector3 value) { Read(out float x); Read(out float y); Read(out float z); value = new Vector3(x, y, z); }
     internal void Read(out Vector3[] arr) { Read(out int count); arr = new Vector3[count]; for (int i = 0; i < count; i++) Read(out arr[i]); }

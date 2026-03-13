@@ -54,7 +54,6 @@ public partial class Character : Pawn, IDamageable
     private bool _yawDirty;
     private bool _pitchDirty;
 
-    public PlayerStateNew PlayerStateNew = new();
 
     public override void _Ready()
     {
@@ -160,10 +159,10 @@ public partial class Character : Pawn, IDamageable
         if(PlayerState == null)
         {
             GD.Print($"player state is null");
+            return;
         }
         _weapon.OwnerPlayerID = PlayerState.PlayerID;
         _weapon.SetIsAuthority(IsAuthority);
-
     }
 
     public override void OnUnpossessed()

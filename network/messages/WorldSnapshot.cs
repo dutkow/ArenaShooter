@@ -19,9 +19,11 @@ public class WorldSnapshot : Message
 
     public CharacterSnapshot[] Characters;
     public PublicPlayerState[] PublicPlayerStates; // refactor
+    public CharacterPublicState[] CharacterPublicStates;
+    public CharacterPrivateState CharacterPrivateState;
+
     public ProjectileSpawnData[] UnacknowledgedRemoteProjectiles;
     public ProjectileState[] UnacknowledgedProjectileStates;
-    public ProjectileSpawnData[] UnacknowledgedPredictedProjectiles;
 
     protected override int BufferSize()
     {

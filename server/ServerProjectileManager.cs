@@ -150,9 +150,6 @@ public class ServerProjectileManager
 
         snapshot.UnacknowledgedProjectileStates = GetUnackedProjectileStatesByPlayerID(playerID).Values.ToArray();
         AddUnackedProjectileStateHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedProjectileStates);
-
-        snapshot.UnacknowledgedPredictedProjectiles = GetUnackedPredictedProjectilesByPlayerID(playerID).Values.ToArray();
-        AddUnackedPredictedProjectileHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedPredictedProjectiles);
     }
 
     public void AddUnackedPredictedProjectileHistoryByPlayerID(ushort tick, byte playerID, ProjectileSpawnData[] predictedProjectiles)
