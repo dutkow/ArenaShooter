@@ -110,6 +110,7 @@ public class ClientGame
                 // Client doesn't know about this character but it's alive, spawn it
                 else if(playerState.IsAlive)
                 {
+                    GD.Print($"CLIENT SNAPSHOT:client wants to spawn player. player ID: {playerState.PlayerID}. position:  {playerState.CharacterPublicState.Position}");
                     SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Rotation.X);
                 }
             }

@@ -37,6 +37,12 @@ public class PlayerState()
         if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Add(Deaths);
         if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Add(Ping);
         if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Add(IsAlive);
+
+        if(IsAlive)
+        {
+            CharacterPublicState.Add(msg);
+            CharacterPrivateState.Add(msg);
+        }
     }
 
     internal void Write(Message msg, byte clientPlayerID)
@@ -49,6 +55,12 @@ public class PlayerState()
         if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Write(Deaths);
         if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Write(Ping);
         if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Write(IsAlive);
+
+        if(IsAlive)
+        {
+            CharacterPublicState.Write(msg);
+            CharacterPrivateState.Write(msg);
+        }
     }
     internal void Read(Message msg, byte clientPlayerID)
     {
@@ -62,5 +74,11 @@ public class PlayerState()
         if ((flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Read(out Deaths);
         if ((flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Read(out Ping);
         if ((flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Read(out IsAlive);
+
+        if(IsAlive)
+        {
+            CharacterPublicState.Read(msg);
+            CharacterPrivateState.Read(msg);
+        }
     }
 }

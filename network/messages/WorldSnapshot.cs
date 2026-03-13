@@ -171,9 +171,6 @@ public class WorldSnapshot : Message
     }
 
  
-
-    // REFACTOR
-
     public static WorldSnapshot Build()
     {
         WorldSnapshot newSnapshot = new();
@@ -182,17 +179,9 @@ public class WorldSnapshot : Message
         newSnapshot.LastProcessedClientTick = 0;
         newSnapshot.PickupMask = PickupManager.Instance.PickupMask;
 
-        // Characters (existing code)
         newSnapshot.PlayerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray();
-
-        foreach(var playerState in newSnapshot.PlayerStates)
-        {
-            GD.Print($"server is saying player id: {playerState.PlayerID} is alive: {playerState.IsAlive}");
-        }
         return newSnapshot;
     }
-
-
 
     // Build a delta snapshot compared to a previous snapshot
     public WorldSnapshot BuildDelta(WorldSnapshot previous)

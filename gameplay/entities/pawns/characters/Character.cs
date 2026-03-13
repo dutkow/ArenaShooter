@@ -84,6 +84,11 @@ public partial class Character : Pawn, IDamageable
 
         //GlobalPosition = MovementComp.State.Position;
 
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
+
     }
 
     public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
