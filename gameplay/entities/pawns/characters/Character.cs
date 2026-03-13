@@ -154,7 +154,7 @@ public partial class Character : Pawn, IDamageable
     {
         base._Process(delta);
 
-        //InterpolateMovement((float)delta);
+        InterpolateMovement((float)delta);
     }
 
     /// <summary>
@@ -246,12 +246,12 @@ public partial class Character : Pawn, IDamageable
         {
             if(IsLocal)
             {
-                UpdatePositionState(MovementComp.State.Position);
+                //UpdatePositionState(MovementComp.State.Position);
             }
             else
             {
-                GlobalPosition = MovementComp.State.Position;
-                GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
+                GlobalPosition = PlayerState.CharacterPublicState.Position;
+                GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Rotation.Y, 0.0f);
                 _thirdPersonWeaponSocket.Rotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
             }
         }
@@ -499,6 +499,11 @@ public partial class Character : Pawn, IDamageable
 
                 _pitchDirty = true;
             }
+
+            if(IsAuthority)
+            {
+                UpdateRotationState(Yaw, Pitch);
+            }
         }
     }
 
@@ -579,7 +584,7 @@ public partial class Character : Pawn, IDamageable
         GlobalPosition = position;
     }
 
-    public void OnRotationChanged(float globalYaw, float localPitch)
+    public void UpdateRotationState(float globalYaw, float localPitch)
     {
         PlayerState.CharacterPublicState.Rotation = new Vector2(globalYaw, localPitch);
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
@@ -638,12 +643,14 @@ public partial class Character : Pawn, IDamageable
         {
             GD.Print($"client received position changed: {publicState.Position}");
 
-            GlobalPosition = publicState.Position;
+            //GlobalPosition = publicState.Position;
             PlayerState.CharacterPublicState.Position = publicState.Position;
         }
 
         if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
         {
+            GD.Print($"client received rotation changed: {publicState.Rotation}");
+
             PlayerState.CharacterPublicState.Rotation = publicState.Rotation;
         }
 
