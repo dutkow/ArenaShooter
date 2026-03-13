@@ -15,6 +15,18 @@ public class CharacterPublicState
         Flags = 0;
     }
 
+    public CharacterPublicState Copy()
+    {
+        return new CharacterPublicState
+        {
+            Flags = Flags,
+            Position = Position,
+            Velocity = Velocity,
+            Rotation = Rotation,
+            MovementMode = MovementMode,
+        };
+    }
+
     internal void Add(Message msg, bool forceFull = false)
     {
         if (forceFull)

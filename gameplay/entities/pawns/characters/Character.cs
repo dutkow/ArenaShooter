@@ -53,7 +53,8 @@ public partial class Character : Pawn, IDamageable
 
     private bool _lookDirty;
 
-   
+    public CharacterPublicState PredictedPublicState = new();
+
     public override void _Ready()
     {
         base._Ready();
@@ -121,7 +122,6 @@ public partial class Character : Pawn, IDamageable
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
         UpdatePositionState(PlayerState.CharacterPublicState.Position);
-
 
         _weapon.ProcessClientInput(cmd.Mask);
     }
@@ -548,6 +548,8 @@ public partial class Character : Pawn, IDamageable
         {
             PlayerState.CharacterPublicState.Position = position;
             PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+
+            GD.Print($"Player ID: {PlayerState.PlayerID} moved. New position: {position}. SETTING ON {NetworkSession.Instance.NetworkMode}");
         }
 
         ApplyPosition(position);
@@ -615,12 +617,10 @@ public partial class Character : Pawn, IDamageable
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
-            PlayerState.CharacterPublicState.Position = publicState.Position;
+            GD.Print($"Running apply public state on player id: {PlayerState.PlayerID} and PLAYER MOVED. network mode: {NetworkSession.Instance.NetworkMode}");
 
-            if(IsLocal)
+            if (IsLocal)
             {
-
-                GD.Print($"num unacked client inputs = {ClientGame.Instance.UnprocessedClientInputs.Count}");
                 foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
                 {
                     publicState = MovementComp.Step(publicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL, true);
@@ -628,6 +628,17 @@ public partial class Character : Pawn, IDamageable
 
                 ReconcileMoveState(publicState);
             }
+            else
+            {
+                GD.Print($"this character is not local!. ID = {PlayerState.PlayerID}. network mode: {NetworkSession.Instance.NetworkMode}");
+
+                PlayerState.CharacterPublicState.Position = publicState.Position;
+            }
+        }
+        else
+        {
+            GD.Print($"Running apply public state on player id: {PlayerState.PlayerID} and PLAYER DIDNT MOVE. network mode: {NetworkSession.Instance.NetworkMode}");
+
         }
 
         if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)

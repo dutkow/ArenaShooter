@@ -117,7 +117,16 @@ public class CharacterMovement
 
     public void HandleInput(ClientInputCommand cmd, float delta)
     {
-        _character.PlayerState.CharacterPublicState = Step(_character.PlayerState.CharacterPublicState, cmd, delta);
+        if(_character.IsAuthority)
+        {
+            _character.PlayerState.CharacterPublicState = Step(_character.PlayerState.CharacterPublicState, cmd, delta);
+        }
+        else
+        {
+            _character.PlayerState.CharacterPublicState = Step(_character.PlayerState.CharacterPublicState, cmd, delta);
+
+            //_character.PredictedPublicState = Step(_character.PredictedPublicState, cmd, delta);
+        }
     }
 
     private void HandleGroundedMovement(CharacterPublicState state, Vector3 desiredMoveDir, float delta)
