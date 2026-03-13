@@ -35,16 +35,7 @@ public enum CharacterPrivateFlags : byte
     AMMO_CHANGED = 1 << 5,
 }
 
-public class CharacterPublicState
-{
-    public CharacterPublicFlags Flags;
 
-    public Vector3 Position;
-    public Vector2 Rotation; // global yaw, local pitch
-    public Vector3 Velocity;
-    public CharacterMoveMode MovementMode;
-    public WeaponType EquippedWeapon;
-}
 
 public class CharacterPrivateState
 {
