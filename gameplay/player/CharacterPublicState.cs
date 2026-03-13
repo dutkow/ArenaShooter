@@ -11,6 +11,11 @@ public class CharacterPublicState
     public CharacterMoveMode MovementMode;
     public WeaponType EquippedWeapon;
 
+    public void ClearFlags()
+    {
+        Flags = 0;
+    }
+
     internal void Add(Message msg)
     {
         msg.AddEnum(Flags);
@@ -37,11 +42,13 @@ public class CharacterPublicState
 
         msg.ReadEnum(out state.Flags);
 
-        if ((state.Flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Read(out state.Position);
-        if ((state.Flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Read(out state.Rotation);
-        if ((state.Flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Read(out state.Velocity);
-        if ((state.Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.ReadEnum(out state.MovementMode);
-        if ((state.Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.ReadEnum(out state.EquippedWeapon);
+        var flags = state.Flags;
+
+        if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Read(out state.Position);
+        if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Read(out state.Rotation);
+        if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Read(out state.Velocity);
+        if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.ReadEnum(out state.MovementMode);
+        if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.ReadEnum(out state.EquippedWeapon);
 
         return state;
     }

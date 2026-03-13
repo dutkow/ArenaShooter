@@ -95,7 +95,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
         }
 
         State = state;
-        State.Pawn = pawn;
+        //State.Character = pawn;
 
         MovementComp.SetCharacter(this);
 

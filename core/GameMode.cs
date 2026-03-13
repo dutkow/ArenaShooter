@@ -78,20 +78,14 @@ public partial class GameMode : Node
     {
         GD.Print("Match started: unfreeze players");
 
-        foreach (var playerCharacter in PlayerManager.Instance.GetPlayerCharacters())
-        {
-            playerCharacter.SetInputEnabled(false);
-            playerCharacter.SetWeaponsEnabled(true);
-        }
+
     }
 
     private void HandlePostMatch()
     {
         GD.Print("Post-match: freeze players and show results");
 
-        foreach (var player in PlayerManager.Instance.GetActivePlayers())
-        {
-        }
+
 
         // Optional: trigger scoreboard, announce winner, etc.
     }

@@ -26,15 +26,4 @@ public partial class PlayerManager : Node
         _playerStates.Remove(state);
     }
 
-    public IReadOnlyList<PlayerState> GetAllPlayers() => _playerStates;
-
-    public IReadOnlyList<PlayerState> GetActivePlayers()
-    {
-        return _playerStates.FindAll(p => p.Pawn != null);
-    }
-
-    public IReadOnlyList<ArenaCharacterOld> GetPlayerCharacters()
-    {
-        return _playerStates.Select(p => p.Pawn).OfType<ArenaCharacterOld>().ToList();
-    }
 }

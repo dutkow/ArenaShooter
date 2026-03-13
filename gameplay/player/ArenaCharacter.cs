@@ -36,22 +36,6 @@ public enum CharacterPrivateFlags : byte
 }
 
 
-
-public class CharacterPrivateState
-{
-    public CharacterPrivateFlags Flags;
-
-    public byte Health;
-    public byte MaxHealth;
-    public byte Armor;
-    public byte MaxArmor;
-    public WeaponFlags HeldWeaponsFlags;
-    public WeaponFlags AmmoChangedFlags;
-    public byte[] Ammo = new byte[10]; // 10 weapons for now, like a classic arena FPS
-
-}
-
-
 public partial class ArenaCharacter : Node3D, ILifeEntity
 {
     private CharacterPublicState PublicState = new CharacterPublicState();
