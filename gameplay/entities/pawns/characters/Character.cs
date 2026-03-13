@@ -137,7 +137,14 @@ public partial class Character : Pawn, IDamageable
 
         if(IsLocal)
         {
-            LocalInterpolation((float)delta);
+            if(IsAuthority)
+            {
+                LocalAuthorityInterpolation((float)delta);
+            }
+            else
+            {
+                LocalPredictiveInterpolation((float)delta);
+            }
         }
         else
         {
@@ -146,7 +153,7 @@ public partial class Character : Pawn, IDamageable
     }
 
 
-    public void LocalInterpolation(float delta)
+    public void LocalAuthorityInterpolation(float delta)
     {
         if (_useInterpolation)
         {
@@ -154,16 +161,20 @@ public partial class Character : Pawn, IDamageable
         }
         else
         {
-            if (IsAuthority)
-            {
-                GlobalPosition = PlayerState.CharacterPublicState.Position;
-            }
-            else
-            {
-                GlobalPosition = PredictedPublicState.Position;
-            }
+            GlobalPosition = PlayerState.CharacterPublicState.Position;
         }
+    }
 
+    public void LocalPredictiveInterpolation(float delta)
+    {
+        if (_useInterpolation)
+        {
+            InterpolatePosition(delta * LOCAL_SV_INTERP_RATE);
+        }
+        else
+        {
+            GlobalPosition = PredictedPublicState.Position;
+        }
     }
 
     public void RemoteInterpolation(float delta)
@@ -180,7 +191,32 @@ public partial class Character : Pawn, IDamageable
             GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Rotation.X, 0.0f);
             _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Rotation.Y, 0.0f, 0.0f);
         }
+    }
 
+    float LOCAL_SV_INTERP_RATE = 0.5f;
+    float LOCAL_CL_INTERP_RATE = 0.5f;
+    float REMOTE_CL_INTERP_RATE = 0.5f;
+
+
+    public void InterpolatePosition(float interpSpeed)
+    {
+
+        var targetPosition = PlayerState.CharacterPublicState.Position + _visualContainerPosition;
+        _visualContainer.GlobalPosition = _visualContainer.GlobalPosition.Lerp(targetPosition, LOCAL_SV_INTERP_RATE);
+    }
+
+    public void InterpolateYaw(float interpSpeed)
+    {
+        Vector3 rot = GlobalRotation;
+        rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Rotation.X, interpSpeed);
+        GlobalRotation = rot;
+    }
+
+    public void InterpolatePitch(float interpSpeed)
+    {
+        Vector3 camRot = _thirdPersonWeaponMesh.GlobalRotation;
+        camRot.X = Mathf.Lerp(camRot.X, PlayerState.CharacterPublicState.Rotation.Y, interpSpeed);
+        _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
     /// <summary>
@@ -222,6 +258,94 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
+    // Apply Replicated States
+    public void ApplyAuthoritativePublicState(CharacterPublicState publicState)
+    {
+        CharacterPublicFlags flags = publicState.Flags;
+
+
+        if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
+        {
+            publicState.Position = PredictedPublicState.Position;
+        }
+
+        if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
+        {
+            publicState.Rotation = PredictedPublicState.Rotation;
+        }
+
+        if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) == 0)
+        {
+            publicState.Velocity = PredictedPublicState.Velocity;
+        }
+
+        if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) == 0)
+        {
+            publicState.MovementMode = PredictedPublicState.MovementMode;
+        }
+
+        if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) == 0)
+        {
+            publicState.EquippedWeapon = PredictedPublicState.EquippedWeapon;
+        }
+
+
+        if(IsLocal)
+        {
+            foreach (var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
+            {
+                publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
+            }
+
+            ReconcileMoveState(publicState);
+        }
+    }
+
+    public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)
+    {
+        CharacterPrivateFlags flags = privateState.Flags;
+
+        if ((flags & CharacterPrivateFlags.HEALTH_CHANGED) != 0)
+        {
+            PlayerState.CharacterPrivateState.Health = privateState.Health;
+        }
+
+        if ((flags & CharacterPrivateFlags.MAX_HEALTH_CHANGED) != 0)
+        {
+            PlayerState.CharacterPrivateState.MaxHealth = privateState.MaxHealth;
+        }
+
+        if ((flags & CharacterPrivateFlags.ARMOR_CHANGED) != 0)
+        {
+            PlayerState.CharacterPrivateState.Armor = privateState.Armor;
+        }
+
+        if ((flags & CharacterPrivateFlags.MAX_ARMOR_CHANGED) != 0)
+        {
+            PlayerState.CharacterPrivateState.MaxArmor = privateState.MaxArmor;
+        }
+
+        if ((flags & CharacterPrivateFlags.WEAPONS_CHANGED) != 0)
+        {
+            PlayerState.CharacterPrivateState.HeldWeaponsFlags = privateState.HeldWeaponsFlags;
+        }
+
+        if ((flags & CharacterPrivateFlags.AMMO_CHANGED) != 0)
+        {
+            WeaponFlags ammoFlags = privateState.AmmoChangedFlags;
+            for (int i = 0; i < WeaponConstants.TOTAL_WEAPON_SLOTS; i++)
+            {
+                WeaponFlags mask = (WeaponFlags)(1 << i);
+                if ((ammoFlags & mask) != 0)
+                {
+                    PlayerState.CharacterPrivateState.Ammo[i] = privateState.Ammo[i];
+                }
+            }
+
+            PlayerState.CharacterPrivateState.AmmoChangedFlags = privateState.AmmoChangedFlags;
+        }
+    }
+
     public override void OnUnpossessed()
     {
         base.OnUnpossessed();
@@ -258,32 +382,6 @@ public partial class Character : Pawn, IDamageable
         //_thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
         _thirdPersonWeaponMesh.Visible = false;
 
-    }
-
-    float LOCAL_SV_INTERP_RATE = 0.5f;
-    float LOCAL_CL_INTERP_RATE = 0.5f;
-    float REMOTE_CL_INTERP_RATE = 0.5f;
-
-
-    public void InterpolatePosition(float interpSpeed)
-    {
-
-        var targetPosition = PlayerState.CharacterPublicState.Position + _visualContainerPosition;
-        _visualContainer.GlobalPosition = _visualContainer.GlobalPosition.Lerp(targetPosition, LOCAL_SV_INTERP_RATE);
-    }
-
-    public void InterpolateYaw(float interpSpeed)
-    {
-        Vector3 rot = GlobalRotation;
-        rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Rotation.X, interpSpeed);
-        GlobalRotation = rot;
-    }
-
-    public void InterpolatePitch(float interpSpeed)
-    {
-        Vector3 camRot = _thirdPersonWeaponMesh.GlobalRotation;
-        camRot.X = Mathf.Lerp(camRot.X, PlayerState.CharacterPublicState.Rotation.Y, interpSpeed);
-        _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
 
@@ -343,9 +441,9 @@ public partial class Character : Pawn, IDamageable
     }
 
 
-    public override ClientInputCommand AddInput(ClientInputCommand cmd)
+    public override ClientInputCommand CaptureInput(ClientInputCommand cmd)
     {
-        base.AddInput(cmd);
+        base.CaptureInput(cmd);
 
         if(_inputEnabled)
         {
@@ -383,6 +481,23 @@ public partial class Character : Pawn, IDamageable
         return cmd;
     }
 
+    public void DebugInput()
+    {
+        if (Input.IsActionJustPressed("toggle_cursor_lock"))
+        {
+            if (Input.MouseMode == Input.MouseModeEnum.Captured)
+            {
+                Input.MouseMode = Input.MouseModeEnum.Visible;
+                SetInputEnabled(false);
+            }
+            else if (Input.MouseMode == Input.MouseModeEnum.Visible)
+            {
+                Input.MouseMode = Input.MouseModeEnum.Captured;
+                SetInputEnabled(true);
+            }
+        }
+    }
+
     public override void _Input(InputEvent @event)
     {
         base._Input(@event);
@@ -392,20 +507,7 @@ public partial class Character : Pawn, IDamageable
             return;
         }
 
-        // always process for debugging
-        if (Input.IsActionJustPressed("toggle_cursor_lock"))
-        {
-            if(Input.MouseMode == Input.MouseModeEnum.Captured)
-            {
-                Input.MouseMode = Input.MouseModeEnum.Visible;
-                SetInputEnabled(false);
-            }
-            else if(Input.MouseMode == Input.MouseModeEnum.Visible)
-            {
-                Input.MouseMode = Input.MouseModeEnum.Captured;
-                SetInputEnabled(true);
-            }
-        }
+        DebugInput();
 
         if(!_inputEnabled)
         {
@@ -526,16 +628,11 @@ public partial class Character : Pawn, IDamageable
 
     // Public State Changes
 
-    const float POSITION_EPSILON = 0.01f;
-    const float ROTATION_EPSILON = 0.01f;
-
     public void UpdatePositionState(Vector3 position)
     {
-        if (GlobalPosition.DistanceSquaredTo(position) > POSITION_EPSILON * POSITION_EPSILON)
-        {
-            PlayerState.CharacterPublicState.Position = position;
-            PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
-        }
+
+        PlayerState.CharacterPublicState.Position = position;
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
 
         ApplyPosition(position);
     }
@@ -595,89 +692,7 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
-    // Apply Replicated States
-    public void ApplyAuthoritativePublicState(CharacterPublicState publicState)
-    {
-        CharacterPublicFlags flags = publicState.Flags;
 
-        
-        if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
-        {
-            publicState.Position = PredictedPublicState.Position;
-        }
-
-        if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
-        {
-            publicState.Rotation = PredictedPublicState.Rotation;
-        }
-
-        if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) == 0)
-        {
-            publicState.Velocity = PredictedPublicState.Velocity;
-        }
-
-        if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) == 0)
-        {
-            publicState.MovementMode = PredictedPublicState.MovementMode;
-        }
-
-        if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) == 0)
-        {
-            publicState.EquippedWeapon = PredictedPublicState.EquippedWeapon;
-        }
-
-        foreach(var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
-        {
-            publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
-        }
-        
-        //ReconcileMoveState(publicState);
-    }
-
-    public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)
-    {
-        CharacterPrivateFlags flags = privateState.Flags;
-
-        if ((flags & CharacterPrivateFlags.HEALTH_CHANGED) != 0)
-        {
-            PlayerState.CharacterPrivateState.Health = privateState.Health;
-        }
-
-        if ((flags & CharacterPrivateFlags.MAX_HEALTH_CHANGED) != 0)
-        {
-            PlayerState.CharacterPrivateState.MaxHealth = privateState.MaxHealth;
-        }
-
-        if ((flags & CharacterPrivateFlags.ARMOR_CHANGED) != 0)
-        {
-            PlayerState.CharacterPrivateState.Armor = privateState.Armor;
-        }
-
-        if ((flags & CharacterPrivateFlags.MAX_ARMOR_CHANGED) != 0)
-        {
-            PlayerState.CharacterPrivateState.MaxArmor = privateState.MaxArmor;
-        }
-
-        if ((flags & CharacterPrivateFlags.WEAPONS_CHANGED) != 0)
-        {
-            PlayerState.CharacterPrivateState.HeldWeaponsFlags = privateState.HeldWeaponsFlags;
-        }
-
-        if ((flags & CharacterPrivateFlags.AMMO_CHANGED) != 0)
-        {
-            WeaponFlags ammoFlags = privateState.AmmoChangedFlags;
-            for (int i = 0; i < WeaponConstants.TOTAL_WEAPON_SLOTS; i++)
-            {
-                WeaponFlags mask = (WeaponFlags)(1 << i);
-                if ((ammoFlags & mask) != 0)
-                {
-                    PlayerState.CharacterPrivateState.Ammo[i] = privateState.Ammo[i];
-                }
-            }
-
-            PlayerState.CharacterPrivateState.AmmoChangedFlags = privateState.AmmoChangedFlags;
-        }
-    }
 
     // Flags management
     public void ClearFlags()

@@ -68,7 +68,7 @@ public class ClientGame
 
         if (LocalPlayerPawn != null)
         {
-            cmd = LocalPlayerPawn.AddInput(cmd);
+            cmd = LocalPlayerPawn.CaptureInput(cmd);
         }
 
         cmd.ClientTick = MatchState.Instance.CurrentTick;

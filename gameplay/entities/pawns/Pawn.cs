@@ -56,7 +56,7 @@ public partial class Pawn : Entity
 
     public virtual void OnDeath() { }
 
-    public virtual ClientInputCommand AddInput(ClientInputCommand cmd)
+    public virtual ClientInputCommand CaptureInput(ClientInputCommand cmd)
     {
         return cmd;
     }

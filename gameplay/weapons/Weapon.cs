@@ -125,7 +125,7 @@ public partial class Weapon : Entity
             FiredPredictedProjectile = true;
         }
 
-        if(NetworkSession.Instance.IsServer)
+        if(IsAuthority)
         {
             spawnData.ServerTickOnSpawn = MatchState.Instance.CurrentTick;
             ServerProjectileManager.Instance.CreateProjectilePendingSpawn(spawnData, IsPredictingProjectiles);
