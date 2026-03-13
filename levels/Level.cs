@@ -37,13 +37,6 @@ public partial class Level : Node3D
 
         
 
-        if (!NetworkSession.Instance.IsDedicatedServer)
-        {
-
-            //byte localPlayerID = NetworkSession.Instance.LocalPlayerID;
-            //GameMode.Instance.AddPlayerController(localPlayerID);
-        }
-
         CallDeferred(nameof(PostInit));
     }
 

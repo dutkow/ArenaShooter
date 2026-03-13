@@ -38,7 +38,7 @@ public static class ServerConnectionService
         
         InitialMatchState.Send(peer); // NOTE: need to reconsider ordering, but match state should send loaded client in initial match state for now
 
-        PlayerJoined.Send(playerID, playerName);
+        //PlayerJoined.Send(playerID, playerName);
 
         var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
 

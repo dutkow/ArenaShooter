@@ -10,7 +10,7 @@ public static class ServerGameplayService
         // REFACTOR CODE
         if (NetworkSession.Instance.PeerIDsToPlayerIDs.TryGetValue(peerID, out var playerID))
         {
-            if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerID, out var playerState))
+            if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
             {
                 var character = playerState.Character; // COULD USE IS ALIVE CHECK
                 if (character != null)

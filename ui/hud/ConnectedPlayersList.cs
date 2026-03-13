@@ -24,7 +24,7 @@ public partial class ConnectedPlayersList : Control
 
 
         // REFACTOR
-        foreach (var kvp in MatchState.Instance.NewConnectedPlayers)
+        foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
             AddPlayerToList(kvp.Value);
         }

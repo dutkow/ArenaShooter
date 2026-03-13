@@ -64,7 +64,7 @@ public partial class MatchState : Node
     // ----------------------
     // Player management
     // ----------------------
-    public Dictionary<byte, PlayerState> NewConnectedPlayers = new();
+    public Dictionary<byte, PlayerState> ConnectedPlayers = new();
 
     public event Action<PlayerState>? PlayerJoined;
     public event Action<PlayerState>? PlayerJoinedNew;
@@ -97,7 +97,7 @@ public partial class MatchState : Node
         {
             GD.Print("running init listen server stuff on match state");
             byte playerID = ClientGame.Instance.LocalPlayerID;
-            NewAddPlayer(playerID, Settings.Instance.PlayerName);
+            AddPlayer(playerID, Settings.Instance.PlayerName);
             var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
         }
     }
@@ -117,7 +117,7 @@ public partial class MatchState : Node
         {
             byte playerID = initialMatchState.PlayerIDs[i];
 
-            NewAddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
+            AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
         }
     }
 
@@ -199,20 +199,18 @@ public partial class MatchState : Node
     // Player handling
     // ----------------------
     
-
-
-    // REFACTOR CODE
-    public void NewAddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
+    public void AddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
     {
-        if (NewConnectedPlayers.ContainsKey(playerID))
+        if (ConnectedPlayers.ContainsKey(playerID))
         {
             return; // Already added
         }
 
         var playerState = new PlayerState();
+        playerState.PlayerID = playerID;
         playerState.PlayerName = playerName;
   
-        NewConnectedPlayers[playerID] = playerState;
+        ConnectedPlayers[playerID] = playerState;
 
         try
         {

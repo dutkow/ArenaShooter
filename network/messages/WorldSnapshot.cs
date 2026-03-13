@@ -20,7 +20,7 @@ public class WorldSnapshot : Message
     public PlayerState[] PlayerStates;
     byte ReceivingPlayerID;
 
-    public ProjectileSpawnData[] UnacknowledgedRemoteProjectiles;
+    public ProjectileSpawnData[] UnacknowledgedSpawnedProjectiles;
     public ProjectileState[] UnacknowledgedProjectileStates;
 
     protected override int BufferSize()
@@ -42,11 +42,12 @@ public class WorldSnapshot : Message
             }
         }    
 
-        ushort unackedCount = (ushort)(UnacknowledgedRemoteProjectiles?.Length ?? 0);
+        // Unacknowledged spawned projectiles
+        ushort unackedCount = (ushort)(UnacknowledgedSpawnedProjectiles?.Length ?? 0);
         Add(unackedCount);
         for (int i = 0; i < unackedCount; i++)
         {
-            var proj = UnacknowledgedRemoteProjectiles[i];
+            var proj = UnacknowledgedSpawnedProjectiles[i];
             Add(proj.ProjectileID);
             Add(proj.ownerPlayerID);
             Add((byte)proj.Type);
@@ -55,7 +56,7 @@ public class WorldSnapshot : Message
             Add(proj.SpawnDirection);
         }
 
-        // --- Unacknowledged Projectile State Changes ---
+        // Unacknowledged projectile state changes
         ushort stateChangesCount = (ushort)(UnacknowledgedProjectileStates?.Length ?? 0);
         Add(stateChangesCount);
         for (int i = 0; i < stateChangesCount; i++)
@@ -86,12 +87,12 @@ public class WorldSnapshot : Message
             }
         }
 
-        // **Write unacked projectiles**
-        ushort unackedCount = (ushort)(UnacknowledgedRemoteProjectiles?.Length ?? 0);
+        // Unacknowledged spawned projectiles
+        ushort unackedCount = (ushort)(UnacknowledgedSpawnedProjectiles?.Length ?? 0);
         Write(unackedCount);
         for (int i = 0; i < unackedCount; i++)
         {
-            var proj = UnacknowledgedRemoteProjectiles[i];
+            var proj = UnacknowledgedSpawnedProjectiles[i];
             Write(proj.ProjectileID);
             Write(proj.ownerPlayerID);
             Write((byte)proj.Type);
@@ -100,7 +101,7 @@ public class WorldSnapshot : Message
             Write(proj.SpawnDirection);
         }
 
-        // --- Unacknowledged Projectile State Changes ---
+        // Unacknowledged projectile state changes
         ushort stateChangesCount = (ushort)(UnacknowledgedProjectileStates?.Length ?? 0);
         Write(stateChangesCount);
         for (int i = 0; i < stateChangesCount; i++)
@@ -135,9 +136,9 @@ public class WorldSnapshot : Message
             }
         }
 
-        // **Read unacked projectiles**
+        // Unacknowledged spawned projectiles
         Read(out ushort unackedCount);
-        UnacknowledgedRemoteProjectiles = new ProjectileSpawnData[unackedCount];
+        UnacknowledgedSpawnedProjectiles = new ProjectileSpawnData[unackedCount];
         for (int i = 0; i < unackedCount; ++i)
         {
             var proj = new ProjectileSpawnData();
@@ -149,10 +150,10 @@ public class WorldSnapshot : Message
             Read(out proj.SpawnLocation);
             Read(out proj.SpawnDirection);
 
-            UnacknowledgedRemoteProjectiles[i] = proj;
+            UnacknowledgedSpawnedProjectiles[i] = proj;
         }
 
-        // --- Unacknowledged Projectile State Changes ---
+        // Unacknowledged projectile state changes
         Read(out ushort stateChangesCount);
         UnacknowledgedProjectileStates = new ProjectileState[stateChangesCount];
         for (int i = 0; i < stateChangesCount; ++i)
@@ -173,7 +174,7 @@ public class WorldSnapshot : Message
 
     // REFACTOR
 
-    public static WorldSnapshot BuildNew()
+    public static WorldSnapshot Build()
     {
         WorldSnapshot newSnapshot = new();
 
@@ -182,7 +183,7 @@ public class WorldSnapshot : Message
         newSnapshot.PickupMask = PickupManager.Instance.PickupMask;
 
         // Characters (existing code)
-        newSnapshot.PlayerStates = MatchState.Instance.NewConnectedPlayers.Values.ToArray();
+        newSnapshot.PlayerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray();
 
         return newSnapshot;
     }

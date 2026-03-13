@@ -112,7 +112,7 @@ public class InitialMatchState : Message
     // REFACTOR CODE
     public static void Send(ENetPacketPeer client)
     {
-        var players = MatchState.Instance.NewConnectedPlayers;
+        var players = MatchState.Instance.ConnectedPlayers;
         int count = players.Count;
 
         byte[] playerIDs = new byte[count];

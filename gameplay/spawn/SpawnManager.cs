@@ -33,21 +33,20 @@ public partial class SpawnManager : Node3D
     public Pawn ServerSpawnPlayer(byte playerID)
     {
         var spawnPoint = GetSpawnPoint();
-        Pawn spawnedPlayer = NewLocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
+        Pawn spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
-        PlayerSpawned.Send(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
+        //PlayerSpawned.Send(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
         return spawnedPlayer;
     }
 
 
-    // REFACTOR CODE
-    public Pawn NewLocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
+    public Pawn LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
     {
-        GD.Print($"new local spawn player ran on {NetworkSession.Instance.NetworkMode}");
+        GD.Print($"new local spawn player ran on {NetworkSession.Instance.NetworkMode}. NEW PLAYER ID: {playerID} and local player id {ClientGame.Instance.LocalPlayerID}");
         var spawnedPlayer = (Character)GameMode.Instance.DefaultPawnScene.Instantiate();
 
-        if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerID, out var playerState))
+        if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
         {
             playerState.Character = spawnedPlayer;
         }

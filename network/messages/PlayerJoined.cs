@@ -50,6 +50,6 @@ public class PlayerJoined : Message
             return; // Need to rethink ordering on init match state. But for now, just ensure we don't readd.
         }
 
-        MatchState.Instance.NewAddPlayer(playerID, playerName);
+        //MatchState.Instance.AddPlayer(playerID, playerName);
     }
 }

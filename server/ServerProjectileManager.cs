@@ -145,8 +145,8 @@ public class ServerProjectileManager
     {
         ushort serverTick = snapshot.ServerTick;
 
-        snapshot.UnacknowledgedRemoteProjectiles = GetUnackedProjectilesByPlayerID(playerID).Values.ToArray();
-        AddUnackedProjectileHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedRemoteProjectiles);
+        snapshot.UnacknowledgedSpawnedProjectiles = GetUnackedProjectilesByPlayerID(playerID).Values.ToArray();
+        AddUnackedProjectileHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedSpawnedProjectiles);
 
         snapshot.UnacknowledgedProjectileStates = GetUnackedProjectileStatesByPlayerID(playerID).Values.ToArray();
         AddUnackedProjectileStateHistoryByPlayerID(serverTick, playerID, snapshot.UnacknowledgedProjectileStates);

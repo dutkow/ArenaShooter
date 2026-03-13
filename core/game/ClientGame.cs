@@ -95,7 +95,8 @@ public class ClientGame
 
         foreach(var playerState in snapshot.PlayerStates)
         {
-            if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerState.PlayerID, out var foundPlayerState))
+
+            if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerState.PlayerID, out var foundPlayerState))
             {
                 Character character = foundPlayerState.Character;
                 if (character != null)
@@ -109,8 +110,12 @@ public class ClientGame
                 }
                 else
                 {
-                    SpawnManager.Instance.NewLocalSpawnPlayer(foundPlayerState.PlayerID, foundPlayerState.CharacterPublicState.Position, foundPlayerState.CharacterPublicState.Rotation.X);
+                    SpawnManager.Instance.LocalSpawnPlayer(foundPlayerState.PlayerID, foundPlayerState.CharacterPublicState.Position, foundPlayerState.CharacterPublicState.Rotation.X);
                 }
+            }
+            else
+            {
+                GD.Print($"didn't find a player with id {playerState.PlayerID} on network mode: {NetworkSession.Instance.NetworkMode}");
             }
         }
 

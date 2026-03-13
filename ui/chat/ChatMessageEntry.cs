@@ -24,7 +24,7 @@ public partial class ChatMessageEntry : Control
             return; // handle later if and when this exists
         }
         // REFACTOR CODE
-        if (MatchState.Instance.NewConnectedPlayers.TryGetValue(chatMessageInfo.PlayerID, out var newPlayerState))
+        if (MatchState.Instance.ConnectedPlayers.TryGetValue(chatMessageInfo.PlayerID, out var newPlayerState))
         {
             _senderNameLabel.Text = newPlayerState.PlayerName + ":";
         }
