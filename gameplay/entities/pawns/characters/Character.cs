@@ -97,17 +97,21 @@ public partial class Character : Pawn, IDamageable
     {
         base.ApplyInput(cmd);
 
-        MovementComp.HandleInput(cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-        _weapon.HandleInput(cmd.Mask);
 
         if(IsAuthority)
         {
+            MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
             UpdatePositionState(PlayerState.CharacterPublicState.Position);
+
         }
         else if(IsLocal)
         {
             GlobalPosition = PlayerState.CharacterPublicState.Position;
+            MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
         }
+
+        _weapon.HandleInput(cmd.Mask);
+
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
@@ -152,13 +156,23 @@ public partial class Character : Pawn, IDamageable
         SetRole(NetworkRole.LOCAL);
         UIRoot.Instance.OnPossessedCharacter(this);
 
-        if(PlayerState == null)
+        if(MatchState.Instance.ConnectedPlayers.TryGetValue(ClientGame.Instance.LocalPlayerID, out var foundPlayerState))
+        {
+            PlayerState = foundPlayerState;
+        }
+        else
         {
             GD.Print($"player state is null");
-            return;
         }
-        _weapon.OwnerPlayerID = PlayerState.PlayerID;
+
+            _weapon.OwnerPlayerID = PlayerState.PlayerID;
         _weapon.SetIsAuthority(IsAuthority);
+
+        if(!IsAuthority)
+        {
+            PredictedPublicState = PlayerState.CharacterPublicState.Copy();
+            GD.Print($"client copied pub state");
+        }
     }
 
     public override void OnUnpossessed()
@@ -549,7 +563,7 @@ public partial class Character : Pawn, IDamageable
             PlayerState.CharacterPublicState.Position = position;
             PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
 
-            GD.Print($"Player ID: {PlayerState.PlayerID} moved. New position: {position}. SETTING ON {NetworkSession.Instance.NetworkMode}");
+            //GD.Print($"Player ID: {PlayerState.PlayerID} moved. New position: {position}. SETTING ON {NetworkSession.Instance.NetworkMode}");
         }
 
         ApplyPosition(position);
