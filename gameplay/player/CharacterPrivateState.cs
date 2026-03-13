@@ -44,20 +44,18 @@ public class CharacterPrivateState
         if ((Flags & CharacterPrivateFlags.WEAPONS_CHANGED) != 0) msg.WriteEnum(HeldWeaponsFlags);
         if ((Flags & CharacterPrivateFlags.AMMO_CHANGED) != 0) msg.WriteEnum(AmmoChangedFlags);
     }
-    internal static CharacterPrivateState Read(Message msg)
+    internal CharacterPrivateState Read(Message msg)
     {
         var state = new CharacterPrivateState();
 
-        msg.ReadEnum(out state.Flags);
+        msg.ReadEnum(out Flags);
 
-        var flags = state.Flags;
-
-        if ((flags & CharacterPrivateFlags.HEALTH_CHANGED) != 0) msg.Read(out state.Health);
-        if ((flags & CharacterPrivateFlags.MAX_HEALTH_CHANGED) != 0) msg.Read(out state.MaxHealth);
-        if ((flags & CharacterPrivateFlags.ARMOR_CHANGED) != 0) msg.Read(out state.Armor);
-        if ((flags & CharacterPrivateFlags.MAX_ARMOR_CHANGED) != 0) msg.Read(out state.MaxArmor);
-        if ((flags & CharacterPrivateFlags.WEAPONS_CHANGED) != 0) msg.ReadEnum(out state.HeldWeaponsFlags);
-        if ((flags & CharacterPrivateFlags.AMMO_CHANGED) != 0) msg.ReadEnum(out state.AmmoChangedFlags);
+        if ((Flags & CharacterPrivateFlags.HEALTH_CHANGED) != 0) msg.Read(out Health);
+        if ((Flags & CharacterPrivateFlags.MAX_HEALTH_CHANGED) != 0) msg.Read(out MaxHealth);
+        if ((Flags & CharacterPrivateFlags.ARMOR_CHANGED) != 0) msg.Read(out Armor);
+        if ((Flags & CharacterPrivateFlags.MAX_ARMOR_CHANGED) != 0) msg.Read(out MaxArmor);
+        if ((Flags & CharacterPrivateFlags.WEAPONS_CHANGED) != 0) msg.ReadEnum(out HeldWeaponsFlags);
+        if ((Flags & CharacterPrivateFlags.AMMO_CHANGED) != 0) msg.ReadEnum(out AmmoChangedFlags);
 
         return state;
     }

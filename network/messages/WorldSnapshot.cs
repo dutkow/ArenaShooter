@@ -184,6 +184,11 @@ public class WorldSnapshot : Message
 
         // Characters (existing code)
         newSnapshot.PlayerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray();
+
+        foreach(var playerState in newSnapshot.PlayerStates)
+        {
+            GD.Print($"server is saying player id: {playerState.PlayerID} is alive: {playerState.IsAlive}");
+        }
         return newSnapshot;
     }
 

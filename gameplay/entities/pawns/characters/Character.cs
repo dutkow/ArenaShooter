@@ -82,7 +82,7 @@ public partial class Character : Pawn, IDamageable
         Vector3 dir = -Camera.GlobalTransform.Basis.Z;
         _weapon.Tick(delta, Camera.GlobalPosition, dir);
 
-        GlobalPosition = MovementComp.State.Position + new Vector3(0.0f, 0.0f, 0.1f);
+        //GlobalPosition = MovementComp.State.Position;
 
     }
 

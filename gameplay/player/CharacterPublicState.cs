@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Net.NetworkInformation;
 
 public class CharacterPublicState
 {
@@ -40,15 +41,13 @@ public class CharacterPublicState
     {
         var state = new CharacterPublicState();
 
-        msg.ReadEnum(out state.Flags);
+        msg.ReadEnum(out Flags);
 
-        var flags = state.Flags;
-
-        if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Read(out state.Position);
-        if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Read(out state.Rotation);
-        if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Read(out state.Velocity);
-        if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.ReadEnum(out state.MovementMode);
-        if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.ReadEnum(out state.EquippedWeapon);
+        if ((Flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Read(out Position);
+        if ((Flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Read(out Rotation);
+        if ((Flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Read(out Velocity);
+        if ((Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.ReadEnum(out MovementMode);
+        if ((Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.ReadEnum(out EquippedWeapon);
 
         return state;
     }

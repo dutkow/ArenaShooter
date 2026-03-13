@@ -33,8 +33,6 @@ public class ClientGame
         GD.Print($"Starting client. NetworkMode = {NetworkSession.Instance.NetworkMode}");
 
         ClientProjectileManager.Create();
-
-
     }
 
     public void Tick()
@@ -97,6 +95,8 @@ public class ClientGame
         {
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerState.PlayerID, out var foundPlayerState))
             {
+
+                // Client already has an instance of this character, apply snapshot, which could also kill it if it's not alive
                 Character character = foundPlayerState.Character;
                 if (character != null)
                 {
@@ -107,14 +107,11 @@ public class ClientGame
                         character.ApplyPrivateState(foundPlayerState.CharacterPrivateState);
                     }
                 }
-                else
+                // Client doesn't know about this character but it's alive, spawn it
+                else if(playerState.IsAlive)
                 {
-                    SpawnManager.Instance.LocalSpawnPlayer(foundPlayerState.PlayerID, foundPlayerState.CharacterPublicState.Position, foundPlayerState.CharacterPublicState.Rotation.X);
+                    SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Rotation.X);
                 }
-            }
-            else
-            {
-                GD.Print($"didn't find a player with id {playerState.PlayerID} on network mode: {NetworkSession.Instance.NetworkMode}");
             }
         }
 

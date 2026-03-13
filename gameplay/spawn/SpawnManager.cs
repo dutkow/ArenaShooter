@@ -30,20 +30,24 @@ public partial class SpawnManager : Node3D
         return ListUtils.RandomElement(_playerSpawnPoints);
     }
 
-    public Pawn ServerSpawnPlayer(byte playerID)
+    public Character ServerSpawnPlayer(byte playerID)
     {
         var spawnPoint = GetSpawnPoint();
-        Pawn spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
-
-        //PlayerSpawned.Send(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
+        if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var player))
+        {
+            player.IsAlive = true;
+            GD.Print($"setting player is alive to true for player id {playerID}");
+            player.Flags |= PlayerStateFlags.IS_ALIVE_CHANGED;
+        }
+        Character spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
         return spawnedPlayer;
     }
 
 
-    public Pawn LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
+    public Character LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
     {
-        GD.Print($"new local spawn player ran on {NetworkSession.Instance.NetworkMode}. NEW PLAYER ID: {playerID} and local player id {ClientGame.Instance.LocalPlayerID}");
+        GD.Print($"new local spawn player ran on {NetworkSession.Instance.NetworkMode}. NEW PLAYER ID: {playerID} and local player id {ClientGame.Instance.LocalPlayerID}, spawn position: {spawnPosition}");
         var spawnedPlayer = (Character)GameMode.Instance.DefaultPawnScene.Instantiate();
 
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
@@ -59,7 +63,6 @@ public partial class SpawnManager : Node3D
 
         if (playerID == ClientGame.Instance.LocalPlayerID)
         {
-            GD.Print($"running possess when spawning player on {NetworkSession.Instance.NetworkMode}. spawned player ID = {playerID} and local player ID = {NetworkSession.Instance.LocalPlayerID}");
             ClientGame.Instance.LocalPlayerController.Possess(spawnedPlayer);
         }
         else
