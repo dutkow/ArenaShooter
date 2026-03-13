@@ -135,7 +135,52 @@ public partial class Character : Pawn, IDamageable
     {
         base._Process(delta);
 
-        InterpolateMovement((float)delta);
+        if(IsLocal)
+        {
+            LocalInterpolation((float)delta);
+        }
+        else
+        {
+            RemoteInterpolation((float)delta);
+        }
+    }
+
+
+    public void LocalInterpolation(float delta)
+    {
+        if (_useInterpolation)
+        {
+            InterpolatePosition(delta * LOCAL_SV_INTERP_RATE);
+        }
+        else
+        {
+            if (IsAuthority)
+            {
+                GlobalPosition = PlayerState.CharacterPublicState.Position;
+            }
+            else
+            {
+                GlobalPosition = PredictedPublicState.Position;
+            }
+        }
+
+    }
+
+    public void RemoteInterpolation(float delta)
+    {
+        if(_useInterpolation)
+        {
+            InterpolatePosition(delta * REMOTE_CL_INTERP_RATE);
+            InterpolateYaw(delta * 10.0f);
+            InterpolatePitch(delta * 10.0f);
+        }
+        else
+        {
+            GlobalPosition = PlayerState.CharacterPublicState.Position;
+            GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Rotation.X, 0.0f);
+            _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Rotation.Y, 0.0f, 0.0f);
+        }
+
     }
 
     /// <summary>
@@ -219,43 +264,6 @@ public partial class Character : Pawn, IDamageable
     float LOCAL_CL_INTERP_RATE = 0.5f;
     float REMOTE_CL_INTERP_RATE = 0.5f;
 
-    public void InterpolateMovement(float delta)
-    {
-        if(_useInterpolation)
-        {
-            if (IsLocal)
-            {
-                InterpolatePosition(delta * LOCAL_SV_INTERP_RATE);
-            }
-            else
-            {
-                InterpolatePosition(delta * REMOTE_CL_INTERP_RATE);
-                InterpolateYaw(delta * 10.0f);
-                InterpolatePitch(delta * 10.0f);
-            }
-        }
-        else
-        {
-            if(IsLocal)
-            {
-                if(IsAuthority)
-                {
-                    GlobalPosition = PlayerState.CharacterPublicState.Position;
-                }
-                else
-                {
-                    GlobalPosition = PredictedPublicState.Position;
-                }
-            }
-            else
-            {
-                GlobalPosition = PlayerState.CharacterPublicState.Position;
-                GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Rotation.X, 0.0f);
-                _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Rotation.Y, 0.0f, 0.0f);
-            }
-        }
-
-    }
 
     public void InterpolatePosition(float interpSpeed)
     {
@@ -587,60 +595,6 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
-
-    /*
-    public override void ApplySnapshot(CharacterSnapshot snapshot)
-    {
-        base.ApplySnapshot(snapshot);
-
-
-        // Reset any values which haven't changed
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
-        {
-            snapshot.Position = MovementComp.State.Position;        
-        }
-
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
-        {
-            snapshot.Velocity = MovementComp.State.Velocity;
-        }
-
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))
-        {
-            snapshot.Yaw = MovementComp.State.Yaw;
-        }
-
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))
-        {
-            snapshot.Pitch = MovementComp.State.Pitch;
-        }
-
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))
-        {
-            snapshot.MoveMode = MovementComp.State.MoveMode;
-        }
-
-
-        var snapshotMoveState = snapshot.GetMoveState();
-
-        if (IsLocal)
-        {
-            var reconciledState = snapshotMoveState;
-
-            foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
-            {
-                reconciledState = MovementComp.Step(reconciledState, cmd, NetworkConstants.SERVER_TICK_INTERVAL, true);
-            }
-
-            ReconcileMoveState(reconciledState);
-        }
-        else
-        {
-            MovementComp.State = snapshotMoveState;
-        }
-    }*/
-
-
     // Apply Replicated States
     public void ApplyAuthoritativePublicState(CharacterPublicState publicState)
     {
@@ -677,7 +631,7 @@ public partial class Character : Pawn, IDamageable
             publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
         }
         
-        ReconcileMoveState(publicState);
+        //ReconcileMoveState(publicState);
     }
 
     public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)
