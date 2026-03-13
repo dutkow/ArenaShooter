@@ -278,58 +278,6 @@ public partial class Character : Pawn, IDamageable
         _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
-    /*
-    public override void ApplySnapshot(CharacterSnapshot snapshot)
-    {
-        base.ApplySnapshot(snapshot);
-
-
-        // Reset any values which haven't changed
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
-        {
-            snapshot.Position = MovementComp.State.Position;        
-        }
-
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
-        {
-            snapshot.Velocity = MovementComp.State.Velocity;
-        }
-
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))
-        {
-            snapshot.Yaw = MovementComp.State.Yaw;
-        }
-
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))
-        {
-            snapshot.Pitch = MovementComp.State.Pitch;
-        }
-
-        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))
-        {
-            snapshot.MoveMode = MovementComp.State.MoveMode;
-        }
-
-
-        var snapshotMoveState = snapshot.GetMoveState();
-
-        if (IsLocal)
-        {
-            var reconciledState = snapshotMoveState;
-
-            foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
-            {
-                reconciledState = MovementComp.Step(reconciledState, cmd, NetworkConstants.SERVER_TICK_INTERVAL, true);
-            }
-
-            ReconcileMoveState(reconciledState);
-        }
-        else
-        {
-            MovementComp.State = snapshotMoveState;
-        }
-    }*/
-
 
     public void ReconcileMoveState(CharacterPublicState authoritativeState)
     {
@@ -358,13 +306,13 @@ public partial class Character : Pawn, IDamageable
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
-            //GD.Print($"snap correction horizontal, error {distXZ}");
+            GD.Print($"snap correction horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
-            //GD.Print($"lerp correction horizontal, error {distXZ}");
+            GD.Print($"lerp correction horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }
@@ -639,53 +587,97 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
+
+    /*
+    public override void ApplySnapshot(CharacterSnapshot snapshot)
+    {
+        base.ApplySnapshot(snapshot);
+
+
+        // Reset any values which haven't changed
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION))
+        {
+            snapshot.Position = MovementComp.State.Position;        
+        }
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY))
+        {
+            snapshot.Velocity = MovementComp.State.Velocity;
+        }
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW))
+        {
+            snapshot.Yaw = MovementComp.State.Yaw;
+        }
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH))
+        {
+            snapshot.Pitch = MovementComp.State.Pitch;
+        }
+
+        if (!snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE))
+        {
+            snapshot.MoveMode = MovementComp.State.MoveMode;
+        }
+
+
+        var snapshotMoveState = snapshot.GetMoveState();
+
+        if (IsLocal)
+        {
+            var reconciledState = snapshotMoveState;
+
+            foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
+            {
+                reconciledState = MovementComp.Step(reconciledState, cmd, NetworkConstants.SERVER_TICK_INTERVAL, true);
+            }
+
+            ReconcileMoveState(reconciledState);
+        }
+        else
+        {
+            MovementComp.State = snapshotMoveState;
+        }
+    }*/
+
+
     // Apply Replicated States
     public void ApplyAuthoritativePublicState(CharacterPublicState publicState)
     {
         CharacterPublicFlags flags = publicState.Flags;
 
-        if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
+        
+        if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
         {
-            if (IsLocal)
-            {
-                GD.Print($"num unprocessedinputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
-                /*
-                foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
-                {
-                    publicState = MovementComp.Step(publicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL, true);
-                }
-
-                ReconcileMoveState(publicState);*/
-            }
-            else
-            {
-                PlayerState.CharacterPublicState.Position = publicState.Position;
-            }
+            publicState.Position = PredictedPublicState.Position;
         }
 
-        if(!IsLocal)
+        if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
         {
-            if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
-            {
-                PlayerState.CharacterPublicState.Rotation = publicState.Rotation;
-            }
+            publicState.Rotation = PredictedPublicState.Rotation;
         }
 
-        /*
-        if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0)
+        if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) == 0)
         {
-            PlayerState.CharacterPublicState.Velocity = publicState.Velocity;
+            publicState.Velocity = PredictedPublicState.Velocity;
         }
 
-        if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0)
+        if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) == 0)
         {
-            PlayerState.CharacterPublicState.MovementMode = publicState.MovementMode;
+            publicState.MovementMode = PredictedPublicState.MovementMode;
         }
 
-        if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0)
+        if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) == 0)
         {
-            PlayerState.CharacterPublicState.EquippedWeapon = publicState.EquippedWeapon;
-        }*/
+            publicState.EquippedWeapon = PredictedPublicState.EquippedWeapon;
+        }
+
+        foreach(var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
+        {
+            publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
+        }
+        
+        ReconcileMoveState(publicState);
     }
 
     public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)

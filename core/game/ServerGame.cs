@@ -37,16 +37,31 @@ public class ServerGame
 
     public void Tick()
     {
+        ProcessNextClientInputs();
+
         var newSnapshot = WorldSnapshot.Build();
-        //NetworkSender.Broadcast(newSnapshot);
-        SendWorldSnapshotDeltas(newSnapshot); // in this we send the snapshot prior to updating the next client input. we could alternatively, process client inputs, then update?
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
 
-        foreach(var playerState in newSnapshot.PlayerStates)
+        foreach (var playerState in newSnapshot.PlayerStates)
         {
-            playerState.ClearFlags();
+            // Instead of clearing flags, mark everything as changed
+            playerState.CharacterPublicState.Flags =
+                CharacterPublicFlags.POSITION_CHANGED |
+                CharacterPublicFlags.VELOCITY_CHANGED |
+                CharacterPublicFlags.ROTATION_CHANGED |
+                CharacterPublicFlags.MOVEMENT_MODE_CHANGED |
+                CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
+
+            playerState.CharacterPrivateState.Flags =
+                CharacterPrivateFlags.HEALTH_CHANGED |
+                CharacterPrivateFlags.MAX_HEALTH_CHANGED |
+                CharacterPrivateFlags.ARMOR_CHANGED |
+                CharacterPrivateFlags.MAX_ARMOR_CHANGED |
+                CharacterPrivateFlags.WEAPONS_CHANGED |
+                CharacterPrivateFlags.AMMO_CHANGED;
         }
-        ProcessNextClientInputs();
+
+        SendWorldSnapshotDeltas(newSnapshot); // in this we send the snapshot prior to updating the next client input. we could alternatively, process client inputs, then update?
 
     }
 

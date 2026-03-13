@@ -87,9 +87,6 @@ public class ClientGame
         LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
         LastServerTickProcessedByClient = snapshot.ServerTick;
 
-        GD.Print($"snapshot server tick: {snapshot.ServerTick} and last server tick processed by client: {LastServerTickProcessedByClient}. last client tick processed by server: {LastClientTickProcessedByServer}");
-
-
         UnprocessedClientInputs.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
 
 
@@ -99,6 +96,7 @@ public class ClientGame
         {
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerState.PlayerID, out var foundPlayerState))
             {
+                //GD.Print($"num unacked inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
                 // Client already has an instance of this character, apply snapshot, which could also kill it if it's not alive
                 Character character = foundPlayerState.Character;
                 if (character != null)
