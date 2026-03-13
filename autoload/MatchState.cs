@@ -117,6 +117,7 @@ public partial class MatchState : Node
         {
             byte playerID = initialMatchState.PlayerIDs[i];
 
+            GD.Print($"player id in initial match state: {playerID}");
             AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
         }
     }
@@ -201,6 +202,7 @@ public partial class MatchState : Node
     
     public void AddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
     {
+        GD.Print($"add player running on {NetworkSession.Instance.NetworkMode}. player id: {playerID}");
         if (ConnectedPlayers.ContainsKey(playerID))
         {
             return; // Already added

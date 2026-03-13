@@ -35,6 +35,7 @@ public static class ClientConnectionService
 
     public static void HandleInitialMatchState(byte[] data)
     {
+
         var msg = new InitialMatchState();
         msg.ReadMessage(data);
 

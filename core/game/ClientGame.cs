@@ -93,9 +93,8 @@ public class ClientGame
 
         PickupManager.Instance.ApplyPickupMask(snapshot.PickupMask);
 
-        foreach(var playerState in snapshot.PlayerStates)
+        foreach (var playerState in snapshot.PlayerStates)
         {
-
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerState.PlayerID, out var foundPlayerState))
             {
                 Character character = foundPlayerState.Character;

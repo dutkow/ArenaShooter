@@ -50,19 +50,17 @@ public class PlayerState()
         if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Write(Ping);
         if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Write(IsAlive);
     }
-    internal PlayerState Read(Message msg, byte clientPlayerID)
+    internal void Read(Message msg, byte clientPlayerID)
     {
-        var state = new PlayerState();
-        msg.Read(out state.PlayerID);
+        msg.Read(out PlayerID);
 
-        msg.ReadEnum(out state.Flags);
+        msg.ReadEnum(out Flags);
 
-        var flags = state.Flags;
-        if ((flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Read(out state.Kills);
-        if ((flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Read(out state.Deaths);
-        if ((flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Read(out state.Ping);
-        if ((flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Read(out state.IsAlive);
+        var flags = Flags;
 
-        return state;
+        if ((flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Read(out Kills);
+        if ((flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Read(out Deaths);
+        if ((flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Read(out Ping);
+        if ((flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Read(out IsAlive);
     }
 }

@@ -37,6 +37,8 @@ public class ConnectionAccepted : Message
             ENetFlags = ENetPacketFlags.Reliable,
             AssignedPlayerID = assignedID,
         };
+
+        GD.Print($"assing player id to client: {assignedID}");
         NetworkSender.ToClient(client, msg);
     }
 }

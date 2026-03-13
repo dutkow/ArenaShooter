@@ -29,16 +29,14 @@ public static class ServerConnectionService
         NetworkHandler.Instance.ReadyPeers.Add(peer);
 
 
-        GD.Print("Server sending player joined");
 
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
-        PlayerJoined.Execute(playerID, playerName);
-        
-        InitialMatchState.Send(peer); // NOTE: need to reconsider ordering, but match state should send loaded client in initial match state for now
+        //PlayerJoined.Execute(playerID, playerName);
+        MatchState.Instance.AddPlayer(playerID, playerName);
+        InitialMatchState.Send(peer);
 
-        //PlayerJoined.Send(playerID, playerName);
 
         var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
 

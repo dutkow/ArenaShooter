@@ -39,12 +39,6 @@ public class ServerGame
     {
         var newSnapshot = WorldSnapshot.Build();
 
-        GD.Print($"num players in snapshot: {newSnapshot.PlayerStates.Length}");
-
-        foreach (var playerState in newSnapshot.PlayerStates)
-        {
-            GD.Print($"player state ID in snapshot: {playerState.PlayerID}");
-        }
         NetworkSender.Broadcast(newSnapshot);
         //SendWorldSnapshotDeltas(newSnapshot); // in this we send the snapshot prior to updating the next client input. we could alternatively, process client inputs, then update?
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
@@ -55,7 +49,6 @@ public class ServerGame
     public void ProcessNextClientInputs()
     {
 
-        // REFACTOR CODE
         foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
             byte playerID = kvp.Key;

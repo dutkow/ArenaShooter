@@ -184,7 +184,6 @@ public class WorldSnapshot : Message
 
         // Characters (existing code)
         newSnapshot.PlayerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray();
-
         return newSnapshot;
     }
 
