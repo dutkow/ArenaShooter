@@ -398,8 +398,8 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
             {
                 SetNextClientCommand();
 
-                GlobalRotation = new Vector3(0.0f, _currentServerCommand.Yaw, 0.0f);
-                CameraPivot.Rotation = new Vector3(_currentServerCommand.Pitch, 0.0f, 0.0f);
+                //GlobalRotation = new Vector3(0.0f, _currentServerCommand.Yaw, 0.0f);
+                //CameraPivot.Rotation = new Vector3(_currentServerCommand.Pitch, 0.0f, 0.0f);
 
                 MovementComp.Tick(_currentServerCommand.Mask, delta, CameraPivot);
             }
@@ -448,8 +448,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
         {
             ClientTick = MatchState.Instance.CurrentTick,
             Mask = cmd, // use the captured input
-            Yaw = GlobalRotation.Y,
-            Pitch = CameraPivot.GlobalRotation.X
+            Look = new Vector2(GlobalRotation.Y, CameraPivot.Rotation.X)
         };
 
         // Add to local history queue

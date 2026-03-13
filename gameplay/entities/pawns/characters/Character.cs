@@ -51,8 +51,7 @@ public partial class Character : Pawn, IDamageable
 
     private bool _useInterpolation = false;
 
-    private bool _yawDirty;
-    private bool _pitchDirty;
+    private bool _lookDirty;
 
    
     public override void _Ready()
@@ -111,34 +110,16 @@ public partial class Character : Pawn, IDamageable
         {
             GlobalPosition = MovementComp.State.Position;
         }
-
-        /*
-        if (IsLocal)
-        {
-            UpdatePositionState(MovementComp.State.Position);
-        }
-        else
-        {
-            GlobalPosition = MovementComp.State.Position;
-            GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
-            _thirdPersonWeaponSocket.Rotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
-        }*/
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
     {
         base.ProcessClientInput(cmd);
 
-        if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
+        if (cmd.Mask.HasFlag(ClientCommandMask.LOOK))
         {
-            MovementComp.State.Yaw = cmd.Yaw;
-            GlobalRotation = new Vector3(0.0f, cmd.Yaw, 0.0f);
-        }
-
-        if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
-        {
-            MovementComp.State.Pitch = cmd.Pitch;
-            _cameraPivot.Rotation = new Vector3(cmd.Pitch, 0.0f, 0.0f);
+            UpdateRotationState(cmd.Look);
+            GD.Print($"calling update rotation state on client");
         }
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
@@ -251,8 +232,8 @@ public partial class Character : Pawn, IDamageable
             else
             {
                 GlobalPosition = PlayerState.CharacterPublicState.Position;
-                GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Rotation.Y, 0.0f);
-                _thirdPersonWeaponSocket.Rotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
+                GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Rotation.X, 0.0f);
+                _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Rotation.Y, 0.0f, 0.0f);
             }
         }
 
@@ -398,18 +379,11 @@ public partial class Character : Pawn, IDamageable
             if (Input.IsActionPressed("jump")) cmd.Mask |= ClientCommandMask.JUMP;
             if (Input.IsActionPressed("primary_fire")) cmd.Mask |= ClientCommandMask.FIRE_PRIMARY;
 
-            if (_yawDirty)
+            if (_lookDirty)
             {
-                cmd.Mask |= ClientCommandMask.YAW;
-                cmd.Yaw = GlobalRotation.Y;
-                _yawDirty = false;
-            }
-
-            if (_pitchDirty)
-            {
-                cmd.Mask |= ClientCommandMask.PITCH;
-                cmd.Pitch = _thirdPersonWeaponSocket.Rotation.X;
-                _pitchDirty = false;
+                cmd.Mask |= ClientCommandMask.LOOK;
+                cmd.Look = new Vector2(GlobalRotation.Y, _thirdPersonWeaponSocket.Rotation.X);
+                _lookDirty = false;
             }
         }
 
@@ -480,8 +454,7 @@ public partial class Character : Pawn, IDamageable
             if(Mathf.Abs(mouseEvent.Relative.X) > 0.0f)
             {
                 RotateY(Mathf.DegToRad(-mouseEvent.Relative.X * MouseSensitivity));
-                MovementComp.State.Yaw = Yaw;
-                _yawDirty = true;
+                //MovementComp.State.Yaw = Yaw;
             }
 
             if (Mathf.Abs(mouseEvent.Relative.Y) > 0.0f)
@@ -494,15 +467,19 @@ public partial class Character : Pawn, IDamageable
                     _cameraPivot.RotationDegrees = new Vector3(Pitch, 0, 0);
                 }
 
-                MovementComp.State.Pitch = _cameraPivot.Rotation.X;
+                //MovementComp.State.Pitch = _cameraPivot.Rotation.X;
                 _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;
 
-                _pitchDirty = true;
             }
 
-            if(IsAuthority)
+            if(mouseEvent.Relative != Vector2.Zero)
             {
-                UpdateRotationState(Yaw, Pitch);
+                _lookDirty = true;
+            }
+
+            if(_lookDirty)
+            {
+                UpdateRotationState(new Vector2(Yaw, _cameraPivot.Rotation.X));
             }
         }
     }
@@ -567,6 +544,7 @@ public partial class Character : Pawn, IDamageable
     // Public State Changes
 
     const float POSITION_EPSILON = 0.01f;
+    const float ROTATION_EPSILON = 0.01f;
 
     public void UpdatePositionState(Vector3 position)
     {
@@ -584,10 +562,15 @@ public partial class Character : Pawn, IDamageable
         GlobalPosition = position;
     }
 
-    public void UpdateRotationState(float globalYaw, float localPitch)
+    public void UpdateRotationState(Vector2 look)
     {
-        PlayerState.CharacterPublicState.Rotation = new Vector2(globalYaw, localPitch);
+        GD.Print($"rotation state changed. new yaw state: {look.X}");
+
+        PlayerState.CharacterPublicState.Rotation = new Vector2(look.X, look.Y);
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
+
+        MovementComp.State.Yaw = look.X;
+        MovementComp.State.Pitch = look.Y;
     }
 
     public void OnVelocityChanged(Vector3 velocity)
@@ -643,14 +626,12 @@ public partial class Character : Pawn, IDamageable
         {
             GD.Print($"client received position changed: {publicState.Position}");
 
-            //GlobalPosition = publicState.Position;
             PlayerState.CharacterPublicState.Position = publicState.Position;
         }
 
         if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
         {
             GD.Print($"client received rotation changed: {publicState.Rotation}");
-
             PlayerState.CharacterPublicState.Rotation = publicState.Rotation;
         }
 

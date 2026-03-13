@@ -16,12 +16,11 @@ public enum ClientCommandMask : ushort
     FIRE_SECONDARY = 1 << 6,
 
     // CLIENT AUTHORITATIVE ROTATION
-    YAW = 1 << 7,
-    PITCH = 1 << 8,
+    LOOK = 1 << 7,
 
     // EVENTS
-    WAS_LAUNCHED = 1 << 9,
-    FIRED_PREDICTED_PROJECTILE = 1 << 10,
+    WAS_LAUNCHED = 1 << 8,
+    FIRED_PREDICTED_PROJECTILE = 1 << 9,
 }
 
 public struct ClientInputCommand
@@ -29,8 +28,8 @@ public struct ClientInputCommand
     public ushort ClientTick;
     public ClientCommandMask Mask;
 
-    public float Yaw;
-    public float Pitch;
+    public Vector2 Look;
+
     public Vector3 LaunchVelocity;
     public ushort PredictedProjectileClientID;
 }
@@ -57,10 +56,8 @@ public class ClientCommand : Message
             Add(cmd.ClientTick);
             AddEnum(cmd.Mask);
 
-            if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
-                Add(cmd.Yaw);
-            if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
-                Add(cmd.Pitch);
+            if (cmd.Mask.HasFlag(ClientCommandMask.LOOK))
+                Add(cmd.Look);
             if (cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
             {
                 Add(cmd.LaunchVelocity.X);
@@ -89,10 +86,9 @@ public class ClientCommand : Message
             Write(cmd.ClientTick);
             WriteEnum(cmd.Mask);
 
-            if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
-                Write(cmd.Yaw); // raw float
-            if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
-                Write(cmd.Pitch); // raw float
+            if (cmd.Mask.HasFlag(ClientCommandMask.LOOK))
+                Write(cmd.Look);
+
             if (cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
             {
                 Write(cmd.LaunchVelocity.X); // raw float
@@ -126,10 +122,9 @@ public class ClientCommand : Message
             Read(out ushort mask);
             cmd.Mask = (ClientCommandMask)mask;
 
-            if (cmd.Mask.HasFlag(ClientCommandMask.YAW))
-                Read(out cmd.Yaw); // raw float
-            if (cmd.Mask.HasFlag(ClientCommandMask.PITCH))
-                Read(out cmd.Pitch); // raw float
+            if (cmd.Mask.HasFlag(ClientCommandMask.LOOK))
+                Read(out cmd.Look);
+
             if (cmd.Mask.HasFlag(ClientCommandMask.WAS_LAUNCHED))
             {
                 Read(out cmd.LaunchVelocity.X); // raw float
