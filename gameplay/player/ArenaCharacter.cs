@@ -65,8 +65,8 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
 
     public void SetHealth(int health)
     {
-        byte clamped = (byte)Math.Clamp(health, 0, PrivateState.MaxHealth);
-        FlagStatics.SetAndFlag(ref PrivateState.Health, clamped, ref PrivateState.Flags, CharacterPrivateFlags.HEALTH_CHANGED);
+        PrivateState.Health = (byte)health;
+        PrivateState.Flags |= CharacterPrivateFlags.HEALTH_CHANGED;
     }
 
     public int GetMaxHealth()
@@ -76,8 +76,8 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
 
     public void SetMaxHealth(int maxHealth)
     {
-        byte clamped = (byte)maxHealth;
-        FlagStatics.SetAndFlag(ref PrivateState.MaxHealth, clamped, ref PrivateState.Flags, CharacterPrivateFlags.MAX_HEALTH_CHANGED);
+        PrivateState.MaxHealth = (byte)maxHealth;
+        PrivateState.Flags |= CharacterPrivateFlags.MAX_HEALTH_CHANGED;
     }
 
     public int GetArmor()
@@ -87,8 +87,8 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
 
     public void SetArmor(int armor)
     {
-        byte clamped = (byte)Math.Clamp(armor, 0, PrivateState.MaxArmor);
-        FlagStatics.SetAndFlag(ref PrivateState.Armor, clamped, ref PrivateState.Flags, CharacterPrivateFlags.ARMOR_CHANGED);
+        PrivateState.Armor = (byte)armor;
+        PrivateState.Flags |= CharacterPrivateFlags.ARMOR_CHANGED;
     }
 
     public int GetMaxArmor()
@@ -98,25 +98,27 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
 
     public void SetMaxArmor(int maxArmor)
     {
-        byte clamped = (byte)maxArmor;
-        FlagStatics.SetAndFlag(ref PrivateState.MaxArmor, clamped, ref PrivateState.Flags, CharacterPrivateFlags.MAX_ARMOR_CHANGED);
+        PrivateState.MaxArmor = (byte)maxArmor;
+        PrivateState.Flags |= CharacterPrivateFlags.MAX_ARMOR_CHANGED;
     }
 
     // Public State Changes
     public void OnPositionChanged(Vector3 position)
     {
-        FlagStatics.SetAndFlag(ref PublicState.Position, position, ref PublicState.Flags, CharacterPublicFlags.POSITION_CHANGED);
+        PublicState.Position = position;
+        PublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
     }
 
     public void OnRotationChanged(float globalYaw, float localPitch)
     {
-        Vector2 rotation = new Vector2(globalYaw, localPitch);
-        FlagStatics.SetAndFlag(ref PublicState.Rotation, rotation, ref PublicState.Flags, CharacterPublicFlags.ROTATION_CHANGED);
+        PublicState.Rotation = new Vector2(globalYaw, localPitch);
+        PublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
     }
 
     public void OnVelocityChanged(Vector3 velocity)
     {
-        FlagStatics.SetAndFlag(ref PublicState.Velocity, velocity, ref PublicState.Flags, CharacterPublicFlags.VELOCITY_CHANGED);
+        PublicState.Velocity = velocity;
+        PublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
     }
 
     public void OnMovementModeChanged(CharacterMoveMode movementMode)
