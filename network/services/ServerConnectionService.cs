@@ -35,6 +35,7 @@ public static class ServerConnectionService
 
         //PlayerJoined.Execute(playerID, playerName);
         MatchState.Instance.AddPlayer(playerID, playerName);
+
         InitialMatchState.Send(peer);
 
 

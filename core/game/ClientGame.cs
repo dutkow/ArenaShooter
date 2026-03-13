@@ -40,7 +40,7 @@ public class ClientGame
         var cmd = GetClientInputCommand(); // client generates input and applies it locally
 
         LocalPlayerController?.ApplyInput(cmd);
-        LocalPlayerPawn?.ApplyInput(cmd);
+        LocalPlayerPawn?.TickWithCommand(cmd);
 
         if(!NetworkSession.Instance.IsListenServer)
         {
@@ -95,7 +95,6 @@ public class ClientGame
         {
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerState.PlayerID, out var foundPlayerState))
             {
-
                 // Client already has an instance of this character, apply snapshot, which could also kill it if it's not alive
                 Character character = foundPlayerState.Character;
                 if (character != null)
@@ -110,7 +109,6 @@ public class ClientGame
                 // Client doesn't know about this character but it's alive, spawn it
                 else if(playerState.IsAlive)
                 {
-                    GD.Print($"CLIENT SNAPSHOT:client wants to spawn player. player ID: {playerState.PlayerID}. position:  {playerState.CharacterPublicState.Position}");
                     SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Rotation.X);
                 }
             }

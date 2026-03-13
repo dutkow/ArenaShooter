@@ -44,6 +44,12 @@ public class ServerGame
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
         ProcessNextClientInputs();
 
+        foreach(var playerState in newSnapshot.PlayerStates)
+        {
+            //GD.Print($"SERVER SNAP: Player ID: {playerState.PlayerID}. Player position changed flag: {playerState.CharacterPublicState.Flags.HasFlag(CharacterPublicFlags.POSITION_CHANGED)}");
+            playerState.ClearFlags();
+        }
+
     }
 
     public void ProcessNextClientInputs()

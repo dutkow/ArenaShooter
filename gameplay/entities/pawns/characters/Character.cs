@@ -81,14 +81,6 @@ public partial class Character : Pawn, IDamageable
 
         Vector3 dir = -Camera.GlobalTransform.Basis.Z;
         _weapon.Tick(delta, Camera.GlobalPosition, dir);
-
-        //GlobalPosition = MovementComp.State.Position;
-
-        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
-        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
-        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
-        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
-
     }
 
     public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
@@ -104,14 +96,23 @@ public partial class Character : Pawn, IDamageable
 
     }
 
-    public override void ApplyInput(ClientInputCommand cmd)
+    public override void TickWithCommand(ClientInputCommand cmd)
     {
-        base.ApplyInput(cmd);
+        base.TickWithCommand(cmd);
 
         MovementComp.HandleInput(cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-
         _weapon.HandleInput(cmd.Mask);
 
+        if (IsLocal)
+        {
+            UpdatePositionState(MovementComp.State.Position);
+        }
+        else
+        {
+            GlobalPosition = MovementComp.State.Position;
+            GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
+            _thirdPersonWeaponSocket.Rotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
+        }
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
@@ -132,6 +133,7 @@ public partial class Character : Pawn, IDamageable
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
+
         _weapon.ProcessClientInput(cmd.Mask);
     }
 
@@ -139,7 +141,7 @@ public partial class Character : Pawn, IDamageable
     {
         base._Process(delta);
 
-        InterpolateMovement((float)delta);
+        //InterpolateMovement((float)delta);
     }
 
     /// <summary>
@@ -231,7 +233,7 @@ public partial class Character : Pawn, IDamageable
         {
             if(IsLocal)
             {
-                GlobalPosition = MovementComp.State.Position;
+                UpdatePositionState(MovementComp.State.Position);
             }
             else
             {
@@ -545,10 +547,24 @@ public partial class Character : Pawn, IDamageable
     }
 
     // Public State Changes
-    public void OnPositionChanged(Vector3 position)
+
+    const float POSITION_EPSILON = 0.01f;
+
+    public void UpdatePositionState(Vector3 position)
     {
-        PlayerState.CharacterPublicState.Position = position;
-        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+
+        if (GlobalPosition.DistanceSquaredTo(position) > POSITION_EPSILON * POSITION_EPSILON)
+        {
+            PlayerState.CharacterPublicState.Position = position;
+            PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+        }
+
+        ApplyPosition(position);
+    }
+
+    public void ApplyPosition(Vector3 position)
+    {
+        GlobalPosition = position;
     }
 
     public void OnRotationChanged(float globalYaw, float localPitch)
@@ -608,6 +624,7 @@ public partial class Character : Pawn, IDamageable
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
+            GlobalPosition = publicState.Position;
             PlayerState.CharacterPublicState.Position = publicState.Position;
         }
 

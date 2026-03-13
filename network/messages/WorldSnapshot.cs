@@ -32,16 +32,17 @@ public class WorldSnapshot : Message
         Add(PickupMask);
 
         // Player States
-        byte playerStatesCount = (byte)PlayerStates.Length;
-        if(playerStatesCount > 0)
+        byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
+        Add(playerStatesCount);
+        if (playerStatesCount > 0)
         {
-            Add(playerStatesCount);
             foreach(var playerState in PlayerStates)
             {
                 playerState.Add(this, ReceivingPlayerID);
             }
         }    
 
+        /*
         // Unacknowledged spawned projectiles
         ushort unackedCount = (ushort)(UnacknowledgedSpawnedProjectiles?.Length ?? 0);
         Add(unackedCount);
@@ -63,7 +64,7 @@ public class WorldSnapshot : Message
         {
             var change = UnacknowledgedProjectileStates[i];
             Add(change.ProjectileID);
-        }
+        }*/
 
         return _dataSize;
     }
@@ -77,16 +78,18 @@ public class WorldSnapshot : Message
         Write(PickupMask);
 
         // Player States
-        byte playerStatesCount = (byte)PlayerStates.Length;
+        byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
+        Write(playerStatesCount);
+
         if (playerStatesCount > 0)
         {
-            Write(playerStatesCount);
             foreach (var playerState in PlayerStates)
             {
                 playerState.Write(this, ReceivingPlayerID);
             }
         }
 
+        /*
         // Unacknowledged spawned projectiles
         ushort unackedCount = (ushort)(UnacknowledgedSpawnedProjectiles?.Length ?? 0);
         Write(unackedCount);
@@ -108,7 +111,7 @@ public class WorldSnapshot : Message
         {
             var change = UnacknowledgedProjectileStates[i];
             Write(change.ProjectileID);
-        }
+        }*/
 
 
         return _data;
@@ -125,9 +128,11 @@ public class WorldSnapshot : Message
         // Player States
         byte playerStatesCount;
         Read(out playerStatesCount);
-        PlayerStates = new PlayerState[playerStatesCount];
+
         if (playerStatesCount > 0)
         {
+            PlayerStates = new PlayerState[playerStatesCount];
+
             for(int i = 0; i < playerStatesCount; ++i)
             {
                 PlayerState playerState = new();
@@ -137,6 +142,7 @@ public class WorldSnapshot : Message
         }
 
         // Unacknowledged spawned projectiles
+        /*
         Read(out ushort unackedCount);
         UnacknowledgedSpawnedProjectiles = new ProjectileSpawnData[unackedCount];
         for (int i = 0; i < unackedCount; ++i)
@@ -161,7 +167,7 @@ public class WorldSnapshot : Message
             var change = new ProjectileState();
             Read(out change.ProjectileID);
             UnacknowledgedProjectileStates[i] = change;
-        }
+        }*/
     }
 
     public static void Send(ENetPacketPeer peer, WorldSnapshot snapshot)

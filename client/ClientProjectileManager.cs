@@ -97,8 +97,8 @@ public class ClientProjectileManager
 
     public void ApplyWorldSnapshot(WorldSnapshot snapshot)
     {
-        HandleUnackedProjectiles(snapshot.UnacknowledgedSpawnedProjectiles);
-        HandleUnackedProjectileStates(snapshot.UnacknowledgedProjectileStates);
+        //HandleUnackedProjectiles(snapshot.UnacknowledgedSpawnedProjectiles);
+        //HandleUnackedProjectileStates(snapshot.UnacknowledgedProjectileStates);
     }
 
     public void ApplyState(ProjectileState state)

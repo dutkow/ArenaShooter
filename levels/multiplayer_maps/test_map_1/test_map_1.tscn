@@ -52,16 +52,16 @@ material_override = ExtResource("4_m0y5v")
 mesh = SubResource("PlaneMesh_m0y5v")
 
 [node name="SpawnPoint2" parent="." unique_id=1217284222 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.57391953, 0, -0.8189119, 0, 1, 0, 0.8189119, 0, 0.57391953, -7.49806, 72.11139, 8.134499)
+transform = Transform3D(0.57391953, 0, -0.8189119, 0, 1, 0, 0.8189119, 0, 0.57391953, -7.49806, 24.239105, 8.134499)
 
 [node name="SpawnPoint3" parent="." unique_id=1982700480 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 68.811615, 7.3622265)
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 20.939331, 7.3622265)
 
 [node name="SpawnPoint5" parent="." unique_id=896187144 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 68.811615, -3.7766695)
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 12.684643, 20.939331, -3.7766695)
 
 [node name="SpawnPoint6" parent="." unique_id=1609247714 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 4.138729, 68.811615, 6.186696)
+transform = Transform3D(0.8644682, 0, 0.50268805, 0, 1, 0, -0.50268805, 0, 0.8644682, 4.138729, 20.939331, 6.186696)
 
 [node name="JumpPad" parent="." unique_id=655431875 instance=ExtResource("6_m0y5v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.1323514, 0)

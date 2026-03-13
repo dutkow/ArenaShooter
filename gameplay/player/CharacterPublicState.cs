@@ -1,6 +1,4 @@
 using Godot;
-using System;
-using System.Net.NetworkInformation;
 
 public class CharacterPublicState
 {
@@ -17,43 +15,69 @@ public class CharacterPublicState
         Flags = 0;
     }
 
-    internal void Add(Message msg)
+    internal void Add(Message msg, bool forceFull = false)
     {
-        msg.AddEnum(Flags);
+        if (forceFull)
+        {
+            msg.Add(Position);
+            msg.Add(Rotation);
+            msg.Add(Velocity);
+            msg.AddEnum(MovementMode);
+            msg.AddEnum(EquippedWeapon);
+        }
+        else
+        {
+            msg.AddEnum(Flags);
 
-        msg.Add(Position);
-
-        if ((Flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Add(Position);
-        if ((Flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Add(Rotation);
-        if ((Flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Add(Velocity);
-        if ((Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.AddEnum(MovementMode);
-        if ((Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.AddEnum(EquippedWeapon);
+            if ((Flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Add(Position);
+            if ((Flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Add(Rotation);
+            if ((Flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Add(Velocity);
+            if ((Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.AddEnum(MovementMode);
+            if ((Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.AddEnum(EquippedWeapon);
+        }
     }
 
-    internal void Write(Message msg)
+    internal void Write(Message msg, bool forceFull = false)
     {
-        msg.WriteEnum(Flags);
+        if (forceFull)
+        {
+            msg.Write(Position);
+            msg.Write(Rotation);
+            msg.Write(Velocity);
+            msg.WriteEnum(MovementMode);
+            msg.WriteEnum(EquippedWeapon);
+        }
+        else
+        {
+            msg.WriteEnum(Flags);
 
-        msg.Write(Position);
-        if ((Flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Write(Position);
-        if ((Flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Write(Rotation);
-        if ((Flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Write(Velocity);
-        if ((Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.WriteEnum(MovementMode);
-        if ((Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.WriteEnum(EquippedWeapon);
+            if ((Flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Write(Position);
+            if ((Flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Write(Rotation);
+            if ((Flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Write(Velocity);
+            if ((Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.WriteEnum(MovementMode);
+            if ((Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.WriteEnum(EquippedWeapon);
+        }
     }
-    internal CharacterPublicState Read(Message msg)
+
+    internal void Read(Message msg, bool forceFull = false)
     {
-        var state = new CharacterPublicState();
+        if (forceFull)
+        {
+            msg.Read(out Position);
+            msg.Read(out Rotation);
+            msg.Read(out Velocity);
+            msg.ReadEnum(out MovementMode);
+            msg.ReadEnum(out EquippedWeapon);
+        }
+        else
+        {
+            msg.ReadEnum(out Flags);
 
-        msg.ReadEnum(out Flags);
-
-        msg.Read(out Position);
-        if ((Flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Read(out Position);
-        if ((Flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Read(out Rotation);
-        if ((Flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Read(out Velocity);
-        if ((Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.ReadEnum(out MovementMode);
-        if ((Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.ReadEnum(out EquippedWeapon);
-
-        return state;
+            if ((Flags & CharacterPublicFlags.POSITION_CHANGED) != 0) msg.Read(out Position);
+            if ((Flags & CharacterPublicFlags.ROTATION_CHANGED) != 0) msg.Read(out Rotation);
+            if ((Flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0) msg.Read(out Velocity);
+            if ((Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.ReadEnum(out MovementMode);
+            if ((Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.ReadEnum(out EquippedWeapon);
+        }
     }
 }

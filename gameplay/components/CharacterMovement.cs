@@ -291,6 +291,8 @@ public class CharacterMovement
     public void HandleInput(ClientInputCommand cmd, float delta)
     {
         State = Step(State, cmd, delta);
+
+
     }
 
     private void HandleGroundedMovement(CharacterMoveState state, Vector3 desiredMoveDirection, float delta)

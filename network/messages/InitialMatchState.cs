@@ -8,8 +8,7 @@ using System.Linq;
 /// </summary>
 public class InitialMatchState : Message
 {
-    public byte[] PlayerIDs;
-    public string[] PlayerNames;
+    public PlayerState[] PlayerStates;
 
     // ----------------------
     // Serialization
@@ -19,14 +18,19 @@ public class InitialMatchState : Message
     {
         base.BufferSize();
 
-        int count = PlayerIDs.Length;
+        byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
+        Add(playerStatesCount);
 
-        Add(count);
-
-        for (int i = 0; i < count; i++)
+        if (playerStatesCount > 0)
         {
-            Add(PlayerIDs[i]);
-            Add(PlayerNames[i]);
+            foreach (var playerState in PlayerStates)
+            {
+                // Include anything not included in world snapshot
+                Add(playerState.PlayerName);
+
+                // This will include default snapshot
+                playerState.Add(this, 0, true);
+            }
         }
 
         return _dataSize;
@@ -36,14 +40,19 @@ public class InitialMatchState : Message
     {
         base.WriteMessage();
 
-        int count = PlayerIDs.Length;
+        // Player States
+        byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
+        Write(playerStatesCount);
 
-        Write(count);
-
-        for (int i = 0; i < count; i++)
+        if (playerStatesCount > 0)
         {
-            Write(PlayerIDs[i]);
-            Write(PlayerNames[i]);
+            foreach (var playerState in PlayerStates)
+            {
+                // Include anything not included in world snapshot
+                Write(playerState.PlayerName);
+
+                playerState.Write(this, 0, true);
+            }
         }
 
         return _data;
@@ -53,15 +62,27 @@ public class InitialMatchState : Message
     {
         base.ReadMessage(data);
 
-        Read(out int count);
+        // Read the number of player states
+        byte playerStatesCount;
+        Read(out playerStatesCount);
 
-        PlayerIDs = new byte[count];
-        PlayerNames = new string[count];
-
-        for (int i = 0; i < count; i++)
+        if (playerStatesCount > 0)
         {
-            Read(out PlayerIDs[i]);
-            Read(out PlayerNames[i]);
+            PlayerStates = new PlayerState[playerStatesCount];
+
+            for (int i = 0; i < playerStatesCount; i++)
+            {
+                PlayerStates[i] = new PlayerState();
+
+                // Read anything not included in world snapshot
+                Read(out PlayerStates[i].PlayerName);
+
+                PlayerStates[i].Read(this, 0, true);
+            }
+        }
+        else
+        {
+            PlayerStates = Array.Empty<PlayerState>();
         }
     }
 
@@ -70,28 +91,15 @@ public class InitialMatchState : Message
     // ----------------------
 
 
-
     public static void Send(ENetPacketPeer client)
     {
         var playerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray();
-        int numPlayers = playerStates.Length;
-
-        byte[] playerIDs = new byte[numPlayers];
-        string[] playerNames = new string[numPlayers];
-
-        for(int i = 0; i < numPlayers; ++i)
-        {
-            var playerState = playerStates[i];
-            playerIDs[i] = playerState.PlayerID;
-            playerNames[i] = playerState.PlayerName;
-        }
 
         var msg = new InitialMatchState
         {
             MessageType = Msg.S2C_INITIAL_MATCH_STATE,
             ENetFlags = ENetPacketFlags.Reliable,
-            PlayerIDs = playerIDs,
-            PlayerNames = playerNames,
+            PlayerStates = playerStates
         };
 
         GD.Print($"sending initial match state to peer: {client}");

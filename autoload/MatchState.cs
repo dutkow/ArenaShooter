@@ -113,12 +113,16 @@ public partial class MatchState : Node
 
     public void OnReceivedInitialMatchState(InitialMatchState initialMatchState)
     {
-        for(int i = 0; i < initialMatchState.PlayerIDs.Length; ++i)
+        if(initialMatchState.PlayerStates == null)
         {
-            byte playerID = initialMatchState.PlayerIDs[i];
+            GD.Print($"initial match state player states are null");
+            return;
 
-            GD.Print($"player id in initial match state: {playerID}");
-            AddPlayer(initialMatchState.PlayerIDs[i], initialMatchState.PlayerNames[i]);
+        }
+        for(int i = 0; i < initialMatchState.PlayerStates.Length; ++i)
+        {
+
+            AddExistingPlayerOnClientJoined(initialMatchState.PlayerStates[i]);
         }
     }
 
@@ -228,6 +232,20 @@ public partial class MatchState : Node
         if (ClientGame.Instance != null && playerID == ClientGame.Instance.LocalPlayerID)
         {
             ClientGame.Instance.AssignPlayerState(playerState);
+        }
+    }
+
+    public void AddExistingPlayerOnClientJoined(PlayerState playerState)
+    {
+        ConnectedPlayers[playerState.PlayerID] = playerState;
+
+        if(playerState.IsAlive)
+        {
+
+            SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Rotation.Y);
+
+            GD.Print($"client is spawning {playerState.PlayerID} at position {playerState.CharacterPublicState.Position}");
+
         }
     }
 

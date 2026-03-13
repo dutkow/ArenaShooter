@@ -61,7 +61,7 @@ public partial class Pawn : Entity
         return cmd;
     }
 
-    public virtual void ApplyInput(ClientInputCommand cmd) { }
+    public virtual void TickWithCommand(ClientInputCommand cmd) { }
     public virtual void ProcessClientInput(ClientInputCommand cmd) { }
 
     public virtual void ApplySnapshot(CharacterSnapshot snapshot) { }
