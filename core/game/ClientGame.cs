@@ -98,11 +98,13 @@ public class ClientGame
                 Character character = foundPlayerState.Character;
                 if (character != null)
                 {
-                    character.ApplyPublicState(playerState.CharacterPublicState);
+                    GD.Print($"PlayerID: {playerState.PlayerID}, PublicFlags: {playerState.CharacterPublicState.Flags}");
+
+                    character.ApplyAuthoritativePublicState(playerState.CharacterPublicState);
 
                     if(playerState.PlayerID == ClientGame.Instance.LocalPlayerID)
                     {
-                        character.ApplyPrivateState(playerState.CharacterPrivateState);
+                        character.ApplyAuthoritativePrivateState(playerState.CharacterPrivateState);
                     }
                 }
                 // Client doesn't know about this character but it's alive, spawn it
@@ -110,6 +112,10 @@ public class ClientGame
                 {
                     SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Rotation.X);
                 }
+            }
+            else
+            {
+                GD.Print($"client doesn't ahve this player in connected players");
             }
         }
 

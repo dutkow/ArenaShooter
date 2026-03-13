@@ -640,14 +640,12 @@ public partial class Character : Pawn, IDamageable
     }
 
     // Apply Replicated States
-    public void ApplyPublicState(CharacterPublicState publicState)
+    public void ApplyAuthoritativePublicState(CharacterPublicState publicState)
     {
         CharacterPublicFlags flags = publicState.Flags;
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
-            GD.Print($"Running apply public state on player id: {PlayerState.PlayerID} and PLAYER MOVED. ");
-
             if (IsLocal)
             {
                 foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
@@ -659,8 +657,6 @@ public partial class Character : Pawn, IDamageable
             }
             else
             {
-                GD.Print($"this character is not local!. ID = {PlayerState.PlayerID}.");
-
                 PlayerState.CharacterPublicState.Position = publicState.Position;
             }
         }
@@ -689,7 +685,7 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
-    public void ApplyPrivateState(CharacterPrivateState privateState)
+    public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)
     {
         CharacterPrivateFlags flags = privateState.Flags;
 
