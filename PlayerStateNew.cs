@@ -84,7 +84,7 @@ public enum CharacterPrivateFlags : byte
     AMMO_CHANGED = 1 << 5,
 }
 
-public static class StateHelpers
+public static class FlagStatics
 {
     public static void SetAndFlag<TField, TFlag>(ref TField field, TField value, ref TFlag flags, TFlag flag)
         where TField : struct, IEquatable<TField>
@@ -96,6 +96,8 @@ public static class StateHelpers
             flags = (TFlag)(object)(((ushort)(object)flags) | ((ushort)(object)flag));
         }
     }
+
+
 }
 
 public class ExamplePlayerState
@@ -146,27 +148,71 @@ public class CharacterPrivateState
 
 }
 
-public partial class ExampleCharacter : Node3D
+public partial class ExampleCharacter : Node3D, ILifeEntity
 {
-    CharacterPublicState PublicState = new();
-    CharacterPrivateState PrivateState = new();
+    private CharacterPublicState PublicState = new CharacterPublicState();
+    private CharacterPrivateState PrivateState = new CharacterPrivateState();
 
+    // Health & Armor
+    public int GetHealth()
+    {
+        return PrivateState.Health;
+    }
+
+    public void SetHealth(int health)
+    {
+        byte clamped = (byte)Math.Clamp(health, 0, PrivateState.MaxHealth);
+        FlagStatics.SetAndFlag(ref PrivateState.Health, clamped, ref PrivateState.Flags, CharacterPrivateFlags.HEALTH_CHANGED);
+    }
+
+    public int GetMaxHealth()
+    {
+        return PrivateState.MaxHealth;
+    }
+
+    public void SetMaxHealth(int maxHealth)
+    {
+        byte clamped = (byte)maxHealth;
+        FlagStatics.SetAndFlag(ref PrivateState.MaxHealth, clamped, ref PrivateState.Flags, CharacterPrivateFlags.MAX_HEALTH_CHANGED);
+    }
+
+    public int GetArmor()
+    {
+        return PrivateState.Armor;
+    }
+
+    public void SetArmor(int armor)
+    {
+        byte clamped = (byte)Math.Clamp(armor, 0, PrivateState.MaxArmor);
+        FlagStatics.SetAndFlag(ref PrivateState.Armor, clamped, ref PrivateState.Flags, CharacterPrivateFlags.ARMOR_CHANGED);
+    }
+
+    public int GetMaxArmor()
+    {
+        return PrivateState.MaxArmor;
+    }
+
+    public void SetMaxArmor(int maxArmor)
+    {
+        byte clamped = (byte)maxArmor;
+        FlagStatics.SetAndFlag(ref PrivateState.MaxArmor, clamped, ref PrivateState.Flags, CharacterPrivateFlags.MAX_ARMOR_CHANGED);
+    }
+
+    // Public State Changes
     public void OnPositionChanged(Vector3 position)
     {
-        PublicState.Position = position;
-        PublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+        FlagStatics.SetAndFlag(ref PublicState.Position, position, ref PublicState.Flags, CharacterPublicFlags.POSITION_CHANGED);
     }
 
     public void OnRotationChanged(float globalYaw, float localPitch)
     {
-        PublicState.Rotation = new Vector2(globalYaw, localPitch);
-        PublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
+        Vector2 rotation = new Vector2(globalYaw, localPitch);
+        FlagStatics.SetAndFlag(ref PublicState.Rotation, rotation, ref PublicState.Flags, CharacterPublicFlags.ROTATION_CHANGED);
     }
 
     public void OnVelocityChanged(Vector3 velocity)
     {
-        PublicState.Velocity = velocity;
-        PublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
+        FlagStatics.SetAndFlag(ref PublicState.Velocity, velocity, ref PublicState.Flags, CharacterPublicFlags.VELOCITY_CHANGED);
     }
 
     public void OnMovementModeChanged(CharacterMoveMode movementMode)
@@ -181,38 +227,18 @@ public partial class ExampleCharacter : Node3D
         PublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
     }
 
-    public void OnHealthChanged(byte health)
-    {
-        PrivateState.Health = health;
-        PrivateState.Flags |= CharacterPrivateFlags.HEALTH_CHANGED;
-    }
-
-    public void OnMaxHealthChanged(byte maxHealth)
-    {
-        PrivateState.Health = maxHealth;
-        PrivateState.Flags |= CharacterPrivateFlags.MAX_HEALTH_CHANGED;
-    }
-
-    public void OnArmorChanged(byte armor)
-    {
-        PrivateState.Armor = armor;
-        PrivateState.Flags |= CharacterPrivateFlags.ARMOR_CHANGED;
-    }
-
-    public void OnMaxArmorChanged(byte maxArmor)
-    {
-        PrivateState.MaxArmor = maxArmor;
-        PrivateState.Flags |= CharacterPrivateFlags.MAX_ARMOR_CHANGED;
-    }
+    // Weapons & Ammo
     public void OnReceivedWeapon(WeaponType weaponType)
     {
-        PrivateState.HeldWeaponsFlags |= WeaponConstants.MaskFromWeapon(weaponType);
+        WeaponFlags mask = WeaponConstants.MaskFromWeapon(weaponType);
+        PrivateState.HeldWeaponsFlags |= mask;
         PrivateState.Flags |= CharacterPrivateFlags.WEAPONS_CHANGED;
     }
 
     public void OnLostWeapon(WeaponType weaponType)
     {
-        PrivateState.HeldWeaponsFlags &= ~WeaponConstants.MaskFromWeapon(weaponType);
+        WeaponFlags mask = WeaponConstants.MaskFromWeapon(weaponType);
+        PrivateState.HeldWeaponsFlags &= ~mask;
         PrivateState.Flags |= CharacterPrivateFlags.WEAPONS_CHANGED;
     }
 
@@ -227,35 +253,35 @@ public partial class ExampleCharacter : Node3D
         }
     }
 
+    // Apply Replicated States
     public void ApplyPublicState(CharacterPublicState publicState)
     {
         CharacterPublicFlags flags = publicState.Flags;
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
-
+            PublicState.Position = publicState.Position;
         }
+
         if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
         {
-
+            PublicState.Rotation = publicState.Rotation;
         }
+
         if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0)
         {
-
+            PublicState.Velocity = publicState.Velocity;
         }
+
         if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0)
         {
+            PublicState.MovementMode = publicState.MovementMode;
         }
+
         if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0)
         {
-
+            PublicState.EquippedWeapon = publicState.EquippedWeapon;
         }
-    }
-
-    public void ClearFlags()
-    {
-        PublicState.Flags = 0;
-        PrivateState.Flags = 0;
     }
 
     public void ApplyPrivateState(CharacterPrivateState privateState)
@@ -264,38 +290,33 @@ public partial class ExampleCharacter : Node3D
 
         if ((flags & CharacterPrivateFlags.HEALTH_CHANGED) != 0)
         {
-
+            PrivateState.Health = privateState.Health;
         }
+
         if ((flags & CharacterPrivateFlags.MAX_HEALTH_CHANGED) != 0)
         {
-
+            PrivateState.MaxHealth = privateState.MaxHealth;
         }
+
         if ((flags & CharacterPrivateFlags.ARMOR_CHANGED) != 0)
         {
-
+            PrivateState.Armor = privateState.Armor;
         }
+
         if ((flags & CharacterPrivateFlags.MAX_ARMOR_CHANGED) != 0)
         {
-
+            PrivateState.MaxArmor = privateState.MaxArmor;
         }
+
         if ((flags & CharacterPrivateFlags.WEAPONS_CHANGED) != 0)
         {
-            WeaponFlags weaponFlags = privateState.HeldWeaponsFlags;
-            for (int i = 0; i < WeaponConstants.TOTAL_WEAPON_SLOTS; i++)
-            {
-                WeaponFlags mask = (WeaponFlags)(1 << i);
-                if ((weaponFlags & mask) != 0)
-                {
-                    bool isHeld = (privateState.HeldWeaponsFlags & mask) != 0;
-                }
-            }
-
             PrivateState.HeldWeaponsFlags = privateState.HeldWeaponsFlags;
         }
+
         if ((flags & CharacterPrivateFlags.AMMO_CHANGED) != 0)
         {
             WeaponFlags ammoFlags = privateState.AmmoChangedFlags;
-            for (int i = 0; i < WeaponConstants.TotalWeaponSlots; i++)
+            for (int i = 0; i < WeaponConstants.TOTAL_WEAPON_SLOTS; i++)
             {
                 WeaponFlags mask = (WeaponFlags)(1 << i);
                 if ((ammoFlags & mask) != 0)
@@ -307,8 +328,14 @@ public partial class ExampleCharacter : Node3D
             PrivateState.AmmoChangedFlags = privateState.AmmoChangedFlags;
         }
     }
-}
 
+    // Flags management
+    public void ClearFlags()
+    {
+        PublicState.Flags = 0;
+        PrivateState.Flags = 0;
+    }
+}
 
 public partial class PlayerStateNew
 {
