@@ -40,7 +40,7 @@ public class ClientGame
         var cmd = GetClientInputCommand(); // client generates input and applies it locally
 
         LocalPlayerController?.ApplyInput(cmd);
-        LocalPlayerPawn?.TickWithCommand(cmd);
+        LocalPlayerPawn?.ApplyInput(cmd);
 
         if(!NetworkSession.Instance.IsListenServer)
         {
@@ -99,11 +99,11 @@ public class ClientGame
                 Character character = foundPlayerState.Character;
                 if (character != null)
                 {
-                    character.ApplyPublicState(foundPlayerState.CharacterPublicState);
+                    character.ApplyPublicState(playerState.CharacterPublicState);
 
-                    if(foundPlayerState.PlayerID == ClientGame.Instance.LocalPlayerID)
+                    if(playerState.PlayerID == ClientGame.Instance.LocalPlayerID)
                     {
-                        character.ApplyPrivateState(foundPlayerState.CharacterPrivateState);
+                        character.ApplyPrivateState(playerState.CharacterPrivateState);
                     }
                 }
                 // Client doesn't know about this character but it's alive, spawn it

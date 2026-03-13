@@ -96,13 +96,23 @@ public partial class Character : Pawn, IDamageable
 
     }
 
-    public override void TickWithCommand(ClientInputCommand cmd)
+    public override void ApplyInput(ClientInputCommand cmd)
     {
-        base.TickWithCommand(cmd);
+        base.ApplyInput(cmd);
 
         MovementComp.HandleInput(cmd, NetworkConstants.SERVER_TICK_INTERVAL);
         _weapon.HandleInput(cmd.Mask);
 
+        if(IsAuthority)
+        {
+            UpdatePositionState(MovementComp.State.Position);
+        }
+        else if(IsLocal)
+        {
+            GlobalPosition = MovementComp.State.Position;
+        }
+
+        /*
         if (IsLocal)
         {
             UpdatePositionState(MovementComp.State.Position);
@@ -112,7 +122,7 @@ public partial class Character : Pawn, IDamageable
             GlobalPosition = MovementComp.State.Position;
             GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
             _thirdPersonWeaponSocket.Rotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
-        }
+        }*/
     }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
@@ -132,6 +142,9 @@ public partial class Character : Pawn, IDamageable
         }
 
         MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+
+
+        UpdatePositionState(MovementComp.State.Position);
 
 
         _weapon.ProcessClientInput(cmd.Mask);
@@ -552,7 +565,6 @@ public partial class Character : Pawn, IDamageable
 
     public void UpdatePositionState(Vector3 position)
     {
-
         if (GlobalPosition.DistanceSquaredTo(position) > POSITION_EPSILON * POSITION_EPSILON)
         {
             PlayerState.CharacterPublicState.Position = position;
@@ -624,6 +636,8 @@ public partial class Character : Pawn, IDamageable
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
+            GD.Print($"client received position changed: {publicState.Position}");
+
             GlobalPosition = publicState.Position;
             PlayerState.CharacterPublicState.Position = publicState.Position;
         }

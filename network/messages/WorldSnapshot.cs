@@ -186,12 +186,16 @@ public class WorldSnapshot : Message
         newSnapshot.PickupMask = PickupManager.Instance.PickupMask;
 
         newSnapshot.PlayerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray();
+
+
         return newSnapshot;
     }
 
     // Build a delta snapshot compared to a previous snapshot
     public WorldSnapshot BuildDelta(WorldSnapshot previous)
     {
+        return previous;
+        /*
         if (previous == null)
             return this;
 
@@ -262,7 +266,7 @@ public class WorldSnapshot : Message
             PickupMask = PickupMask,
             PlayerStates = deltaList.ToArray(),
             MessageType = Msg.S2C_WORLD_SNAPSHOT
-        };
+        };*/
     }
 
     public void AddPrivatePlayerInfo(byte playerID)
