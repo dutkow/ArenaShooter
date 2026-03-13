@@ -341,7 +341,6 @@ public partial class Character : Pawn, IDamageable
                     PlayerState.CharacterPrivateState.Ammo[i] = privateState.Ammo[i];
                 }
             }
-
             PlayerState.CharacterPrivateState.AmmoChangedFlags = privateState.AmmoChangedFlags;
         }
     }
@@ -392,12 +391,12 @@ public partial class Character : Pawn, IDamageable
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
         const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
-        const float INTERP_THRESHOLD_H = 0.025f;      // Horizontal lerp start
-        const float INTERP_THRESHOLD_V = 0.025f;     // Vertical lerp start
+        const float INTERP_THRESHOLD_H = 0.01f;      // Horizontal lerp start
+        const float INTERP_THRESHOLD_V = 0.01f;     // Vertical lerp start
 
         // Lerp speeds
-        const float INTERP_SPEED_H = 0.15f;
-        const float INTERP_SPEED_V = 0.15f;
+        const float INTERP_SPEED_H = 0.25f;
+        const float INTERP_SPEED_V = 0.25f;
 
         Vector3 targetPos = authoritativeState.Position;
         Vector3 currentPos = PredictedPublicState.Position;
@@ -456,6 +455,8 @@ public partial class Character : Pawn, IDamageable
 
             if (_lookDirty)
             {
+                PredictedPublicState.Rotation = new Vector2(GlobalRotation.Y, _cameraPivot.Rotation.X);
+
                 cmd.Mask |= ClientCommandMask.LOOK;
                 cmd.Look = PredictedPublicState.Rotation;
                 _lookDirty = false;
@@ -477,6 +478,8 @@ public partial class Character : Pawn, IDamageable
         }
 
         MovementComp.LaunchVector = Vector3.Zero;
+
+
 
         return cmd;
     }
@@ -560,10 +563,6 @@ public partial class Character : Pawn, IDamageable
                 if (IsAuthority)
                 {
                     UpdateRotationState(newLookRotation);
-                }
-                else
-                {
-                    PredictedPublicState.Rotation = newLookRotation;
                 }
             }
         }
