@@ -2,7 +2,7 @@ using Godot;
 
 public class CharacterMovementComponent
 {
-    private ArenaCharacter _character;
+    private ArenaCharacterOld _character;
 
     public Vector3 Velocity;
     private Vector3 _targetVelocity;
@@ -14,7 +14,7 @@ public class CharacterMovementComponent
     public float JumpVelocity = 50;
     public float AirControlAcceleration = 0.5f;
 
-    public void SetCharacter(ArenaCharacter character)
+    public void SetCharacter(ArenaCharacterOld character)
     {
         _character = character;
     }

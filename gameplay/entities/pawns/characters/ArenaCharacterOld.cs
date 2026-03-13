@@ -10,7 +10,7 @@ public enum MovementState
     FALLING
 }
 
-public partial class ArenaCharacter : CharacterBody3D, IPossessable, INetworkedObject, IDamageable, IPlayerEntity
+public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetworkedObject, IDamageable, IPlayerEntity
 {
     // ----------------------
     // Exports & Components

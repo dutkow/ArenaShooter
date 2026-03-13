@@ -25,7 +25,7 @@ public partial class UIRoot : Control
         ShowPlayerHud();
     }
 
-    public void OnPossessedArenaCharacter(ArenaCharacter character)
+    public void OnPossessedArenaCharacter(ArenaCharacterOld character)
     {
         EnsurePlayerHud();
 

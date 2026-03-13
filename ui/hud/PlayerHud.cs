@@ -6,7 +6,7 @@ public partial class PlayerHud : Control
     [Export] private ShieldBar _shieldBar;
     [Export] private HealthBar _healthBar;
 
-    public void AssignToArenaCharacter(ArenaCharacter character)
+    public void AssignToArenaCharacter(ArenaCharacterOld character)
     {
         var healthComponent = character.HealthComponent;
 
