@@ -661,14 +661,15 @@ public partial class Character : Pawn, IDamageable
             }
         }
 
-
-        if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
+        if(!IsLocal)
         {
-            GD.Print($"Running apply public state on player id: {PlayerState.PlayerID} and PLAYER ROTATED. ");
-
-            PlayerState.CharacterPublicState.Rotation = publicState.Rotation;
+            if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
+            {
+                PlayerState.CharacterPublicState.Rotation = publicState.Rotation;
+            }
         }
 
+        /*
         if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0)
         {
             PlayerState.CharacterPublicState.Velocity = publicState.Velocity;
@@ -682,7 +683,7 @@ public partial class Character : Pawn, IDamageable
         if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0)
         {
             PlayerState.CharacterPublicState.EquippedWeapon = publicState.EquippedWeapon;
-        }
+        }*/
     }
 
     public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)

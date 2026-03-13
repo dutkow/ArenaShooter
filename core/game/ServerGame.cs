@@ -39,7 +39,6 @@ public class ServerGame
     {
         var newSnapshot = WorldSnapshot.Build();
 
-        ProcessNextClientInputs();
 
         NetworkSender.Broadcast(newSnapshot);
         //SendWorldSnapshotDeltas(newSnapshot); // in this we send the snapshot prior to updating the next client input. we could alternatively, process client inputs, then update?
@@ -47,9 +46,9 @@ public class ServerGame
 
         foreach(var playerState in newSnapshot.PlayerStates)
         {
-            GD.Print($"sending player id: {playerState.PlayerID} moved = {playerState.CharacterPublicState.Flags.HasFlag(CharacterPublicFlags.POSITION_CHANGED)}");
             playerState.ClearFlags();
         }
+        ProcessNextClientInputs();
 
     }
 

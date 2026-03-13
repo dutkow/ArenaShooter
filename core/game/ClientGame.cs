@@ -98,8 +98,6 @@ public class ClientGame
                 Character character = foundPlayerState.Character;
                 if (character != null)
                 {
-                    GD.Print($"PlayerID: {playerState.PlayerID}, PublicFlags: {playerState.CharacterPublicState.Flags}");
-
                     character.ApplyAuthoritativePublicState(playerState.CharacterPublicState);
 
                     if(playerState.PlayerID == ClientGame.Instance.LocalPlayerID)
@@ -112,10 +110,6 @@ public class ClientGame
                 {
                     SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Rotation.X);
                 }
-            }
-            else
-            {
-                GD.Print($"client doesn't ahve this player in connected players");
             }
         }
 
