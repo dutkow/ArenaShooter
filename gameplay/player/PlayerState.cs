@@ -35,6 +35,8 @@ public class PlayerState()
 
         if (forceFull)
         {
+            msg.Add(PlayerName);
+
             msg.Add(Kills);
             msg.Add(Deaths);
             msg.Add(Ping);
@@ -67,6 +69,8 @@ public class PlayerState()
 
         if (forceFull)
         {
+            msg.Write(PlayerName);
+
             msg.Write(Kills);
             msg.Write(Deaths);
             msg.Write(Ping);
@@ -101,6 +105,8 @@ public class PlayerState()
 
         if (forceFull)
         {
+            msg.Read(out PlayerName);
+
             msg.Read(out Kills);
             msg.Read(out Deaths);
             msg.Read(out Ping);

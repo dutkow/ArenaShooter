@@ -25,10 +25,6 @@ public class InitialMatchState : Message
         {
             foreach (var playerState in PlayerStates)
             {
-                // Include anything not included in world snapshot
-                Add(playerState.PlayerName);
-
-                // This will include default snapshot
                 playerState.Add(this, 0, true);
             }
         }
@@ -48,9 +44,6 @@ public class InitialMatchState : Message
         {
             foreach (var playerState in PlayerStates)
             {
-                // Include anything not included in world snapshot
-                Write(playerState.PlayerName);
-
                 playerState.Write(this, 0, true);
             }
         }
@@ -62,9 +55,11 @@ public class InitialMatchState : Message
     {
         base.ReadMessage(data);
 
-        // Read the number of player states
+        // Read the number of players
         byte playerStatesCount;
         Read(out playerStatesCount);
+
+        GD.Print($"num received players: {playerStatesCount}");
 
         if (playerStatesCount > 0)
         {
@@ -72,17 +67,9 @@ public class InitialMatchState : Message
 
             for (int i = 0; i < playerStatesCount; i++)
             {
-                PlayerStates[i] = new PlayerState();
-
-                // Read anything not included in world snapshot
-                Read(out PlayerStates[i].PlayerName);
-
+                PlayerStates[i] = new PlayerState(); // ✅ important!
                 PlayerStates[i].Read(this, 0, true);
             }
-        }
-        else
-        {
-            PlayerStates = Array.Empty<PlayerState>();
         }
     }
 
@@ -102,7 +89,15 @@ public class InitialMatchState : Message
             PlayerStates = playerStates
         };
 
-        GD.Print($"sending initial match state to peer: {client}");
+        GD.Print($"SENDING INITIAL MATCH STATE");
+
+        foreach (var playerState in msg.PlayerStates)
+        {
+            GD.Print($"initial match state SEND PLAYER DATA. playerID: {playerState.PlayerID}. is alive: {playerState.IsAlive}. player name: {playerState.PlayerName}. player position: {playerState.CharacterPublicState.Position}");
+        }
+        GD.Print($"---------------------------");
+
+
         NetworkSender.ToClient(client, msg);
     }
 }

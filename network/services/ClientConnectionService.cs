@@ -41,6 +41,13 @@ public static class ClientConnectionService
 
         MatchState.Instance.OnReceivedInitialMatchState(msg);
         GD.Print($"Client received: {msg.MessageType}");
+
+        foreach(var playerState in msg.PlayerStates)
+        {
+            GD.Print($"initial match state RECEIVE PLAYER DATA. playerID: {playerState.PlayerID}. is alive: {playerState.IsAlive}. player name: {playerState.PlayerName}. player position: {playerState.CharacterPublicState.Position}");
+        }
+        GD.Print($"----------------");
+
     }
 
     public static void HandlePlayerJoined(byte[] data)

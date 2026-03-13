@@ -36,10 +36,14 @@ public static class ServerConnectionService
         //PlayerJoined.Execute(playerID, playerName);
         MatchState.Instance.AddPlayer(playerID, playerName);
 
+        GD.Print($"calling initial match state send in client loaded");
+
+        var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
+
+
         InitialMatchState.Send(peer);
 
 
-        var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
 
         GD.Print($"Server received: {msg.MessageType}");
     }
