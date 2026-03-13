@@ -55,11 +55,6 @@ public class ClientGame
         LocalPlayerState = playerState;
     }
 
-    // REFACTOR CODE
-    public void AssignPlayerStateNew(PlayerStateNew playerState)
-    {
-        LocalPlayerStateNew = playerState;
-    }
 
     public void SendClientCommand(ClientInputCommand cmd)
     {
@@ -100,21 +95,21 @@ public class ClientGame
 
         foreach(var playerState in snapshot.PlayerStates)
         {
-            if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerState.PlayerID, out var playerStateNew))
+            if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerState.PlayerID, out var foundPlayerState))
             {
-                Character character = playerStateNew.PublicState.Character;
+                Character character = foundPlayerState.Character;
                 if (character != null)
                 {
-                    character.ApplyPublicState(playerState.Character.PublicState);
+                    character.ApplyPublicState(foundPlayerState.CharacterPublicState);
 
-                    if(playerState.PlayerID == ClientGame.Instance.LocalPlayerID)
+                    if(foundPlayerState.PlayerID == ClientGame.Instance.LocalPlayerID)
                     {
-                        character.ApplyPrivateState(playerState.Character.PrivateState);
+                        character.ApplyPrivateState(foundPlayerState.CharacterPrivateState);
                     }
                 }
                 else
                 {
-                    SpawnManager.Instance.NewLocalSpawnPlayer(playerState.PlayerID, playerState.Character.PublicState.Position, playerState.Character.PublicState.Rotation.X);
+                    SpawnManager.Instance.NewLocalSpawnPlayer(foundPlayerState.PlayerID, foundPlayerState.CharacterPublicState.Position, foundPlayerState.CharacterPublicState.Rotation.X);
                 }
             }
         }

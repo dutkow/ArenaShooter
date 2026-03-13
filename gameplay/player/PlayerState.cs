@@ -8,6 +8,9 @@ public class PlayerState()
     public string PlayerName;
     public Character Character; // instance, not replicated
 
+    public CharacterPublicState CharacterPublicState = new();
+    public CharacterPrivateState CharacterPrivateState = new();
+
     public PlayerStateFlags Flags;
 
     public byte Kills;

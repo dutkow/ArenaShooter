@@ -127,9 +127,9 @@ public class InitialMatchState : Message
             var player = kvp.Value;
 
             playerIDs[i] = kvp.Key;
-            playerNames[i] = player.PublicState.PlayerName;
+            playerNames[i] = player.PlayerName;
 
-            Character character = player.PublicState.Character;
+            Character character = player.Character;
             if (character != null)
             {
                 positions[i] = character.GlobalPosition;

@@ -12,7 +12,7 @@ public static class ServerGameplayService
         {
             if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerID, out var playerState))
             {
-                var character = playerState.PublicState.Character; // COULD USE IS ALIVE CHECK
+                var character = playerState.Character; // COULD USE IS ALIVE CHECK
                 if (character != null)
                 {
                     var cmd = new ClientCommand();

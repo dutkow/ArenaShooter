@@ -53,7 +53,7 @@ public class ServerGame
         {
             byte playerID = kvp.Key;
             var playerState = kvp.Value;
-            var character = playerState.PublicState.Character;
+            var character = playerState.Character;
 
             if (character == null)
             {

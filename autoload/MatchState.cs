@@ -64,10 +64,10 @@ public partial class MatchState : Node
     // ----------------------
     // Player management
     // ----------------------
-    public Dictionary<byte, PlayerStateNew> NewConnectedPlayers = new();
+    public Dictionary<byte, PlayerState> NewConnectedPlayers = new();
 
     public event Action<PlayerState>? PlayerJoined;
-    public event Action<PlayerStateNew>? PlayerJoinedNew;
+    public event Action<PlayerState>? PlayerJoinedNew;
 
     public event Action<int, PlayerState>? PlayerLeft;
 
@@ -209,15 +209,15 @@ public partial class MatchState : Node
             return; // Already added
         }
 
-        var playerState = new PlayerStateNew();
-        playerState.PublicState.PlayerName = playerName;
+        var playerState = new PlayerState();
+        playerState.PlayerName = playerName;
   
         NewConnectedPlayers[playerID] = playerState;
 
         try
         {
             PlayerJoinedNew?.Invoke(playerState);
-            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PublicState.PlayerName}. Network Mode = {NetworkSession.Instance.NetworkMode}");
+            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PlayerName}. Network Mode = {NetworkSession.Instance.NetworkMode}");
 
         }
         catch (Exception e)
@@ -227,7 +227,7 @@ public partial class MatchState : Node
 
         if (ClientGame.Instance != null && playerID == ClientGame.Instance.LocalPlayerID)
         {
-            ClientGame.Instance.AssignPlayerStateNew(playerState);
+            ClientGame.Instance.AssignPlayerState(playerState);
         }
     }
 

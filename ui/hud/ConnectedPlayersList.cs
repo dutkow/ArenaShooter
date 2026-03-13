@@ -26,7 +26,7 @@ public partial class ConnectedPlayersList : Control
         // REFACTOR
         foreach (var kvp in MatchState.Instance.NewConnectedPlayers)
         {
-            NewAddPlayerToList(kvp.Value.PublicState);
+            AddPlayerToList(kvp.Value);
         }
     }
 
@@ -37,10 +37,5 @@ public partial class ConnectedPlayersList : Control
         _playerListContainer.AddChild(playerLabel);
     }
 
-    public void NewAddPlayerToList(PublicPlayerState playerState)
-    {
-        Label playerLabel = new();
-        playerLabel.Text = playerState.PlayerName;
-        _playerListContainer.AddChild(playerLabel);
-    }
+
 }

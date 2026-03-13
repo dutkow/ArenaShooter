@@ -494,100 +494,95 @@ public partial class Character : Pawn, IDamageable
     }
 
 
-
-
-    public CharacterPublicState PublicState = new CharacterPublicState();
-    public CharacterPrivateState PrivateState = new CharacterPrivateState();
-
     // Health & Armor
     public int GetHealth()
     {
-        return PrivateState.Health;
+        return PlayerState.CharacterPrivateState.Health;
     }
 
     public void SetHealth(int health)
     {
-        PrivateState.Health = (byte)health;
-        PrivateState.Flags |= CharacterPrivateFlags.HEALTH_CHANGED;
+        PlayerState.CharacterPrivateState.Health = (byte)health;
+        PlayerState.CharacterPrivateState.Flags |= CharacterPrivateFlags.HEALTH_CHANGED;
     }
 
     public int GetMaxHealth()
     {
-        return PrivateState.MaxHealth;
+        return PlayerState.CharacterPrivateState.MaxHealth;
     }
 
     public void SetMaxHealth(int maxHealth)
     {
-        PrivateState.MaxHealth = (byte)maxHealth;
-        PrivateState.Flags |= CharacterPrivateFlags.MAX_HEALTH_CHANGED;
+        PlayerState.CharacterPrivateState.MaxHealth = (byte)maxHealth;
+        PlayerState.CharacterPrivateState.Flags |= CharacterPrivateFlags.MAX_HEALTH_CHANGED;
     }
 
     public int GetArmor()
     {
-        return PrivateState.Armor;
+        return PlayerState.CharacterPrivateState.Armor;
     }
 
     public void SetArmor(int armor)
     {
-        PrivateState.Armor = (byte)armor;
-        PrivateState.Flags |= CharacterPrivateFlags.ARMOR_CHANGED;
+        PlayerState.CharacterPrivateState.Armor = (byte)armor;
+        PlayerState.CharacterPrivateState.Flags |= CharacterPrivateFlags.ARMOR_CHANGED;
     }
 
     public int GetMaxArmor()
     {
-        return PrivateState.MaxArmor;
+        return PlayerState.CharacterPrivateState.MaxArmor;
     }
 
     public void SetMaxArmor(int maxArmor)
     {
-        PrivateState.MaxArmor = (byte)maxArmor;
-        PrivateState.Flags |= CharacterPrivateFlags.MAX_ARMOR_CHANGED;
+        PlayerState.CharacterPrivateState.MaxArmor = (byte)maxArmor;
+        PlayerState.CharacterPrivateState.Flags |= CharacterPrivateFlags.MAX_ARMOR_CHANGED;
     }
 
     // Public State Changes
     public void OnPositionChanged(Vector3 position)
     {
-        PublicState.Position = position;
-        PublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+        PlayerState.CharacterPublicState.Position = position;
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
     }
 
     public void OnRotationChanged(float globalYaw, float localPitch)
     {
-        PublicState.Rotation = new Vector2(globalYaw, localPitch);
-        PublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
+        PlayerState.CharacterPublicState.Rotation = new Vector2(globalYaw, localPitch);
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
     }
 
     public void OnVelocityChanged(Vector3 velocity)
     {
-        PublicState.Velocity = velocity;
-        PublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
+        PlayerState.CharacterPublicState.Velocity = velocity;
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
     }
 
     public void OnMovementModeChanged(CharacterMoveMode movementMode)
     {
-        PublicState.MovementMode = movementMode;
-        PublicState.Flags |= CharacterPublicFlags.MOVEMENT_MODE_CHANGED;
+        PlayerState.CharacterPublicState.MovementMode = movementMode;
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.MOVEMENT_MODE_CHANGED;
     }
 
     public void OnEquippedWeaponChanged(WeaponType weaponType)
     {
-        PublicState.EquippedWeapon = weaponType;
-        PublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
+        PlayerState.CharacterPublicState.EquippedWeapon = weaponType;
+        PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
     }
 
     // Weapons & Ammo
     public void OnReceivedWeapon(WeaponType weaponType)
     {
         WeaponFlags mask = WeaponConstants.MaskFromWeapon(weaponType);
-        PrivateState.HeldWeaponsFlags |= mask;
-        PrivateState.Flags |= CharacterPrivateFlags.WEAPONS_CHANGED;
+        PlayerState.CharacterPrivateState.HeldWeaponsFlags |= mask;
+        PlayerState.CharacterPrivateState.Flags |= CharacterPrivateFlags.WEAPONS_CHANGED;
     }
 
     public void OnLostWeapon(WeaponType weaponType)
     {
         WeaponFlags mask = WeaponConstants.MaskFromWeapon(weaponType);
-        PrivateState.HeldWeaponsFlags &= ~mask;
-        PrivateState.Flags |= CharacterPrivateFlags.WEAPONS_CHANGED;
+        PlayerState.CharacterPrivateState.HeldWeaponsFlags &= ~mask;
+        PlayerState.CharacterPrivateState.Flags |= CharacterPrivateFlags.WEAPONS_CHANGED;
     }
 
     public void OnAmmoChanged(WeaponType weaponType, byte newAmmo)
@@ -595,9 +590,9 @@ public partial class Character : Pawn, IDamageable
         int index = (int)weaponType;
         if (index < WeaponConstants.TOTAL_WEAPON_SLOTS)
         {
-            PrivateState.Ammo[index] = newAmmo;
-            PrivateState.AmmoChangedFlags |= WeaponConstants.MaskFromWeapon(weaponType);
-            PrivateState.Flags |= CharacterPrivateFlags.AMMO_CHANGED;
+            PlayerState.CharacterPrivateState.Ammo[index] = newAmmo;
+            PlayerState.CharacterPrivateState.AmmoChangedFlags |= WeaponConstants.MaskFromWeapon(weaponType);
+            PlayerState.CharacterPrivateState.Flags |= CharacterPrivateFlags.AMMO_CHANGED;
         }
     }
 
@@ -608,27 +603,27 @@ public partial class Character : Pawn, IDamageable
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
-            PublicState.Position = publicState.Position;
+            PlayerState.CharacterPublicState.Position = publicState.Position;
         }
 
         if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
         {
-            PublicState.Rotation = publicState.Rotation;
+            PlayerState.CharacterPublicState.Rotation = publicState.Rotation;
         }
 
         if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0)
         {
-            PublicState.Velocity = publicState.Velocity;
+            PlayerState.CharacterPublicState.Velocity = publicState.Velocity;
         }
 
         if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0)
         {
-            PublicState.MovementMode = publicState.MovementMode;
+            PlayerState.CharacterPublicState.MovementMode = publicState.MovementMode;
         }
 
         if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0)
         {
-            PublicState.EquippedWeapon = publicState.EquippedWeapon;
+            PlayerState.CharacterPublicState.EquippedWeapon = publicState.EquippedWeapon;
         }
     }
 
@@ -638,27 +633,27 @@ public partial class Character : Pawn, IDamageable
 
         if ((flags & CharacterPrivateFlags.HEALTH_CHANGED) != 0)
         {
-            PrivateState.Health = privateState.Health;
+            PlayerState.CharacterPrivateState.Health = privateState.Health;
         }
 
         if ((flags & CharacterPrivateFlags.MAX_HEALTH_CHANGED) != 0)
         {
-            PrivateState.MaxHealth = privateState.MaxHealth;
+            PlayerState.CharacterPrivateState.MaxHealth = privateState.MaxHealth;
         }
 
         if ((flags & CharacterPrivateFlags.ARMOR_CHANGED) != 0)
         {
-            PrivateState.Armor = privateState.Armor;
+            PlayerState.CharacterPrivateState.Armor = privateState.Armor;
         }
 
         if ((flags & CharacterPrivateFlags.MAX_ARMOR_CHANGED) != 0)
         {
-            PrivateState.MaxArmor = privateState.MaxArmor;
+            PlayerState.CharacterPrivateState.MaxArmor = privateState.MaxArmor;
         }
 
         if ((flags & CharacterPrivateFlags.WEAPONS_CHANGED) != 0)
         {
-            PrivateState.HeldWeaponsFlags = privateState.HeldWeaponsFlags;
+            PlayerState.CharacterPrivateState.HeldWeaponsFlags = privateState.HeldWeaponsFlags;
         }
 
         if ((flags & CharacterPrivateFlags.AMMO_CHANGED) != 0)
@@ -669,18 +664,18 @@ public partial class Character : Pawn, IDamageable
                 WeaponFlags mask = (WeaponFlags)(1 << i);
                 if ((ammoFlags & mask) != 0)
                 {
-                    PrivateState.Ammo[i] = privateState.Ammo[i];
+                    PlayerState.CharacterPrivateState.Ammo[i] = privateState.Ammo[i];
                 }
             }
 
-            PrivateState.AmmoChangedFlags = privateState.AmmoChangedFlags;
+            PlayerState.CharacterPrivateState.AmmoChangedFlags = privateState.AmmoChangedFlags;
         }
     }
 
     // Flags management
     public void ClearFlags()
     {
-        PublicState.ClearFlags();
-        PrivateState.ClearFlags();
+        PlayerState.CharacterPublicState.ClearFlags();
+        PlayerState.CharacterPrivateState.ClearFlags();
     }
 }

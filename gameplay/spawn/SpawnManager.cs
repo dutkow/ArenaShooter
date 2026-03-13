@@ -49,7 +49,7 @@ public partial class SpawnManager : Node3D
 
         if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerID, out var playerState))
         {
-            playerState.PublicState.Character = spawnedPlayer;
+            playerState.Character = spawnedPlayer;
         }
 
         AddChild(spawnedPlayer);
@@ -69,7 +69,7 @@ public partial class SpawnManager : Node3D
             spawnedPlayer.HandleRemoteSpawn(playerID);
         }
 
-        spawnedPlayer.InitializeNew(playerState);
+        spawnedPlayer.Initialize(playerState);
 
 
         return spawnedPlayer;

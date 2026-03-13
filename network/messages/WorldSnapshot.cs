@@ -124,10 +124,13 @@ public class WorldSnapshot : Message
         // Player States
         byte playerStatesCount;
         Read(out playerStatesCount);
+        PlayerStates = new PlayerState[playerStatesCount];
         if (playerStatesCount > 0)
         {
-            foreach (var playerState in PlayerStates)
+            for(int i = 0; i < playerStatesCount; ++i)
             {
+                PlayerState playerState = new();
+                PlayerStates[i] = playerState;
                 playerState.Read(this, ReceivingPlayerID);
             }
         }
@@ -135,7 +138,7 @@ public class WorldSnapshot : Message
         // **Read unacked projectiles**
         Read(out ushort unackedCount);
         UnacknowledgedRemoteProjectiles = new ProjectileSpawnData[unackedCount];
-        for (int i = 0; i < unackedCount; i++)
+        for (int i = 0; i < unackedCount; ++i)
         {
             var proj = new ProjectileSpawnData();
             Read(out proj.ProjectileID);
@@ -152,7 +155,7 @@ public class WorldSnapshot : Message
         // --- Unacknowledged Projectile State Changes ---
         Read(out ushort stateChangesCount);
         UnacknowledgedProjectileStates = new ProjectileState[stateChangesCount];
-        for (int i = 0; i < stateChangesCount; i++)
+        for (int i = 0; i < stateChangesCount; ++i)
         {
             var change = new ProjectileState();
             Read(out change.ProjectileID);
@@ -179,7 +182,7 @@ public class WorldSnapshot : Message
         newSnapshot.PickupMask = PickupManager.Instance.PickupMask;
 
         // Characters (existing code)
-        var playerStates = MatchState.Instance.NewConnectedPlayers.Values;
+        newSnapshot.PlayerStates = MatchState.Instance.NewConnectedPlayers.Values.ToArray();
 
         return newSnapshot;
     }
