@@ -111,15 +111,7 @@ public partial class PlayerStateNew
     public PublicPlayerState PublicState = new();
     public PrivatePlayerState PrivateState = new();
 
-    public void TickPlayerState()
-    {
-        if ((PublicState.IsAlive && PublicState.Character != null))
-        {
-            PublicState.Position = PublicState.Character.MovementComp.State.Position;
-            PublicState.Yaw = PublicState.Character.MovementComp.State.Yaw;
-            PublicState.Pitch = PublicState.Character.MovementComp.State.Pitch;
-        }
-    }
+
 }
 
 public partial class PublicPlayerState
@@ -176,17 +168,6 @@ public partial class PublicPlayerState
 
         if ((flags & PublicPlayerFlags.EQUIPPED_WEAPON) != 0)
             EquippedWeapon = state.EquippedWeapon;
-    }
-
-    public CharacterMoveState GetMoveState()
-    {
-        CharacterMoveState moveState = new();
-        moveState.Position = Position;
-        moveState.Velocity = Velocity;
-        moveState.Yaw = Yaw;
-        moveState.Pitch = Pitch;
-        moveState.MoveMode = MoveMode;
-        return moveState;
     }
 
     public static PublicPlayerFlags ComputeDirtyFlags(PublicPlayerState current, PublicPlayerState previous)

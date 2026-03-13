@@ -46,10 +46,6 @@ public class ServerGame
 
         foreach(var playerState in newSnapshot.PlayerStates)
         {
-            if(playerState.CharacterPublicState.Flags.HasFlag(CharacterPublicFlags.ROTATION_CHANGED))
-            {
-                GD.Print($"SERVER SNAP: Player ID: {playerState.PlayerID}.. new rotation: {playerState.CharacterPublicState.Rotation}");
-            }
             playerState.ClearFlags();
         }
 

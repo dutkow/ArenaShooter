@@ -36,16 +36,6 @@ public struct CharacterSnapshot
     public byte Health;
     public byte Shield;
 
-    public CharacterMoveState GetMoveState()
-    {
-        CharacterMoveState state = new();
-        state.Position = Position;
-        state.Velocity = Velocity;
-        state.Yaw = Yaw;
-        state.Pitch = Pitch;
-        state.MoveMode = MoveMode;
-        return state;
-    }
 
     public CharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
                              float yaw, float pitch, CharacterMoveMode moveMode,

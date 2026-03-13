@@ -41,10 +41,8 @@ public static class ServerConnectionService
         var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
 
 
-        InitialMatchState.Send(peer);
-
-
-
         GD.Print($"Server received: {msg.MessageType}");
+
+        InitialMatchState.Send(peer);
     }
 }

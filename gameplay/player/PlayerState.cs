@@ -42,11 +42,7 @@ public class PlayerState()
             msg.Add(Ping);
             msg.Add(IsAlive);
 
-            if(IsAlive)
-            {
-                CharacterPublicState.Add(msg);
-                CharacterPrivateState.Add(msg);
-            }
+
         }
         else
         {
@@ -54,13 +50,10 @@ public class PlayerState()
             if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Add(Deaths);
             if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Add(Ping);
             if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Add(IsAlive);
-
-            if (IsAlive)
-            {
-                CharacterPublicState.Add(msg);
-                CharacterPrivateState.Add(msg);
-            }
         }
+
+        CharacterPublicState.Add(msg, forceFull);
+        CharacterPrivateState.Add(msg, forceFull);
     }
 
     internal void Write(Message msg, byte clientPlayerID, bool forceFull = false)
@@ -75,9 +68,6 @@ public class PlayerState()
             msg.Write(Deaths);
             msg.Write(Ping);
             msg.Write(IsAlive);
-
-            CharacterPublicState.Write(msg);
-            CharacterPrivateState.Write(msg);
         }
         else
         {
@@ -87,10 +77,10 @@ public class PlayerState()
             if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Write(Deaths);
             if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Write(Ping);
             if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Write(IsAlive);
-
-            CharacterPublicState.Write(msg);
-            CharacterPrivateState.Write(msg);
         }
+
+        CharacterPublicState.Write(msg, forceFull);
+        CharacterPrivateState.Write(msg, forceFull);
     }
 
     internal void Read(Message msg, byte clientPlayerID, bool forceFull = false)
@@ -106,9 +96,6 @@ public class PlayerState()
             msg.Read(out Ping);
             msg.Read(out IsAlive);
 
-
-            CharacterPublicState.Read(msg);
-            CharacterPrivateState.Read(msg);
         }
         else
         {
@@ -118,10 +105,8 @@ public class PlayerState()
             if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Read(out Deaths);
             if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Read(out Ping);
             if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Read(out IsAlive);
-
-
-            CharacterPublicState.Read(msg);
-            CharacterPrivateState.Read(msg);
         }
+        CharacterPublicState.Read(msg, forceFull);
+        CharacterPrivateState.Read(msg, forceFull);
     }
 }

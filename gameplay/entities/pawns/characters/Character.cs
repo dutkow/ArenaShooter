@@ -87,9 +87,6 @@ public partial class Character : Pawn, IDamageable
         GlobalPosition = spawnPosition;
         GlobalRotation = new Vector3(0.0f, yaw, 0.0f);
 
-        MovementComp.State.Position = spawnPosition;
-        MovementComp.State.Yaw = yaw;
-        MovementComp.State.Pitch = pitch;
 
         MovementComp.Initialize(this);
 
@@ -104,11 +101,11 @@ public partial class Character : Pawn, IDamageable
 
         if(IsAuthority)
         {
-            UpdatePositionState(MovementComp.State.Position);
+            UpdatePositionState(PlayerState.CharacterPublicState.Position);
         }
         else if(IsLocal)
         {
-            GlobalPosition = MovementComp.State.Position;
+            GlobalPosition = PlayerState.CharacterPublicState.Position;
         }
     }
 
@@ -119,13 +116,11 @@ public partial class Character : Pawn, IDamageable
         if (cmd.Mask.HasFlag(ClientCommandMask.LOOK))
         {
             UpdateRotationState(cmd.Look);
-            GD.Print($"calling update rotation state on client");
         }
 
-        MovementComp.State = MovementComp.Step(MovementComp.State, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+        PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-
-        UpdatePositionState(MovementComp.State.Position);
+        UpdatePositionState(PlayerState.CharacterPublicState.Position);
 
 
         _weapon.ProcessClientInput(cmd.Mask);
@@ -242,24 +237,25 @@ public partial class Character : Pawn, IDamageable
     public void InterpolatePosition(float interpSpeed)
     {
 
-        var targetPosition = MovementComp.State.Position + _visualContainerPosition;
+        var targetPosition = PlayerState.CharacterPublicState.Position + _visualContainerPosition;
         _visualContainer.GlobalPosition = _visualContainer.GlobalPosition.Lerp(targetPosition, LOCAL_SV_INTERP_RATE);
     }
 
     public void InterpolateYaw(float interpSpeed)
     {
         Vector3 rot = GlobalRotation;
-        rot.Y = Mathf.LerpAngle(rot.Y, MovementComp.State.Yaw, interpSpeed);
+        rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Rotation.X, interpSpeed);
         GlobalRotation = rot;
     }
 
     public void InterpolatePitch(float interpSpeed)
     {
         Vector3 camRot = _thirdPersonWeaponMesh.GlobalRotation;
-        camRot.X = Mathf.Lerp(camRot.X, MovementComp.State.Pitch, interpSpeed);
+        camRot.X = Mathf.Lerp(camRot.X, PlayerState.CharacterPublicState.Rotation.Y, interpSpeed);
         _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
+    /*
     public override void ApplySnapshot(CharacterSnapshot snapshot)
     {
         base.ApplySnapshot(snapshot);
@@ -309,12 +305,12 @@ public partial class Character : Pawn, IDamageable
         {
             MovementComp.State = snapshotMoveState;
         }
-    }
+    }*/
 
 
-    public void ReconcileMoveState(CharacterMoveState newPredictedState)
+    public void ReconcileMoveState(CharacterPublicState newPredictedState)
     {
-        Vector3 delta = MovementComp.State.Position - newPredictedState.Position;
+        Vector3 delta = PlayerState.CharacterPublicState.Position - newPredictedState.Position;
 
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
@@ -327,23 +323,25 @@ public partial class Character : Pawn, IDamageable
         const float INTERP_SPEED_V = 0.15f;
 
         Vector3 targetPos = newPredictedState.Position;
-        Vector3 currentPos = MovementComp.State.Position;
+        Vector3 currentPos = PlayerState.CharacterPublicState.Position;
 
         Vector2 deltaXZ = new Vector2(delta.X, delta.Z);
         float distXZ = deltaXZ.Length();
 
         float deltaY = Math.Abs(delta.Y);
 
+        GD.Print($"horizontal error: {distXZ}. position: {PlayerState.CharacterPublicState.Position}. predictedp osition {newPredictedState.Position}");
+
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
-            //GD.Print($"snap correction horizontal, error {distXZ}");
+            GD.Print($"snap correction horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
-            //GD.Print($"lerp correction horizontal, error {distXZ}");
+            GD.Print($"lerp correction horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }
@@ -361,8 +359,8 @@ public partial class Character : Pawn, IDamageable
         }
 
         // Apply the corrected position and velocity
-        MovementComp.State.Position = currentPos;
-        MovementComp.State.Velocity = newPredictedState.Velocity;
+        PlayerState.CharacterPublicState.Position = currentPos;
+        PlayerState.CharacterPublicState.Velocity = newPredictedState.Velocity;
     }
 
 
@@ -454,7 +452,6 @@ public partial class Character : Pawn, IDamageable
             if(Mathf.Abs(mouseEvent.Relative.X) > 0.0f)
             {
                 RotateY(Mathf.DegToRad(-mouseEvent.Relative.X * MouseSensitivity));
-                //MovementComp.State.Yaw = Yaw;
             }
 
             if (Mathf.Abs(mouseEvent.Relative.Y) > 0.0f)
@@ -467,7 +464,6 @@ public partial class Character : Pawn, IDamageable
                     _cameraPivot.RotationDegrees = new Vector3(Pitch, 0, 0);
                 }
 
-                //MovementComp.State.Pitch = _cameraPivot.Rotation.X;
                 _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;
 
             }
@@ -491,8 +487,8 @@ public partial class Character : Pawn, IDamageable
 
     public void Teleport(Vector3 position, float yawRotation)
     {
-        MovementComp.State.Position = position;
-        MovementComp.State.Yaw = yawRotation;
+        PlayerState.CharacterPublicState.Position = position;
+        PlayerState.CharacterPublicState.Rotation.X = yawRotation;
     }
 
 
@@ -564,13 +560,8 @@ public partial class Character : Pawn, IDamageable
 
     public void UpdateRotationState(Vector2 look)
     {
-        GD.Print($"rotation state changed. new yaw state: {look.X}");
-
         PlayerState.CharacterPublicState.Rotation = new Vector2(look.X, look.Y);
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
-
-        MovementComp.State.Yaw = look.X;
-        MovementComp.State.Pitch = look.Y;
     }
 
     public void OnVelocityChanged(Vector3 velocity)
@@ -624,14 +615,23 @@ public partial class Character : Pawn, IDamageable
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
-            GD.Print($"client received position changed: {publicState.Position}");
-
             PlayerState.CharacterPublicState.Position = publicState.Position;
+
+            if(IsLocal)
+            {
+
+                GD.Print($"num unacked client inputs = {ClientGame.Instance.UnprocessedClientInputs.Count}");
+                foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
+                {
+                    publicState = MovementComp.Step(publicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL, true);
+                }
+
+                ReconcileMoveState(publicState);
+            }
         }
 
         if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
         {
-            GD.Print($"client received rotation changed: {publicState.Rotation}");
             PlayerState.CharacterPublicState.Rotation = publicState.Rotation;
         }
 

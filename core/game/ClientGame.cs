@@ -21,7 +21,6 @@ public class ClientGame
     public List<ClientInputCommand> UnprocessedClientInputs = new();
     const int REDUNDANT_INPUTS = 4;
 
-
     public void Initialize(byte localPlayerID)
     {
         Instance = this;

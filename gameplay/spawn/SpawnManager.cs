@@ -42,7 +42,6 @@ public partial class SpawnManager : Node3D
         }
         Character spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
-
         player.Flags |= PlayerStateFlags.IS_ALIVE_CHANGED;
         player.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
         player.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
