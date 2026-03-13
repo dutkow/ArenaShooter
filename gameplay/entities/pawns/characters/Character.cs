@@ -496,8 +496,8 @@ public partial class Character : Pawn, IDamageable
 
 
 
-    private CharacterPublicState PublicState = new CharacterPublicState();
-    private CharacterPrivateState PrivateState = new CharacterPrivateState();
+    public CharacterPublicState PublicState = new CharacterPublicState();
+    public CharacterPrivateState PrivateState = new CharacterPrivateState();
 
     // Health & Armor
     public int GetHealth()

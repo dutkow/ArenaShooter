@@ -36,7 +36,7 @@ public class CharacterPublicState
         if ((Flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) != 0) msg.WriteEnum(MovementMode);
         if ((Flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0) msg.WriteEnum(EquippedWeapon);
     }
-    internal static CharacterPublicState Read(Message msg)
+    internal CharacterPublicState Read(Message msg)
     {
         var state = new CharacterPublicState();
 

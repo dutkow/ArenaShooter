@@ -94,32 +94,29 @@ public class ClientGame
         LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
         LastServerTickProcessedByClient = snapshot.ServerTick;
 
-        var characterSnapshots = snapshot.GetCharacterSnapshots();
-
         UnprocessedClientInputs.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
 
         PickupManager.Instance.ApplyPickupMask(snapshot.PickupMask);
 
-        for (int i = 0; i < characterSnapshots.Length; ++i)
+        foreach(var playerState in snapshot.PlayerStates)
         {
-            var characterSnapshot = characterSnapshots[i];
-
-
-
-            // REFACTOR CODE
-            if (MatchState.Instance.NewConnectedPlayers.TryGetValue(characterSnapshot.PlayerID, out var playerStateNew))
+            if (MatchState.Instance.NewConnectedPlayers.TryGetValue(playerState.PlayerID, out var playerStateNew))
             {
                 Character character = playerStateNew.PublicState.Character;
                 if (character != null)
                 {
-                    character.ApplySnapshot(characterSnapshot);
+                    character.ApplyPublicState(playerState.Character.PublicState);
+
+                    if(playerState.PlayerID == ClientGame.Instance.LocalPlayerID)
+                    {
+                        character.ApplyPrivateState(playerState.Character.PrivateState);
+                    }
                 }
                 else
                 {
-                    SpawnManager.Instance.NewLocalSpawnPlayer(characterSnapshot.PlayerID, characterSnapshot.Position, characterSnapshot.Yaw);
+                    SpawnManager.Instance.NewLocalSpawnPlayer(playerState.PlayerID, playerState.Character.PublicState.Position, playerState.Character.PublicState.Rotation.X);
                 }
             }
-            //////////////
         }
 
         ClientProjectileManager.Instance.ApplyWorldSnapshot(snapshot);

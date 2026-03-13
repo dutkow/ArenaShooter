@@ -24,7 +24,7 @@ public class PlayerState()
         }
     }
 
-    internal void Add(Message msg)
+    internal void Add(Message msg, byte clientPlayerID)
     {
         msg.Add(PlayerID);
 
@@ -36,7 +36,7 @@ public class PlayerState()
         if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Add(IsAlive);
     }
 
-    internal void Write(Message msg)
+    internal void Write(Message msg, byte clientPlayerID)
     {
         msg.Write(PlayerID);
 
@@ -47,7 +47,7 @@ public class PlayerState()
         if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Write(Ping);
         if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Write(IsAlive);
     }
-    internal static PlayerState Read(Message msg)
+    internal PlayerState Read(Message msg, byte clientPlayerID)
     {
         var state = new PlayerState();
         msg.Read(out state.PlayerID);

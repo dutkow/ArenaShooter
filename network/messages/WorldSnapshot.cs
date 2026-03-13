@@ -17,10 +17,8 @@ public class WorldSnapshot : Message
     public ushort LastProcessedClientTick;
     public ulong PickupMask;
 
-    public CharacterSnapshot[] Characters;
-    public PublicPlayerState[] PublicPlayerStates; // refactor
-    public CharacterPublicState[] CharacterPublicStates;
-    public CharacterPrivateState CharacterPrivateState;
+    public PlayerState[] PlayerStates;
+    byte ReceivingPlayerID;
 
     public ProjectileSpawnData[] UnacknowledgedRemoteProjectiles;
     public ProjectileState[] UnacknowledgedProjectileStates;
@@ -33,22 +31,16 @@ public class WorldSnapshot : Message
         Add(LastProcessedClientTick);
         Add(PickupMask);
 
-        byte charactersLength = (byte)Characters.Length;
-        Add(charactersLength);
-        for (int i = 0; i < Characters.Length; i++)
+        // Player States
+        byte playerStatesCount = (byte)PlayerStates.Length;
+        if(playerStatesCount > 0)
         {
-            var c = Characters[i];
-            Add(c.PlayerID);
-
-            Add((ushort)c.DirtyFlags);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION)) Add(c.Position);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY)) Add(c.Velocity);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Add(c.Yaw);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Add(c.Pitch);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) AddEnum(c.MoveMode);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Add(c.Health);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Add(c.Shield);
-        }
+            Add(playerStatesCount);
+            foreach(var playerState in PlayerStates)
+            {
+                playerState.Add(this, ReceivingPlayerID);
+            }
+        }    
 
         ushort unackedCount = (ushort)(UnacknowledgedRemoteProjectiles?.Length ?? 0);
         Add(unackedCount);
@@ -83,21 +75,15 @@ public class WorldSnapshot : Message
         Write(LastProcessedClientTick);
         Write(PickupMask);
 
-        byte charactersLength = (byte)Characters.Length;
-        Write(charactersLength);
-        for (int i = 0; i < Characters.Length; i++)
+        // Player States
+        byte playerStatesCount = (byte)PlayerStates.Length;
+        if (playerStatesCount > 0)
         {
-            var c = Characters[i];
-            Write(c.PlayerID);
-
-            Write((ushort)c.DirtyFlags);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.POSITION)) Write(c.Position);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.VELOCITY)) Write(c.Velocity);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.YAW)) Write(c.Yaw);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.PITCH)) Write(c.Pitch);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) WriteEnum(c.MoveMode);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.HEALTH)) Write(c.Health);
-            if (c.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD)) Write(c.Shield);
+            Write(playerStatesCount);
+            foreach (var playerState in PlayerStates)
+            {
+                playerState.Write(this, ReceivingPlayerID);
+            }
         }
 
         // **Write unacked projectiles**
@@ -135,37 +121,15 @@ public class WorldSnapshot : Message
         Read(out LastProcessedClientTick);
         Read(out PickupMask);
 
-        byte count;
-        Read(out count);
-        Characters = new CharacterSnapshot[count];
-
-        for (int i = 0; i < count; i++)
+        // Player States
+        byte playerStatesCount;
+        Read(out playerStatesCount);
+        if (playerStatesCount > 0)
         {
-            byte id;
-            Read(out id);
-
-            ushort rawFlags;
-            Read(out rawFlags);
-            var flags = (CharacterSnapshotFlags)rawFlags;
-
-            Vector3 pos = Vector3.Zero;
-            Vector3 vel = Vector3.Zero;
-            float yaw = 0f;
-            float pitch = 0f;
-            CharacterMoveMode moveMode = CharacterMoveMode.GROUNDED;
-            Vector3 launchVelocity = Vector3.Zero;
-            byte health = 0;
-            byte shield = 0;
-
-            if (flags.HasFlag(CharacterSnapshotFlags.POSITION)) Read(out pos);
-            if (flags.HasFlag(CharacterSnapshotFlags.VELOCITY)) Read(out vel);
-            if (flags.HasFlag(CharacterSnapshotFlags.YAW)) Read(out yaw);
-            if (flags.HasFlag(CharacterSnapshotFlags.PITCH)) Read(out pitch);
-            if (flags.HasFlag(CharacterSnapshotFlags.MOVE_MODE)) ReadEnum(out moveMode);
-            if (flags.HasFlag(CharacterSnapshotFlags.HEALTH)) Read(out health);
-            if (flags.HasFlag(CharacterSnapshotFlags.SHIELD)) Read(out shield);
-
-            Characters[i] = new CharacterSnapshot(id, pos, vel, yaw, pitch, moveMode, health, shield, flags);
+            foreach (var playerState in PlayerStates)
+            {
+                playerState.Read(this, ReceivingPlayerID);
+            }
         }
 
         // **Read unacked projectiles**
@@ -199,7 +163,7 @@ public class WorldSnapshot : Message
     public static void Send(ENetPacketPeer peer, WorldSnapshot snapshot)
     {
         //var msg = snapshot.Read();
-        //NetworkSender.Broadcast(msg);
+        NetworkSender.Broadcast(snapshot);
     }
 
  
@@ -215,47 +179,7 @@ public class WorldSnapshot : Message
         newSnapshot.PickupMask = PickupManager.Instance.PickupMask;
 
         // Characters (existing code)
-        var playerStates = MatchState.Instance.NewConnectedPlayers;
-        var publicPlayerStates = new PublicPlayerState[playerStates.Count];
-
-        int i = 0;
-        foreach (var kvp in playerStates)
-        {
-            var newPlayerState = kvp.Value;
-            Vector3 pos = Vector3.Zero;
-            Vector3 vel = Vector3.Zero;
-            float yaw = 0f;
-            float pitch = 0f;
-            CharacterMoveMode moveMode = CharacterMoveMode.GROUNDED;
-            byte health = 0;
-            byte shield = 0;
-
-            Character character = newPlayerState.PublicState.Character;
-            if (character != null)
-            {
-                pos = character.MovementComp.State.Position;
-                vel = character.MovementComp.State.Velocity;
-                yaw = character.MovementComp.State.Yaw;
-                pitch = character.MovementComp.State.Pitch;
-                moveMode = character.MovementComp.State.MoveMode;
-                health = (byte)character.HealthComp.Health;
-                shield = (byte)character.HealthComp.Shield;
-            }
-
-            PublicPlayerFlags allFlags = PublicPlayerFlags.POSITION |
-                                              PublicPlayerFlags.VELOCITY |
-                                              PublicPlayerFlags.YAW |
-                                              PublicPlayerFlags.PITCH |
-                                              PublicPlayerFlags.MOVE_MODE;
-
-
-            newPlayerState.PublicState.Flags = allFlags;
-            publicPlayerStates[i] = newPlayerState.PublicState;
-
-            i++;
-        }
-
-        newSnapshot.PublicPlayerStates = publicPlayerStates;
+        var playerStates = MatchState.Instance.NewConnectedPlayers.Values;
 
         return newSnapshot;
     }
@@ -266,112 +190,40 @@ public class WorldSnapshot : Message
     public WorldSnapshot BuildDelta(WorldSnapshot previous)
     {
         if (previous == null)
-        {
             return this;
-        }
 
-        var deltaList = new List<CharacterSnapshot>();
+        var deltaList = new List<PlayerState>();
 
-        // Convert previous snapshot to dictionary for fast lookup
-        var prevDict = previous.Characters.ToDictionary(c => c.PlayerID);
+        var prevDict = previous.PlayerStates.ToDictionary(p => p.PlayerID);
 
-        foreach (var current in Characters)
+        foreach (var current in PlayerStates)
         {
-            CharacterSnapshotFlags flags = CharacterSnapshotFlags.NONE;
-
             if (prevDict.TryGetValue(current.PlayerID, out var old))
             {
-                // compute which fields changed
-                flags = CharacterSnapshot.ComputeDirtyFlags(current, old);
+                PlayerStateFlags flags = 0;
 
-                // Only add if something actually changed
-                if (flags != CharacterSnapshotFlags.NONE)
+                if (current.Kills != old.Kills)
+                    flags |= PlayerStateFlags.KILLS_CHANGED;
+
+                if (current.Deaths != old.Deaths)
+                    flags |= PlayerStateFlags.DEATHS_CHANGED;
+
+                if (current.Ping != old.Ping)
+                    flags |= PlayerStateFlags.PING_CHANGED;
+
+                if (current.IsAlive != old.IsAlive)
+                    flags |= PlayerStateFlags.IS_ALIVE_CHANGED;
+
+                if (flags != 0)
                 {
-                    var delta = new CharacterSnapshot(
-                        current.PlayerID,
-                        current.Position,
-                        current.Velocity,
-                        current.Yaw,
-                        current.Pitch,
-                        current.MoveMode,
-                        current.Health,
-                        current.Shield,
-                        flags
-                    );
-                    deltaList.Add(delta);
-                }
-            }
-            else
-            {
-                // New character not in previous snapshot — include all fields
-                flags = CharacterSnapshot.ComputeDirtyFlags(current, null);
-                var delta = new CharacterSnapshot(
-                    current.PlayerID,
-                    current.Position,
-                    current.Velocity,
-                    current.Yaw,
-                    current.Pitch,
-                    current.MoveMode,
-                    current.Health,
-                    current.Shield,
-                    flags
-                );
-                deltaList.Add(delta);
-            }
-        }
-
-        return new WorldSnapshot
-        {
-            ENetFlags = ENetPacketFlags.UnreliableFragment,
-            ServerTick = MatchState.Instance.CurrentTick,
-            LastProcessedClientTick = LastProcessedClientTick,
-            PickupMask = PickupManager.Instance.PickupMask,
-            Characters = deltaList.ToArray(),
-            MessageType = Msg.S2C_WORLD_SNAPSHOT,
-        };
-    }
-
-
-    public WorldSnapshot BuildDeltaNew(WorldSnapshot previous)
-    {
-        if (previous == null)
-        {
-            return this;
-        }
-
-        var deltaList = new List<PublicPlayerState>();
-
-        // Convert previous snapshot to dictionary for fast lookup
-        var prevDict = previous.PublicPlayerStates.ToDictionary(p => p.PlayerID);
-
-        foreach (var current in PublicPlayerStates)
-        {
-            PublicPlayerFlags flags = PublicPlayerFlags.NONE;
-
-            if (prevDict.TryGetValue(current.PlayerID, out var old))
-            {
-                // compute which fields changed
-                flags = PublicPlayerState.ComputeDirtyFlags(current, old);
-
-                // Only add if something actually changed
-                if (flags != PublicPlayerFlags.NONE)
-                {
-                    var delta = new PublicPlayerState
+                    var delta = new PlayerState()
                     {
                         PlayerID = current.PlayerID,
                         Flags = flags,
-
                         Kills = current.Kills,
                         Deaths = current.Deaths,
-                        IsAlive = current.IsAlive,
-
-                        Position = current.Position,
-                        Velocity = current.Velocity,
-                        Yaw = current.Yaw,
-                        Pitch = current.Pitch,
-                        MoveMode = current.MoveMode,
-
-                        EquippedWeapon = current.EquippedWeapon
+                        Ping = current.Ping,
+                        IsAlive = current.IsAlive
                     };
 
                     deltaList.Add(delta);
@@ -379,25 +231,20 @@ public class WorldSnapshot : Message
             }
             else
             {
-                // New player not in previous snapshot — include all fields
-                flags = PublicPlayerState.ComputeDirtyFlags(current, null);
-
-                var delta = new PublicPlayerState
+                // new player → send full state
+                var delta = new PlayerState()
                 {
-                    PlayerID = current.PlayerID,
-                    Flags = flags,
+                    Flags =
+                        PlayerStateFlags.KILLS_CHANGED |
+                        PlayerStateFlags.DEATHS_CHANGED |
+                        PlayerStateFlags.PING_CHANGED |
+                        PlayerStateFlags.IS_ALIVE_CHANGED,
 
+                    PlayerID = current.PlayerID,
                     Kills = current.Kills,
                     Deaths = current.Deaths,
-                    IsAlive = current.IsAlive,
-
-                    Position = current.Position,
-                    Velocity = current.Velocity,
-                    Yaw = current.Yaw,
-                    Pitch = current.Pitch,
-                    MoveMode = current.MoveMode,
-
-                    EquippedWeapon = current.EquippedWeapon
+                    Ping = current.Ping,
+                    IsAlive = current.IsAlive
                 };
 
                 deltaList.Add(delta);
@@ -407,16 +254,13 @@ public class WorldSnapshot : Message
         return new WorldSnapshot
         {
             ENetFlags = ENetPacketFlags.UnreliableFragment,
-            ServerTick = MatchState.Instance.CurrentTick,
+            ServerTick = ServerTick,
             LastProcessedClientTick = LastProcessedClientTick,
-            PickupMask = PickupManager.Instance.PickupMask,
-            PublicPlayerStates = deltaList.ToArray(),
-            MessageType = Msg.S2C_WORLD_SNAPSHOT,
+            PickupMask = PickupMask,
+            PlayerStates = deltaList.ToArray(),
+            MessageType = Msg.S2C_WORLD_SNAPSHOT
         };
     }
-
-
-    public CharacterSnapshot[] GetCharacterSnapshots() => Characters;
 
     public void AddPrivatePlayerInfo(byte playerID)
     {
