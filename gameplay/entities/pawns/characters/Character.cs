@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 
 public partial class Character : Pawn, IDamageable
@@ -100,14 +101,13 @@ public partial class Character : Pawn, IDamageable
 
         if(IsAuthority)
         {
-            MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+            PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
             UpdatePositionState(PlayerState.CharacterPublicState.Position);
 
         }
         else if(IsLocal)
         {
-            MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-
+            PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
             PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
         }
 
@@ -353,18 +353,18 @@ public partial class Character : Pawn, IDamageable
 
         float deltaY = Math.Abs(delta.Y);
 
-        GD.Print($"horizontal error: {distXZ}. position: {PredictedPublicState.Position}. predictedp osition {authoritativeState.Position}");
+        //GD.Print($"horizontal error: {distXZ}. position: {PredictedPublicState.Position}. predictedp osition {authoritativeState.Position}");
 
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
-            GD.Print($"snap correction horizontal, error {distXZ}");
+            //GD.Print($"snap correction horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
-            GD.Print($"lerp correction horizontal, error {distXZ}");
+            //GD.Print($"lerp correction horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }
@@ -648,12 +648,14 @@ public partial class Character : Pawn, IDamageable
         {
             if (IsLocal)
             {
+                GD.Print($"num unprocessedinputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
+                /*
                 foreach (var cmd in ClientGame.Instance.UnprocessedClientInputs)
                 {
                     publicState = MovementComp.Step(publicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL, true);
                 }
 
-                ReconcileMoveState(publicState);
+                ReconcileMoveState(publicState);*/
             }
             else
             {

@@ -78,6 +78,7 @@ public class ClientGame
 
     public void ApplyWorldSnapshot(WorldSnapshot snapshot)
     {
+
         if (!NetUtils.IsNewerTick(snapshot.ServerTick, LastServerTickProcessedByClient))
         {
             return;
@@ -86,7 +87,11 @@ public class ClientGame
         LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
         LastServerTickProcessedByClient = snapshot.ServerTick;
 
+        GD.Print($"snapshot server tick: {snapshot.ServerTick} and last server tick processed by client: {LastServerTickProcessedByClient}. last client tick processed by server: {LastClientTickProcessedByServer}");
+
+
         UnprocessedClientInputs.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
+
 
         PickupManager.Instance.ApplyPickupMask(snapshot.PickupMask);
 
