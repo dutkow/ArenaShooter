@@ -46,6 +46,7 @@ public class ServerGame
 
         foreach(var playerState in newSnapshot.PlayerStates)
         {
+            GD.Print($"sending player id: {playerState.PlayerID} moved = {playerState.CharacterPublicState.Flags.HasFlag(CharacterPublicFlags.POSITION_CHANGED)}");
             playerState.ClearFlags();
         }
 

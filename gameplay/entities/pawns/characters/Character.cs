@@ -106,8 +106,9 @@ public partial class Character : Pawn, IDamageable
         }
         else if(IsLocal)
         {
-            GlobalPosition = PlayerState.CharacterPublicState.Position;
-            MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+            MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+
+            PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
         }
 
         _weapon.HandleInput(cmd.Mask);
@@ -165,12 +166,13 @@ public partial class Character : Pawn, IDamageable
             GD.Print($"player state is null");
         }
 
-            _weapon.OwnerPlayerID = PlayerState.PlayerID;
+        _weapon.OwnerPlayerID = PlayerState.PlayerID;
         _weapon.SetIsAuthority(IsAuthority);
 
         if(!IsAuthority)
         {
             PredictedPublicState = PlayerState.CharacterPublicState.Copy();
+            PredictedPublicState.Rotation = new Vector2(GlobalRotation.Y, 0.0f);
             GD.Print($"client copied pub state");
         }
     }
@@ -236,7 +238,14 @@ public partial class Character : Pawn, IDamageable
         {
             if(IsLocal)
             {
-                //UpdatePositionState(MovementComp.State.Position);
+                if(IsAuthority)
+                {
+                    GlobalPosition = PlayerState.CharacterPublicState.Position;
+                }
+                else
+                {
+                    GlobalPosition = PredictedPublicState.Position;
+                }
             }
             else
             {
@@ -322,9 +331,9 @@ public partial class Character : Pawn, IDamageable
     }*/
 
 
-    public void ReconcileMoveState(CharacterPublicState newPredictedState)
+    public void ReconcileMoveState(CharacterPublicState authoritativeState)
     {
-        Vector3 delta = PlayerState.CharacterPublicState.Position - newPredictedState.Position;
+        Vector3 delta = PredictedPublicState.Position - authoritativeState.Position;
 
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
@@ -336,15 +345,15 @@ public partial class Character : Pawn, IDamageable
         const float INTERP_SPEED_H = 0.15f;
         const float INTERP_SPEED_V = 0.15f;
 
-        Vector3 targetPos = newPredictedState.Position;
-        Vector3 currentPos = PlayerState.CharacterPublicState.Position;
+        Vector3 targetPos = authoritativeState.Position;
+        Vector3 currentPos = PredictedPublicState.Position;
 
         Vector2 deltaXZ = new Vector2(delta.X, delta.Z);
         float distXZ = deltaXZ.Length();
 
         float deltaY = Math.Abs(delta.Y);
 
-        GD.Print($"horizontal error: {distXZ}. position: {PlayerState.CharacterPublicState.Position}. predictedp osition {newPredictedState.Position}");
+        GD.Print($"horizontal error: {distXZ}. position: {PredictedPublicState.Position}. predictedp osition {authoritativeState.Position}");
 
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
@@ -373,8 +382,8 @@ public partial class Character : Pawn, IDamageable
         }
 
         // Apply the corrected position and velocity
-        PlayerState.CharacterPublicState.Position = currentPos;
-        PlayerState.CharacterPublicState.Velocity = newPredictedState.Velocity;
+        PredictedPublicState.Position = currentPos;
+        PredictedPublicState.Velocity = authoritativeState.Velocity;
     }
 
 
@@ -394,7 +403,7 @@ public partial class Character : Pawn, IDamageable
             if (_lookDirty)
             {
                 cmd.Mask |= ClientCommandMask.LOOK;
-                cmd.Look = new Vector2(GlobalRotation.Y, _thirdPersonWeaponSocket.Rotation.X);
+                cmd.Look = PredictedPublicState.Rotation;
                 _lookDirty = false;
             }
         }
@@ -489,7 +498,15 @@ public partial class Character : Pawn, IDamageable
 
             if(_lookDirty)
             {
-                UpdateRotationState(new Vector2(Yaw, _cameraPivot.Rotation.X));
+                Vector2 newLookRotation = new Vector2(Yaw, _cameraPivot.Rotation.X);
+                if (IsAuthority)
+                {
+                    UpdateRotationState(newLookRotation);
+                }
+                else
+                {
+                    PredictedPublicState.Rotation = newLookRotation;
+                }
             }
         }
     }
@@ -562,8 +579,6 @@ public partial class Character : Pawn, IDamageable
         {
             PlayerState.CharacterPublicState.Position = position;
             PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
-
-            //GD.Print($"Player ID: {PlayerState.PlayerID} moved. New position: {position}. SETTING ON {NetworkSession.Instance.NetworkMode}");
         }
 
         ApplyPosition(position);
@@ -631,7 +646,7 @@ public partial class Character : Pawn, IDamageable
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
-            GD.Print($"Running apply public state on player id: {PlayerState.PlayerID} and PLAYER MOVED. network mode: {NetworkSession.Instance.NetworkMode}");
+            GD.Print($"Running apply public state on player id: {PlayerState.PlayerID} and PLAYER MOVED. ");
 
             if (IsLocal)
             {
@@ -644,19 +659,17 @@ public partial class Character : Pawn, IDamageable
             }
             else
             {
-                GD.Print($"this character is not local!. ID = {PlayerState.PlayerID}. network mode: {NetworkSession.Instance.NetworkMode}");
+                GD.Print($"this character is not local!. ID = {PlayerState.PlayerID}.");
 
                 PlayerState.CharacterPublicState.Position = publicState.Position;
             }
         }
-        else
-        {
-            GD.Print($"Running apply public state on player id: {PlayerState.PlayerID} and PLAYER DIDNT MOVE. network mode: {NetworkSession.Instance.NetworkMode}");
 
-        }
 
         if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
         {
+            GD.Print($"Running apply public state on player id: {PlayerState.PlayerID} and PLAYER ROTATED. ");
+
             PlayerState.CharacterPublicState.Rotation = publicState.Rotation;
         }
 
