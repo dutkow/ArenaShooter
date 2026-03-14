@@ -100,7 +100,7 @@ public class ServerGame
                 nextCommand = lastCommand;
             }
 
-            character.ProcessClientInput(nextCommand);
+            character.ServerProcessNextClientInput(nextCommand);
             _unprocessedClientInputs[playerID] = queue;
         }
     }

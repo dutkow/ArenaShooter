@@ -23,6 +23,9 @@ public partial class Character : Pawn, IDamageable
 
     const int REDUNDANT_INPUTS = 4;
 
+    private Vector2 _lookRotation;
+
+    public Vector2 _deltaLook;
     public float Yaw => GlobalRotation.Y;
     public float Pitch { get; private set; }
 
@@ -88,18 +91,13 @@ public partial class Character : Pawn, IDamageable
 
 
 
-    public override void ProcessClientInput(ClientInputCommand cmd)
+    public override void ServerProcessNextClientInput(ClientInputCommand cmd)
     {
-        base.ProcessClientInput(cmd);
+        base.ServerProcessNextClientInput(cmd);
 
-        if (cmd.Mask.HasFlag(ClientCommandMask.LOOK))
-        {
-            UpdateRotationState(cmd.Look);
-        }
-
+        PlayerState.CharacterPublicState.Rotation = cmd.Look;
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-        UpdatePositionState(PlayerState.CharacterPublicState.Position);
         _weapon.ProcessClientInput(cmd.Mask);
     }
 
@@ -426,15 +424,6 @@ public partial class Character : Pawn, IDamageable
             if (Input.IsActionPressed("move_right")) cmd.Mask |= ClientCommandMask.STRAFE_RIGHT;
             if (Input.IsActionPressed("jump")) cmd.Mask |= ClientCommandMask.JUMP;
             if (Input.IsActionPressed("primary_fire")) cmd.Mask |= ClientCommandMask.FIRE_PRIMARY;
-
-            if (_lookDirty)
-            {
-                PredictedPublicState.Rotation = new Vector2(GlobalRotation.Y, 0.0f);
-
-                cmd.Mask |= ClientCommandMask.LOOK;
-                cmd.Look = PredictedPublicState.Rotation;
-                _lookDirty = false;
-            }
         }
 
         if (MovementComp.WasLaunched)
@@ -451,16 +440,37 @@ public partial class Character : Pawn, IDamageable
             _weapon.FiredPredictedProjectile = false;
         }
 
+
         MovementComp.LaunchVector = Vector3.Zero;
 
         Vector3 dir = -Camera.GlobalTransform.Basis.Z;
         _weapon.Tick(NetworkConstants.SERVER_TICK_INTERVAL, Camera.GlobalPosition, dir);
 
+
+        _lookRotation = new Vector2(GlobalRotation.Y, Pitch);
+        PredictedPublicState.Rotation = _lookRotation;
+        cmd.Look = _lookRotation;
+        cmd.Mask |= ClientCommandMask.LOOK;
+
         PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
         PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
         _weapon.HandleInput(cmd.Mask);
 
+
+
+        _deltaLook = Vector2.Zero;
         return cmd;
+    }
+
+    public void HandleMouseLook(InputEvent @event)
+    {
+        if (@event is InputEventMouseMotion mouseEvent)
+        {
+            if (Mathf.Abs(mouseEvent.Relative.X) > 0.0f)
+            {
+                RotateY(Mathf.DegToRad(-mouseEvent.Relative.X * MouseSensitivity));
+            }
+        }
     }
 
     public void DebugInput()
@@ -507,44 +517,7 @@ public partial class Character : Pawn, IDamageable
     }
 
 
-    public void HandleMouseLook(InputEvent @event)
-    {
-        if (@event is InputEventMouseMotion mouseEvent)
-        {
 
-            if(Mathf.Abs(mouseEvent.Relative.X) > 0.0f)
-            {
-                RotateY(Mathf.DegToRad(-mouseEvent.Relative.X * MouseSensitivity));
-            }
-
-            if (Mathf.Abs(mouseEvent.Relative.Y) > 0.0f)
-            {
-                Pitch += -mouseEvent.Relative.Y * MouseSensitivity;
-                Pitch = Mathf.Clamp(Pitch, -90, 90);
-
-                if (_cameraPivot != null)
-                {
-                    _cameraPivot.RotationDegrees = new Vector3(Pitch, 0, 0);
-                }
-
-                _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;
-            }
-
-            if(mouseEvent.Relative != Vector2.Zero)
-            {
-                _lookDirty = true;
-            }
-
-            if(_lookDirty)
-            {
-                Vector2 newLookRotation = new Vector2(Yaw, _cameraPivot.Rotation.X);
-                if (IsAuthority)
-                {
-                    UpdateRotationState(newLookRotation);
-                }
-            }
-        }
-    }
 
     public void Launch(Vector3 velocity)
     {
