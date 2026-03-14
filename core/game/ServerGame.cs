@@ -67,19 +67,14 @@ public class ServerGame
 
     public void ProcessNextClientInputs()
     {
-
         foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
+            GD.Print($"processing input for {kvp.Key}");
             byte playerID = kvp.Key;
             var playerState = kvp.Value;
             var character = playerState.Character;
 
             if (character == null)
-            {
-                continue;
-            }
-
-            if (ClientGame.Instance != null && ClientGame.Instance.LocalPlayerID == playerID)
             {
                 continue;
             }

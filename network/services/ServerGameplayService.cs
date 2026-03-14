@@ -6,20 +6,14 @@ public static class ServerGameplayService
     {
         int peerID = (int)peer.GetMeta("id");
 
-
-        // REFACTOR CODE
         if (NetworkSession.Instance.PeerIDsToPlayerIDs.TryGetValue(peerID, out var playerID))
         {
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
             {
-                var character = playerState.Character; // COULD USE IS ALIVE CHECK
-                if (character != null)
-                {
-                    var cmd = new ClientCommand();
-                    cmd.ReadMessage(data);
+                var cmd = new ClientCommand();
+                cmd.ReadMessage(data);
 
-                    ServerGame.Instance.ReceiveClientCommand(cmd, playerID);
-                }
+                ServerGame.Instance.ReceiveClientCommand(cmd, playerID);
             }
         }
     }

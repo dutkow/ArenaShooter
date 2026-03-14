@@ -36,15 +36,7 @@ public class ClientGame
 
     public void Tick()
     {
-        var cmd = GetClientInputCommand(); // client generates input and applies it locally
-
-        LocalPlayerController?.ApplyInput(cmd);
-        LocalPlayerPawn?.ApplyInput(cmd);
-
-        if(!NetworkSession.Instance.IsListenServer)
-        {
-            SendClientCommand(cmd);
-        }
+        SendCommand();
     }
 
     public void AssignPlayerState(PlayerState playerState)
@@ -52,6 +44,39 @@ public class ClientGame
         LocalPlayerState = playerState;
     }
 
+    public void SendCommand()
+    {
+        var inputCommand = GetClientInputCommand();
+
+        LocalPlayerController?.ApplyInput(inputCommand);
+        LocalPlayerPawn?.ApplyInput(inputCommand);
+
+        if(NetworkSession.Instance.IsListenServer)
+        {
+            SendListenServerCommand(inputCommand);
+        }
+        else
+        {
+            SendClientCommand(inputCommand);
+        }
+    }
+
+    public void SendListenServerCommand(ClientInputCommand inputCommand)
+    {
+        ClientCommand clientCommand = new();
+        clientCommand.LastServerTickProcessedByClient = LastServerTickProcessedByClient;
+        clientCommand.ClientTick = MatchState.Instance.CurrentTick;
+        clientCommand.Commands = new ClientInputCommand[1];
+        clientCommand.Commands[0] = inputCommand;
+        ServerGame.Instance.ReceiveClientCommand(clientCommand, LocalPlayerID);
+    }
+
+    public void SendClientInput(ClientInputCommand inputCommand)
+    {
+        UnprocessedClientInputs.Add(inputCommand);
+        var commandsToSend = UnprocessedClientInputs.Skip(Math.Max(0, UnprocessedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
+        ClientCommand.Send(commandsToSend);
+    }
 
     public void SendClientCommand(ClientInputCommand cmd)
     {

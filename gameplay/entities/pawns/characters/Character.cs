@@ -98,14 +98,7 @@ public partial class Character : Pawn, IDamageable
     {
         base.ApplyInput(cmd);
 
-
-        if(IsAuthority)
-        {
-            PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-            UpdatePositionState(PlayerState.CharacterPublicState.Position);
-
-        }
-        else if(IsLocal)
+        if(IsLocal)
         {
             PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
             PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
@@ -126,8 +119,8 @@ public partial class Character : Pawn, IDamageable
 
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
+        GD.Print($"processing client input");
         UpdatePositionState(PlayerState.CharacterPublicState.Position);
-
         _weapon.ProcessClientInput(cmd.Mask);
     }
 
@@ -455,7 +448,7 @@ public partial class Character : Pawn, IDamageable
 
             if (_lookDirty)
             {
-                PredictedPublicState.Rotation = new Vector2(GlobalRotation.Y, _cameraPivot.Rotation.X);
+                PredictedPublicState.Rotation = new Vector2(GlobalRotation.Y, 0.0f);
 
                 cmd.Mask |= ClientCommandMask.LOOK;
                 cmd.Look = PredictedPublicState.Rotation;
@@ -540,6 +533,7 @@ public partial class Character : Pawn, IDamageable
 
             if (Mathf.Abs(mouseEvent.Relative.Y) > 0.0f)
             {
+                /*
                 Pitch += -mouseEvent.Relative.Y * MouseSensitivity;
                 Pitch = Mathf.Clamp(Pitch, -90, 90);
 
@@ -548,7 +542,7 @@ public partial class Character : Pawn, IDamageable
                     _cameraPivot.RotationDegrees = new Vector3(Pitch, 0, 0);
                 }
 
-                _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;
+                _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;*/
 
             }
 
