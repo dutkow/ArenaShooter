@@ -49,7 +49,7 @@ public partial class SpawnManager : Node3D
         player.CharacterPublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
 
         player.CharacterPublicState.Position = spawnPoint.GlobalPosition;
-        player.CharacterPublicState.Rotation = new Vector2(spawnPoint.GlobalRotation.Y, 0.0f);
+        player.CharacterPublicState.Look = new Vector2(-spawnPoint.GlobalRotation.Y, 0.0f);
 
         return spawnedPlayer;
     }

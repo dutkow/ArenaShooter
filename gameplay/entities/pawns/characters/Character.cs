@@ -16,16 +16,14 @@ public partial class Character : Pawn, IDamageable
 
 
     [Export] public Camera3D Camera; // assign in editor
-    [Export] public float MouseSensitivity = 0.1f;
+    [Export] public float MouseSensitivity = 0.005f;
 
     List<ClientInputCommand> _unacknowledgedClientInputs = new();
 
 
     const int REDUNDANT_INPUTS = 4;
 
-    private Vector2 _lookRotation;
 
-    public Vector2 _deltaLook;
     public float Yaw => GlobalRotation.Y;
     public float Pitch { get; private set; }
 
@@ -72,6 +70,8 @@ public partial class Character : Pawn, IDamageable
         _visualContainerPosition = _visualContainer.Position;
 
         Area.Owner = this;
+
+        
     }
 
     public void ApplyDamage(int damage)
@@ -95,9 +95,7 @@ public partial class Character : Pawn, IDamageable
     {
         base.ServerProcessNextClientInput(cmd);
 
-        PlayerState.CharacterPublicState.Rotation = cmd.Look;
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-
         _weapon.ProcessClientInput(cmd.Mask);
     }
 
@@ -159,9 +157,10 @@ public partial class Character : Pawn, IDamageable
         }
         else
         {
+            /*
             GlobalPosition = PlayerState.CharacterPublicState.Position;
-            GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Rotation.X, 0.0f);
-            _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Rotation.Y, 0.0f, 0.0f);
+            GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Look.X, 0.0f);
+            _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Look.Y, 0.0f, 0.0f);*/
         }
     }
 
@@ -180,14 +179,14 @@ public partial class Character : Pawn, IDamageable
     public void InterpolateYaw(float interpSpeed)
     {
         Vector3 rot = GlobalRotation;
-        rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Rotation.X, interpSpeed);
+        rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Look.X, interpSpeed);
         GlobalRotation = rot;
     }
 
     public void InterpolatePitch(float interpSpeed)
     {
         Vector3 camRot = _thirdPersonWeaponMesh.GlobalRotation;
-        camRot.X = Mathf.Lerp(camRot.X, PlayerState.CharacterPublicState.Rotation.Y, interpSpeed);
+        camRot.X = Mathf.Lerp(camRot.X, PlayerState.CharacterPublicState.Look.Y, interpSpeed);
         _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
@@ -225,7 +224,7 @@ public partial class Character : Pawn, IDamageable
         if(!IsAuthority)
         {
             PredictedPublicState = PlayerState.CharacterPublicState.Copy();
-            PredictedPublicState.Rotation = new Vector2(GlobalRotation.Y, 0.0f);
+            PredictedPublicState.Look = new Vector2(GlobalRotation.Y, 0.0f);
             GD.Print($"client copied pub state");
         }
     }
@@ -243,7 +242,7 @@ public partial class Character : Pawn, IDamageable
 
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
         {
-            publicState.Rotation = PredictedPublicState.Rotation;
+            publicState.Look = PredictedPublicState.Look;
         }
 
         if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) == 0)
@@ -447,28 +446,33 @@ public partial class Character : Pawn, IDamageable
         _weapon.Tick(NetworkConstants.SERVER_TICK_INTERVAL, Camera.GlobalPosition, dir);
 
 
-        _lookRotation = new Vector2(GlobalRotation.Y, Pitch);
-        PredictedPublicState.Rotation = _lookRotation;
-        cmd.Look = _lookRotation;
+        cmd.Look = _accumulatedLookDelta;
         cmd.Mask |= ClientCommandMask.LOOK;
+
 
         PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
         PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
         _weapon.HandleInput(cmd.Mask);
 
-
-
-        _deltaLook = Vector2.Zero;
+        _accumulatedLookDelta = Vector2.Zero;
         return cmd;
     }
 
+    private Vector2 _accumulatedLookDelta;
     public void HandleMouseLook(InputEvent @event)
     {
         if (@event is InputEventMouseMotion mouseEvent)
         {
-            if (Mathf.Abs(mouseEvent.Relative.X) > 0.0f)
+            // Accumulate look delta in degrees (or radians consistently)
+            Vector2 lookDelta = mouseEvent.Relative * MouseSensitivity;
+
+            _accumulatedLookDelta += lookDelta; // Store in degrees
+
+            // Apply yaw rotation in radians
+            if (Mathf.Abs(lookDelta.X) > 0.0f)
             {
-                RotateY(Mathf.DegToRad(-mouseEvent.Relative.X * MouseSensitivity));
+                // Convert degrees -> radians for RotateY
+                RotateY(-lookDelta.X);
             }
         }
     }
@@ -527,7 +531,7 @@ public partial class Character : Pawn, IDamageable
     public void Teleport(Vector3 position, float yawRotation)
     {
         PlayerState.CharacterPublicState.Position = position;
-        PlayerState.CharacterPublicState.Rotation.X = yawRotation;
+        PlayerState.CharacterPublicState.Look.X = yawRotation;
     }
 
 
@@ -594,7 +598,7 @@ public partial class Character : Pawn, IDamageable
 
     public void UpdateRotationState(Vector2 look)
     {
-        PlayerState.CharacterPublicState.Rotation = new Vector2(look.X, look.Y);
+        PlayerState.CharacterPublicState.Look = new Vector2(look.X, look.Y);
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
     }
 

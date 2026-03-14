@@ -42,6 +42,7 @@ public class CharacterMovement
 
     public float HorizontalVelocity { get; private set; }
 
+
     public void Initialize(Character character)
     {
         _character = character;
@@ -69,12 +70,17 @@ public class CharacterMovement
         if (cmd.Mask.HasFlag(ClientCommandMask.STRAFE_LEFT)) move.X -= 1;
         if (cmd.Mask.HasFlag(ClientCommandMask.STRAFE_RIGHT)) move.X += 1;
 
+        state.Look += cmd.Look;
+
         move = move.Normalized();
-        var basis = Basis.FromEuler(new Vector3(0, state.Rotation.X, 0)); // yaw
+        Basis basis = Basis.FromEuler(new Vector3(0, -state.Look.X, 0));
+
         Vector3 desiredMoveDir = (basis.Z * move.Z + basis.X * move.X).Normalized() * MaxGroundSpeed;
 
         if (_jumpCooldownReady)
+        {
             CheckGrounded(state);
+        }
 
         // Jump
         if (cmd.Mask.HasFlag(ClientCommandMask.JUMP) && _isGrounded && _jumpCooldownReady)
@@ -115,19 +121,6 @@ public class CharacterMovement
         return state;
     }
 
-    public void HandleInput(ClientInputCommand cmd, float delta)
-    {
-        if(_character.IsAuthority)
-        {
-            _character.PlayerState.CharacterPublicState = Step(_character.PlayerState.CharacterPublicState, cmd, delta);
-        }
-        else
-        {
-            _character.PlayerState.CharacterPublicState = Step(_character.PlayerState.CharacterPublicState, cmd, delta);
-
-            //_character.PredictedPublicState = Step(_character.PredictedPublicState, cmd, delta);
-        }
-    }
 
     private void HandleGroundedMovement(CharacterPublicState state, Vector3 desiredMoveDir, float delta)
     {
