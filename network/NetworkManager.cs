@@ -21,9 +21,9 @@ public enum NetworkRole : byte
     REMOTE
 }
 
-public partial class NetworkSession : Node
+public class NetworkManager : ITickable
 {
-    public static NetworkSession Instance { get; private set; }
+    public static NetworkManager Instance { get; private set; }
 
     public NetworkMode NetworkMode { get; private set; } = NetworkMode.OFFLINE;
     public bool IsClient => NetworkMode == NetworkMode.CLIENT;
@@ -46,7 +46,7 @@ public partial class NetworkSession : Node
 
     public bool IsServerFull => PlayerIDsToPlayerStates.Count >= MaxPlayers;
 
-    private NetworkHandler _networkHandler;
+    private NetworkPeer _networkPeer;
     private MessageRouter _router;
     private LanServerAdvertiser _lanBroadcaster;
 
@@ -71,28 +71,43 @@ public partial class NetworkSession : Node
 
     public ENetPacketPeer ServerPeer;
 
+
     // ----------------------
     // Initialization
     // ----------------------
+
+    public static void Create()
+    {
+        Instance = new NetworkManager();
+
+        Instance.Initialize();
+    }
+
     public void Initialize()
     {
         Instance = this;
 
-        _router = new MessageRouter();
 
-        // Fill the pool of available _playerIDs
         _availablePlayerIDs.Clear();
         for (byte i = 1; i <= MaxPlayers; i++)
         {
             _availablePlayerIDs.Enqueue(i);
         }
 
-        _networkHandler = NetworkHandler.Instance;
+        _networkPeer = new();
 
-        _networkHandler.OnServerStarted += HandleServerStarted;
+        _networkPeer.OnServerStarted += HandleServerStarted;
         //_networkHandler.OnPeerConnected += HandlePeerConnected;
-        _networkHandler.OnPeerDisconnected += HandlePeerDisconnected;
-        _networkHandler.OnDisconnectedFromServer += HandleFailedToConnect;
+        _networkPeer.OnPeerDisconnected += HandlePeerDisconnected;
+        _networkPeer.OnDisconnectedFromServer += HandleFailedToConnect;
+
+        _router = new MessageRouter();
+
+    }
+
+    public virtual void Tick(double delta)
+    {
+        _networkPeer?.Tick(delta);
     }
 
     public void SetMode(NetworkMode mode)
@@ -133,7 +148,7 @@ public partial class NetworkSession : Node
 
         ServerInfo = info;
 
-        _networkHandler.StartLanServer(info.IP, info.Port);
+        _networkPeer.StartLanServer(info.IP, info.Port);
 
         if (_lanBroadcaster == null)
         {
@@ -207,7 +222,7 @@ public partial class NetworkSession : Node
             return;
         }
 
-        _networkHandler.StartClient(serverInfo.IP, serverInfo.Port);
+        _networkPeer.StartClient(serverInfo.IP, serverInfo.Port);
     }
 
     private void HandleFailedToConnect()

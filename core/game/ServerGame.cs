@@ -116,7 +116,7 @@ public class ServerGame
             ushort lastProcessedClientTick = LastProcessedClientTicksByPlayerID[playerID];
 
 
-            if (!NetworkSession.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
+            if (!NetworkManager.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
             {
                 GD.Print($"Peer not found. Peer ID: {playerID}. Peer: {peer}");
                 continue;

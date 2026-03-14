@@ -141,7 +141,7 @@ public static class NetworkSender
     // -------------------------------------------------
     public static void ToServer(Message message)
     {
-        ENetPacketPeer serverPeer = NetworkSession.Instance.ServerPeer;
+        ENetPacketPeer serverPeer = NetworkManager.Instance.ServerPeer;
         if (serverPeer == null)
         {
             GD.PushError("ServerPeer is null.");
@@ -172,7 +172,7 @@ public static class NetworkSender
         byte[] data = message.WriteMessage();
         int flags = (int)message.Flags;
 
-        foreach (var peer in NetworkHandler.Instance.ReadyPeers)
+        foreach (var peer in NetworkPeer.Instance.ReadyPeers)
         {
             if (peer != null)
                 SendInternal(peer, 0, data, flags, false);
@@ -187,7 +187,7 @@ public static class NetworkSender
         byte[] data = message.WriteMessage();
         int flags = (int)message.Flags;
 
-        foreach (var kvp in NetworkSession.Instance.PlayerIDsToPeers)
+        foreach (var kvp in NetworkManager.Instance.PlayerIDsToPeers)
         {
             if (kvp.Key == excludedPlayerID)
                 continue;

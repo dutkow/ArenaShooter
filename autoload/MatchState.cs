@@ -93,7 +93,7 @@ public partial class MatchState : Node
         //NetworkHandler.Instance.OnPeerConnected += HandlePlayerJoined;
         //NetworkHandler.Instance.OnPeerDisconnected += HandlePeerDisconnected;
 
-        if (NetworkSession.Instance.IsListenServer)
+        if (NetworkManager.Instance.IsListenServer)
         {
             GD.Print("running init listen server stuff on match state");
             byte playerID = ClientGame.Instance.LocalPlayerID;
@@ -207,7 +207,7 @@ public partial class MatchState : Node
     
     public void AddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
     {
-        GD.Print($"add player running on {NetworkSession.Instance.NetworkMode}. player id: {playerID}");
+        GD.Print($"add player running on {NetworkManager.Instance.NetworkMode}. player id: {playerID}");
         if (ConnectedPlayers.ContainsKey(playerID))
         {
             return; // Already added
@@ -222,7 +222,7 @@ public partial class MatchState : Node
         try
         {
             PlayerJoinedNew?.Invoke(playerState);
-            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PlayerName}. Network Mode = {NetworkSession.Instance.NetworkMode}");
+            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PlayerName}. Network Mode = {NetworkManager.Instance.NetworkMode}");
 
         }
         catch (Exception e)

@@ -14,7 +14,7 @@ public partial class MatchDebugPanel : Control
         OnMatchPhaseChanged(MatchState.Instance.MatchPhase);
         MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
 
-        _netRoleLabel.Text = NetworkSession.Instance.NetworkMode.ToString();
+        _netRoleLabel.Text = NetworkManager.Instance.NetworkMode.ToString();
     }
 
     public void OnMatchPhaseChanged(MatchPhase matchPhase)

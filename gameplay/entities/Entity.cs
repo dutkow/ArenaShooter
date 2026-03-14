@@ -17,7 +17,7 @@ public partial class Entity : Node3D
     {
         base._Ready();
 
-        IsAuthority = NetworkSession.Instance.NetworkMode != NetworkMode.CLIENT;
+        IsAuthority = NetworkManager.Instance.NetworkMode != NetworkMode.CLIENT;
     }
     public void SetRole(NetworkRole role)
     {

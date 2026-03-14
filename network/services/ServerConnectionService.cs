@@ -11,7 +11,7 @@ public static class ServerConnectionService
         var msg = new ConnectionRequest();
         msg.ReadMessage(data);
 
-        NetworkSession.Instance.HandleConnectionRequest(peer, msg.PlayerName);
+        NetworkManager.Instance.HandleConnectionRequest(peer, msg.PlayerName);
 
         GD.Print($"Server received: {msg.MessageType}");
     }
@@ -23,10 +23,10 @@ public static class ServerConnectionService
 
         int peerID = (int)peer.GetMeta("id");
 
-        byte playerID = NetworkSession.Instance.PeerIDsToPlayerIDs[peerID];
-        string playerName = NetworkSession.Instance.PlayerIDsToPlayerStates[playerID].PlayerName;
+        byte playerID = NetworkManager.Instance.PeerIDsToPlayerIDs[peerID];
+        string playerName = NetworkManager.Instance.PlayerIDsToPlayerStates[playerID].PlayerName;
 
-        NetworkHandler.Instance.ReadyPeers.Add(peer);
+        NetworkPeer.Instance.ReadyPeers.Add(peer);
 
 
 

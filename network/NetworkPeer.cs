@@ -7,11 +7,10 @@ using System.Data;
 /// NetworkHandler handles low-level networking for both server and client.
 /// LAN only for now. Uses ENet for packet delivery. 
 /// </summary>
-public partial class NetworkHandler : Node
+public class NetworkPeer : ITickable
 {
-    public static NetworkHandler Instance;
+    public static NetworkPeer Instance;
 
-    private NetworkSession _session;
 
     // ----------------------
     // Server events
@@ -63,12 +62,12 @@ public partial class NetworkHandler : Node
     public HashSet<ENetPacketPeer> ReadyPeers = new();
 
 
-    public NetworkHandler()
+    public NetworkPeer()
     {
         Instance = this;
 
-        _session = new();
-        _session.Initialize();
+        //_session = new();
+        //_session.Initialize();
 
         // Initialize available peer IDs 255 -> 0
         for (int i = 255; i >= 0; i--)
@@ -77,7 +76,7 @@ public partial class NetworkHandler : Node
         }
     }
 
-    public override void _Process(double delta)
+    public virtual void Tick(double delta)
     {
         if (Connection == null) return;
 
@@ -127,12 +126,12 @@ public partial class NetworkHandler : Node
                     break;
 
                 case ENetConnection.EventType.Receive:
-                    if(_session == null)
+                    if(NetworkManager.Instance == null)
                     {
                         GD.PushError("NetworkSession returned null.");
                         return;
                     }
-                    _session.HandleReceivedMessage(peer, peer.GetPacket());
+                    NetworkManager.Instance.HandleReceivedMessage(peer, peer.GetPacket());
                     break;
             }
 
@@ -177,7 +176,7 @@ public partial class NetworkHandler : Node
         availablePeerIds.RemoveAt(availablePeerIds.Count - 1);
 
         peer.SetMeta("id", peerId);
-        NetworkSession.Instance.PeerIDsToPeers[peerId] = peer;
+        NetworkManager.Instance.PeerIDsToPeers[peerId] = peer;
 
         GD.Print($"added peer with peer id {peerId} to dict. peer = {peer}");
 
@@ -239,7 +238,7 @@ public partial class NetworkHandler : Node
         _hasFiredConnected = true;
         GD.Print("Connected to server!");
 
-        _session.HandleConnectedToServer(peer);
+        NetworkManager.Instance.HandleConnectedToServer(peer);
         //OnConnectedToServer?.Invoke();
     }
 

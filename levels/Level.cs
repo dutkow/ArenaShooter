@@ -42,12 +42,12 @@ public partial class Level : Node3D
 
     public void PostInit()
     {
-        if (NetworkSession.Instance.IsServer)
+        if (NetworkManager.Instance.IsServer)
         {
             MatchState.Instance.Initialize();
 
         }
-        else if (NetworkSession.Instance.IsClient)
+        else if (NetworkManager.Instance.IsClient)
         {
             ClientLoaded.Send();
             GD.Print($"sending client loaded");

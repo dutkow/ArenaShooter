@@ -6,7 +6,7 @@ public static class ServerGameplayService
     {
         int peerID = (int)peer.GetMeta("id");
 
-        if (NetworkSession.Instance.PeerIDsToPlayerIDs.TryGetValue(peerID, out var playerID))
+        if (NetworkManager.Instance.PeerIDsToPlayerIDs.TryGetValue(peerID, out var playerID))
         {
             if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
             {

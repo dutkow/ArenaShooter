@@ -36,6 +36,6 @@ public partial class ServerResultEntry : Control
 
     public void OnJoinButtonPressed()
     {
-        NetworkSession.Instance.JoinServer(_serverInfo);
+        NetworkManager.Instance.JoinServer(_serverInfo);
     }
 }

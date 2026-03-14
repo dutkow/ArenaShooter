@@ -29,7 +29,7 @@ public class ClientGame
         LocalPlayerController = new();
         Game.Instance.AddChild(LocalPlayerController);
 
-        GD.Print($"Starting client. NetworkMode = {NetworkSession.Instance.NetworkMode}");
+        GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
 
         ClientProjectileManager.Create();
     }
@@ -48,7 +48,7 @@ public class ClientGame
     {
         var inputCommand = GetClientInputCommand();
 
-        if(NetworkSession.Instance.IsListenServer)
+        if(NetworkManager.Instance.IsListenServer)
         {
             SendListenServerCommand(inputCommand);
         }

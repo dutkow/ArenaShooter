@@ -47,7 +47,7 @@ public class HealthUpdate : Message
 
     public static void Send(byte playerID, int health, int shield)
     {
-        ENetPacketPeer peer = NetworkSession.Instance.PlayerIDsToPeers[playerID];
+        ENetPacketPeer peer = NetworkManager.Instance.PlayerIDsToPeers[playerID];
         if(peer == null)
         {
             GD.PushError($"Peer with player ID [{playerID}] is null.");

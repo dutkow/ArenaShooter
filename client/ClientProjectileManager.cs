@@ -80,7 +80,7 @@ public class ClientProjectileManager
 
     public void SpawnPredictedProjectile(ProjectileSpawnData spawnData)
     {
-        GD.Print($"Spawning projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
+        GD.Print($"Spawning projectile on client. Network mode = {NetworkManager.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
 
         var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(_nextAvailableClientProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnDirection, true);
         _predictedProjectiles.Add(spawnedProjectile);
@@ -90,7 +90,7 @@ public class ClientProjectileManager
 
     public void SpawnAuthoritativeProjectile(ProjectileSpawnData spawnData)
     {
-        GD.Print($"Spawning projectile on client. Network mode = {NetworkSession.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
+        GD.Print($"Spawning projectile on client. Network mode = {NetworkManager.Instance.NetworkMode}. Adding projectile ID {spawnData.ProjectileID} to known projectiles");
         var spawnedProjectile = ProjectileManager.Instance.LocalSpawnProjectile(spawnData.ProjectileID, spawnData.Type, spawnData.SpawnLocation, spawnData.SpawnDirection, false);
         _knownProjectiles.Add(spawnData.ProjectileID, spawnedProjectile);
     }

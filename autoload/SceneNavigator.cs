@@ -10,8 +10,8 @@ public class SceneNavigator
     public SceneNavigator()
     {
         // Subscribe to network events (logic only)
-        NetworkSession.Instance.OnSessionStarted += OnSessionStarted;
-        NetworkSession.Instance.OnConnectedToServer += OnConnectedToServer;
+        NetworkManager.Instance.OnSessionStarted += OnSessionStarted;
+        NetworkManager.Instance.OnConnectedToServer += OnConnectedToServer;
     }
 
     private void OnSessionStarted(ServerInfo serverInfo)
@@ -21,13 +21,13 @@ public class SceneNavigator
 
     private void OnConnectedToServer()
     {
-        OpenMultiplayerMap(NetworkSession.Instance.ServerInfo.MapID);
+        OpenMultiplayerMap(NetworkManager.Instance.ServerInfo.MapID);
     }
 
     // Delay optional, purely logic
     public async void OpenMultiplayerMap(string mapID, float delayBeforeLoad = 0.5f)
     {
-        GD.Print($"open multiplayer map ran on {NetworkSession.Instance.NetworkMode}");
+        GD.Print($"open multiplayer map ran on {NetworkManager.Instance.NetworkMode}");
         if (!GameData.Instance.MultiplayerMapsByID.TryGetValue(mapID, out var mapInfo))
         {
             Console.WriteLine($"[SceneNavigator] Map ID {mapID} not found");
@@ -56,7 +56,7 @@ public class SceneNavigator
 
         // Swap scenes via Main
         Main.Instance.SetMainScene(newScene);
-        GD.Print($"set main scene ran on {NetworkSession.Instance.NetworkMode}");
+        GD.Print($"set main scene ran on {NetworkManager.Instance.NetworkMode}");
 
         Console.WriteLine("[SceneNavigator] Multiplayer map fully loaded!");
     }

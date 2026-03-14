@@ -40,12 +40,12 @@ public class ChatMessageRequest : Message
 
     public static void Send(ChatMessageInfo info)
     {
-        if (NetworkSession.Instance.IsServer)
+        if (NetworkManager.Instance.IsServer)
         {
             info.PlayerID = 0;
             if (ChatService.ValidateChatMessageRequest(info))
             {
-                if(NetworkSession.Instance.IsListenServer)
+                if(NetworkManager.Instance.IsListenServer)
                 {
                     ChatManager.Instance.BroadcastChatMessageReceived(info);
                 }

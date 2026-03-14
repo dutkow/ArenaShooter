@@ -1,13 +1,13 @@
 using Godot;
 using System;
 
-public partial class Main : Node
+public partial class Main : Node, ITickable
 {
     public static Main Instance { get; private set; }
 
     public Node _mainScene;
 
-    private SceneNavigator _sceneNavigator = new();
+    private SceneNavigator _sceneNavigator;
 
     [Export] PackedScene _mainMenuScene;
     private MainMenu _mainMenu;
@@ -15,13 +15,30 @@ public partial class Main : Node
     [Export] PackedScene _loadingScreenScene;
     private LoadingScreen _loadingScreen;
 
+
+
     public override void _Ready()
     {
         base._Ready();
 
         Instance = this;
 
+        NetworkManager.Create();
+        _sceneNavigator = new();
+
         OpenMainMenu();
+    }
+
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
+
+        Tick(delta);
+    }
+
+    public virtual void Tick(double delta)
+    {
+        NetworkManager.Instance?.Tick(delta);
     }
 
     public void OpenMainMenu()
