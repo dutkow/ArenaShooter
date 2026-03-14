@@ -48,9 +48,6 @@ public class ClientGame
     {
         var inputCommand = GetClientInputCommand();
 
-        LocalPlayerController?.ApplyInput(inputCommand);
-        LocalPlayerPawn?.ApplyInput(inputCommand);
-
         if(NetworkSession.Instance.IsListenServer)
         {
             SendListenServerCommand(inputCommand);
@@ -88,8 +85,6 @@ public class ClientGame
     public ClientInputCommand GetClientInputCommand()
     {
         var cmd = new ClientInputCommand();
-
-        //cmd = LocalPlayerController.AddInput(cmd);
 
         if (LocalPlayerPawn != null)
         {

@@ -69,7 +69,6 @@ public class ServerGame
     {
         foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
-            GD.Print($"processing input for {kvp.Key}");
             byte playerID = kvp.Key;
             var playerState = kvp.Value;
             var character = playerState.Character;
@@ -84,26 +83,26 @@ public class ServerGame
                 queue = new SortedDictionary<ushort, ClientInputCommand>();
             }
 
-            ClientInputCommand cmd = new();
+            ClientInputCommand nextCommand = new();
+            
 
             if (queue.Count > 0)
             {
-                ushort tickToProcess = queue.Keys.Min();
-                cmd = queue[tickToProcess];
-                queue.Remove(tickToProcess);
+                ushort clientTickOfNextCommand = queue.Keys.Min();
+                nextCommand = queue[clientTickOfNextCommand];
+                queue.Remove(clientTickOfNextCommand);
 
-                LastProcessedClientTicksByPlayerID[playerID] = tickToProcess;
-                LastProcessedClientCommandsByPlayerID[playerID] = cmd;
+                LastProcessedClientTicksByPlayerID[playerID] = clientTickOfNextCommand;
+                LastProcessedClientCommandsByPlayerID[playerID] = nextCommand;
             }
             else if (LastProcessedClientCommandsByPlayerID.TryGetValue(playerID, out var lastCommand))
             {
-                cmd = lastCommand;
+                nextCommand = lastCommand;
             }
 
-            character.ProcessClientInput(cmd);
+            character.ProcessClientInput(nextCommand);
             _unprocessedClientInputs[playerID] = queue;
         }
-        //////////////////
     }
 
     private void SendWorldSnapshotDeltas(WorldSnapshot newSnapshot)

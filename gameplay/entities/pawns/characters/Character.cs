@@ -119,7 +119,6 @@ public partial class Character : Pawn, IDamageable
 
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-        GD.Print($"processing client input");
         UpdatePositionState(PlayerState.CharacterPublicState.Position);
         _weapon.ProcessClientInput(cmd.Mask);
     }
@@ -472,8 +471,6 @@ public partial class Character : Pawn, IDamageable
 
         MovementComp.LaunchVector = Vector3.Zero;
 
-
-
         return cmd;
     }
 
@@ -533,7 +530,6 @@ public partial class Character : Pawn, IDamageable
 
             if (Mathf.Abs(mouseEvent.Relative.Y) > 0.0f)
             {
-                /*
                 Pitch += -mouseEvent.Relative.Y * MouseSensitivity;
                 Pitch = Mathf.Clamp(Pitch, -90, 90);
 
@@ -542,8 +538,7 @@ public partial class Character : Pawn, IDamageable
                     _cameraPivot.RotationDegrees = new Vector3(Pitch, 0, 0);
                 }
 
-                _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;*/
-
+                _thirdPersonWeaponSocket.Rotation = _cameraPivot.Rotation;
             }
 
             if(mouseEvent.Relative != Vector2.Zero)
