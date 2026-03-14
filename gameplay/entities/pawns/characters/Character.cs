@@ -76,14 +76,6 @@ public partial class Character : Pawn, IDamageable
         HealthComp.ApplyDamage(damage);
     }
 
-    public override void _PhysicsProcess(double delta)
-    {
-        base._PhysicsProcess(delta);
-
-        Vector3 dir = -Camera.GlobalTransform.Basis.Z;
-        _weapon.Tick(delta, Camera.GlobalPosition, dir);
-    }
-
     public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
     {
         GlobalPosition = spawnPosition;
@@ -94,19 +86,7 @@ public partial class Character : Pawn, IDamageable
 
     }
 
-    public override void ApplyInput(ClientInputCommand cmd)
-    {
-        base.ApplyInput(cmd);
 
-        if(IsLocal)
-        {
-            PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-            PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
-        }
-
-        _weapon.HandleInput(cmd.Mask);
-
-    }
 
     public override void ProcessClientInput(ClientInputCommand cmd)
     {
@@ -123,13 +103,15 @@ public partial class Character : Pawn, IDamageable
         _weapon.ProcessClientInput(cmd.Mask);
     }
 
+
     public override void _Process(double delta)
     {
         base._Process(delta);
 
-        if(IsLocal)
+        if (IsLocal)
         {
-            if(IsAuthority)
+
+            if (IsAuthority)
             {
                 LocalAuthorityInterpolation((float)delta);
             }
@@ -284,6 +266,7 @@ public partial class Character : Pawn, IDamageable
 
         if(IsLocal)
         {
+            GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
             foreach (var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
             {
                 publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
@@ -383,8 +366,8 @@ public partial class Character : Pawn, IDamageable
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
         const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
-        const float INTERP_THRESHOLD_H = 0.01f;      // Horizontal lerp start
-        const float INTERP_THRESHOLD_V = 0.01f;     // Vertical lerp start
+        const float INTERP_THRESHOLD_H = 0.02f;      // Horizontal lerp start
+        const float INTERP_THRESHOLD_V = 0.02f;     // Vertical lerp start
 
         // Lerp speeds
         const float INTERP_SPEED_H = 0.25f;
@@ -398,18 +381,17 @@ public partial class Character : Pawn, IDamageable
 
         float deltaY = Math.Abs(delta.Y);
 
-        //GD.Print($"horizontal error: {distXZ}. position: {PredictedPublicState.Position}. predictedp osition {authoritativeState.Position}");
+        GD.Print($"horizontal error: {distXZ}.");
 
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
-            GD.Print($"snap correction horizontal, error {distXZ}");
+            //GD.Print($"snap correction horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
-            GD.Print($"lerp correction horizontal, error {distXZ}");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }
@@ -470,6 +452,13 @@ public partial class Character : Pawn, IDamageable
         }
 
         MovementComp.LaunchVector = Vector3.Zero;
+
+        Vector3 dir = -Camera.GlobalTransform.Basis.Z;
+        _weapon.Tick(NetworkConstants.SERVER_TICK_INTERVAL, Camera.GlobalPosition, dir);
+
+        PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+        PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+        _weapon.HandleInput(cmd.Mask);
 
         return cmd;
     }
