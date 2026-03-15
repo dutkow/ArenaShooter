@@ -131,9 +131,8 @@ public class ClientGame
         return cmd;
     }
 
-    public void ApplyWorldSnapshot(WorldSnapshot snapshot)
+    public void HandleWorldSnapshot(WorldSnapshot snapshot)
     {
-        GD.Print($"applying world snapshot");
         if (!NetUtils.IsNewerTick(snapshot.ServerTick, LastServerTickProcessedByClient))
         {
             return;
@@ -212,11 +211,6 @@ public class ClientGame
     public void HandlePlayerJoined(PlayerJoined playerJoined)
     {
         MatchState.Instance.AddPlayer(playerJoined.PlayerInfo);
-    }
-
-    public void HandleWorldSnapshot(WorldSnapshot worldSnapshot)
-    {
-
     }
 
     private void Dispatch<T>(byte[] payload, Action<T> handler) where T : Message, new()

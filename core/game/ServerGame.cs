@@ -61,7 +61,7 @@ public class ServerGame()
 
     public void Tick()
     {
-        ProcessNextClientInputs();
+        ProcessNextClientInputCommands();
 
         var newSnapshot = WorldSnapshot.Build();
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
@@ -89,7 +89,7 @@ public class ServerGame()
 
     }
 
-    public void ProcessNextClientInputs()
+    public void ProcessNextClientInputCommands()
     {
         foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
@@ -107,25 +107,27 @@ public class ServerGame()
                 queue = new SortedDictionary<ushort, ClientInputCommand>();
             }
 
-            ClientInputCommand nextCommand = new();
+            ClientInputCommand nextInputCommand = new();
             
 
             if (queue.Count > 0)
             {
-                ushort clientTickOfNextCommand = queue.Keys.Min();
-                nextCommand = queue[clientTickOfNextCommand];
-                queue.Remove(clientTickOfNextCommand);
+                ushort clientTickOfNextInputCommand = queue.Keys.Min();
+                nextInputCommand = queue[clientTickOfNextInputCommand];
+                queue.Remove(clientTickOfNextInputCommand);
 
-                LastProcessedClientTicksByPlayerID[playerID] = clientTickOfNextCommand;
-                LastProcessedClientCommandsByPlayerID[playerID] = nextCommand;
+                LastProcessedClientTicksByPlayerID[playerID] = clientTickOfNextInputCommand;
+                LastProcessedClientCommandsByPlayerID[playerID] = nextInputCommand;
             }
             else if (LastProcessedClientCommandsByPlayerID.TryGetValue(playerID, out var lastCommand))
             {
-                nextCommand = lastCommand;
+                nextInputCommand = lastCommand;
             }
 
-            character.ServerProcessNextClientInput(nextCommand);
+            character.ServerProcessNextClientInput(nextInputCommand);
             _unprocessedClientInputs[playerID] = queue;
+
+            GD.Print($"Processing client input. player id: {playerID}. input: {nextInputCommand.Flags}");
         }
     }
 

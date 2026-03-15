@@ -22,7 +22,7 @@ public static class ClientGameplayService
 
         GD.Print($"client received world snap");
 
-        ClientGame.Instance.ApplyWorldSnapshot(msg);
+        ClientGame.Instance.HandleWorldSnapshot(msg);
     }
 
     public static void HandleProjectileSpawned(byte[] data)
