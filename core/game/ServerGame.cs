@@ -220,7 +220,7 @@ public class ServerGame
     {
         byte playerID = GetPeerPlayerID(peer);
 
-        MatchState.Instance.AddPlayer(playerID, "need to sort out");
+        MatchState.Instance.AddPlayer(playerID, clientLoaded.PlayerName);
         NetworkPeer.Instance.ReadyPeers.Add(peer);
 
         LastProcessedServerTicksByPlayerID[playerID] = 0;
