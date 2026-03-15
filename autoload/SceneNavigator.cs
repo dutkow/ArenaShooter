@@ -57,6 +57,8 @@ public class SceneNavigator
 
         if (NetworkManager.Instance.IsClient)
         {
+            ClientGame.Initialize();
+            ClientGame.Instance.LocalPlayerID = NetworkManager.Instance.LocalPlayerID;
             ClientLoaded.Send();
             GD.Print($"sending client loaded");
         }

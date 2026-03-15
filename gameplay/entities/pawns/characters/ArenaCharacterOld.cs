@@ -50,7 +50,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
     // Networking
     // ----------------------
     public CharacterSnapshot LastSnapshot;
-    public ClientCommandMask LastInputCommand;
+    public ClientInput LastInputCommand;
 
     private double _tickAccumulator = 0f;
 
@@ -299,7 +299,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
                 foreach (var cmd in _commandHistory.Where(c => c.ClientTick > ClientGame.Instance.LastClientTickProcessedByServer))
                 {
                     // Apply movement inputs to your movement component manually
-                    MovementComp.Tick(cmd.Mask, NetworkConstants.SERVER_TICK_INTERVAL, CameraPivot);
+                    MovementComp.Tick(cmd.Input, NetworkConstants.SERVER_TICK_INTERVAL, CameraPivot);
                     GlobalPosition = _predictedPosition;
                 }
 
@@ -401,7 +401,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
                 //GlobalRotation = new Vector3(0.0f, _currentServerCommand.Yaw, 0.0f);
                 //CameraPivot.Rotation = new Vector3(_currentServerCommand.Pitch, 0.0f, 0.0f);
 
-                MovementComp.Tick(_currentServerCommand.Mask, delta, CameraPivot);
+                MovementComp.Tick(_currentServerCommand.Input, delta, CameraPivot);
             }
 
             Vector3 dir = -Camera.GlobalTransform.Basis.Z;
@@ -410,7 +410,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
 
         if (NetworkedComponent.IsLocal && !NetworkedComponent.IsAuthority)
         {
-            ClientCommandMask cmd = CaptureInput();
+            ClientInput cmd = CaptureInput();
             MovementComp.Tick(cmd, delta, CameraPivot);
 
             _tickAccumulator += delta;
@@ -423,16 +423,16 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
         }
     }
 
-    private ClientCommandMask CaptureInput()
+    private ClientInput CaptureInput()
     {
-        ClientCommandMask cmd = ClientCommandMask.NONE;
+        ClientInput cmd = ClientInput.NONE;
 
-        if (Input.IsActionPressed("move_forward")) cmd |= ClientCommandMask.FORWARD;
-        if (Input.IsActionPressed("move_back")) cmd |= ClientCommandMask.BACKWARD;
-        if (Input.IsActionPressed("move_left")) cmd |= ClientCommandMask.STRAFE_LEFT;
-        if (Input.IsActionPressed("move_right")) cmd |= ClientCommandMask.STRAFE_RIGHT;
-        if (Input.IsActionJustPressed("jump")) cmd |= ClientCommandMask.JUMP;
-        if (Input.IsActionPressed("primary_fire")) cmd |= ClientCommandMask.FIRE_PRIMARY;
+        if (Input.IsActionPressed("move_forward")) cmd |= ClientInput.FORWARD;
+        if (Input.IsActionPressed("move_back")) cmd |= ClientInput.BACKWARD;
+        if (Input.IsActionPressed("move_left")) cmd |= ClientInput.STRAFE_LEFT;
+        if (Input.IsActionPressed("move_right")) cmd |= ClientInput.STRAFE_RIGHT;
+        if (Input.IsActionJustPressed("jump")) cmd |= ClientInput.JUMP;
+        if (Input.IsActionPressed("primary_fire")) cmd |= ClientInput.FIRE_PRIMARY;
 
         LastInputCommand = cmd;
 
@@ -441,13 +441,13 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
         return cmd;
     }
 
-    private void SendClientCommand(ClientCommandMask cmd)
+    private void SendClientCommand(ClientInput cmd)
     {
         // Capture current tick as a TickCommand
         ClientInputCommand tickCmd = new ClientInputCommand
         {
             ClientTick = MatchState.Instance.CurrentTick,
-            Mask = cmd, // use the captured input
+            Input = cmd, // use the captured input
             Look = new Vector2(GlobalRotation.Y, CameraPivot.Rotation.X)
         };
 

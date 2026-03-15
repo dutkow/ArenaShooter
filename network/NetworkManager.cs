@@ -126,16 +126,13 @@ public class NetworkManager : ITickable
 
         switch (NetworkMode)
         {
+            case NetworkMode.OFFLINE:
             case NetworkMode.DEDICATED_SERVER:
-                ServerGame.Initialize();
-                break;
-
             case NetworkMode.LISTEN_SERVER:
                 ServerGame.Initialize();
                 break;
 
             case NetworkMode.CLIENT:
-                ClientGame.Initialize();
                 break;
         }
 
@@ -194,8 +191,6 @@ public class NetworkManager : ITickable
 
             GD.Print($"Player disconnected: _peerID={_peerID}, _playerID={_playerID}");
             OnPlayerLeft?.Invoke(_playerID);
-
-            //ServerInfo.Players--;
         }
         else
         {

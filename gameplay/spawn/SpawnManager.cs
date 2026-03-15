@@ -72,6 +72,7 @@ public partial class SpawnManager : Node3D
         if (playerID == ClientGame.Instance.LocalPlayerID)
         {
             ClientGame.Instance.LocalPlayerController.Possess(spawnedPlayer);
+            GD.Print($"running POSSESS on player id: {playerID} on {NetworkManager.Instance.NetworkMode}");
         }
         else
         {

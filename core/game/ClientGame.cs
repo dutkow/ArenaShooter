@@ -8,7 +8,7 @@ public class ClientGame
     public static ClientGame Instance { get; private set; }
 
     // Player elements
-    public byte LocalPlayerID { get; private set; }
+    public byte LocalPlayerID { get; set; }
     public PlayerController LocalPlayerController { get; private set; }
     public PlayerState LocalPlayerState { get; private set; }
     public PlayerStateNew LocalPlayerStateNew { get; private set; }
@@ -159,8 +159,6 @@ public class ClientGame
     public void HandleConnectionAccepted(ConnectionAccepted connectionAccepted)
     {
         LocalPlayerID = connectionAccepted.AssignedPlayerID;
-        LocalPlayerController = new();
-        Game.Instance.AddChild(LocalPlayerController);
 
         GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
 

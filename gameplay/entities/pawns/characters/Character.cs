@@ -95,8 +95,10 @@ public partial class Character : Pawn, IDamageable
     {
         base.ServerProcessNextClientInput(cmd);
 
+        //GD.Print($"running server process next client input. player id = {PlayerState.PlayerID}. move forward: {cmd.Input.HasFlag(ClientInput.FORWARD)}");
+
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-        _weapon.ProcessClientInput(cmd.Mask);
+        _weapon.ProcessClientInput(cmd.Input);
     }
 
 
@@ -263,7 +265,7 @@ public partial class Character : Pawn, IDamageable
 
         if(IsLocal)
         {
-            GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
+            //GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
             foreach (var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
             {
                 publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
@@ -378,7 +380,7 @@ public partial class Character : Pawn, IDamageable
 
         float deltaY = Math.Abs(delta.Y);
 
-        GD.Print($"horizontal error: {distXZ}.");
+        //GD.Print($"horizontal error: {distXZ}.");
 
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
@@ -417,24 +419,24 @@ public partial class Character : Pawn, IDamageable
 
         if(_inputEnabled)
         {
-            if (Input.IsActionPressed("move_forward")) cmd.Mask |= ClientCommandMask.FORWARD;
-            if (Input.IsActionPressed("move_back")) cmd.Mask |= ClientCommandMask.BACKWARD;
-            if (Input.IsActionPressed("move_left")) cmd.Mask |= ClientCommandMask.STRAFE_LEFT;
-            if (Input.IsActionPressed("move_right")) cmd.Mask |= ClientCommandMask.STRAFE_RIGHT;
-            if (Input.IsActionPressed("jump")) cmd.Mask |= ClientCommandMask.JUMP;
-            if (Input.IsActionPressed("primary_fire")) cmd.Mask |= ClientCommandMask.FIRE_PRIMARY;
+            if (Input.IsActionPressed("move_forward")) cmd.Input |= ClientInput.FORWARD;
+            if (Input.IsActionPressed("move_back")) cmd.Input |= ClientInput.BACKWARD;
+            if (Input.IsActionPressed("move_left")) cmd.Input |= ClientInput.STRAFE_LEFT;
+            if (Input.IsActionPressed("move_right")) cmd.Input |= ClientInput.STRAFE_RIGHT;
+            if (Input.IsActionPressed("jump")) cmd.Input |= ClientInput.JUMP;
+            if (Input.IsActionPressed("primary_fire")) cmd.Input |= ClientInput.FIRE_PRIMARY;
         }
 
         if (MovementComp.WasLaunched)
         {
-            cmd.Mask |= ClientCommandMask.WAS_LAUNCHED;
+            cmd.Input |= ClientInput.WAS_LAUNCHED;
             cmd.LaunchVelocity = MovementComp.LaunchVector;
             MovementComp.WasLaunched = false;
         }
 
         if (_weapon.FiredPredictedProjectile)
         {
-            cmd.Mask |= ClientCommandMask.FIRED_PREDICTED_PROJECTILE;
+            cmd.Input |= ClientInput.FIRED_PREDICTED_PROJECTILE;
             cmd.PredictedProjectileClientID = ClientProjectileManager.Instance.GetNextAvailableClientProjectileID();
             _weapon.FiredPredictedProjectile = false;
         }
@@ -447,12 +449,12 @@ public partial class Character : Pawn, IDamageable
 
 
         cmd.Look = _accumulatedLookDelta;
-        cmd.Mask |= ClientCommandMask.LOOK;
+        cmd.Input |= ClientInput.LOOK;
 
 
         PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
         PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
-        _weapon.HandleInput(cmd.Mask);
+        _weapon.HandleInput(cmd.Input);
 
         _accumulatedLookDelta = Vector2.Zero;
         return cmd;
