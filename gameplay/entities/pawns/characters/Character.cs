@@ -98,7 +98,6 @@ public partial class Character : Pawn, IDamageable
 
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
 
-
         _weapon.ProcessClientInput(cmd.Flags);
     }
 
@@ -269,7 +268,7 @@ public partial class Character : Pawn, IDamageable
             //GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
             foreach (var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
             {
-                publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
+                //publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
             }
 
             ReconcileMoveState(publicState);
@@ -457,9 +456,14 @@ public partial class Character : Pawn, IDamageable
         cmd.Look = _accumulatedLookDelta;
         cmd.Flags |= InputFlags.LOOK;
 
+        if(!IsAuthority)
+        {
+            PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+            PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+        }
 
-        PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-        PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+
+
         _weapon.HandleInput(cmd.Flags);
 
         _accumulatedLookDelta = Vector2.Zero;
