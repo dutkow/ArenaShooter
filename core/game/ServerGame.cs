@@ -1,11 +1,14 @@
 using Godot;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 public class ServerGame
 {
+    const int MAX_PLAYERS = 16;
+    private bool _isServerFull => MatchState.Instance.ConnectedPlayers.Count <= MAX_PLAYERS;
     public static ServerGame Instance { get; private set; }
 
     public bool IsListenServer => Game.Instance.NetworkMode == NetworkMode.LISTEN_SERVER;
@@ -192,14 +195,40 @@ public class ServerGame
         }
     }
 
+    private const string _playerIDMeta = "player_id";
+
+    public byte GetPeerPlayerID(ENetPacketPeer peer)
+    {
+        return (byte)peer.GetMeta(_playerIDMeta);
+    }
+
     public void HandleConnectionRequest(ENetPacketPeer peer, ConnectionRequest connectionRequest)
     {
+        if (_isServerFull)
+        {
+            ConnectionDenied.Send(peer, "Server full");
+            return;
+        }
 
+        byte playerID = GetNextAvailablePlayerID();
+        peer.SetMeta(_playerIDMeta, playerID);
+
+        ConnectionAccepted.Send(peer, playerID);
     }
 
     public void HandleClientLoaded(ENetPacketPeer peer, ClientLoaded clientLoaded)
     {
+        byte playerID = GetPeerPlayerID(peer);
 
+        MatchState.Instance.AddPlayer(playerID, "need to sort out");
+        NetworkPeer.Instance.ReadyPeers.Add(peer);
+
+        LastProcessedServerTicksByPlayerID[playerID] = 0;
+        LastProcessedClientTicksByPlayerID[playerID] = 0;
+
+        var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
+
+        InitialMatchState.Send(peer);
     }
 
     public void HandleClientCommand(ENetPacketPeer peer, ClientCommand clientCommand)
@@ -212,13 +241,27 @@ public class ServerGame
     public virtual void InitMessageHandlers()
     {
         _messageHandlers[Msg.C2S_CONNECTION_REQUEST] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
-        _messageHandlers[Msg.C2S_CLIENT_LOADED] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
-        _messageHandlers[Msg.C2S_CLIENT_COMMAND] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
+        _messageHandlers[Msg.C2S_CLIENT_LOADED] = (peer, payload) => Dispatch<ClientLoaded>(peer, payload, HandleClientLoaded);
+        _messageHandlers[Msg.C2S_CLIENT_COMMAND] = (peer, payload) => Dispatch<ClientCommand>(peer, payload, HandleClientCommand);
     }
 
     private void Dispatch<T>(ENetPacketPeer peer, byte[] payload, Action<ENetPacketPeer, T> handler) where T : Message, new()
     {
         var msg = Message.FromData<T>(payload);
         handler(peer, msg);
+    }
+
+    public byte GetNextAvailablePlayerID()
+    {
+        var connectedPlayerIDs = MatchState.Instance.ConnectedPlayers.Keys.ToHashSet();
+
+        for (byte b = 0; b < byte.MaxValue; ++b)
+        {
+            if(!connectedPlayerIDs.Contains(b))
+            {
+                return b;
+            }
+        }
+        return byte.MaxValue;
     }
 }

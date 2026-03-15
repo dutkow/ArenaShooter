@@ -33,7 +33,7 @@ public class NetworkServer : NetworkPeer
         ServerGame.Instance?.HandleClientMessage(peer, type, packet);
     }
 
-    public byte GetPeerID(ENetPacketPeer peer)
+    public static byte GetPeerID(ENetPacketPeer peer)
     {
         if(peer == null)
         {
@@ -60,4 +60,5 @@ public class NetworkServer : NetworkPeer
         }
         return byte.MaxValue;
     }
+
 }
