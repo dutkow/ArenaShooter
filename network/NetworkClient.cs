@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks.Dataflow;
 
 public class NetworkClient : NetworkPeer
 {
@@ -34,7 +35,8 @@ public class NetworkClient : NetworkPeer
 
     public override void HandleReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
     {
-
+        var type = Message.GetType(packet);
+        ClientGame.Instance.HandleServerMessage(type, packet);
     }
 
     public Error JoinServer(string ipAddress, int port)

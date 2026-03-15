@@ -17,7 +17,6 @@ public class NetworkServer : NetworkPeer
 
     public ServerInfo ServerInfo;
 
-    private const string _ID = "id";
     public Dictionary<byte, ENetPacketPeer> PeersByPeerID = new();
     public Dictionary<byte, ENetPacketPeer> PeersByPlayerID = new();
 
@@ -56,42 +55,21 @@ public class NetworkServer : NetworkPeer
 
     public override void HandlePeerConnected(ENetPacketPeer peer)
     {
-        if (peer == null) return;
-
         byte peerID = GetNextAvailablePeerID();
-        AssignPeerID(peer);
+        NetUtils.SetPeerID(peer, GetNextAvailablePeerID());
         PeersByPeerID[peerID] = peer;
     }
 
     public override void HandlePeerDisconnected(ENetPacketPeer peer)
     {
-        if (peer != null) return;
-
-        byte peerID = GetPeerID(peer);
+        byte peerID = NetUtils.GetPeerID(peer);
     }
 
 
-    public virtual void OnReceivedPacketFromPeer(ENetPacketPeer peer, Msg type, byte[] packet)
+    public override void HandleReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
     {
-        if(peer == null) return;
-
+        var type = Message.GetType(packet);
         ServerGame.Instance?.HandleClientMessage(peer, type, packet);
-    }
-
-    public static byte GetPeerID(ENetPacketPeer peer)
-    {
-        if(peer == null)
-        {
-            GD.PushError("Peer is null!");
-            return byte.MaxValue;
-        }
-
-        return (byte)peer.GetMeta(_ID);
-    }
-
-    public void AssignPeerID(ENetPacketPeer peer)
-    {
-        peer.SetMeta("id", GetNextAvailablePeerID());
     }
 
     public byte GetNextAvailablePeerID()

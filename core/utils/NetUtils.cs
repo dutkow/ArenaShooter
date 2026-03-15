@@ -4,14 +4,27 @@ using System;
 
 public static class NetUtils
 {
-    public static void SetPeerPlayerID(ENetPacketPeer peer, byte ID)
+    private const string _playerIDString = "player_id";
+    private const string _peerIDString = "player_id";
+
+    public static void SetPeerPlayerID(ENetPacketPeer peer, byte playerID)
     {
-        peer.SetMeta("player_id", ID);
+        peer.SetMeta(_playerIDString, playerID);
     }
 
     public static byte GetPeerPlayerID(ENetPacketPeer peer)
     {
-        return (byte)peer.GetMeta("player_id");
+        return (byte)peer.GetMeta(_playerIDString);
+    }
+
+    public static void SetPeerID(ENetPacketPeer peer, byte peerID)
+    {
+        peer.SetMeta(_playerIDString, peerID);
+    }
+
+    public static byte GetPeerID(ENetPacketPeer peer)
+    {
+        return (byte)peer.GetMeta(_playerIDString);
     }
 
 

@@ -108,6 +108,7 @@ public class NetworkPeer : ITickable
                     break;
 
                 case ENetConnection.EventType.Receive:
+                    GD.Print($"HANDLING RECEIVED PACKET");
                     HandleReceivedPacket(peer);
                     break;
 
