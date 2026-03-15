@@ -7,6 +7,8 @@ public class NetworkClient : NetworkPeer
 
     public byte LocalPlayerID;
 
+    public ENetPacketPeer ServerPeer { get; private set; }
+
     public static void Initialize()
     {
         Instance = new NetworkClient();
@@ -18,19 +20,46 @@ public class NetworkClient : NetworkPeer
         LocalPlayerID = localPlayerID;
     }
 
-    public override void OnPeerConnected(ENetPacketPeer peer)
+    public override void HandlePeerConnected(ENetPacketPeer peer)
     {
 
     }
 
-    public override void OnPeerDisconnected(ENetPacketPeer peer)
+    public override void HandlePeerDisconnected(ENetPacketPeer peer)
     {
 
     }
 
 
-    public override void OnReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
+    public override void HandleReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
     {
 
+    }
+
+    public Error JoinServer(string ipAddress, int port)
+    {
+        Connection = new ENetConnection();
+        var error = Connection.CreateHost(1); // 1 client
+        if (error != Error.Ok)
+        {
+            Connection = null;
+            return error;
+        }
+
+        ServerPeer = Connection.ConnectToHost(ipAddress, port);
+
+        if(ServerPeer == null )
+        {
+            return Error.Failed;
+        }
+
+        GD.Print($"server peer is {ServerPeer}");
+
+        return error;
+    }
+
+    public static void Send(Message message)
+    {
+        NetworkSender.ToServer(message);
     }
 }

@@ -15,9 +15,12 @@ public class NetworkServer : NetworkPeer
 
     public ServerMode ServerMode;
 
+    public ServerInfo ServerInfo;
 
     private const string _ID = "id";
     public Dictionary<byte, ENetPacketPeer> PeersByPeerID = new();
+    public Dictionary<byte, ENetPacketPeer> PeersByPlayerID = new();
+
     byte _nextAvailablePeerID;
 
     private ServerAdvertiser _advertiser;
@@ -30,14 +33,32 @@ public class NetworkServer : NetworkPeer
 
     public void InitializeLanServer(ServerInfo _serverInfo)
     {
+
+    }
+
+    public Error StartLanServer(string IP, int port, ServerInfo serverInfo)
+    {
+        Connection = new ENetConnection();
+        var error = Connection.CreateHostBound(IP, port);
+        if (error != Error.Ok)
+        {
+            Connection = null;
+            return error;
+        }
+
         ServerMode = ServerMode.LAN;
+        ServerInfo = serverInfo;
 
         _advertiser = new LanServerAdvertiser();
-        _advertiser.StartBroadcast(_serverInfo);
+        _advertiser.StartBroadcast(ServerInfo);
+
+        OnServerStarted?.Invoke();
+
+        return error;
     }
 
 
-    public override void OnPeerConnected(ENetPacketPeer peer)
+    public override void HandlePeerConnected(ENetPacketPeer peer)
     {
         if (peer == null) return;
 
@@ -46,11 +67,11 @@ public class NetworkServer : NetworkPeer
         PeersByPeerID[peerID] = peer;
     }
 
-    public override void OnPeerDisconnected(ENetPacketPeer peer)
+    public override void HandlePeerDisconnected(ENetPacketPeer peer)
     {
         if (peer != null) return;
 
-        byte peerID = (byte)peer.GetMeta(_ID);
+        byte peerID = GetPeerID(peer);
     }
 
 
@@ -88,5 +109,4 @@ public class NetworkServer : NetworkPeer
         }
         return byte.MaxValue;
     }
-
 }

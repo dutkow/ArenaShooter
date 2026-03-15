@@ -70,6 +70,8 @@ public class NetworkManager : ITickable
 
     public ENetPacketPeer ServerPeer;
 
+    public Action<ServerInfo> JoinedServer;
+
 
     // ----------------------
     // Initialization
@@ -141,15 +143,16 @@ public class NetworkManager : ITickable
     // ----------------------
     // Hosting / Server
     // ----------------------
-    public void HostLanServer(ServerInfo info)
+    public void HostLanServer(ServerInfo serverInfo)
     {
         SetMode(NetworkMode.LISTEN_SERVER);
 
-        ServerInfo = info;
+        var error = NetworkServer.Instance.StartLanServer(serverInfo.IP, serverInfo.Port, serverInfo);
 
-        _networkPeer.StartLanServer(info.IP, info.Port);
-
-        NetworkServer.Instance.InitializeLanServer(ServerInfo);
+        if(error == Error.Ok)
+        {
+            JoinedServer.Invoke(NetworkServer.Instance.ServerInfo);
+        }
 
         _isHosting = true;
     }
@@ -200,15 +203,18 @@ public class NetworkManager : ITickable
 
         ServerInfo = serverInfo;
 
-        GD.Print("Attempting to join server...");
         if (_isHosting)
         {
-            GD.Print("Cannot join a server while hosting!");
             OnFailedToConnect?.Invoke();
             return;
         }
 
-        _networkPeer.StartClient(serverInfo.IP, serverInfo.Port);
+        var error = NetworkClient.Instance.JoinServer(serverInfo.IP, serverInfo.Port);
+
+        if(error == Error.Ok)
+        {
+            JoinedServer?.Invoke(ServerInfo);
+        }
     }
 
     private void HandleFailedToConnect()

@@ -12,6 +12,8 @@ public class SceneNavigator
         // Subscribe to network events (logic only)
         NetworkManager.Instance.OnSessionStarted += OnSessionStarted;
         NetworkManager.Instance.OnConnectedToServer += OnConnectedToServer;
+
+        NetworkManager.Instance.JoinedServer += OnJoinedServer;
     }
 
     private void OnSessionStarted(ServerInfo serverInfo)
@@ -24,9 +26,15 @@ public class SceneNavigator
         OpenMultiplayerMap(NetworkManager.Instance.ServerInfo.MapID);
     }
 
+    private void OnJoinedServer(ServerInfo serverInfo)
+    {
+        OpenMultiplayerMap(serverInfo.MapID);
+    }
+
     // Delay optional, purely logic
     public async void OpenMultiplayerMap(string mapID, float delayBeforeLoad = 0.5f)
     {
+        GD.Print($"open mp map ran. {mapID}. network mode: {NetworkManager.Instance.NetworkMode}");
         if (!GameData.Instance.MultiplayerMapsByID.TryGetValue(mapID, out var mapInfo))
         {
             return;
@@ -62,6 +70,7 @@ public class SceneNavigator
             ClientLoaded.Send();
         }
 
+        GD.Print($"open mp map ran END. {mapID}. network mode: {NetworkManager.Instance.NetworkMode}");
         Main.Instance.SetMainScene(newScene);
     }
 }

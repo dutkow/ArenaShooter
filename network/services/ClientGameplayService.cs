@@ -20,6 +20,8 @@ public static class ClientGameplayService
         var msg = new WorldSnapshot();
         msg.ReadMessage(data);
 
+        GD.Print($"client received world snap");
+
         ClientGame.Instance.ApplyWorldSnapshot(msg);
     }
 

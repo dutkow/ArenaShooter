@@ -46,9 +46,9 @@ public class ServerGame()
         }
         PickupManager.Initialize();
         ServerProjectileManager.Initialize();
+
+        Instance.InitMessageHandlers();
     }
-
-
 
     public void Tick()
     {
@@ -130,10 +130,9 @@ public class ServerGame()
             ushort lastProcessedServerTick = kvp.Value;
             ushort lastProcessedClientTick = LastProcessedClientTicksByPlayerID[playerID];
 
-
-            if (!NetworkManager.Instance.PlayerIDsToPeers.TryGetValue(playerID, out var peer))
+            if (!NetworkServer.Instance.PeersByPlayerID.TryGetValue(playerID, out var peer))
             {
-                GD.Print($"Peer not found. Peer ID: {playerID}. Peer: {peer}");
+                GD.Print($"Peer not found. Player ID ID: {playerID}. Peer: {peer}");
                 continue;
             }
 
@@ -155,6 +154,8 @@ public class ServerGame()
             newSnapshot.AddPrivatePlayerInfo(playerID);
 
             NetworkSender.ToClient(peer, newSnapshot);
+
+            GD.Print("server sending world snapshot");
         }
     }
 
@@ -225,14 +226,18 @@ public class ServerGame()
         byte playerID = GetNextAvailablePlayerID();
         peer.SetMeta(_playerIDMeta, playerID);
 
+        NetworkServer.Instance.PeersByPlayerID[playerID] = peer;
+
         ConnectionAccepted.Send(peer, playerID);
     }
 
     public void HandleClientLoaded(ENetPacketPeer peer, ClientLoaded clientLoaded)
     {
+        GD.Print($"handle client loaded ran");
+
         byte playerID = GetPeerPlayerID(peer);
 
-        MatchState.Instance.AddPlayer(new PlayerInfo(playerID, clientLoaded.PlayerName));
+        MatchState.Instance.AddPlayer(new PlayerInfo(playerID, clientLoaded.ClientInfo.PlayerName));
         NetworkPeer.Instance.ReadyPeers.Add(peer);
 
         LastProcessedServerTicksByPlayerID[playerID] = 0;
@@ -248,7 +253,7 @@ public class ServerGame()
 
     }
 
-    private readonly Dictionary<Msg, Action<ENetPacketPeer, byte[]>> _messageHandlers;
+    private readonly Dictionary<Msg, Action<ENetPacketPeer, byte[]>> _messageHandlers = new();
 
     public virtual void InitMessageHandlers()
     {

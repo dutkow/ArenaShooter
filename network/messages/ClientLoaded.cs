@@ -1,18 +1,21 @@
 using Godot;
 
-
+public struct ClientInfo(string playerName)
+{
+    public string PlayerName = playerName;
+}
 /// <summary>
 /// Sent from Client → Server after the client finishes loading the level/scene.
 /// </summary>
 public class ClientLoaded : Message
 {
-    public string PlayerName;
+    public ClientInfo ClientInfo;
 
     protected override int BufferSize()
     {
         base.BufferSize();
 
-        Add(PlayerName);
+        Add(ClientInfo.PlayerName);
 
         return _dataSize;
     }
@@ -21,7 +24,7 @@ public class ClientLoaded : Message
     {
         base.WriteMessage();
 
-        Write(PlayerName);
+        Write(ClientInfo.PlayerName);
 
         return _data;
     }
@@ -30,7 +33,7 @@ public class ClientLoaded : Message
     {
         base.ReadMessage(data);
 
-        Read(out PlayerName);
+        Read(out ClientInfo.PlayerName);
     }
 
     public static void Send()
@@ -39,7 +42,7 @@ public class ClientLoaded : Message
         {
             MessageType = Msg.C2S_CLIENT_LOADED,
             ENetFlags = ENetPacketFlags.Reliable,
-            PlayerName = Settings.Instance.PlayerName
+            ClientInfo = new ClientInfo(Settings.Instance.PlayerName)
         };
         NetworkSender.ToServer(msg);
     }

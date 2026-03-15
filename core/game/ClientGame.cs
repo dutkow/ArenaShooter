@@ -38,6 +38,10 @@ public class ClientGame
             PickupManager.Initialize();
             ClientProjectileManager.Initialize();
         }
+
+        Instance.InitMessageHandlers();
+
+        NetworkClient.Send(new ClientLoaded());
     }
 
     public void Tick()
@@ -193,7 +197,7 @@ public class ClientGame
         handler(msg);
     }
 
-    private readonly Dictionary<Msg, Action<byte[]>> _messageHandlers;
+    private readonly Dictionary<Msg, Action<byte[]>> _messageHandlers = new();
 
     public virtual void InitMessageHandlers()
     {

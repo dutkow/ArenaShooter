@@ -28,8 +28,6 @@ public static class ServerConnectionService
 
         NetworkPeer.Instance.ReadyPeers.Add(peer);
 
-
-
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 

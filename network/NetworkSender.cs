@@ -141,13 +141,12 @@ public static class NetworkSender
     // -------------------------------------------------
     public static void ToServer(Message message)
     {
-        ENetPacketPeer serverPeer = NetworkManager.Instance.ServerPeer;
+        ENetPacketPeer serverPeer = NetworkClient.Instance.ServerPeer;
         if (serverPeer == null)
         {
             GD.PushError("ServerPeer is null.");
             return;
         }
-
         SendInternal(serverPeer, 0, message.WriteMessage(), (int)message.Flags, true);
     }
 

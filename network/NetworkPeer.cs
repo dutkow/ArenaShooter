@@ -42,7 +42,6 @@ public class NetworkPeer : ITickable
     // General state
     // ----------------------
     public ENetConnection Connection;
-    private bool isServer = false;
 
     // ----------------------
     // LAN discovery
@@ -98,70 +97,49 @@ public class NetworkPeer : ITickable
 
             switch (eventType)
             {
-                case ENetConnection.EventType.Error:
-                    OnError();
-                    break;
-
                 case ENetConnection.EventType.Connect:
-                    if (isServer)
-                    {
-                        PeerConnected(peer);
-                    }
-                    else
-                    {
-                        ConnectedToServer(peer);
-                    }
+                    HandlePeerConnected(peer);
                     break;
 
                 case ENetConnection.EventType.Disconnect:
-                    if (isServer)
-                    {
-                        PeerDisconnected(peer);
-                    }
-                    else
-                    {
-                        DisconnectedFromServer();
-                        return;
-                    }
+                    HandlePeerDisconnected(peer);
                     break;
 
                 case ENetConnection.EventType.Receive:
-                    if(NetworkManager.Instance == null)
-                    {
-                        GD.PushError("NetworkSession returned null.");
-                        return;
-                    }
-                    NetworkManager.Instance.HandleReceivedMessage(peer, peer.GetPacket());
+                    HandleReceivedPacket(peer);
+                    break;
+
+                case ENetConnection.EventType.Error:
+                    HandleError();
                     break;
             }
 
-            // Service again to handle remaining packets in current frame
             packetEvent = Connection.Service();
             eventType = (ENetConnection.EventType)(int)packetEvent[0];
         }
     }
 
-    public virtual void OnError()
+    public virtual void HandleError()
     {
         GD.PushWarning("Network error occurred!");
     }
 
-    public virtual void OnPeerConnected(ENetPacketPeer peer)
+    public virtual void HandlePeerConnected(ENetPacketPeer peer)
     {
 
     }
 
-    public virtual void OnPeerDisconnected(ENetPacketPeer peer)
+    public virtual void HandlePeerDisconnected(ENetPacketPeer peer)
     {
 
     }
 
-    private void OnReceivedPacket(ENetPacketPeer peer)
+    private void HandleReceivedPacket(ENetPacketPeer peer)
     {
-        OnReceivedPacketFromPeer(peer, peer.GetPacket());
+        HandleReceivedPacketFromPeer(peer, peer.GetPacket());
     }
 
-    public virtual void OnReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
+    public virtual void HandleReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
     {
 
     }
@@ -169,25 +147,7 @@ public class NetworkPeer : ITickable
     // ----------------------
     // Server functions
     // ----------------------
-    public void StartLanServer(string IP = "127.0.0.1", int port = 42069)
-    {
-        GD.Print($"Attempting to start server. IP = {IP}. Port = {port}.");
-        Connection = new ENetConnection();
-        var error = Connection.CreateHostBound(IP, port);
-        if (error != Error.Ok)
-        {
-            GD.Print($"Server failed to start: {error}");
-            Connection = null;
-            return;
-        }
 
-        GD.Print("Server started");
-        isServer = true;
-
-        OnServerStarted?.Invoke();
-
-        GD.Print($"starting lan server on port = {IP}");
-    }
 
     private void PeerConnected(ENetPacketPeer peer)
     {
@@ -227,29 +187,7 @@ public class NetworkPeer : ITickable
     // ----------------------
     // Client functions
     // ----------------------
-    public void StartClient(string ipAddress = "127.0.0.1", int port = 42069)
-    {
-        if (Connection != null)
-        {
-            GD.Print("Client already running!");
-            return;
-        }
 
-        Connection = new ENetConnection();
-        var error = Connection.CreateHost(1); // 1 client
-        if (error != Error.Ok)
-        {
-            GD.Print($"Client failed to start: {error}");
-            Connection = null;
-            return;
-        }
-
-        GD.Print($"Client started, connecting to {ipAddress}:{port}...");
-        serverPeer = Connection.ConnectToHost(ipAddress, port);
-
-        // Optional: reset flags to track connection
-        _hasFiredConnected = false;
-    }
 
     private bool _hasFiredConnected = false;
 
