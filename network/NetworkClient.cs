@@ -17,7 +17,7 @@ public class NetworkClient : NetworkPeer
 
     public override void HandlePeerConnected(ENetPacketPeer peer)
     {
-
+        ConnectionRequest.Send(Settings.Instance.PlayerName);
     }
 
     public override void HandlePeerDisconnected(ENetPacketPeer peer)
@@ -48,11 +48,6 @@ public class NetworkClient : NetworkPeer
         {
             return;
         }
-
-        GD.Print($"server peer is {ServerPeer}");
-
-        ConnectionRequest.Send(Settings.Instance.PlayerName);
-        GD.Print($"sending connection request");
     }
 
     public static void Send(Message message)

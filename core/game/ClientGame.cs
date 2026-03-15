@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class ClientGame
 {
@@ -26,6 +27,7 @@ public class ClientGame
     const int REDUNDANT_INPUTS = 4;
 
     private bool _hasReceivedInitialState;
+
 
     public static void Initialize()
     {
@@ -174,7 +176,6 @@ public class ClientGame
 
     public void HandleServerMessage(Msg type, byte[] payload)
     {
-        GD.Print($"CLIENT HANDLING SERVER MSG. TYPE: {type} ");
         if(_messageHandlers.TryGetValue(type, out var handler))
         {
             handler(payload);
@@ -191,6 +192,8 @@ public class ClientGame
 
         GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
 
+        NetworkManager.Instance.BroadcastServerJoined();
+
         ClientProjectileManager.Initialize();
     }
 
@@ -202,6 +205,8 @@ public class ClientGame
     public void HandleInitialMatchState(InitialMatchState initialMatchState)
     {
         _hasReceivedInitialState = true;
+
+        MatchState.Instance.OnReceivedInitialMatchState(initialMatchState);
     }
 
     public void HandlePlayerJoined(PlayerJoined playerJoined)

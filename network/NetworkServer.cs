@@ -55,6 +55,7 @@ public class NetworkServer : NetworkPeer
 
     public override void HandlePeerConnected(ENetPacketPeer peer)
     {
+        GD.Print($"peer connected to network server");
         byte peerID = GetNextAvailablePeerID();
         NetUtils.SetPeerID(peer, GetNextAvailablePeerID());
         PeersByPeerID[peerID] = peer;
@@ -70,7 +71,6 @@ public class NetworkServer : NetworkPeer
     {
         var type = Message.GetType(packet);
 
-        GD.Print($"server received msg of type: {type} from client");
         ServerGame.Instance?.HandleClientMessage(peer, type, packet);
     }
 

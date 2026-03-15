@@ -27,14 +27,6 @@ public partial class Level : Node3D
         PickupManager.Initialize();
         MatchState.Initialize();
 
-        if (NetworkManager.Instance.IsServer)
-        {
-            ServerProjectileManager.Initialize();
-        }
-        else
-        {
-            ClientProjectileManager.Initialize();
-        }
 
         ServerTickManager serverTickManager = new();
         AddChild(serverTickManager);

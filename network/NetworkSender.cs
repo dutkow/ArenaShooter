@@ -148,6 +148,7 @@ public static class NetworkSender
             GD.PushError("ServerPeer is null.");
             return;
         }
+
         SendInternal(serverPeer, 0, message.WriteMessage(), (int)message.Flags, true);
     }
 

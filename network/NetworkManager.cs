@@ -148,11 +148,12 @@ public class NetworkManager : ITickable
     {
         SetMode(NetworkMode.LISTEN_SERVER);
 
+        ServerInfo = serverInfo;
         var error = NetworkServer.Instance.StartLanServer(serverInfo.IP, serverInfo.Port, serverInfo);
 
         if(error == Error.Ok)
         {
-            JoinedServer.Invoke(NetworkServer.Instance.ServerInfo);
+            BroadcastServerJoined();
         }
 
         _isHosting = true;
@@ -305,5 +306,12 @@ public class NetworkManager : ITickable
     {
         OnPlayerJoined?.Invoke(playerID, playerName);
     }
+
+
+    public void BroadcastServerJoined()
+    {
+        JoinedServer?.Invoke(ServerInfo);
+    }
+
 
 }

@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 public class ServerGame()
 {
     const int MAX_PLAYERS = 16;
-    private bool _isServerFull => MatchState.Instance.ConnectedPlayers.Count <= MAX_PLAYERS;
+    private bool _isServerFull => MatchState.Instance.ConnectedPlayers.Count >= MAX_PLAYERS;
     public static ServerGame Instance { get; private set; }
 
     public bool IsListenServer => NetworkManager.Instance.NetworkMode == NetworkMode.LISTEN_SERVER;
@@ -46,7 +46,10 @@ public class ServerGame()
 
     public void OnLoaded()
     {
-        if(IsListenServer)
+        ServerProjectileManager.Initialize();
+
+
+        if (IsListenServer)
         {
             ClientGame.Initialize();
             ClientGame.Instance.OnLoaded();
@@ -165,8 +168,6 @@ public class ServerGame()
             newSnapshot.AddPrivatePlayerInfo(playerID);
 
             NetworkSender.ToClient(peer, newSnapshot);
-
-            GD.Print("server sending world snapshot");
         }
     }
 
@@ -219,25 +220,20 @@ public class ServerGame()
         }
     }
 
-    private const string _playerIDMeta = "player_id";
-
-    public byte GetPeerPlayerID(ENetPacketPeer peer)
-    {
-        return (byte)peer.GetMeta(_playerIDMeta);
-    }
-
     public void HandleConnectionRequest(ENetPacketPeer peer, ConnectionRequest connectionRequest)
     {
         GD.Print($"handle connection request ran.");
 
         if (_isServerFull)
         {
+            GD.Print($"server is full denied");
+
             ConnectionDenied.Send(peer, "Server full");
             return;
         }
 
         byte playerID = GetNextAvailablePlayerID();
-        peer.SetMeta(_playerIDMeta, playerID);
+        NetUtils.SetPeerPlayerID(peer, playerID);
 
         NetworkServer.Instance.PeersByPlayerID[playerID] = peer;
 
@@ -246,7 +242,7 @@ public class ServerGame()
 
     public void HandleClientLoaded(ENetPacketPeer peer, ClientLoaded clientLoaded)
     {
-        byte playerID = GetPeerPlayerID(peer);
+        byte playerID = NetUtils.GetPeerPlayerID(peer);
         NetworkPeer.Instance.ReadyPeers.Add(peer);
 
         GD.Print($"handle client loaded ran. adding last processed tick 0 for player id: {playerID}");
@@ -255,6 +251,8 @@ public class ServerGame()
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
         ApplyClientLoaded(new PlayerInfo(playerID, clientLoaded.ClientInfo.PlayerName));
+
+        SpawnManager.Instance.ServerSpawnPlayer(playerID);
 
         InitialMatchState.Send(peer);
     }
