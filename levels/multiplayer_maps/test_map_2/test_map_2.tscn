@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://yadqwtlxqbcp"]
 
-[ext_resource type="PackedScene" uid="uid://cc5hseasecjdw" path="res://core/game_manager.tscn" id="1_p3bq8"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_ichdc"]
 [ext_resource type="PackedScene" uid="uid://chotxihbm38dv" path="res://gameplay/entities/pawns/characters/arena_characterOld.tscn" id="3_psdie"]
 [ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/player_hud.tscn" id="4_v1juj"]
@@ -32,8 +31,6 @@ transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76
 light_color = Color(0.76899767, 0, 0.15294969, 1)
 shadow_enabled = true
 
-[node name="GameManager" parent="." unique_id=832313805 instance=ExtResource("1_p3bq8")]
-
 [node name="SpawnPoint" parent="." unique_id=1190922558 instance=ExtResource("2_ichdc")]
 transform = Transform3D(-0.94505733, 0, 0.32690457, 0, 1, 0, -0.32690457, 0, -0.94505733, 4.079609, 1.3157029, -20.762333)
 
@@ -42,11 +39,6 @@ transform = Transform3D(-0.9917632, 0, 0.12808594, 0, 1, 0, -0.12808594, 0, -0.9
 
 [node name="Player" parent="." unique_id=52811762 instance=ExtResource("3_psdie")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6006985, 0)
-MouseSens = null
-MouseSmooth = null
-SnapThreshold = null
-CorrectionThreshold = null
-CorrectionSpeed = null
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1849512479]
 

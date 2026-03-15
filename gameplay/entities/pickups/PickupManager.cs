@@ -11,7 +11,7 @@ public class PickupManager
 
     public static PickupManager Instance { get; private set; }
 
-    public static void Create()
+    public static void Initialize()
     {
         if (Instance != null)
         {

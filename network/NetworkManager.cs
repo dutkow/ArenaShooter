@@ -127,11 +127,15 @@ public class NetworkManager : ITickable
         switch (NetworkMode)
         {
             case NetworkMode.DEDICATED_SERVER:
-                Game.Instance.Initialize(NetworkMode);
+                ServerGame.Initialize();
                 break;
 
             case NetworkMode.LISTEN_SERVER:
-                Game.Instance.Initialize(NetworkMode, 0);
+                ServerGame.Initialize();
+                break;
+
+            case NetworkMode.CLIENT:
+                ClientGame.Initialize();
                 break;
         }
 

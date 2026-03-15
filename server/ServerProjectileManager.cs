@@ -26,7 +26,7 @@ public class ServerProjectileManager
 
     private ushort _nextAvailableProjectileID;
 
-    public static void Create()
+    public static void Initialize()
     {
         if (Instance != null)
         {

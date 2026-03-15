@@ -23,34 +23,15 @@ public partial class Level : Node3D
         var gameMode = (GameMode)_gameModeScene.Instantiate();
         AddChild(gameMode);
 
-        MatchState matchState = new();
-        AddChild(matchState);
+        MatchState.Initialize();
+        SpawnManager.Initialize();
 
         ServerTickManager serverTickManager = new();
         AddChild(serverTickManager);
 
-        SpawnManager spawnManager = new();
-        AddChild(spawnManager);
 
         var levelUI = (LevelUI)gameMode.LevelUIScene.Instantiate();
         AddChild(levelUI);
 
-        
-
-        CallDeferred(nameof(PostInit));
-    }
-
-    public void PostInit()
-    {
-        if (NetworkManager.Instance.IsServer)
-        {
-            MatchState.Instance.Initialize();
-
-        }
-        else if (NetworkManager.Instance.IsClient)
-        {
-            ClientLoaded.Send();
-            GD.Print($"sending client loaded");
-        }
     }
 }

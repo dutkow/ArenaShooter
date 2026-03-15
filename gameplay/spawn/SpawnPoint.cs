@@ -15,9 +15,9 @@ public partial class SpawnPoint : Node3D
     public Vector3 SpawnRotation => new Vector3(0.0f, GlobalRotation.Y, 0.0f);
 
     public SpawnPointType Type;
-    public override void _Ready()
+    public override void _EnterTree()
     {
-        base._Ready();
+        base._EnterTree();
 
         _visualContainer.Visible = false;
 

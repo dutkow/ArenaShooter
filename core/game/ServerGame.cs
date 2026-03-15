@@ -31,11 +31,21 @@ public class ServerGame
     private int _bytesSentThisPeriod = 0;
 
 
-    public void Initialize()
+    public static void Initialize()
     {
-        Instance = this;
+        if(Instance != null)
+        {
+            GD.Print($"Server game already exists!");
+        }
 
-        ServerProjectileManager.Create();
+        Instance = new ServerGame();
+
+        if(NetworkManager.Instance.IsListenServer)
+        {
+            ClientGame.Initialize();
+        }
+        PickupManager.Initialize();
+        ServerProjectileManager.Initialize();
     }
 
     public void Tick()

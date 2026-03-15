@@ -21,17 +21,15 @@ public class ClientGame
     public List<ClientInputCommand> UnprocessedClientInputs = new();
     const int REDUNDANT_INPUTS = 4;
 
-    public void Initialize(byte localPlayerID)
+    public static void Initialize()
     {
-        Instance = this;
+        if(ClientGame.Instance != null)
+        {
+            GD.Print($"Client game already exists");
+        }
+        Instance = new ClientGame();
 
-        LocalPlayerID = localPlayerID;
-        LocalPlayerController = new();
-        Game.Instance.AddChild(LocalPlayerController);
-
-        GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
-
-        ClientProjectileManager.Create();
+        Instance.LocalPlayerController = new();
     }
 
     public void Tick()
@@ -154,7 +152,13 @@ public class ClientGame
 
     public void HandleConnectionAccepted(ConnectionAccepted connectionAccepted)
     {
+        LocalPlayerID = connectionAccepted.AssignedPlayerID;
+        LocalPlayerController = new();
+        Game.Instance.AddChild(LocalPlayerController);
 
+        GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
+
+        ClientProjectileManager.Create();
     }
 
     public void HandleConnectionDenied(ConnectionDenied connectionDenied)

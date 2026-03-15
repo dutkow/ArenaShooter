@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 public partial class SpawnManager : Node3D
 {
@@ -8,11 +9,9 @@ public partial class SpawnManager : Node3D
 
     public List<SpawnPoint> _playerSpawnPoints = new();
 
-    public override void _EnterTree()
+    public static void Initialize()
     {
-        base._EnterTree();
-
-        Instance = this;
+        Instance = new SpawnManager();
     }
 
     public void RegisterSpawnPoint(SpawnPoint spawnPoint)
@@ -65,7 +64,7 @@ public partial class SpawnManager : Node3D
             playerState.Character = spawnedPlayer;
         }
 
-        AddChild(spawnedPlayer);
+        Level.Instance.AddChild(spawnedPlayer);
 
         spawnedPlayer.HandleSpawn(spawnPosition, yRotation, 0.0f);
 

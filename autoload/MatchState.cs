@@ -82,16 +82,31 @@ public partial class MatchState : Node
 
         Instance = this;
 
-        PickupManager.Create();
+        PickupManager.Initialize();
 
     }
-    public void Initialize()
+
+    public static void Initialize()
+    {
+        if(Instance != null)
+        {
+            GD.Print($"Match state already exists");
+            return;
+        }
+
+        Instance = new MatchState();
+
+        Instance.StartMatchDeferred();
+    }
+
+    public void StartMatchDeferred()
+    {
+        CallDeferred(nameof(StartMatch));
+    }
+
+    public void StartMatch()
     {
         StartPhase(MatchPhase.WARMUP);
-
-        // Hook network events
-        //NetworkHandler.Instance.OnPeerConnected += HandlePlayerJoined;
-        //NetworkHandler.Instance.OnPeerDisconnected += HandlePeerDisconnected;
 
         if (NetworkManager.Instance.IsListenServer)
         {

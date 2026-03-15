@@ -27,10 +27,8 @@ public class SceneNavigator
     // Delay optional, purely logic
     public async void OpenMultiplayerMap(string mapID, float delayBeforeLoad = 0.5f)
     {
-        GD.Print($"open multiplayer map ran on {NetworkManager.Instance.NetworkMode}");
         if (!GameData.Instance.MultiplayerMapsByID.TryGetValue(mapID, out var mapInfo))
         {
-            Console.WriteLine($"[SceneNavigator] Map ID {mapID} not found");
             return;
         }
 
@@ -48,7 +46,6 @@ public class SceneNavigator
         var packedScene = (Godot.PackedScene)Godot.ResourceLoader.Load(mapScenePath);
         if (packedScene == null)
         {
-            Console.WriteLine($"[SceneNavigator] Failed to load scene {mapScenePath}");
             return;
         }
 
@@ -58,6 +55,10 @@ public class SceneNavigator
         Main.Instance.SetMainScene(newScene);
         GD.Print($"set main scene ran on {NetworkManager.Instance.NetworkMode}");
 
-        Console.WriteLine("[SceneNavigator] Multiplayer map fully loaded!");
+        if (NetworkManager.Instance.IsClient)
+        {
+            ClientLoaded.Send();
+            GD.Print($"sending client loaded");
+        }
     }
 }
