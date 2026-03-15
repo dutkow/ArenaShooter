@@ -16,8 +16,8 @@ public class NetworkPeer : ITickable
     // Server events
     // ----------------------
     public Action? OnServerStarted;
-    public Action<int>? OnPeerConnected;
-    public Action<int>? OnPeerDisconnected;
+    public Action<int>? OnPeerConnectedEvent;
+    public Action<int>? OnPeerDisconnectedEvent;
     public Action<int, byte[]>? OnServerPacket;
 
     // ----------------------
@@ -87,7 +87,7 @@ public class NetworkPeer : ITickable
     // ----------------------
     // Event handling
     // ----------------------
-    private void HandleEvents()
+    public virtual void HandleEvents()
     {
         var packetEvent = Connection.Service();
         ENetConnection.EventType eventType = (ENetConnection.EventType)(int)packetEvent[0];
@@ -99,8 +99,8 @@ public class NetworkPeer : ITickable
             switch (eventType)
             {
                 case ENetConnection.EventType.Error:
-                    GD.PushWarning("Network error occurred!");
-                    return;
+                    OnError();
+                    break;
 
                 case ENetConnection.EventType.Connect:
                     if (isServer)
@@ -139,6 +139,31 @@ public class NetworkPeer : ITickable
             packetEvent = Connection.Service();
             eventType = (ENetConnection.EventType)(int)packetEvent[0];
         }
+    }
+
+    public virtual void OnError()
+    {
+        GD.PushWarning("Network error occurred!");
+    }
+
+    public virtual void OnPeerConnected(ENetPacketPeer peer)
+    {
+
+    }
+
+    public virtual void OnPeerDisconnected(ENetPacketPeer peer)
+    {
+
+    }
+
+    private void OnReceivedPacket(ENetPacketPeer peer)
+    {
+        OnReceivedPacketFromPeer(peer, peer.GetPacket());
+    }
+
+    public virtual void OnReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
+    {
+
     }
 
     // ----------------------
@@ -183,7 +208,7 @@ public class NetworkPeer : ITickable
         clientPeers[peerId] = peer;
 
         GD.Print($"Peer connected: {peerId}");
-        OnPeerConnected?.Invoke(peerId);
+        OnPeerConnectedEvent?.Invoke(peerId);
     }
 
     private void PeerDisconnected(ENetPacketPeer peer)
@@ -196,7 +221,7 @@ public class NetworkPeer : ITickable
 
         ReadyPeers.Remove(peer);
 
-        OnPeerDisconnected?.Invoke(peerId);
+        OnPeerDisconnectedEvent?.Invoke(peerId);
     }
 
     // ----------------------

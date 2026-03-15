@@ -63,4 +63,9 @@ public partial class Game : Node
         _clientGame = new();
         _clientGame.Initialize(localPlayerID);
     }
+
+    public virtual void InitMessageHandlers()
+    {
+
+    }
 }

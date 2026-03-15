@@ -98,7 +98,7 @@ public class NetworkManager : ITickable
 
         _networkPeer.OnServerStarted += HandleServerStarted;
         //_networkHandler.OnPeerConnected += HandlePeerConnected;
-        _networkPeer.OnPeerDisconnected += HandlePeerDisconnected;
+        _networkPeer.OnPeerDisconnectedEvent += HandlePeerDisconnected;
         _networkPeer.OnDisconnectedFromServer += HandleFailedToConnect;
 
         _router = new MessageRouter();

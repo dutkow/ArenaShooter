@@ -159,7 +159,6 @@ public class ServerGame
     {
         if (!_unprocessedClientInputs.ContainsKey(playerID))
         {
-            // Create a new sorted dictionary for this player
             _unprocessedClientInputs[playerID] = new SortedDictionary<ushort, ClientInputCommand>();
         }
 
@@ -167,7 +166,6 @@ public class ServerGame
 
         foreach (var clientCmd in cmd.Commands)
         {
-            // Only add if we don’t already have this tick
             if (!queue.ContainsKey(clientCmd.ClientTick))
             {
                 queue.Add(clientCmd.ClientTick, clientCmd);
@@ -180,5 +178,47 @@ public class ServerGame
     public WorldSnapshot GetWorldSnapshotByTick(ushort tick)
     {
         return _snapshotHistory[tick];
+    }
+
+    public void HandleClientMessage(ENetPacketPeer peer, Msg type, byte[] payload)
+    {
+        if (_messageHandlers.TryGetValue(type, out var handler))
+        {
+            handler(peer, payload);
+        }
+        else
+        {
+            GD.Print($"Unknown client message type: {type}");
+        }
+    }
+
+    public void HandleConnectionRequest(ENetPacketPeer peer, ConnectionRequest connectionRequest)
+    {
+
+    }
+
+    public void HandleClientLoaded(ENetPacketPeer peer, ClientLoaded clientLoaded)
+    {
+
+    }
+
+    public void HandleClientCommand(ENetPacketPeer peer, ClientCommand clientCommand)
+    {
+
+    }
+
+    private readonly Dictionary<Msg, Action<ENetPacketPeer, byte[]>> _messageHandlers;
+
+    public virtual void InitMessageHandlers()
+    {
+        _messageHandlers[Msg.C2S_CONNECTION_REQUEST] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
+        _messageHandlers[Msg.C2S_CLIENT_LOADED] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
+        _messageHandlers[Msg.C2S_CLIENT_COMMAND] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
+    }
+
+    private void Dispatch<T>(ENetPacketPeer peer, byte[] payload, Action<ENetPacketPeer, T> handler) where T : Message, new()
+    {
+        var msg = Message.FromData<T>(payload);
+        handler(peer, msg);
     }
 }

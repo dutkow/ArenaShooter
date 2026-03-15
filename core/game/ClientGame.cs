@@ -138,4 +138,53 @@ public class ClientGame
 
         ClientProjectileManager.Instance.ApplyWorldSnapshot(snapshot);
     }
+
+
+    public void HandleServerMessage(Msg type, byte[] payload)
+    {
+        if(_messageHandlers.TryGetValue(type, out var handler))
+        {
+            handler(payload);
+        }
+        else
+        {
+            GD.Print($"Unknown server message type: {type}");
+        }
+    }
+
+    public void HandleConnectionAccepted(ConnectionAccepted connectionAccepted)
+    {
+
+    }
+
+    public void HandleConnectionDenied(ConnectionDenied connectionDenied)
+    {
+
+    }
+
+    public void HandleInitialMatchState(InitialMatchState initialMatchState)
+    {
+
+    }
+
+    public void HandleWorldSnapshot(WorldSnapshot worldSnapshot)
+    {
+
+    }
+
+    private void Dispatch<T>(byte[] payload, Action<T> handler) where T : Message, new()
+    {
+        var msg = Message.FromData<T>(payload);
+        handler(msg);
+    }
+
+    private readonly Dictionary<Msg, Action<byte[]>> _messageHandlers;
+
+    public virtual void InitMessageHandlers()
+    {
+        _messageHandlers[Msg.S2C_CONNECTION_ACCEPTED] = payload => Dispatch<ConnectionAccepted>(payload, HandleConnectionAccepted);
+        _messageHandlers[Msg.S2C_CONNECTION_DENIED] = payload => Dispatch<ConnectionDenied>(payload, HandleConnectionDenied);
+        _messageHandlers[Msg.S2C_INITIAL_MATCH_STATE] = payload => Dispatch<InitialMatchState>(payload, HandleInitialMatchState);
+        _messageHandlers[Msg.S2C_WORLD_SNAPSHOT] = payload => Dispatch<WorldSnapshot>(payload, HandleWorldSnapshot);
+    }
 }

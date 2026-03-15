@@ -150,4 +150,10 @@ public class ClientCommand : Message
         };
         NetworkSender.ToServer(msg);
     }
+    public static ClientCommand FromData(byte[] data)
+    {
+        var cmd = new ClientCommand();
+        cmd.ReadMessage(data);
+        return cmd;
+    }
 }
