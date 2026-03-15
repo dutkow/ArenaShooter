@@ -61,6 +61,9 @@ public class CharacterMovement
     // Step function now takes CharacterPublicState and returns it
     public CharacterPublicState Step(CharacterPublicState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
+        CheckGrounded(state);
+
+
         // Process movement input
         Vector3 move = Vector3.Zero;
         if (cmd.Flags.HasFlag(InputFlags.FORWARD)) move.Z -= 1;
@@ -69,6 +72,8 @@ public class CharacterMovement
         if (cmd.Flags.HasFlag(InputFlags.STRAFE_RIGHT)) move.X += 1;
 
         state.Look += cmd.Look;
+
+
 
         move = move.Normalized();
         Basis basis = Basis.FromEuler(new Vector3(0, -state.Look.X, 0));
@@ -99,25 +104,29 @@ public class CharacterMovement
         // Launch velocity
         if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
         {
-            state.Velocity += cmd.LaunchVelocity;
+            state.Velocity = new Vector3(state.Velocity.X, cmd.LaunchVelocity.Y, state.Velocity.Z);
             WasLaunched = false;
         }
 
         // Collision handling
         Vector3 safeMotion = HandleCollision(state, delta);
+
         state.Position += safeMotion;
 
         // Server-side collidable checks
         if (!isSimulating && _character.IsAuthority)
+        {
             CheckCollidables(state);
+        }
 
-        CheckGrounded(state);
 
         // Gravity
         if (!_isGrounded)
         {
             state.Velocity.Y += Gravity * delta;
         }
+
+
 
         return state;
     }
@@ -136,18 +145,26 @@ public class CharacterMovement
         {
             float decel = GroundDeceleration * delta;
             if (horizontalVel.Length() <= decel)
+            {
                 horizontalVel = Vector3.Zero;
+            }
             else
+            {
                 horizontalVel -= horizontalVel.Normalized() * decel;
+            }
         }
 
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;
 
         if (_isOnSlope)
+        {
             state.Velocity = ProjectVelocityOnSlope(state.Velocity);
+        }
         else
+        {
             state.Velocity.Y = Mathf.Max(state.Velocity.Y, 0.0f);
+        }
     }
 
     private void HandleAerialMovement(CharacterPublicState state, Vector3 desiredMoveDir, float delta)
@@ -164,9 +181,13 @@ public class CharacterMovement
         {
             float decel = AirDeceleration * delta;
             if (horizontalVel.Length() <= decel)
+            {
                 horizontalVel = Vector3.Zero;
+            }
             else
+            {
                 horizontalVel -= horizontalVel.Normalized() * decel;
+            }
         }
 
         // Clamp horizontal speed
@@ -183,32 +204,43 @@ public class CharacterMovement
         _isGrounded = false;
     }
 
+    const float GROUNDED_CHECK_DISTANCE = 0.05f;
+
     private void CheckGrounded(CharacterPublicState state)
     {
         var space = _character.GetWorld3D().DirectSpaceState;
 
-        Vector3 from = state.Position + Vector3.Down * (_collisionCapsule.MidHeight);
-        Vector3 to = from + Vector3.Down * (0.2f);
+        Vector3 motion = Vector3.Down * GROUNDED_CHECK_DISTANCE;
 
-        PhysicsRayQueryParameters3D query = new()
+        PhysicsShapeQueryParameters3D query = new()
         {
-            From = from,
-            To = to,
+            Shape = _collisionCapsule,
+            Transform = new Transform3D(Basis.Identity, state.Position),
+            Motion = motion,
             CollideWithBodies = true,
             CollideWithAreas = false
         };
         query.SetExclude(_characterCollisionRids);
 
-        var result = space.IntersectRay(query);
-        _isGrounded = result.Count > 0;
+        var result = space.CastMotion(query);
+
+        if(result[1] < 1.0f) // check if we would collide
+        {
+            _isGrounded = true;
+            state.Position += motion * result[0];
+        }
+        else
+        {
+            _isGrounded = false;
+        }
 
         if (_isGrounded)
         {
             HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
 
-            if (HorizontalVelocity != 0 && result.TryGetValue("normal", out var normalObj))
+            if (space.GetRestInfo(query).TryGetValue("normal", out var normal))
             {
-                _groundNormal = (Vector3)normalObj;
+                _groundNormal = (Vector3)normal;
                 _isOnSlope = OnSlope();
             }
         }
