@@ -211,7 +211,7 @@ public partial class Character : Pawn, IDamageable
         SetRole(NetworkRole.LOCAL);
         UIRoot.Instance.OnPossessedCharacter(this);
 
-        if(MatchState.Instance.ConnectedPlayers.TryGetValue(ClientGame.Instance.LocalPlayerID, out var foundPlayerState))
+        if(MatchState.Instance.ConnectedPlayers.TryGetValue(NetworkClient.Instance.LocalPlayerID, out var foundPlayerState))
         {
             PlayerState = foundPlayerState;
         }

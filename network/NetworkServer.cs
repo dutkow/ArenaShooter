@@ -3,11 +3,39 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
 
+public enum ServerMode
+{
+    LAN,
+    INTERNET,
+}
+
 public class NetworkServer : NetworkPeer
 {
+    public static NetworkServer Instance { get; private set; }
+
+    public ServerMode ServerMode;
+
+
     private const string _ID = "id";
     public Dictionary<byte, ENetPacketPeer> PeersByPeerID = new();
     byte _nextAvailablePeerID;
+
+    private ServerAdvertiser _advertiser;
+
+    public static void Initialize()
+    {
+        Instance = new NetworkServer();
+
+    }
+
+    public void InitializeLanServer(ServerInfo _serverInfo)
+    {
+        ServerMode = ServerMode.LAN;
+
+        _advertiser = new LanServerAdvertiser();
+        _advertiser.StartBroadcast(_serverInfo);
+    }
+
 
     public override void OnPeerConnected(ENetPacketPeer peer)
     {

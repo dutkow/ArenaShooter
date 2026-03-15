@@ -56,7 +56,7 @@ public partial class SpawnManager : Node3D
 
     public Character LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
     {
-        GD.Print($"new local spawn player ran on {NetworkManager.Instance.NetworkMode}. NEW PLAYER ID: {playerID} and local player id {ClientGame.Instance.LocalPlayerID}, spawn position: {spawnPosition}");
+        GD.Print($"new local spawn player ran on {NetworkManager.Instance.NetworkMode}. NEW PLAYER ID: {playerID} and local player id {NetworkClient.Instance.LocalPlayerID}, spawn position: {spawnPosition}");
         var spawnedPlayer = (Character)GameMode.Instance.DefaultPawnScene.Instantiate();
 
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
@@ -69,7 +69,7 @@ public partial class SpawnManager : Node3D
         spawnedPlayer.HandleSpawn(spawnPosition, yRotation, 0.0f);
         spawnedPlayer.SetIsAuthority(NetworkManager.Instance.IsServer);
 
-        if (playerID == ClientGame.Instance.LocalPlayerID)
+        if (playerID == NetworkClient.Instance.LocalPlayerID)
         {
             ClientGame.Instance.LocalPlayerController.Possess(spawnedPlayer);
             GD.Print($"running POSSESS on player id: {playerID} on {NetworkManager.Instance.NetworkMode}");

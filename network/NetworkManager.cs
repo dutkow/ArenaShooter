@@ -35,7 +35,6 @@ public class NetworkManager : ITickable
     // ----------------------
     // Connected player info
     // ----------------------
-    public byte LocalPlayerID = 0;
     public int MaxPlayers { get; private set; } = 8;
     public Dictionary<byte, PlayerState> PlayerIDsToPlayerStates = new();
     public Dictionary<int, byte> PeerIDsToPlayerIDs = new();
@@ -117,22 +116,21 @@ public class NetworkManager : ITickable
             return;
         }
 
-        if(NetworkMode == NetworkMode.LISTEN_SERVER)
-        {
-            LocalPlayerID = 0;
-        }
-
         NetworkMode = mode;
 
         switch (NetworkMode)
         {
-            case NetworkMode.OFFLINE:
             case NetworkMode.DEDICATED_SERVER:
+                NetworkServer.Initialize();
+                break;
+            case NetworkMode.OFFLINE:
             case NetworkMode.LISTEN_SERVER:
-                ServerGame.Initialize();
+                NetworkServer.Initialize();
+                NetworkClient.Initialize();
                 break;
 
             case NetworkMode.CLIENT:
+                NetworkClient.Initialize(); // Client game initialization delayed until load
                 break;
         }
 
@@ -151,7 +149,7 @@ public class NetworkManager : ITickable
 
         _networkPeer.StartLanServer(info.IP, info.Port);
 
-        ServerGame.Instance.InitializeLanServer(ServerInfo);
+        NetworkServer.Instance.InitializeLanServer(ServerInfo);
 
         _isHosting = true;
     }

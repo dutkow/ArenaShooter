@@ -43,13 +43,4 @@ public class PlayerJoined : Message
         NetworkSender.Broadcast(msg);
     }
 
-    public static void Execute(byte playerID, string playerName)
-    {
-        if(playerID == NetworkManager.Instance.LocalPlayerID)
-        {
-            return; // Need to rethink ordering on init match state. But for now, just ensure we don't readd.
-        }
-
-        //MatchState.Instance.AddPlayer(playerID, playerName);
-    }
 }

@@ -4,11 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-public enum ServerMode
-{
-    LAN,
-    INTERNET,
-}
 
 public class ServerGame()
 {
@@ -35,9 +30,6 @@ public class ServerGame()
     // Bandwidth tracking
     private int _bytesSentThisPeriod = 0;
 
-    public ServerMode ServerMode;
-    private ServerAdvertiser _serverAdvertiser;
-
 
     public static void Initialize()
     {
@@ -56,18 +48,7 @@ public class ServerGame()
         ServerProjectileManager.Initialize();
     }
 
-    public void InitializeLanServer(ServerInfo _serverInfo)
-    {
-        ServerMode = ServerMode.LAN;
 
-        _serverAdvertiser = new LanServerAdvertiser();
-        _serverAdvertiser.StartBroadcast(_serverInfo);
-    }
-
-    public void InitializeInternetServer()
-    {
-        ServerMode = ServerMode.INTERNET;
-    }
 
     public void Tick()
     {

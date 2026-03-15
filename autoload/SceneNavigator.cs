@@ -51,16 +51,17 @@ public class SceneNavigator
 
         var newScene = packedScene.Instantiate<Godot.Node>();
 
-        // Swap scenes via Main
-        Main.Instance.SetMainScene(newScene);
-        GD.Print($"set main scene ran on {NetworkManager.Instance.NetworkMode}");
 
-        if (NetworkManager.Instance.IsClient)
+        if(!NetworkManager.Instance.IsClient)
+        {
+            ServerGame.Initialize();
+        }
+        else if (NetworkManager.Instance.IsClient)
         {
             ClientGame.Initialize();
-            ClientGame.Instance.LocalPlayerID = NetworkManager.Instance.LocalPlayerID;
             ClientLoaded.Send();
-            GD.Print($"sending client loaded");
         }
+
+        Main.Instance.SetMainScene(newScene);
     }
 }

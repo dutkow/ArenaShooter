@@ -8,7 +8,6 @@ public class ClientGame
     public static ClientGame Instance { get; private set; }
 
     // Player elements
-    public byte LocalPlayerID { get; set; }
     public PlayerController LocalPlayerController { get; private set; }
     public PlayerState LocalPlayerState { get; private set; }
     public PlayerStateNew LocalPlayerStateNew { get; private set; }
@@ -69,7 +68,7 @@ public class ClientGame
         clientCommand.ClientTick = MatchState.Instance.CurrentTick;
         clientCommand.Commands = new ClientInputCommand[1];
         clientCommand.Commands[0] = inputCommand;
-        ServerGame.Instance.ReceiveClientCommand(clientCommand, LocalPlayerID);
+        ServerGame.Instance.ReceiveClientCommand(clientCommand, NetworkClient.Instance.LocalPlayerID);
     }
 
     public void SendClientInput(ClientInputCommand inputCommand)
@@ -127,7 +126,7 @@ public class ClientGame
                 {
                     character.ApplyAuthoritativePublicState(playerState.CharacterPublicState);
 
-                    if(playerState.PlayerID == ClientGame.Instance.LocalPlayerID)
+                    if(playerState.PlayerID == NetworkClient.Instance.LocalPlayerID)
                     {
                         character.ApplyAuthoritativePrivateState(playerState.CharacterPrivateState);
                     }
@@ -158,7 +157,7 @@ public class ClientGame
 
     public void HandleConnectionAccepted(ConnectionAccepted connectionAccepted)
     {
-        LocalPlayerID = connectionAccepted.AssignedPlayerID;
+        NetworkClient.Instance.SetLocalPlayerID(connectionAccepted.AssignedPlayerID);
 
         GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
 

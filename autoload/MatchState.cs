@@ -111,7 +111,7 @@ public partial class MatchState : Node
         if (NetworkManager.Instance.IsListenServer)
         {
             GD.Print("running init listen server stuff on match state");
-            byte playerID = ClientGame.Instance.LocalPlayerID;
+            byte playerID = NetworkClient.Instance.LocalPlayerID;
             AddPlayer(playerID, Settings.Instance.PlayerName);
             var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
         }
@@ -245,7 +245,7 @@ public partial class MatchState : Node
             GD.PrintErr("PlayerJoined event crashed: ", e);
         }
 
-        if (ClientGame.Instance != null && playerID == ClientGame.Instance.LocalPlayerID)
+        if (ClientGame.Instance != null && playerID == NetworkClient.Instance.LocalPlayerID)
         {
             ClientGame.Instance.AssignPlayerState(playerState);
         }
