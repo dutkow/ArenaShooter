@@ -82,8 +82,6 @@ public partial class MatchState : Node
 
         Instance = this;
 
-        PickupManager.Initialize();
-
     }
 
     public static void Initialize()

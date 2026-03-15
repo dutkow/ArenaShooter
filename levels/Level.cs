@@ -23,8 +23,18 @@ public partial class Level : Node3D
         var gameMode = (GameMode)_gameModeScene.Instantiate();
         AddChild(gameMode);
 
-        MatchState.Initialize();
         SpawnManager.Initialize();
+        PickupManager.Initialize();
+        MatchState.Initialize();
+
+        if (NetworkManager.Instance.IsServer)
+        {
+            ServerProjectileManager.Initialize();
+        }
+        else
+        {
+            ClientProjectileManager.Initialize();
+        }
 
         ServerTickManager serverTickManager = new();
         AddChild(serverTickManager);

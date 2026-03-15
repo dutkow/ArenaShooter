@@ -9,10 +9,11 @@ public class NetworkClient : NetworkPeer
 
     public ENetPacketPeer ServerPeer { get; private set; }
 
-    public static void Initialize()
+    public static NetworkClient Initialize()
     {
         Instance = new NetworkClient();
 
+        return Instance;
     }
 
     public void SetLocalPlayerID(byte localPlayerID)
@@ -39,7 +40,7 @@ public class NetworkClient : NetworkPeer
     public Error JoinServer(string ipAddress, int port)
     {
         Connection = new ENetConnection();
-        var error = Connection.CreateHost(1); // 1 client
+        var error = Connection.CreateHost(1);
         if (error != Error.Ok)
         {
             Connection = null;

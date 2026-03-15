@@ -95,12 +95,11 @@ public class NetworkManager : ITickable
             _availablePlayerIDs.Enqueue(i);
         }
 
-        _networkPeer = new();
 
-        _networkPeer.OnServerStarted += HandleServerStarted;
+        //_networkPeer.OnServerStarted += HandleServerStarted;
         //_networkHandler.OnPeerConnected += HandlePeerConnected;
-        _networkPeer.OnPeerDisconnectedEvent += HandlePeerDisconnected;
-        _networkPeer.OnDisconnectedFromServer += HandleFailedToConnect;
+        //_networkPeer.OnPeerDisconnectedEvent += HandlePeerDisconnected;
+        //_networkPeer.OnDisconnectedFromServer += HandleFailedToConnect;
 
         _router = new MessageRouter();
 
@@ -123,16 +122,16 @@ public class NetworkManager : ITickable
         switch (NetworkMode)
         {
             case NetworkMode.DEDICATED_SERVER:
-                NetworkServer.Initialize();
+                _networkPeer = NetworkServer.Initialize();
                 break;
             case NetworkMode.OFFLINE:
             case NetworkMode.LISTEN_SERVER:
-                NetworkServer.Initialize();
+                _networkPeer = NetworkServer.Initialize();
                 NetworkClient.Initialize();
                 break;
 
             case NetworkMode.CLIENT:
-                NetworkClient.Initialize(); // Client game initialization delayed until load
+                _networkPeer = NetworkClient.Initialize(); // Client game initialization delayed until load
                 break;
         }
 

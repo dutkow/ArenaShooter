@@ -142,6 +142,7 @@ public static class NetworkSender
     public static void ToServer(Message message)
     {
         ENetPacketPeer serverPeer = NetworkClient.Instance.ServerPeer;
+
         if (serverPeer == null)
         {
             GD.PushError("ServerPeer is null.");

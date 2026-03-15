@@ -25,15 +25,11 @@ public class NetworkServer : NetworkPeer
 
     private ServerAdvertiser _advertiser;
 
-    public static void Initialize()
+    public static NetworkServer Initialize()
     {
         Instance = new NetworkServer();
 
-    }
-
-    public void InitializeLanServer(ServerInfo _serverInfo)
-    {
-
+        return Instance;
     }
 
     public Error StartLanServer(string IP, int port, ServerInfo serverInfo)

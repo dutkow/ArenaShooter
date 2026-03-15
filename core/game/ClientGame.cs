@@ -35,13 +35,13 @@ public class ClientGame
 
         if(NetworkManager.Instance.IsClient)
         {
-            PickupManager.Initialize();
-            ClientProjectileManager.Initialize();
+            ClientLoaded.Send();
         }
-
+        else
+        {
+            ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(NetworkClient.Instance.LocalPlayerID, Settings.Instance.PlayerName));
+        }
         Instance.InitMessageHandlers();
-
-        NetworkClient.Send(new ClientLoaded());
     }
 
     public void Tick()
@@ -148,7 +148,6 @@ public class ClientGame
 
         ClientProjectileManager.Instance.ApplyWorldSnapshot(snapshot);
     }
-
 
     public void HandleServerMessage(Msg type, byte[] payload)
     {

@@ -40,14 +40,13 @@ public class ServerGame()
 
         Instance = new ServerGame();
 
+
+        Instance.InitMessageHandlers();
+
         if (NetworkManager.Instance.IsListenServer)
         {
             ClientGame.Initialize();
         }
-        PickupManager.Initialize();
-        ServerProjectileManager.Initialize();
-
-        Instance.InitMessageHandlers();
     }
 
     public void Tick()
@@ -132,7 +131,6 @@ public class ServerGame()
 
             if (!NetworkServer.Instance.PeersByPlayerID.TryGetValue(playerID, out var peer))
             {
-                GD.Print($"Peer not found. Player ID ID: {playerID}. Peer: {peer}");
                 continue;
             }
 
@@ -226,6 +224,8 @@ public class ServerGame()
         byte playerID = GetNextAvailablePlayerID();
         peer.SetMeta(_playerIDMeta, playerID);
 
+
+        GD.Print($"handle connection request ran.");
         NetworkServer.Instance.PeersByPlayerID[playerID] = peer;
 
         ConnectionAccepted.Send(peer, playerID);
@@ -236,16 +236,21 @@ public class ServerGame()
         GD.Print($"handle client loaded ran");
 
         byte playerID = GetPeerPlayerID(peer);
-
-        MatchState.Instance.AddPlayer(new PlayerInfo(playerID, clientLoaded.ClientInfo.PlayerName));
         NetworkPeer.Instance.ReadyPeers.Add(peer);
 
-        LastProcessedServerTicksByPlayerID[playerID] = 0;
-        LastProcessedClientTicksByPlayerID[playerID] = 0;
-
-        var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
+        ApplyClientLoaded(new PlayerInfo(playerID, clientLoaded.ClientInfo.PlayerName));
 
         InitialMatchState.Send(peer);
+    }
+
+    public void ApplyClientLoaded(PlayerInfo playerInfo)
+    {
+        MatchState.Instance.AddPlayer(playerInfo);
+
+        LastProcessedServerTicksByPlayerID[playerInfo.PlayerID] = 0;
+        LastProcessedClientTicksByPlayerID[playerInfo.PlayerID] = 0;
+
+        var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerInfo.PlayerID);
     }
 
     public void HandleClientCommand(ENetPacketPeer peer, ClientCommand clientCommand)
