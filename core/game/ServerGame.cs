@@ -52,7 +52,8 @@ public class ServerGame()
             ClientGame.Instance.OnLoaded();
         }
 
-        MatchState.Instance.StartMatch();
+        GD.Print($"on loaded ran on server game");
+        StartMatch();
     }
 
     public void Tick()
@@ -181,7 +182,7 @@ public class ServerGame()
         }
     }
 
-    public void ReceiveClientCommand(ClientCommand cmd, byte playerID)
+    public void ApplyClientCommand(byte playerID, ClientCommand cmd)
     {
         if (!_unprocessedClientInputs.ContainsKey(playerID))
         {
@@ -261,12 +262,11 @@ public class ServerGame()
     public void ApplyClientLoaded(PlayerInfo playerInfo)
     {
         MatchState.Instance.AddPlayer(playerInfo);
-        var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerInfo.PlayerID);
     }
 
     public void HandleClientCommand(ENetPacketPeer peer, ClientCommand clientCommand)
     {
-
+        ApplyClientCommand(NetUtils.GetPeerPlayerID(peer), clientCommand);
     }
 
     private readonly Dictionary<Msg, Action<ENetPacketPeer, byte[]>> _messageHandlers = new();
@@ -302,5 +302,19 @@ public class ServerGame()
 
         }
         return byte.MaxValue;
+    }
+
+    public void StartMatch()
+    {
+        GD.Print($"start match ran on {NetworkManager.Instance.NetworkMode}");
+
+        if (NetworkManager.Instance.IsServer)
+        {
+            foreach (var player in MatchState.Instance.ConnectedPlayers.Values)
+            {
+                var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(player.PlayerInfo.PlayerID);
+            }
+        }
+
     }
 }

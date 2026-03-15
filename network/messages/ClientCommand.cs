@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 [Flags]
-public enum ClientInput : ushort
+public enum InputFlags : ushort
 {
     NONE = 0,
 
@@ -26,7 +26,7 @@ public enum ClientInput : ushort
 public struct ClientInputCommand
 {
     public ushort ClientTick;
-    public ClientInput Input;
+    public InputFlags Flags;
 
     public Vector2 Look;
 
@@ -54,17 +54,17 @@ public class ClientCommand : Message
         foreach (var cmd in cmds)
         {
             Add(cmd.ClientTick);
-            AddEnum(cmd.Input);
+            AddEnum(cmd.Flags);
 
-            if (cmd.Input.HasFlag(ClientInput.LOOK))
+            if (cmd.Flags.HasFlag(InputFlags.LOOK))
                 Add(cmd.Look);
-            if (cmd.Input.HasFlag(ClientInput.WAS_LAUNCHED))
+            if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
             {
                 Add(cmd.LaunchVelocity.X);
                 Add(cmd.LaunchVelocity.Y);
                 Add(cmd.LaunchVelocity.Z);
             }
-            if (cmd.Input.HasFlag(ClientInput.FIRED_PREDICTED_PROJECTILE))
+            if (cmd.Flags.HasFlag(InputFlags.FIRED_PREDICTED_PROJECTILE))
                 Add(cmd.PredictedProjectileClientID);
         }
 
@@ -84,18 +84,18 @@ public class ClientCommand : Message
         foreach (var cmd in cmds)
         {
             Write(cmd.ClientTick);
-            WriteEnum(cmd.Input);
+            WriteEnum(cmd.Flags);
 
-            if (cmd.Input.HasFlag(ClientInput.LOOK))
+            if (cmd.Flags.HasFlag(InputFlags.LOOK))
                 Write(cmd.Look);
 
-            if (cmd.Input.HasFlag(ClientInput.WAS_LAUNCHED))
+            if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
             {
                 Write(cmd.LaunchVelocity.X); // raw float
                 Write(cmd.LaunchVelocity.Y);
                 Write(cmd.LaunchVelocity.Z);
             }
-            if (cmd.Input.HasFlag(ClientInput.FIRED_PREDICTED_PROJECTILE))
+            if (cmd.Flags.HasFlag(InputFlags.FIRED_PREDICTED_PROJECTILE))
                 Write(cmd.PredictedProjectileClientID);
         }
 
@@ -120,18 +120,18 @@ public class ClientCommand : Message
             Read(out cmd.ClientTick);
 
             Read(out ushort mask);
-            cmd.Input = (ClientInput)mask;
+            cmd.Flags = (InputFlags)mask;
 
-            if (cmd.Input.HasFlag(ClientInput.LOOK))
+            if (cmd.Flags.HasFlag(InputFlags.LOOK))
                 Read(out cmd.Look);
 
-            if (cmd.Input.HasFlag(ClientInput.WAS_LAUNCHED))
+            if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
             {
                 Read(out cmd.LaunchVelocity.X); // raw float
                 Read(out cmd.LaunchVelocity.Y);
                 Read(out cmd.LaunchVelocity.Z);
             }
-            if (cmd.Input.HasFlag(ClientInput.FIRED_PREDICTED_PROJECTILE))
+            if (cmd.Flags.HasFlag(InputFlags.FIRED_PREDICTED_PROJECTILE))
                 Read(out cmd.PredictedProjectileClientID);
 
             Commands[i] = cmd;

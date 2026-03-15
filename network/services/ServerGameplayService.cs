@@ -13,7 +13,7 @@ public static class ServerGameplayService
                 var cmd = new ClientCommand();
                 cmd.ReadMessage(data);
 
-                ServerGame.Instance.ReceiveClientCommand(cmd, playerID);
+                ServerGame.Instance.ApplyClientCommand(playerID, cmd);
             }
         }
     }

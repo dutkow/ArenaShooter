@@ -58,14 +58,14 @@ public partial class Weapon : Entity
         _hasFiredSincePress = false;
     }
 
-    public void ProcessClientInput(ClientInput cmd)
+    public void ProcessClientInput(InputFlags cmd)
     {
         HandleInput(cmd);
     }
 
-    public void HandleInput(ClientInput cmd)
+    public void HandleInput(InputFlags cmd)
     {
-        bool wantsPrimaryFire = cmd.HasFlag(ClientInput.FIRE_PRIMARY);
+        bool wantsPrimaryFire = cmd.HasFlag(InputFlags.FIRE_PRIMARY);
 
         if (wantsPrimaryFire)
         {

@@ -96,18 +96,7 @@ public partial class MatchState : Node
 
     }
 
-    public void StartMatch()
-    {
-        StartPhase(MatchPhase.WARMUP);
-
-
-        GD.Print($"num players to spawn:{ConnectedPlayers.Count} ");
-        foreach (var player in ConnectedPlayers.Values)
-        {
-            var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(player.PlayerInfo.PlayerID);
-        }
-    }
-
+ 
     public void Tick()
     {
         ServerGame.Instance?.Tick();
@@ -127,7 +116,7 @@ public partial class MatchState : Node
         }
         for(int i = 0; i < initialMatchState.PlayerStates.Length; ++i)
         {
-
+            GD.Print($"add existing player on client joined ran");
             AddExistingPlayerOnClientJoined(initialMatchState.PlayerStates[i]);
         }
     }

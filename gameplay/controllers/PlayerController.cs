@@ -66,12 +66,12 @@ public partial class PlayerController : Controller
 
     public virtual ClientInputCommand AddInput(ClientInputCommand cmd)
     {
-        if (Input.IsActionPressed("move_forward")) cmd.Input |= ClientInput.FORWARD;
-        if (Input.IsActionPressed("move_back")) cmd.Input |= ClientInput.BACKWARD;
-        if (Input.IsActionPressed("move_left")) cmd.Input |= ClientInput.STRAFE_LEFT;
-        if (Input.IsActionPressed("move_right")) cmd.Input |= ClientInput.STRAFE_RIGHT;
-        if (Input.IsActionPressed("jump")) cmd.Input |= ClientInput.JUMP;
-        if (Input.IsActionPressed("primary_fire")) cmd.Input |= ClientInput.FIRE_PRIMARY;
+        if (Input.IsActionPressed("move_forward")) cmd.Flags |= InputFlags.FORWARD;
+        if (Input.IsActionPressed("move_back")) cmd.Flags |= InputFlags.BACKWARD;
+        if (Input.IsActionPressed("move_left")) cmd.Flags |= InputFlags.STRAFE_LEFT;
+        if (Input.IsActionPressed("move_right")) cmd.Flags |= InputFlags.STRAFE_RIGHT;
+        if (Input.IsActionPressed("jump")) cmd.Flags |= InputFlags.JUMP;
+        if (Input.IsActionPressed("primary_fire")) cmd.Flags |= InputFlags.FIRE_PRIMARY;
 
         return cmd;
     }

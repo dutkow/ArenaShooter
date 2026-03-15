@@ -95,10 +95,9 @@ public partial class Character : Pawn, IDamageable
     {
         base.ServerProcessNextClientInput(cmd);
 
-        //GD.Print($"running server process next client input. player id = {PlayerState.PlayerID}. move forward: {cmd.Input.HasFlag(ClientInput.FORWARD)}");
 
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-        _weapon.ProcessClientInput(cmd.Input);
+        _weapon.ProcessClientInput(cmd.Flags);
     }
 
 
@@ -200,6 +199,7 @@ public partial class Character : Pawn, IDamageable
         base.OnPossessed(controller);
 
         //_healthComp.Death += OnDeath;
+
 
         Input.MouseMode = Input.MouseModeEnum.Captured;
 
@@ -355,6 +355,7 @@ public partial class Character : Pawn, IDamageable
         //_thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
         _thirdPersonWeaponMesh.Visible = false;
 
+        GD.Print($"hiding third person view");
     }
 
 
@@ -419,24 +420,24 @@ public partial class Character : Pawn, IDamageable
 
         if(_inputEnabled)
         {
-            if (Input.IsActionPressed("move_forward")) cmd.Input |= ClientInput.FORWARD;
-            if (Input.IsActionPressed("move_back")) cmd.Input |= ClientInput.BACKWARD;
-            if (Input.IsActionPressed("move_left")) cmd.Input |= ClientInput.STRAFE_LEFT;
-            if (Input.IsActionPressed("move_right")) cmd.Input |= ClientInput.STRAFE_RIGHT;
-            if (Input.IsActionPressed("jump")) cmd.Input |= ClientInput.JUMP;
-            if (Input.IsActionPressed("primary_fire")) cmd.Input |= ClientInput.FIRE_PRIMARY;
+            if (Input.IsActionPressed("move_forward")) cmd.Flags |= InputFlags.FORWARD;
+            if (Input.IsActionPressed("move_back")) cmd.Flags |= InputFlags.BACKWARD;
+            if (Input.IsActionPressed("move_left")) cmd.Flags |= InputFlags.STRAFE_LEFT;
+            if (Input.IsActionPressed("move_right")) cmd.Flags |= InputFlags.STRAFE_RIGHT;
+            if (Input.IsActionPressed("jump")) cmd.Flags |= InputFlags.JUMP;
+            if (Input.IsActionPressed("primary_fire")) cmd.Flags |= InputFlags.FIRE_PRIMARY;
         }
 
         if (MovementComp.WasLaunched)
         {
-            cmd.Input |= ClientInput.WAS_LAUNCHED;
+            cmd.Flags |= InputFlags.WAS_LAUNCHED;
             cmd.LaunchVelocity = MovementComp.LaunchVector;
             MovementComp.WasLaunched = false;
         }
 
         if (_weapon.FiredPredictedProjectile)
         {
-            cmd.Input |= ClientInput.FIRED_PREDICTED_PROJECTILE;
+            cmd.Flags |= InputFlags.FIRED_PREDICTED_PROJECTILE;
             cmd.PredictedProjectileClientID = ClientProjectileManager.Instance.GetNextAvailableClientProjectileID();
             _weapon.FiredPredictedProjectile = false;
         }
@@ -449,12 +450,12 @@ public partial class Character : Pawn, IDamageable
 
 
         cmd.Look = _accumulatedLookDelta;
-        cmd.Input |= ClientInput.LOOK;
+        cmd.Flags |= InputFlags.LOOK;
 
 
         PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
         PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
-        _weapon.HandleInput(cmd.Input);
+        _weapon.HandleInput(cmd.Flags);
 
         _accumulatedLookDelta = Vector2.Zero;
         return cmd;

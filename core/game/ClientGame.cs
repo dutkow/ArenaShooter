@@ -42,12 +42,15 @@ public class ClientGame
     {
         Instance.LocalPlayerController = new();
 
+        GD.Print($"on loaded ran on client game");
+
         if (NetworkManager.Instance.IsClient)
         {
             ClientLoaded.Send();
         }
         else
         {
+            _hasReceivedInitialState = true;
             ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, Settings.Instance.PlayerName));
         }
     }
@@ -90,7 +93,8 @@ public class ClientGame
         clientCommand.ClientTick = MatchState.Instance.CurrentTick;
         clientCommand.Commands = new ClientInputCommand[1];
         clientCommand.Commands[0] = inputCommand;
-        ServerGame.Instance.ReceiveClientCommand(clientCommand, ClientGame.Instance.LocalPlayerID);
+
+        ServerGame.Instance.ApplyClientCommand(ClientGame.Instance.LocalPlayerID, clientCommand);
     }
 
     public void SendClientInput(ClientInputCommand inputCommand)
@@ -115,6 +119,10 @@ public class ClientGame
         {
             cmd = LocalPlayerPawn.CaptureInput(cmd);
         }
+        else
+        {
+            GD.Print($"local player pawn is null");
+        }
 
         cmd.ClientTick = MatchState.Instance.CurrentTick;
 
@@ -123,7 +131,7 @@ public class ClientGame
 
     public void ApplyWorldSnapshot(WorldSnapshot snapshot)
     {
-
+        GD.Print($"applying world snapshot");
         if (!NetUtils.IsNewerTick(snapshot.ServerTick, LastServerTickProcessedByClient))
         {
             return;

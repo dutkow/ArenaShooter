@@ -23,8 +23,8 @@ public partial class GameMode : Node
 
     public void Initialize()
     {
-        MatchState.Instance.StartMatch();
-        MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
+        //MatchState.Instance.StartMatch();
+        //MatchState.Instance.MatchPhaseChanged += OnMatchPhaseChanged;
     }
 
     private void OnMatchPhaseChanged(MatchPhase phase)

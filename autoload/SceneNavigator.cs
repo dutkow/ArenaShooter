@@ -63,6 +63,10 @@ public class SceneNavigator
         Main.Instance.SetMainScene(newScene);
 
         ServerGame.Instance?.OnLoaded();
-        ClientGame.Instance?.OnLoaded();
+
+        if(NetworkManager.Instance.IsClient)
+        {
+            ClientGame.Instance.OnLoaded();
+        }
     }
 }

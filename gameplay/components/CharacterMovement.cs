@@ -65,10 +65,10 @@ public class CharacterMovement
 
         // Process movement input
         Vector3 move = Vector3.Zero;
-        if (cmd.Input.HasFlag(ClientInput.FORWARD)) move.Z -= 1;
-        if (cmd.Input.HasFlag(ClientInput.BACKWARD)) move.Z += 1;
-        if (cmd.Input.HasFlag(ClientInput.STRAFE_LEFT)) move.X -= 1;
-        if (cmd.Input.HasFlag(ClientInput.STRAFE_RIGHT)) move.X += 1;
+        if (cmd.Flags.HasFlag(InputFlags.FORWARD)) move.Z -= 1;
+        if (cmd.Flags.HasFlag(InputFlags.BACKWARD)) move.Z += 1;
+        if (cmd.Flags.HasFlag(InputFlags.STRAFE_LEFT)) move.X -= 1;
+        if (cmd.Flags.HasFlag(InputFlags.STRAFE_RIGHT)) move.X += 1;
 
         state.Look += cmd.Look;
 
@@ -83,7 +83,7 @@ public class CharacterMovement
         }
 
         // Jump
-        if (cmd.Input.HasFlag(ClientInput.JUMP) && _isGrounded && _jumpCooldownReady)
+        if (cmd.Flags.HasFlag(InputFlags.JUMP) && _isGrounded && _jumpCooldownReady)
             Jump(state);
 
         // Gravity
@@ -104,7 +104,7 @@ public class CharacterMovement
         }
 
         // Launch velocity
-        if (cmd.Input.HasFlag(ClientInput.WAS_LAUNCHED))
+        if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
         {
             state.Velocity += cmd.LaunchVelocity;
             WasLaunched = false;

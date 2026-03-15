@@ -60,7 +60,6 @@ public partial class SpawnManager : Node3D
         {
             GD.Print($"client game is null");
         }
-        GD.Print($"new local spawn player ran on {NetworkManager.Instance.NetworkMode}. NEW PLAYER ID: {playerID} and local player id {ClientGame.Instance.LocalPlayerID}, spawn position: {spawnPosition}");
         var spawnedPlayer = (Character)GameMode.Instance.DefaultPawnScene.Instantiate();
 
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
