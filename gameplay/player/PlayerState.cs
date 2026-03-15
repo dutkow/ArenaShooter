@@ -4,8 +4,8 @@ using System;
 
 public class PlayerState()
 {
-    public byte PlayerID;
-    public string PlayerName;
+    public PlayerInfo PlayerInfo;
+ 
     public Character Character; // instance, not replicated
 
     public CharacterPublicState CharacterPublicState = new();
@@ -29,13 +29,13 @@ public class PlayerState()
 
     internal void Add(Message msg, byte clientPlayerID, bool forceFull = false)
     {
-        msg.Add(PlayerID);
+        msg.Add(PlayerInfo.PlayerID);
 
         msg.AddEnum(Flags);
 
         if (forceFull)
         {
-            msg.Add(PlayerName);
+            msg.Add(PlayerInfo.PlayerName);
 
             msg.Add(Kills);
             msg.Add(Deaths);
@@ -58,11 +58,11 @@ public class PlayerState()
 
     internal void Write(Message msg, byte clientPlayerID, bool forceFull = false)
     {
-        msg.Write(PlayerID);
+        msg.Write(PlayerInfo.PlayerID);
 
         if (forceFull)
         {
-            msg.Write(PlayerName);
+            msg.Write(PlayerInfo.PlayerName);
 
             msg.Write(Kills);
             msg.Write(Deaths);
@@ -85,11 +85,11 @@ public class PlayerState()
 
     internal void Read(Message msg, byte clientPlayerID, bool forceFull = false)
     {
-        msg.Read(out PlayerID);
+        msg.Read(out PlayerInfo.PlayerID);
 
         if (forceFull)
         {
-            msg.Read(out PlayerName);
+            msg.Read(out PlayerInfo.PlayerName);
 
             msg.Read(out Kills);
             msg.Read(out Deaths);

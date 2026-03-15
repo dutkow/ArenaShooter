@@ -220,7 +220,7 @@ public partial class Character : Pawn, IDamageable
             GD.Print($"player state is null");
         }
 
-        _weapon.OwnerPlayerID = PlayerState.PlayerID;
+        _weapon.OwnerPlayerID = PlayerState.PlayerInfo.PlayerID;
         _weapon.SetIsAuthority(IsAuthority);
 
         if(!IsAuthority)

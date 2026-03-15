@@ -141,7 +141,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
 
     public NetworkRole GetNetworkRole() => NetworkedComponent.Role;
     public bool IsAuthority() => NetworkedComponent.IsAuthority;
-    public byte GetPlayerID() => State.PlayerID;
+    public byte GetPlayerID() => State.PlayerInfo.PlayerID;
     public bool IsPlayerControlled() => true;
 
     // ----------------------
@@ -189,7 +189,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
     public CharacterSnapshot GetSnapshot()
     {
         var snapshot = new CharacterSnapshot();
-        snapshot.PlayerID = State.PlayerID;
+        snapshot.PlayerID = State.PlayerInfo.PlayerID;
         snapshot.Position = GlobalPosition;
         snapshot.Velocity = MovementComp.Velocity;
         snapshot.Yaw = Yaw;

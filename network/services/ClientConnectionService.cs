@@ -42,7 +42,7 @@ public static class ClientConnectionService
 
         foreach(var playerState in msg.PlayerStates)
         {
-            GD.Print($"initial match state RECEIVE PLAYER DATA. playerID: {playerState.PlayerID}. is alive: {playerState.IsAlive}. player name: {playerState.PlayerName}. player position: {playerState.CharacterPublicState.Position}");
+            GD.Print($"initial match state RECEIVE PLAYER DATA. playerID: {playerState.PlayerInfo.PlayerID}. is alive: {playerState.IsAlive}. player name: {playerState.PlayerInfo.PlayerName}. player position: {playerState.CharacterPublicState.Position}");
         }
         GD.Print($"----------------");
 

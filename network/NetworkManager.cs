@@ -180,14 +180,9 @@ public class NetworkManager : ITickable
         {
             PeerIDsToPlayerIDs.Remove(_peerID);
             PlayerIDsToPlayerStates.Remove(_playerID);
-
             PeerIDsToPeers.Remove(_peerID);
-
             PlayerIDsToPeers.Remove(_playerID);
-
             _availablePlayerIDs.Enqueue(_playerID);
-
-            GD.Print($"Player disconnected: _peerID={_peerID}, _playerID={_playerID}");
             OnPlayerLeft?.Invoke(_playerID);
         }
         else
@@ -202,7 +197,6 @@ public class NetworkManager : ITickable
     public void JoinServer(ServerInfo serverInfo)
     {
         SetMode(NetworkMode.CLIENT);
-
 
         ServerInfo = serverInfo;
 
@@ -294,8 +288,7 @@ public class NetworkManager : ITickable
 
         PlayerIDsToPlayerStates[playerID] = new PlayerState()
         {
-            PlayerID = playerID,
-            PlayerName = playerName
+            PlayerInfo = new PlayerInfo(playerID, playerName)
         };
 
         GameMode.Instance.AddPlayerController(playerID);
@@ -304,8 +297,6 @@ public class NetworkManager : ITickable
         OnPlayerJoined?.Invoke(playerID, playerName);
 
         ConnectionAccepted.Send(peer, playerID);
-
-        //ServerInfo.Players++;
     }
 
     public void HandlePlayerJoined(byte playerID, string playerName)

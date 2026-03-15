@@ -14,6 +14,9 @@ public class ClientGame
 
     public Pawn LocalPlayerPawn => LocalPlayerController.PossessedPawn;
 
+    // Events
+    public event Action<PlayerState>? PlayerJoined;
+
     // Client-server synchronization
     public ushort LastServerTickProcessedByClient;
     public ushort LastClientTickProcessedByServer;
@@ -117,7 +120,7 @@ public class ClientGame
 
         foreach (var playerState in snapshot.PlayerStates)
         {
-            if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerState.PlayerID, out var foundPlayerState))
+            if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerState.PlayerInfo.PlayerID, out var foundPlayerState))
             {
                 //GD.Print($"num unacked inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
                 // Client already has an instance of this character, apply snapshot, which could also kill it if it's not alive
@@ -126,7 +129,7 @@ public class ClientGame
                 {
                     character.ApplyAuthoritativePublicState(playerState.CharacterPublicState);
 
-                    if(playerState.PlayerID == NetworkClient.Instance.LocalPlayerID)
+                    if(playerState.PlayerInfo.PlayerID == NetworkClient.Instance.LocalPlayerID)
                     {
                         character.ApplyAuthoritativePrivateState(playerState.CharacterPrivateState);
                     }
@@ -134,7 +137,7 @@ public class ClientGame
                 // Client doesn't know about this character but it's alive, spawn it
                 else if(playerState.IsAlive)
                 {
-                    SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Look.X);
+                    SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Look.X);
                 }
             }
         }
@@ -174,6 +177,11 @@ public class ClientGame
 
     }
 
+    public void HandlePlayerJoined(PlayerJoined playerJoined)
+    {
+        MatchState.Instance.AddPlayer(playerJoined.PlayerInfo);
+    }
+
     public void HandleWorldSnapshot(WorldSnapshot worldSnapshot)
     {
 
@@ -189,6 +197,8 @@ public class ClientGame
 
     public virtual void InitMessageHandlers()
     {
+        _messageHandlers[Msg.S2C_PLAYER_JOINED] = payload => Dispatch<PlayerJoined>(payload, HandlePlayerJoined);
+
         _messageHandlers[Msg.S2C_CONNECTION_ACCEPTED] = payload => Dispatch<ConnectionAccepted>(payload, HandleConnectionAccepted);
         _messageHandlers[Msg.S2C_CONNECTION_DENIED] = payload => Dispatch<ConnectionDenied>(payload, HandleConnectionDenied);
         _messageHandlers[Msg.S2C_INITIAL_MATCH_STATE] = payload => Dispatch<InitialMatchState>(payload, HandleInitialMatchState);

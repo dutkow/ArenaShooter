@@ -24,7 +24,7 @@ public static class ServerConnectionService
         int peerID = (int)peer.GetMeta("id");
 
         byte playerID = NetworkManager.Instance.PeerIDsToPlayerIDs[peerID];
-        string playerName = NetworkManager.Instance.PlayerIDsToPlayerStates[playerID].PlayerName;
+        string playerName = NetworkManager.Instance.PlayerIDsToPlayerStates[playerID].PlayerInfo.PlayerName;
 
         NetworkPeer.Instance.ReadyPeers.Add(peer);
 
@@ -34,7 +34,7 @@ public static class ServerConnectionService
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
         //PlayerJoined.Execute(playerID, playerName);
-        MatchState.Instance.AddPlayer(playerID, playerName);
+        MatchState.Instance.AddPlayer(new PlayerInfo(playerID, playerName));
 
         GD.Print($"calling initial match state send in client loaded");
 

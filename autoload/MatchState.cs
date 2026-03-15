@@ -111,9 +111,9 @@ public partial class MatchState : Node
         if (NetworkManager.Instance.IsListenServer)
         {
             GD.Print("running init listen server stuff on match state");
-            byte playerID = NetworkClient.Instance.LocalPlayerID;
-            AddPlayer(playerID, Settings.Instance.PlayerName);
-            var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
+            var serverPlayerInfo = new PlayerInfo(NetworkClient.Instance.LocalPlayerID, Settings.Instance.PlayerName);
+            AddPlayer(serverPlayerInfo);
+            var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(serverPlayerInfo.PlayerID);
         }
     }
 
@@ -220,24 +220,23 @@ public partial class MatchState : Node
     // Player handling
     // ----------------------
     
-    public void AddPlayer(byte playerID, string playerName) // TODO: Refactor this into separate functions for adding existing players and handling joining players
+    public void AddPlayer(PlayerInfo playerInfo)
     {
-        GD.Print($"add player running on {NetworkManager.Instance.NetworkMode}. player id: {playerID}");
-        if (ConnectedPlayers.ContainsKey(playerID))
+        GD.Print($"add player running on {NetworkManager.Instance.NetworkMode}. player id: {playerInfo.PlayerID}");
+        if (ConnectedPlayers.ContainsKey(playerInfo.PlayerID))
         {
             return; // Already added
         }
 
         var playerState = new PlayerState();
-        playerState.PlayerID = playerID;
-        playerState.PlayerName = playerName;
+        playerState.PlayerInfo = playerInfo;
   
-        ConnectedPlayers[playerID] = playerState;
+        ConnectedPlayers[playerInfo.PlayerID] = playerState;
 
         try
         {
             PlayerJoinedNew?.Invoke(playerState);
-            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PlayerName}. Network Mode = {NetworkManager.Instance.NetworkMode}");
+            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PlayerInfo.PlayerName}. Network Mode = {NetworkManager.Instance.NetworkMode}");
 
         }
         catch (Exception e)
@@ -245,7 +244,7 @@ public partial class MatchState : Node
             GD.PrintErr("PlayerJoined event crashed: ", e);
         }
 
-        if (ClientGame.Instance != null && playerID == NetworkClient.Instance.LocalPlayerID)
+        if (ClientGame.Instance != null && playerInfo.PlayerID == NetworkClient.Instance.LocalPlayerID)
         {
             ClientGame.Instance.AssignPlayerState(playerState);
         }
@@ -253,14 +252,14 @@ public partial class MatchState : Node
 
     public void AddExistingPlayerOnClientJoined(PlayerState playerState)
     {
-        ConnectedPlayers[playerState.PlayerID] = playerState;
+        ConnectedPlayers[playerState.PlayerInfo.PlayerID] = playerState;
 
         if(playerState.IsAlive)
         {
 
-            SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Look.Y);
+            SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Look.Y);
 
-            GD.Print($"client is spawning {playerState.PlayerID} at position {playerState.CharacterPublicState.Position}");
+            GD.Print($"client is spawning {playerState.PlayerInfo.PlayerID} at position {playerState.CharacterPublicState.Position}");
 
         }
     }
