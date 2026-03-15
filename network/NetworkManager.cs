@@ -154,12 +154,7 @@ public class NetworkManager : ITickable
 
         _networkPeer.StartLanServer(info.IP, info.Port);
 
-        if (_lanBroadcaster == null)
-        {
-            _lanBroadcaster = new();
-        }
-
-        _lanBroadcaster.StartBroadcast(info);
+        ServerGame.Instance.InitializeLanServer(ServerInfo);
 
         _isHosting = true;
     }

@@ -4,8 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
+public enum ServerMode
+{
+    LAN,
+    INTERNET,
+}
 
-public class ServerGame
+public class ServerGame()
 {
     const int MAX_PLAYERS = 16;
     private bool _isServerFull => MatchState.Instance.ConnectedPlayers.Count <= MAX_PLAYERS;
@@ -30,6 +35,9 @@ public class ServerGame
     // Bandwidth tracking
     private int _bytesSentThisPeriod = 0;
 
+    public ServerMode ServerMode;
+    private ServerAdvertiser _serverAdvertiser;
+
 
     public static void Initialize()
     {
@@ -40,12 +48,25 @@ public class ServerGame
 
         Instance = new ServerGame();
 
-        if(NetworkManager.Instance.IsListenServer)
+        if (NetworkManager.Instance.IsListenServer)
         {
             ClientGame.Initialize();
         }
         PickupManager.Initialize();
         ServerProjectileManager.Initialize();
+    }
+
+    public void InitializeLanServer(ServerInfo _serverInfo)
+    {
+        ServerMode = ServerMode.LAN;
+
+        _serverAdvertiser = new LanServerAdvertiser();
+        _serverAdvertiser.StartBroadcast(_serverInfo);
+    }
+
+    public void InitializeInternetServer()
+    {
+        ServerMode = ServerMode.INTERNET;
     }
 
     public void Tick()

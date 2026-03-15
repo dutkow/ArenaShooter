@@ -67,7 +67,6 @@ public partial class SpawnManager : Node3D
         Level.Instance.AddChild(spawnedPlayer);
 
         spawnedPlayer.HandleSpawn(spawnPosition, yRotation, 0.0f);
-
         spawnedPlayer.SetIsAuthority(NetworkManager.Instance.IsServer);
 
         if (playerID == ClientGame.Instance.LocalPlayerID)

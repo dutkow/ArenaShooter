@@ -14,7 +14,7 @@ public class ClientProjectileManager
 
     public ushort _nextAvailableClientProjectileID;
 
-    public static void Create()
+    public static void Initialize()
     {
         if (Instance != null)
         {

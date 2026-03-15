@@ -8,13 +8,13 @@ using System.Timers;
 /// <summary>
 /// Broadcasts server info over the LAN so clients can discover available servers.
 /// </summary>
-public partial class LanServerAdvertiser
+public class LanServerAdvertiser : ServerAdvertiser
 {
     private UdpClient _udp;
     private ServerInfo _info;
     private System.Timers.Timer _timer;
 
-    public void StartBroadcast(ServerInfo info)
+    public override void StartBroadcast(ServerInfo info)
     {
         _info = info;
 
@@ -29,7 +29,7 @@ public partial class LanServerAdvertiser
         _timer.Start();
     }
 
-    private void Broadcast()
+    public override void Broadcast()
     {
         try
         {
@@ -48,7 +48,7 @@ public partial class LanServerAdvertiser
         }
     }
 
-    public void StopBroadcast()
+    public override void StopBroadcast()
     {
         _timer?.Stop();
         _timer?.Dispose();

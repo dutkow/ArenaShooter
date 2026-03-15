@@ -30,6 +30,12 @@ public class ClientGame
         Instance = new ClientGame();
 
         Instance.LocalPlayerController = new();
+
+        if(NetworkManager.Instance.IsClient)
+        {
+            PickupManager.Initialize();
+            ClientProjectileManager.Initialize();
+        }
     }
 
     public void Tick()
@@ -158,7 +164,7 @@ public class ClientGame
 
         GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
 
-        ClientProjectileManager.Create();
+        ClientProjectileManager.Initialize();
     }
 
     public void HandleConnectionDenied(ConnectionDenied connectionDenied)

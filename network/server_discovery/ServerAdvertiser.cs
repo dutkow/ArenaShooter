@@ -1,6 +1,11 @@
 using Godot;
 using System;
 
-public partial class InternetServerAdvertiser : Node
+public abstract class ServerAdvertiser
 {
+    public abstract void StartBroadcast(ServerInfo info);
+
+    public abstract void Broadcast();
+    public abstract void StopBroadcast();
+
 }
