@@ -62,14 +62,7 @@ public class SceneNavigator
         GD.Print($"open mp map ran END. {mapID}. network mode: {NetworkManager.Instance.NetworkMode}");
         Main.Instance.SetMainScene(newScene);
 
-        if (!NetworkManager.Instance.IsClient)
-        {
-            ServerGame.Initialize();
-        }
-        else if (NetworkManager.Instance.IsClient)
-        {
-            ClientGame.Initialize();
-            ClientLoaded.Send();
-        }
+        ServerGame.Instance?.OnLoaded();
+        ClientGame.Instance?.OnLoaded();
     }
 }

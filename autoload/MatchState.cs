@@ -94,30 +94,22 @@ public partial class MatchState : Node
 
         Instance = new MatchState();
 
-        Instance.StartMatchDeferred();
-    }
-
-    public void StartMatchDeferred()
-    {
-        CallDeferred(nameof(StartMatch));
     }
 
     public void StartMatch()
     {
         StartPhase(MatchPhase.WARMUP);
 
-        if (NetworkManager.Instance.IsListenServer)
+
+        GD.Print($"num players to spawn:{ConnectedPlayers.Count} ");
+        foreach (var player in ConnectedPlayers.Values)
         {
-            GD.Print("running init listen server stuff on match state");
-            var serverPlayerInfo = new PlayerInfo(NetworkClient.Instance.LocalPlayerID, Settings.Instance.PlayerName);
-            AddPlayer(serverPlayerInfo);
-            var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(serverPlayerInfo.PlayerID);
+            var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(player.PlayerInfo.PlayerID);
         }
     }
 
     public void Tick()
     {
-
         ServerGame.Instance?.Tick();
         ClientGame.Instance?.Tick();
 
@@ -217,7 +209,6 @@ public partial class MatchState : Node
     // ----------------------
     // Player handling
     // ----------------------
-    
     public void AddPlayer(PlayerInfo playerInfo)
     {
         GD.Print($"add player running on {NetworkManager.Instance.NetworkMode}. player id: {playerInfo.PlayerID}");
@@ -242,7 +233,7 @@ public partial class MatchState : Node
             GD.PrintErr("PlayerJoined event crashed: ", e);
         }
 
-        if (ClientGame.Instance != null && playerInfo.PlayerID == NetworkClient.Instance.LocalPlayerID)
+        if (ClientGame.Instance != null && playerInfo.PlayerID == ClientGame.Instance.LocalPlayerID)
         {
             ClientGame.Instance.AssignPlayerState(playerState);
         }

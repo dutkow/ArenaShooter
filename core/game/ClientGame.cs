@@ -14,6 +14,8 @@ public class ClientGame
 
     public Pawn LocalPlayerPawn => LocalPlayerController.PossessedPawn;
 
+    public byte LocalPlayerID;
+
     // Events
     public event Action<PlayerState>? PlayerJoined;
 
@@ -23,6 +25,8 @@ public class ClientGame
     public List<ClientInputCommand> UnprocessedClientInputs = new();
     const int REDUNDANT_INPUTS = 4;
 
+    private bool _hasReceivedInitialState;
+
     public static void Initialize()
     {
         if(ClientGame.Instance != null)
@@ -31,22 +35,33 @@ public class ClientGame
         }
         Instance = new ClientGame();
 
+        Instance.InitMessageHandlers();
+    }
+
+    public void OnLoaded()
+    {
         Instance.LocalPlayerController = new();
 
-        if(NetworkManager.Instance.IsClient)
+        if (NetworkManager.Instance.IsClient)
         {
             ClientLoaded.Send();
         }
         else
         {
-            ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(NetworkClient.Instance.LocalPlayerID, Settings.Instance.PlayerName));
+            ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, Settings.Instance.PlayerName));
         }
-        Instance.InitMessageHandlers();
+    }
+    public void SetLocalPlayerID(byte localPlayerID)
+    {
+        LocalPlayerID = localPlayerID;
     }
 
     public void Tick()
     {
-        SendCommand();
+        if(_hasReceivedInitialState)
+        {
+            SendCommand();
+        }
     }
 
     public void AssignPlayerState(PlayerState playerState)
@@ -75,7 +90,7 @@ public class ClientGame
         clientCommand.ClientTick = MatchState.Instance.CurrentTick;
         clientCommand.Commands = new ClientInputCommand[1];
         clientCommand.Commands[0] = inputCommand;
-        ServerGame.Instance.ReceiveClientCommand(clientCommand, NetworkClient.Instance.LocalPlayerID);
+        ServerGame.Instance.ReceiveClientCommand(clientCommand, ClientGame.Instance.LocalPlayerID);
     }
 
     public void SendClientInput(ClientInputCommand inputCommand)
@@ -133,7 +148,7 @@ public class ClientGame
                 {
                     character.ApplyAuthoritativePublicState(playerState.CharacterPublicState);
 
-                    if(playerState.PlayerInfo.PlayerID == NetworkClient.Instance.LocalPlayerID)
+                    if(playerState.PlayerInfo.PlayerID == ClientGame.Instance.LocalPlayerID)
                     {
                         character.ApplyAuthoritativePrivateState(playerState.CharacterPrivateState);
                     }
@@ -151,6 +166,7 @@ public class ClientGame
 
     public void HandleServerMessage(Msg type, byte[] payload)
     {
+        GD.Print($"CLIENT HANDLING SERVER MSG. TYPE: {type} ");
         if(_messageHandlers.TryGetValue(type, out var handler))
         {
             handler(payload);
@@ -163,7 +179,7 @@ public class ClientGame
 
     public void HandleConnectionAccepted(ConnectionAccepted connectionAccepted)
     {
-        NetworkClient.Instance.SetLocalPlayerID(connectionAccepted.AssignedPlayerID);
+        SetLocalPlayerID(connectionAccepted.AssignedPlayerID);
 
         GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
 
@@ -177,7 +193,7 @@ public class ClientGame
 
     public void HandleInitialMatchState(InitialMatchState initialMatchState)
     {
-
+        _hasReceivedInitialState = true;
     }
 
     public void HandlePlayerJoined(PlayerJoined playerJoined)

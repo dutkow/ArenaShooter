@@ -35,7 +35,7 @@ public class ClientProjectileManager
     {
         foreach(var spawnData in unackedProjectileSpawnDataArray)
         {
-            if (spawnData.ownerPlayerID == NetworkClient.Instance.LocalPlayerID)
+            if (spawnData.ownerPlayerID == ClientGame.Instance.LocalPlayerID)
             {
                 var projectile = FindPredictedProjectile();
                 if(projectile != null)

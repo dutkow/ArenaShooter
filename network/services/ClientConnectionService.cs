@@ -12,7 +12,7 @@ public static class ClientConnectionService
         msg.ReadMessage(data);
 
         byte playerID = msg.AssignedPlayerID;
-        NetworkClient.Instance.SetLocalPlayerID(playerID);
+        ClientGame.Instance.SetLocalPlayerID(playerID);
 
         GD.Print($"initializing network mode as client on player");
 

@@ -11,7 +11,7 @@ public class ServerGame()
     private bool _isServerFull => MatchState.Instance.ConnectedPlayers.Count <= MAX_PLAYERS;
     public static ServerGame Instance { get; private set; }
 
-    public bool IsListenServer => Game.Instance.NetworkMode == NetworkMode.LISTEN_SERVER;
+    public bool IsListenServer => NetworkManager.Instance.NetworkMode == NetworkMode.LISTEN_SERVER;
 
     // Client-server synchronization
     public ushort LastClientTickProcessedByServer;
@@ -40,13 +40,19 @@ public class ServerGame()
 
         Instance = new ServerGame();
 
-
         Instance.InitMessageHandlers();
 
-        if (NetworkManager.Instance.IsListenServer)
+    }
+
+    public void OnLoaded()
+    {
+        if(IsListenServer)
         {
             ClientGame.Initialize();
+            ClientGame.Instance.OnLoaded();
         }
+
+        MatchState.Instance.StartMatch();
     }
 
     public void Tick()
@@ -125,9 +131,15 @@ public class ServerGame()
 
         foreach (var kvp in LastProcessedServerTicksByPlayerID)
         {
+
             byte playerID = kvp.Key;
             ushort lastProcessedServerTick = kvp.Value;
             ushort lastProcessedClientTick = LastProcessedClientTicksByPlayerID[playerID];
+
+            if(IsListenServer && ClientGame.Instance.LocalPlayerID == playerID)
+            {
+                continue;
+            }
 
             if (!NetworkServer.Instance.PeersByPlayerID.TryGetValue(playerID, out var peer))
             {
@@ -215,6 +227,8 @@ public class ServerGame()
 
     public void HandleConnectionRequest(ENetPacketPeer peer, ConnectionRequest connectionRequest)
     {
+        GD.Print($"handle connection request ran.");
+
         if (_isServerFull)
         {
             ConnectionDenied.Send(peer, "Server full");
@@ -224,8 +238,6 @@ public class ServerGame()
         byte playerID = GetNextAvailablePlayerID();
         peer.SetMeta(_playerIDMeta, playerID);
 
-
-        GD.Print($"handle connection request ran.");
         NetworkServer.Instance.PeersByPlayerID[playerID] = peer;
 
         ConnectionAccepted.Send(peer, playerID);
@@ -233,10 +245,13 @@ public class ServerGame()
 
     public void HandleClientLoaded(ENetPacketPeer peer, ClientLoaded clientLoaded)
     {
-        GD.Print($"handle client loaded ran");
-
         byte playerID = GetPeerPlayerID(peer);
         NetworkPeer.Instance.ReadyPeers.Add(peer);
+
+        GD.Print($"handle client loaded ran. adding last processed tick 0 for player id: {playerID}");
+
+        ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
+        ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
         ApplyClientLoaded(new PlayerInfo(playerID, clientLoaded.ClientInfo.PlayerName));
 
@@ -246,10 +261,6 @@ public class ServerGame()
     public void ApplyClientLoaded(PlayerInfo playerInfo)
     {
         MatchState.Instance.AddPlayer(playerInfo);
-
-        LastProcessedServerTicksByPlayerID[playerInfo.PlayerID] = 0;
-        LastProcessedClientTicksByPlayerID[playerInfo.PlayerID] = 0;
-
         var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerInfo.PlayerID);
     }
 
@@ -277,12 +288,18 @@ public class ServerGame()
     {
         var connectedPlayerIDs = MatchState.Instance.ConnectedPlayers.Keys.ToHashSet();
 
+        GD.Print($"get next available player id ran");
         for (byte b = 0; b < byte.MaxValue; ++b)
         {
-            if(!connectedPlayerIDs.Contains(b))
+            GD.Print($"get next available player id iterated");
+
+            if (!connectedPlayerIDs.Contains(b))
             {
+                GD.Print($"next available player id = {b}");
                 return b;
             }
+            GD.Print($"connected player ids already contains {b}");
+
         }
         return byte.MaxValue;
     }

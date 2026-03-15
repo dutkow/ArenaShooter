@@ -69,6 +69,8 @@ public class NetworkServer : NetworkPeer
     public override void HandleReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
     {
         var type = Message.GetType(packet);
+
+        GD.Print($"server received msg of type: {type} from client");
         ServerGame.Instance?.HandleClientMessage(peer, type, packet);
     }
 

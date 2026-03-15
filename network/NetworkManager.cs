@@ -128,14 +128,16 @@ public class NetworkManager : ITickable
             case NetworkMode.LISTEN_SERVER:
                 _networkPeer = NetworkServer.Initialize();
                 NetworkClient.Initialize();
+                ServerGame.Initialize();
                 break;
 
             case NetworkMode.CLIENT:
-                _networkPeer = NetworkClient.Initialize(); // Client game initialization delayed until load
+                _networkPeer = NetworkClient.Initialize();
+                ClientGame.Initialize();
                 break;
         }
 
-        _router.Initialize(mode);
+        //_router.Initialize(mode);
         OnRoleChanged?.Invoke(NetworkMode);
     }
 
@@ -208,12 +210,7 @@ public class NetworkManager : ITickable
             return;
         }
 
-        var error = NetworkClient.Instance.JoinServer(serverInfo.IP, serverInfo.Port);
-
-        if(error == Error.Ok)
-        {
-            JoinedServer?.Invoke(ServerInfo);
-        }
+        NetworkClient.Instance.JoinServer(serverInfo.IP, serverInfo.Port);
     }
 
     private void HandleFailedToConnect()

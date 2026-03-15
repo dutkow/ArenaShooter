@@ -6,8 +6,6 @@ public class NetworkClient : NetworkPeer
 {
     public static NetworkClient Instance { get; private set; }
 
-    public byte LocalPlayerID;
-
     public ENetPacketPeer ServerPeer { get; private set; }
 
     public static NetworkClient Initialize()
@@ -15,11 +13,6 @@ public class NetworkClient : NetworkPeer
         Instance = new NetworkClient();
 
         return Instance;
-    }
-
-    public void SetLocalPlayerID(byte localPlayerID)
-    {
-        LocalPlayerID = localPlayerID;
     }
 
     public override void HandlePeerConnected(ENetPacketPeer peer)
@@ -39,26 +32,27 @@ public class NetworkClient : NetworkPeer
         ClientGame.Instance.HandleServerMessage(type, packet);
     }
 
-    public Error JoinServer(string ipAddress, int port)
+    public void JoinServer(string ipAddress, int port)
     {
         Connection = new ENetConnection();
         var error = Connection.CreateHost(1);
         if (error != Error.Ok)
         {
             Connection = null;
-            return error;
+            return;
         }
 
         ServerPeer = Connection.ConnectToHost(ipAddress, port);
 
         if(ServerPeer == null )
         {
-            return Error.Failed;
+            return;
         }
 
         GD.Print($"server peer is {ServerPeer}");
 
-        return error;
+        ConnectionRequest.Send(Settings.Instance.PlayerName);
+        GD.Print($"sending connection request");
     }
 
     public static void Send(Message message)

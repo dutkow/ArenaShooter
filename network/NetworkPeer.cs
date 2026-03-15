@@ -88,8 +88,6 @@ public class NetworkPeer : ITickable
     // ----------------------
     public virtual void HandleEvents()
     {
-        GD.Print($"handle events running. net mode: {NetworkManager.Instance.NetworkMode}");
-
         var packetEvent = Connection.Service();
         ENetConnection.EventType eventType = (ENetConnection.EventType)(int)packetEvent[0];
 
@@ -108,7 +106,6 @@ public class NetworkPeer : ITickable
                     break;
 
                 case ENetConnection.EventType.Receive:
-                    GD.Print($"HANDLING RECEIVED PACKET");
                     HandleReceivedPacket(peer);
                     break;
 
