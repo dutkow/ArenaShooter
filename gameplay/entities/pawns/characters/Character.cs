@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 
@@ -160,8 +161,8 @@ public partial class Character : Pawn, IDamageable
         else
         {
             GlobalPosition = PlayerState.CharacterPublicState.Position;
-            GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Look.X, 0.0f);
-            _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Look.Y, 0.0f, 0.0f);
+            GlobalRotation = new Vector3(0.0f, -PlayerState.CharacterPublicState.Look.X, 0.0f);
+            _thirdPersonWeaponSocket.Rotation = new Vector3(-PlayerState.CharacterPublicState.Look.Y, 0.0f, 0.0f);
         }
     }
 
@@ -370,8 +371,8 @@ public partial class Character : Pawn, IDamageable
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
         const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
-        const float INTERP_THRESHOLD_H = 0.02f;      // Horizontal lerp start
-        const float INTERP_THRESHOLD_V = 0.02f;     // Vertical lerp start
+        const float INTERP_THRESHOLD_H = 0.1f;      // Horizontal lerp start
+        const float INTERP_THRESHOLD_V = 0.1f;     // Vertical lerp start
 
         // Lerp speeds
         const float INTERP_SPEED_H = 0.25f;
@@ -385,7 +386,6 @@ public partial class Character : Pawn, IDamageable
 
         float deltaY = Math.Abs(delta.Y);
 
-        //GD.Print($"horizontal error: {distXZ}.");
 
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
@@ -396,6 +396,7 @@ public partial class Character : Pawn, IDamageable
         }
         else if (distXZ > INTERP_THRESHOLD_H)
         {
+            GD.Print($"horizontal error: {distXZ}.");
             currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
             currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
         }
@@ -466,20 +467,32 @@ public partial class Character : Pawn, IDamageable
     }
 
     private Vector2 _accumulatedLookDelta;
+
+    private float _pitch = 0.0f;
     public void HandleMouseLook(InputEvent @event)
     {
         if (@event is InputEventMouseMotion mouseEvent)
         {
-            // Accumulate look delta in degrees (or radians consistently)
             Vector2 lookDelta = mouseEvent.Relative * MouseSensitivity;
 
-            _accumulatedLookDelta += lookDelta; // Store in degrees
+            _accumulatedLookDelta += lookDelta;
 
-            // Apply yaw rotation in radians
+            // Yaw (horizontal)
             if (Mathf.Abs(lookDelta.X) > 0.0f)
             {
-                // Convert degrees -> radians for RotateY
                 RotateY(-lookDelta.X);
+            }
+
+            // Pitch (vertical)
+            if (Mathf.Abs(lookDelta.Y) > 0.0f)
+            {
+                _pitch -= lookDelta.Y;
+
+                _pitch = Mathf.Clamp(_pitch, -Mathf.DegToRad(89.0f), Mathf.DegToRad(89.0f));
+
+                Vector3 rot = _cameraPivot.Rotation;
+                rot.X = _pitch;
+                _cameraPivot.Rotation = rot;
             }
         }
     }

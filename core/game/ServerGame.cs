@@ -53,6 +53,8 @@ public class ServerGame()
         {
             ClientGame.Initialize();
             ClientGame.Instance.OnLoaded();
+
+            ClientProjectileManager.Initialize();
         }
 
         GD.Print($"on loaded ran on server game");
@@ -126,8 +128,6 @@ public class ServerGame()
 
             character.ServerProcessNextClientInput(nextInputCommand);
             _unprocessedClientInputs[playerID] = queue;
-
-            GD.Print($"Processing client input. player id: {playerID}. input: {nextInputCommand.Flags}");
         }
     }
 

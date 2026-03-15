@@ -30,22 +30,22 @@ public class CharacterMovement
     private bool _isGrounded = false;
     private bool _isOnSlope = false;
     private Vector3 _groundNormal;
-    private float _jumpAccumulator = 0.0f;
     private CapsuleShape3D _collisionCapsule;
     private Godot.Collections.Array<Rid> _characterCollisionRids = new();
 
     public Vector3 LaunchVector;
     public bool WasLaunched;
 
-    private float _jumpDelay => 0.2f;
-    private bool _jumpCooldownReady => _jumpAccumulator >= _jumpDelay;
-
+    private bool _jumpCooldownReady = true;
     public float HorizontalVelocity { get; private set; }
 
+    public int _ticksToIgnoreGroundPostJump = 10;
 
     public void Initialize(Character character)
     {
         _character = character;
+
+
 
         if (_character.CollisionShape.Shape is CapsuleShape3D capsule)
         {
@@ -61,8 +61,6 @@ public class CharacterMovement
     // Step function now takes CharacterPublicState and returns it
     public CharacterPublicState Step(CharacterPublicState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
-        _jumpAccumulator += delta;
-
         // Process movement input
         Vector3 move = Vector3.Zero;
         if (cmd.Flags.HasFlag(InputFlags.FORWARD)) move.Z -= 1;
@@ -77,18 +75,13 @@ public class CharacterMovement
 
         Vector3 desiredMoveDir = (basis.Z * move.Z + basis.X * move.X).Normalized() * MaxGroundSpeed;
 
-        if (_jumpCooldownReady)
+        // Jump
+        if (cmd.Flags.HasFlag(InputFlags.JUMP) && _isGrounded)
         {
-            CheckGrounded(state);
+            Jump(state);
         }
 
-        // Jump
-        if (cmd.Flags.HasFlag(InputFlags.JUMP) && _isGrounded && _jumpCooldownReady)
-            Jump(state);
 
-        // Gravity
-        if (!_isGrounded)
-            state.Velocity.Y += Gravity * delta;
 
         state.MovementMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
 
@@ -117,6 +110,14 @@ public class CharacterMovement
         // Server-side collidable checks
         if (!isSimulating && _character.IsAuthority)
             CheckCollidables(state);
+
+        CheckGrounded(state);
+
+        // Gravity
+        if (!_isGrounded)
+        {
+            state.Velocity.Y += Gravity * delta;
+        }
 
         return state;
     }
@@ -180,17 +181,14 @@ public class CharacterMovement
     {
         state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpSpeed;
         _isGrounded = false;
-        _jumpAccumulator = 0.0f;
     }
 
     private void CheckGrounded(CharacterPublicState state)
     {
         var space = _character.GetWorld3D().DirectSpaceState;
 
-        float offset = 0.25f;
-        float traceDist = 0.25f;
-        Vector3 from = state.Position + Vector3.Down * (_collisionCapsule.MidHeight - offset);
-        Vector3 to = from + Vector3.Down * (offset + traceDist);
+        Vector3 from = state.Position + Vector3.Down * (_collisionCapsule.MidHeight);
+        Vector3 to = from + Vector3.Down * (0.2f);
 
         PhysicsRayQueryParameters3D query = new()
         {
@@ -219,6 +217,8 @@ public class CharacterMovement
             _groundNormal = Vector3.Zero;
             _isOnSlope = false;
         }
+
+        GD.Print($"grounded = {_isGrounded}");
     }
 
     private Vector3 ProjectVelocityOnSlope(Vector3 velocity)
