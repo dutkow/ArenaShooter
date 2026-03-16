@@ -22,8 +22,8 @@ public class CharacterMovement
 
     public float _walkAcceleration = 60.0f;
     public float _airAcceleration = 0.5f;
-    public float GroundDeceleration = 100f;
-    public float AirDeceleration = 5f;
+    public float _walkDeceleration = 100f;
+    public float _airDeceleration = 0.0f;
 
     public bool PreserveHorizontalSpeedOnSlope = true;
 
@@ -225,13 +225,13 @@ public class CharacterMovement
             HandleAerialMovement(state, delta);
             return;
         }
-        ApplyAcceleration(state, _walkAcceleration, delta);
+        ApplyAcceleration(state, _walkAcceleration, _walkDeceleration, delta);
         ProjectVelocityOnGround(state);
     }
 
     private void HandleAerialMovement(CharacterPublicState state, float delta)
     {
-        ApplyAcceleration(state, _airAcceleration, delta);
+        ApplyAcceleration(state, _airAcceleration, _airDeceleration, delta);
         ApplyGravity(state, delta);
 
         return;
@@ -244,7 +244,7 @@ public class CharacterMovement
         }
         else
         {
-            float decel = AirDeceleration * delta;
+            float decel = _airDeceleration * delta;
             if (horizontalVel.Length() <= decel)
             {
                 horizontalVel = Vector3.Zero;
@@ -268,18 +268,39 @@ public class CharacterMovement
 
     }
 
-    public void ApplyAcceleration(CharacterPublicState state, float acceleration, float delta)
+    public void ApplyAcceleration(CharacterPublicState state, float acceleration, float deceleration, float delta)
     {
-        if (_desiredSpeed <= 0) return;
+        Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
 
-        float currentSpeed = state.Velocity.Dot(_desiredDirection);
-        float addSpeed = _desiredSpeed - currentSpeed;
+        if (_desiredSpeed > 0)
+        {
+            // Accelerate toward desired direction
+            float currentSpeed = horizontalVel.Dot(_desiredDirection);
+            float addSpeed = _desiredSpeed - currentSpeed;
+            if (addSpeed > 0)
+            {
+                float accelAmount = MathF.Min(acceleration * delta, addSpeed);
+                horizontalVel += _desiredDirection * accelAmount;
+            }
+        }
+        else
+        {
+            // Decelerate if no input
+            float speed = horizontalVel.Length();
+            if (speed > 0)
+            {
+                float decelAmount = deceleration * delta;
+                if (speed <= decelAmount)
+                    horizontalVel = Vector3.Zero;
+                else
+                    horizontalVel -= horizontalVel.Normalized() * decelAmount;
+            }
+        }
 
-        if (addSpeed <= 0) return;
-
-        float accelAmount = MathF.Min(acceleration, addSpeed);
-        state.Velocity += _desiredDirection * accelAmount;
+        state.Velocity.X = horizontalVel.X;
+        state.Velocity.Z = horizontalVel.Z;
     }
+
     private void Jump(CharacterPublicState state)
     {
         state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpSpeed;
