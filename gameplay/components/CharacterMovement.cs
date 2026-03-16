@@ -15,8 +15,8 @@ public class CharacterMovement
 
     // Movement parameters
     public float MaxGroundSpeed = 10.0f;
-    public float Gravity = -5.0f;
-    public Vector3 _gravityVector => new Vector3(0.0f, Gravity, 0.0f);
+    public float Gravity = 10.0f;
+    public Vector3 _gravityVector => new Vector3(0.0f, -Gravity, 0.0f);
     public float JumpSpeed = 10.0f;
     public float MaxStepHeight = 0.25f;
 
@@ -81,6 +81,8 @@ public class CharacterMovement
         GD.Print($"Desired direction: {_desiredDirection}. desired speed: {_desiredSpeed}. is grounded = {_isGrounded}. ground normal: {_groundNormal}. move mode: {state.MovementMode}");
         PerformMove(state, delta);
 
+        HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
+        VerticalVelocity = state.Velocity.Y;
         return state;
 
         state.MovementMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
@@ -285,8 +287,6 @@ public class CharacterMovement
 
         state.Velocity.Y += Gravity * delta;
 
-        state.Velocity = ProjectVelocityOnGround(state.Velocity);
-
     }
 
     public void ApplyAcceleration(CharacterPublicState state, float acceleration, float delta)
@@ -319,14 +319,14 @@ public class CharacterMovement
         Vector3 remainingMotion = state.Velocity * delta;
         int maxIterations = 4; // handle multiple collisions in one frame
 
-        _isGrounded = false;
-
         for (int i = 0; i < maxIterations; i++)
         {
             if (remainingMotion.Length() < 0.001f)
+            {
                 break; // nothing left to move
+            }
 
-            // Cast capsule along remaining motion
+            // Check movement
             PhysicsShapeQueryParameters3D query = new()
             {
                 Shape = _collisionCapsule,
@@ -342,47 +342,45 @@ public class CharacterMovement
             float safeFraction = result[0];
             Vector3 safeMotion = remainingMotion * safeFraction;
 
+            GD.Print($"perform move iteration {i}. safe fraction: {safeFraction}");
+
             // Move as far as possible safely
             state.Position += safeMotion;
 
             // No collision? Done!
             if (safeFraction >= 1.0f)
+            {
                 break;
+            }
+
+            // We collided, check collision
+
+            float unsafeFraction = result[1];
+            Vector3 unsafeMotion = remainingMotion * unsafeFraction;
+
+            PhysicsShapeQueryParameters3D collisionQuery = new()
+            {
+                Shape = _collisionCapsule,
+                Transform = new Transform3D(Basis.Identity, state.Position + unsafeMotion),
+                Motion = remainingMotion,
+                CollideWithBodies = true,
+                CollideWithAreas = false
+            };
+            collisionQuery.SetExclude(_characterCollisionRids);
+
+            var collisionResult = space.CastMotion(collisionQuery);
 
             // Collision happened — get the normal
-            if (!space.GetRestInfo(query).TryGetValue("normal", out var value))
+            if (!space.GetRestInfo(collisionQuery).TryGetValue("normal", out var value))
+            {
                 break;
+            }
 
             Vector3 collisionNormal = (Vector3)value;
-            float collisionDot = collisionNormal.Dot(Vector3.Up);
 
-            if (collisionDot >= _walkableThreshold)
-            {
-                // Landed on floor
-                state.Velocity.Y = 0.0f;
-                _isGrounded = true;
-
-                // Slide remaining motion along the floor plane
-                remainingMotion = SlideAlongSurface(remainingMotion * (1.0f - safeFraction), collisionNormal);
-            }
-            else
-            {
-                // Wall / steep slope → slide along it
-                state.Velocity = SlideAlongSurface(state.Velocity, collisionNormal);
-                remainingMotion = SlideAlongSurface(remainingMotion * (1.0f - safeFraction), collisionNormal);
-            }
+            remainingMotion = remainingMotion * (1.0f - safeFraction);
+            remainingMotion = remainingMotion - collisionNormal * remainingMotion.Dot(collisionNormal);
         }
-    }
-    public Vector3 SlideAlongSurface(Vector3 vector, Vector3 normal)
-    {
-        float dot = vector.Dot(normal);
-
-        if (dot < 0f)
-        {
-            vector -= normal * dot;
-        }
-
-        return vector;
     }
 
     private Vector3 ProjectVelocityOnGround(Vector3 velocity)
