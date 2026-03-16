@@ -20,7 +20,7 @@ public class CharacterMovement
     public float JumpSpeed = 10.0f;
     public float MaxStepHeight = 0.25f;
 
-    public float GroundAcceleration = 60.0f;
+    public float _walkAcceleration = 60.0f;
     public float _airAcceleration = 0.5f;
     public float GroundDeceleration = 100f;
     public float AirDeceleration = 5f;
@@ -225,37 +225,14 @@ public class CharacterMovement
             HandleAerialMovement(state, delta);
             return;
         }
-
-        Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
-
-        if (_desiredDirection.LengthSquared() > 0)
-        {
-            horizontalVel = horizontalVel.MoveToward(_desiredDirection * MaxGroundSpeed, GroundAcceleration * delta);
-        }
-        else
-        {
-            float decel = GroundDeceleration * delta;
-            if (horizontalVel.Length() <= decel)
-            {
-                horizontalVel = Vector3.Zero;
-            }
-            else
-            {
-                horizontalVel -= horizontalVel.Normalized() * decel;
-            }
-        }
-
-        state.Velocity.X = horizontalVel.X;
-        state.Velocity.Z = horizontalVel.Z;
-
-        state.Velocity = ProjectVelocityOnGround(state.Velocity);
+        ApplyAcceleration(state, _walkAcceleration, delta);
+        ProjectVelocityOnGround(state);
     }
 
     private void HandleAerialMovement(CharacterPublicState state, float delta)
     {
         ApplyAcceleration(state, _airAcceleration, delta);
         ApplyGravity(state, delta);
-
 
         return;
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
@@ -280,7 +257,9 @@ public class CharacterMovement
 
         // Clamp horizontal speed
         if (horizontalVel.Length() > MaxGroundSpeed)
+        {
             horizontalVel = horizontalVel.Normalized() * MaxGroundSpeed;
+        }
 
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;
@@ -383,9 +362,9 @@ public class CharacterMovement
         }
     }
 
-    private Vector3 ProjectVelocityOnGround(Vector3 velocity)
+    private void ProjectVelocityOnGround(CharacterPublicState state)
     {
-        return velocity - _groundNormal * velocity.Dot(_groundNormal);
+        state.Velocity -= _groundNormal * state.Velocity.Dot(_groundNormal);
     }
 
     private Vector3 HandleCollision(CharacterPublicState state, float delta)
