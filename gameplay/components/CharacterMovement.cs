@@ -65,25 +65,30 @@ public class CharacterMovement
     {
         ApplyInput(state, cmd, delta);
 
-        if(!_wasLaunched)
+        if(_wasLaunched)
+        {
+            _wasLaunched = false;
+        }
+        else
         {
             CheckGrounded(state);
         }
 
         switch (state.MovementMode)
-        {
-            case CharacterMoveMode.GROUNDED:
-                HandleGroundedMovement(state, delta);
-                break;
-            case CharacterMoveMode.FALLING:
-                HandleAerialMovement(state, delta);
-                break;
-        }
+            {
+                case CharacterMoveMode.GROUNDED:
+                    HandleGroundedMovement(state, delta);
+                    break;
+                case CharacterMoveMode.FALLING:
+                    HandleAerialMovement(state, delta);
+                    break;
+            }
 
         PerformMove(state, delta);
 
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
         VerticalVelocity = state.Velocity.Y;
+
 
         CheckCollidables(state);
 
@@ -91,6 +96,8 @@ public class CharacterMovement
         GD.Print($"is grounded: {_isGrounded}");
         return state;
 
+
+        /*
         state.MovementMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
 
         // Movement
@@ -112,13 +119,15 @@ public class CharacterMovement
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
         VerticalVelocity = state.Velocity.Y;
 
-        return state;
+        return state;*/
     }
 
     Vector3 _desiredDirection;
     float _desiredSpeed;
     bool _wantsToJump;
     bool _wasLaunched;
+
+
 
 
     public void ApplyInput(CharacterPublicState state, ClientInputCommand cmd, float delta)
@@ -130,7 +139,6 @@ public class CharacterMovement
         if (cmd.Flags.HasFlag(InputFlags.STRAFE_RIGHT)) move.X += 1;
 
         _wantsToJump = cmd.Flags.HasFlag(InputFlags.JUMP);
-        _wasLaunched = cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED);
 
         state.Look += cmd.Look;
         Basis basis = Basis.FromEuler(new Vector3(0, -state.Look.X, 0));
@@ -144,12 +152,6 @@ public class CharacterMovement
         {
             _desiredDirection = Vector3.Zero;
             _desiredSpeed = 0.0f;
-        }
-
-        if(_wasLaunched)
-        {
-            state.Velocity += LaunchVector;
-            GD.Print($"was launched true on input. applying launch vector {LaunchVector}");
         }
     }
 
@@ -235,6 +237,7 @@ public class CharacterMovement
             return;
         }
         ApplyAcceleration(state, _walkAcceleration, _walkDeceleration, delta);
+
         ProjectVelocityOnGround(state);
     }
 
@@ -322,6 +325,7 @@ public class CharacterMovement
     private void Jump(CharacterPublicState state)
     {
         state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpSpeed;
+        state.MovementMode = CharacterMoveMode.FALLING;
         _isGrounded = false;
     }
 
@@ -359,7 +363,17 @@ public class CharacterMovement
             var result = space.CastMotion(query);
 
             float safeFraction = result[0];
-            Vector3 safeMotion = remainingMotion * (safeFraction - SAFE_MOTION_PADDING);
+
+            Vector3 safeMotion;
+            if(i == 0)
+            {
+                safeMotion = remainingMotion * (safeFraction);
+            }
+            else
+            {
+                safeMotion = remainingMotion * (safeFraction - SAFE_MOTION_PADDING);
+
+            }
 
             // Move as far as possible safely
             state.Position += safeMotion;
@@ -458,15 +472,8 @@ public class CharacterMovement
         return safeMotion;
     }
 
-    public void QueueLaunch(Vector3 vector)
-    {
-        LaunchVector = vector;
-        WasLaunched = true;
 
-        GD.Print($"queue launch with launch vector: {LaunchVector}");
-    }
-
-
+    public List<ICharacterCollidable> _seenCollidables = new();
 
     private void CheckCollidables(CharacterPublicState state)
     {
@@ -486,6 +493,8 @@ public class CharacterMovement
 
         var results = space.IntersectShape(query, 8);
 
+        List<ICharacterCollidable> newSeenCollidables = new();
+
         foreach (var result in results)
         {
             if (result.TryGetValue("collider_id", out var idObj))
@@ -493,8 +502,26 @@ public class CharacterMovement
                 ulong id = (ulong)idObj;
                 var node = GodotObject.InstanceFromId(id) as Node3D;
                 if (node?.Owner is ICharacterCollidable collidable)
-                    collidable.OnCollidedWith(_character);
+                {
+                    newSeenCollidables.Add(collidable);
+
+                    if(!_seenCollidables.Contains(collidable))
+                    {
+                        collidable.OnCollidedWith(_character);
+                    }
+                }
             }
         }
+
+        _seenCollidables = newSeenCollidables;
+    }
+
+
+    public void Launch(CharacterPublicState state, Vector3 launchVelocity)
+    {
+        _wasLaunched = true;
+        _isGrounded = false;
+        state.Velocity += launchVelocity;
+        state.MovementMode = CharacterMoveMode.FALLING;
     }
 }

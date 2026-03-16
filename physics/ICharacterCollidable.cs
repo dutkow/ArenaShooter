@@ -5,5 +5,4 @@ public interface ICharacterCollidable
 {
     void OnCollidedWith(Character character);
 
-
 }

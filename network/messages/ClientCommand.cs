@@ -17,10 +17,6 @@ public enum InputFlags : ushort
 
     // CLIENT AUTHORITATIVE ROTATION
     LOOK = 1 << 7,
-
-    // EVENTS
-    WAS_LAUNCHED = 1 << 8,
-    FIRED_PREDICTED_PROJECTILE = 1 << 9,
 }
 
 public struct ClientInputCommand
@@ -30,7 +26,6 @@ public struct ClientInputCommand
 
     public Vector2 Look;
 
-    public Vector3 LaunchVelocity;
     public ushort PredictedProjectileClientID;
 }
 
@@ -58,14 +53,6 @@ public class ClientCommand : Message
 
             if (cmd.Flags.HasFlag(InputFlags.LOOK))
                 Add(cmd.Look);
-            if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
-            {
-                Add(cmd.LaunchVelocity.X);
-                Add(cmd.LaunchVelocity.Y);
-                Add(cmd.LaunchVelocity.Z);
-            }
-            if (cmd.Flags.HasFlag(InputFlags.FIRED_PREDICTED_PROJECTILE))
-                Add(cmd.PredictedProjectileClientID);
         }
 
         return _dataSize;
@@ -88,15 +75,6 @@ public class ClientCommand : Message
 
             if (cmd.Flags.HasFlag(InputFlags.LOOK))
                 Write(cmd.Look);
-
-            if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
-            {
-                Write(cmd.LaunchVelocity.X); // raw float
-                Write(cmd.LaunchVelocity.Y);
-                Write(cmd.LaunchVelocity.Z);
-            }
-            if (cmd.Flags.HasFlag(InputFlags.FIRED_PREDICTED_PROJECTILE))
-                Write(cmd.PredictedProjectileClientID);
         }
 
         return _data;
@@ -124,15 +102,6 @@ public class ClientCommand : Message
 
             if (cmd.Flags.HasFlag(InputFlags.LOOK))
                 Read(out cmd.Look);
-
-            if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
-            {
-                Read(out cmd.LaunchVelocity.X); // raw float
-                Read(out cmd.LaunchVelocity.Y);
-                Read(out cmd.LaunchVelocity.Z);
-            }
-            if (cmd.Flags.HasFlag(InputFlags.FIRED_PREDICTED_PROJECTILE))
-                Read(out cmd.PredictedProjectileClientID);
 
             Commands[i] = cmd;
         }

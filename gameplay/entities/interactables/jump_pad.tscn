@@ -21,6 +21,8 @@ mesh = SubResource("BoxMesh_m60fg")
 skeleton = NodePath("")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=314998766]
+collision_layer = 512
+collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1978581302]
 shape = SubResource("BoxShape3D_qskwt")
