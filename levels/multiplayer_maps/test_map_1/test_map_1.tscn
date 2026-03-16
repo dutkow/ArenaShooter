@@ -116,7 +116,7 @@ transform = Transform3D(-0.703804, 0, 0.71039426, 0, 1, 0, -0.71039426, 0, -0.70
 gizmo_extents = 5.0
 
 [node name="StaticBody3D2" type="StaticBody3D" parent="." unique_id=592124310]
-transform = Transform3D(0.99999976, -1.8587798e-10, -4.656613e-10, 7.607923e-10, 1, 0, -1.1641532e-10, 0, 0.99999976, 31.20812, 0.18855196, -7.2682214)
+transform = Transform3D(0.9999996, -1.8587798e-10, -8.1490725e-10, 1.692456e-09, 1, 2.3283064e-10, -2.3283064e-10, 0, 0.9999996, 1.9362024, 0.028018534, -16.490932)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2" unique_id=795539259]
 mesh = SubResource("BoxMesh_pc4o5")

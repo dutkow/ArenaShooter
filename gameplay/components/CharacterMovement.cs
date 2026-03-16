@@ -276,22 +276,12 @@ public class CharacterMovement
         // apply acceleration
         if (_desiredSpeed > 0)
         {
-            // correctly clamp speed
-            if (true)
+            float currentSpeedInDir = horizontalVel.Dot(_desiredDirection);
+            float addSpeed = _desiredSpeed - currentSpeedInDir;
+            if (addSpeed > 0)
             {
-                float currentSpeedInDir = horizontalVel.Dot(_desiredDirection);
-                float addSpeed = _desiredSpeed - currentSpeedInDir;
-
-                if (addSpeed > 0)
-                {
-                    float accelAmount = MathF.Min(acceleration * delta, addSpeed);
-                    horizontalVel += _desiredDirection * accelAmount;
-                }
-            }
-            // strafe jumping - not implemented
-            else
-            {
-
+                float accelAmount = MathF.Min(acceleration * delta, addSpeed);
+                horizontalVel += _desiredDirection * accelAmount;
             }
         }
         // apply deceleration if no input
@@ -307,6 +297,13 @@ public class CharacterMovement
                     horizontalVel -= horizontalVel.Normalized() * decelAmount;
             }
         }
+
+        float totalSpeed = horizontalVel.Length();
+        if (totalSpeed > MaxGroundSpeed)
+        {
+            horizontalVel = horizontalVel.Normalized() * MaxGroundSpeed;
+        }
+
 
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;
