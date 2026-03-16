@@ -263,23 +263,25 @@ public partial class Character : Pawn, IDamageable
         }
 
 
+
         if(IsLocal)
         {
             //GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
 
-            MovementComp.PreConciliationReset(publicState);
             foreach (var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
             {
                 publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
             }
 
-            //ReconcileMoveState(publicState);
+            ReconcileMoveState(publicState);
         }
         else
         {
             PlayerState.CharacterPublicState = publicState;
         }
+
     }
+
 
     public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)
     {
@@ -391,7 +393,7 @@ public partial class Character : Pawn, IDamageable
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
         {
-            //GD.Print($"snap correction horizontal, error {distXZ}");
+            GD.Print($"snap correction horizontal, error {distXZ}");
             currentPos.X = targetPos.X;
             currentPos.Z = targetPos.Z;
         }
@@ -405,12 +407,12 @@ public partial class Character : Pawn, IDamageable
         // --- Vertical correction ---
         if (deltaY > SNAP_THRESHOLD_V)
         {
-            //GD.Print($"snap correction vertical, error {deltaY}");
+            GD.Print($"snap correction vertical, error {deltaY}");
             currentPos.Y = targetPos.Y;
         }
         else if (deltaY > INTERP_THRESHOLD_V)
         {
-            //GD.Print($"lerp correction vertical, error {deltaY}");
+            GD.Print($"lerp correction vertical, error {deltaY}");
             currentPos.Y = Mathf.Lerp(currentPos.Y, targetPos.Y, INTERP_SPEED_V);
         }
 
@@ -536,20 +538,16 @@ public partial class Character : Pawn, IDamageable
 
 
 
-    public void Launch(Vector3 velocity)
+    public void Launch(Vector3 velocity, CharacterPublicState state, bool isSimulating)
     {
-
         if(IsAuthority)
         {
             PlayerState.CharacterPublicState = MovementComp.QueueLaunch(PlayerState.CharacterPublicState, velocity);
         }
         else if(IsLocal)
         {
-            PredictedPublicState = MovementComp.QueueLaunch(PredictedPublicState, velocity);
-        }
-        else
-        {
-            GD.Print("launch failed");
+            state = MovementComp.QueueLaunch(state, velocity);
+            GD.Print($"launch predicted ran on client. is simualting: {isSimulating}");
         }
     }
 

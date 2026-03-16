@@ -33,13 +33,8 @@ public class CharacterMovement
     private CapsuleShape3D _collisionCapsule;
     private Godot.Collections.Array<Rid> _characterCollisionRids = new();
 
-    public Vector3 LaunchVector;
-    public bool WasLaunched;
 
 
-
-
-    private bool _jumpCooldownReady = true;
     public float HorizontalVelocity { get; private set; }
     public float VerticalVelocity { get; private set; }
 
@@ -67,6 +62,7 @@ public class CharacterMovement
     // Step function now takes CharacterPublicState and returns it
     public CharacterPublicState Step(CharacterPublicState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
+
         ApplyInput(state, cmd, delta);
 
         if(!CheckLaunch(state))
@@ -94,9 +90,6 @@ public class CharacterMovement
         return state;
     }
 
-    Vector3 _desiredDirection;
-    float _desiredSpeed;
-    bool _wantsToJump;
 
 
     public void ApplyInput(CharacterPublicState state, ClientInputCommand cmd, float delta)
@@ -107,20 +100,20 @@ public class CharacterMovement
         if (cmd.Flags.HasFlag(InputFlags.STRAFE_LEFT)) move.X -= 1;
         if (cmd.Flags.HasFlag(InputFlags.STRAFE_RIGHT)) move.X += 1;
 
-        _wantsToJump = cmd.Flags.HasFlag(InputFlags.JUMP);
+        state.WantsToJump = cmd.Flags.HasFlag(InputFlags.JUMP);
 
         state.Look += cmd.Look;
         Basis basis = Basis.FromEuler(new Vector3(0, -state.Look.X, 0));
 
         if (move != Vector3.Zero)
         {
-            _desiredDirection = (basis.Z * move.Z + basis.X * move.X).Normalized();
-            _desiredSpeed = MaxGroundSpeed;
+            state.DesiredDirection = (basis.Z * move.Z + basis.X * move.X).Normalized();
+            state.DesiredSpeed = MaxGroundSpeed;
         }
         else
         {
-            _desiredDirection = Vector3.Zero;
-            _desiredSpeed = 0.0f;
+            state.DesiredDirection = Vector3.Zero;
+            state.DesiredSpeed = 0.0f;
         }
     }
 
@@ -129,11 +122,9 @@ public class CharacterMovement
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
 
-    private bool _isGrounded = false;
-    private Vector3 _groundNormal;
     private void CheckGrounded(CharacterPublicState state)
     {
-        _isGrounded = false;
+        state.IsGrounded = false;
 
         var space = _character.GetWorld3D().DirectSpaceState;
 
@@ -171,21 +162,20 @@ public class CharacterMovement
 
             if (space.GetRestInfo(groundedQuery).TryGetValue("normal", out var normal))
             {
-                _groundNormal = (Vector3)normal;
+                state.GroundNormal = (Vector3)normal;
 
-                if (_groundNormal.Dot(Vector3.Up) >= _walkableThreshold)
+                if (state.GroundNormal.Dot(Vector3.Up) >= _walkableThreshold)
                 {
-                    _isGrounded = true;
-
+                    state.IsGrounded = true;
                 }
             }
         }
         else
         {
-            _groundNormal = Vector3.Zero;
+            state.GroundNormal = Vector3.Zero;
         }
 
-        if(_isGrounded)
+        if(state.IsGrounded)
         {
             state.MovementMode = CharacterMoveMode.GROUNDED;
         }
@@ -199,10 +189,9 @@ public class CharacterMovement
     private void HandleGroundedMovement(CharacterPublicState state, float delta)
     {
         // Jump
-        if (_wantsToJump && _isGrounded)
+        if (state.WantsToJump && state.IsGrounded)
         {
             Jump(state);
-            GD.Print($"JUMPED!");
             HandleAerialMovement(state, delta);
             return;
         }
@@ -219,9 +208,9 @@ public class CharacterMovement
         return;
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
 
-        if (_desiredDirection.LengthSquared() > 0)
+        if (state.DesiredDirection.LengthSquared() > 0)
         {
-            Vector3 velChange = _desiredDirection * MaxGroundSpeed * _airAcceleration * delta;
+            Vector3 velChange = state.DesiredDirection * MaxGroundSpeed * _airAcceleration * delta;
             horizontalVel += velChange;
         }
         else
@@ -256,14 +245,14 @@ public class CharacterMovement
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
 
         // apply acceleration
-        if (_desiredSpeed > 0)
+        if (state.DesiredSpeed > 0)
         {
-            float currentSpeedInDir = horizontalVel.Dot(_desiredDirection);
-            float addSpeed = _desiredSpeed - currentSpeedInDir;
+            float currentSpeedInDir = horizontalVel.Dot(state.DesiredDirection);
+            float addSpeed = state.DesiredSpeed - currentSpeedInDir;
             if (addSpeed > 0)
             {
                 float accelAmount = MathF.Min(acceleration * delta, addSpeed);
-                horizontalVel += _desiredDirection * accelAmount;
+                horizontalVel += state.DesiredDirection * accelAmount;
             }
         }
         // apply deceleration if no input
@@ -296,7 +285,7 @@ public class CharacterMovement
     {
         state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpSpeed;
         state.MovementMode = CharacterMoveMode.FALLING;
-        _isGrounded = false;
+        state.IsGrounded = false;
     }
 
     public void ApplyGravity(CharacterPublicState state, float delta)
@@ -389,7 +378,7 @@ public class CharacterMovement
 
     private void ProjectVelocityOnGround(CharacterPublicState state)
     {
-        state.Velocity -= _groundNormal * state.Velocity.Dot(_groundNormal);
+        state.Velocity -= state.GroundNormal * state.Velocity.Dot(state.GroundNormal);
     }
 
     private Vector3 HandleCollision(CharacterPublicState state, float delta)
@@ -473,7 +462,7 @@ public class CharacterMovement
 
                     if (!state.CurrentCollidables.Contains(collidable))
                     {
-                        collidable.OnCollidedWith(_character);
+                        collidable.OnCollidedWith(_character, state, isSimulating);
                     }
 
                 }
@@ -484,9 +473,6 @@ public class CharacterMovement
         state.CurrentCollidables = newCollidables;
 
     }
-
-
-
 
 
     public CharacterPublicState QueueLaunch(CharacterPublicState state, Vector3 launchVelocity)
@@ -501,7 +487,6 @@ public class CharacterMovement
     {
         if (state.WasLaunched)
         {
-
             state.Velocity += state.LaunchVelocity;
             state.MovementMode = CharacterMoveMode.FALLING;
 
@@ -513,10 +498,11 @@ public class CharacterMovement
         return false;
     }
 
-    public void PreConciliationReset(CharacterPublicState state)
+    public CharacterPublicState PreReconciliationReset(CharacterPublicState state)
     {
         state.WasLaunched = false;
         state.CurrentCollidables.Clear();
 
+        return state;
     }
 }

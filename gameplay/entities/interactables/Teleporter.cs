@@ -8,7 +8,7 @@ public partial class Teleporter : Entity, ICharacterCollidable
 
     [Export] private Node3D _targetDestination;
 
-    public void OnCollidedWith(Character character)
+    public void OnCollidedWith(Character character, CharacterPublicState state, bool isSimulating)
     {
         Teleport(character);
     }

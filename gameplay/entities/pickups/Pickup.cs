@@ -94,7 +94,7 @@ public partial class Pickup : Entity,  ICharacterCollidable
         PickupManager.Instance.SetPickupState(PickupID, IsSpawned);
     }
 
-    public virtual void OnCollidedWith(Character character)
+    public virtual void OnCollidedWith(Character character, CharacterPublicState state, bool isSimulating)
     {
         HandlePickup();
     }

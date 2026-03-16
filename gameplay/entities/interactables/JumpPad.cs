@@ -30,9 +30,9 @@ public partial class JumpPad : Node3D, ICharacterCollidable
         _area3D.Owner = this;
     }
 
-    public void OnCollidedWith(Character character)
+    public void OnCollidedWith(Character character, CharacterPublicState state, bool isSimulating)
     {
-        character?.Launch(LaunchVector);
+        character?.Launch(LaunchVector, state, isSimulating);
     }
 
     public void OnStoppedCollidingWith(Character character)
