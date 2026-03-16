@@ -549,7 +549,7 @@ public partial class Character : Pawn, IDamageable
 
     public void Launch(Vector3 velocity)
     {
-        //MovementComp.QueueLaunch(velocity);
+        MovementComp.QueueLaunch(velocity);
     }
 
     public void Teleport(Vector3 position, float yawRotation)

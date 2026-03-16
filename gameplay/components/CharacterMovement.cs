@@ -15,7 +15,7 @@ public class CharacterMovement
 
     // Movement parameters
     public float MaxGroundSpeed = 10.0f;
-    public float Gravity = 10.0f;
+    public float Gravity = 25.0f;
     public Vector3 _gravityVector => new Vector3(0.0f, -Gravity, 0.0f);
     public float JumpSpeed = 10.0f;
     public float MaxStepHeight = 0.25f;
@@ -59,8 +59,7 @@ public class CharacterMovement
         }
     }
 
-
-
+ 
     // Step function now takes CharacterPublicState and returns it
     public CharacterPublicState Step(CharacterPublicState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
@@ -83,6 +82,9 @@ public class CharacterMovement
 
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
         VerticalVelocity = state.Velocity.Y;
+
+        CheckCollidables(state);
+
         return state;
 
         state.MovementMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
@@ -91,11 +93,6 @@ public class CharacterMovement
 
 
         // Launch velocity
-        if (cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED))
-        {
-            state.Velocity = new Vector3(state.Velocity.X, cmd.LaunchVelocity.Y, state.Velocity.Z);
-            WasLaunched = false;
-        }
 
         // Collision handling
         Vector3 safeMotion = HandleCollision(state, delta);
@@ -141,6 +138,12 @@ public class CharacterMovement
         {
             _desiredDirection = Vector3.Zero;
             _desiredSpeed = 0.0f;
+        }
+
+        if (WasLaunched)
+        {
+            state.Velocity = new Vector3(state.Velocity.X, cmd.LaunchVelocity.Y, state.Velocity.Z);
+            WasLaunched = false;
         }
     }
 
@@ -321,6 +324,7 @@ public class CharacterMovement
         state.Velocity += _gravityVector * delta;
     }
 
+    const float SAFE_MOTION_PADDING = 0.01f;
     public void PerformMove(CharacterPublicState state, float delta)
     {
         var space = _character.CollisionShape.GetWorld3D().DirectSpaceState;
@@ -349,7 +353,7 @@ public class CharacterMovement
             var result = space.CastMotion(query);
 
             float safeFraction = result[0];
-            Vector3 safeMotion = remainingMotion * safeFraction;
+            Vector3 safeMotion = remainingMotion * (safeFraction - SAFE_MOTION_PADDING);
 
             GD.Print($"perform move iteration {i}. safe fraction: {safeFraction}");
 
@@ -386,6 +390,7 @@ public class CharacterMovement
             }
 
             Vector3 collisionNormal = (Vector3)value;
+
 
             remainingMotion = remainingMotion * (1.0f - safeFraction);
             remainingMotion = remainingMotion - collisionNormal * remainingMotion.Dot(collisionNormal);
@@ -451,6 +456,8 @@ public class CharacterMovement
     {
         LaunchVector = vector;
         WasLaunched = true;
+
+        GD.Print($"queue launch");
     }
 
 
