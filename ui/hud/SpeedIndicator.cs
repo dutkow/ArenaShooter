@@ -6,7 +6,9 @@ public partial class SpeedIndicator : Control
 {
     Character _character;
 
-    [Export] Label SpeedLabel;
+    [Export] Label HorizontalSpeedLabel;
+    [Export] Label VerticalSpeedLabel;
+
 
     public override void _Ready()
     {
@@ -19,6 +21,8 @@ public partial class SpeedIndicator : Control
     {
         base._Process(delta);
 
-        SpeedLabel.Text = UnitConversion.ToQuake(Mathf.RoundToInt(_character.MovementComp.HorizontalVelocity)).ToString();
+        HorizontalSpeedLabel.Text = UnitConversion.ToQuake(Mathf.RoundToInt(_character.MovementComp.HorizontalVelocity)).ToString();
+        VerticalSpeedLabel.Text = UnitConversion.ToQuake(Mathf.RoundToInt(_character.MovementComp.VerticalVelocity)).ToString();
+
     }
 }

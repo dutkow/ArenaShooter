@@ -38,6 +38,8 @@ public class CharacterMovement
 
     private bool _jumpCooldownReady = true;
     public float HorizontalVelocity { get; private set; }
+    public float VerticalVelocity { get; private set; }
+
 
     public int _ticksToIgnoreGroundPostJump = 10;
 
@@ -126,7 +128,8 @@ public class CharacterMovement
             state.Velocity.Y += Gravity * delta;
         }
 
-
+        HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
+        VerticalVelocity = state.Velocity.Z;
 
         return state;
     }
@@ -236,7 +239,6 @@ public class CharacterMovement
 
         if (_isGrounded)
         {
-            HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
 
             if (space.GetRestInfo(query).TryGetValue("normal", out var normal))
             {

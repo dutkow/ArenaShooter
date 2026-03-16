@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://qppgjafprsaj" path="res://ui/hud/SpeedIndicator.cs" id="1_blch4"]
 
-[node name="SpeedIndicator" type="Control" unique_id=1613452437 node_paths=PackedStringArray("SpeedLabel")]
+[node name="SpeedIndicator" type="Control" unique_id=1613452437 node_paths=PackedStringArray("HorizontalSpeedLabel", "VerticalSpeedLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,15 +12,23 @@ offset_bottom = -531.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_blch4")
-SpeedLabel = NodePath("SpeedLabel")
+HorizontalSpeedLabel = NodePath("VBoxContainer/HorizontalSpeedLabel")
+VerticalSpeedLabel = NodePath("VBoxContainer/VerticalSpeedLabel")
 
-[node name="SpeedLabel" type="Label" parent="." unique_id=1893052526]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1549835360]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HorizontalSpeedLabel" type="Label" parent="VBoxContainer" unique_id=1893052526]
+layout_mode = 2
+theme_override_constants/outline_size = 4
+text = "[100]"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VerticalSpeedLabel" type="Label" parent="VBoxContainer" unique_id=11783467]
+layout_mode = 2
 theme_override_constants/outline_size = 4
 text = "[100]"
 horizontal_alignment = 1

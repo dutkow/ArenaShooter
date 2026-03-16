@@ -31,6 +31,7 @@ size = Vector3(50, 20, 40)
 size = Vector3(50, 20, 40)
 
 [node name="TestLevel" type="Node3D" unique_id=1962331172]
+transform = Transform3D(0.999982, 0.0058062505, -0.0015373828, -0.0058046915, 0.99998266, 0.0010174644, 0.0015432592, -0.0010085289, 0.99999833, 0, 0, 0)
 script = ExtResource("1_m0y5v")
 _gameModeScene = ExtResource("4_h6y0w")
 
@@ -88,6 +89,7 @@ shape = SubResource("BoxShape3D_j45q0")
 transform = Transform3D(0.081831396, 0.027505217, -0.98543125, -0.2796542, 0.23059602, 0.034748863, 0.54272765, 0.11467325, 0.16648653, 6.8347282, 1.6880598, -26.852303)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D5" unique_id=2125878803]
+transform = Transform3D(0.98793536, 0.012577385, -0.1543552, -0.04095608, 0.9824302, -0.1820814, 0.14935312, 0.18620639, 0.9710926, 6.2651443, 7.4700947, 0.7219143)
 material_override = ExtResource("6_j45q0")
 mesh = SubResource("BoxMesh_m0y5v")
 skeleton = NodePath("")
