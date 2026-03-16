@@ -21,7 +21,7 @@ public class CharacterMovement
     public float MaxStepHeight = 0.25f;
 
     public float _walkAcceleration = 60.0f;
-    public float _airAcceleration = 0.5f;
+    public float _airAcceleration = 5.0f;
     public float _walkDeceleration = 100f;
     public float _airDeceleration = 0.0f;
 
@@ -270,22 +270,33 @@ public class CharacterMovement
 
     public void ApplyAcceleration(CharacterPublicState state, float acceleration, float deceleration, float delta)
     {
+        // Correctly clamped acceleration
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
 
+        // apply acceleration
         if (_desiredSpeed > 0)
         {
-            // Accelerate toward desired direction
-            float currentSpeed = horizontalVel.Dot(_desiredDirection);
-            float addSpeed = _desiredSpeed - currentSpeed;
-            if (addSpeed > 0)
+            // correctly clamp speed
+            if (true)
             {
-                float accelAmount = MathF.Min(acceleration * delta, addSpeed);
-                horizontalVel += _desiredDirection * accelAmount;
+                float currentSpeedInDir = horizontalVel.Dot(_desiredDirection);
+                float addSpeed = _desiredSpeed - currentSpeedInDir;
+
+                if (addSpeed > 0)
+                {
+                    float accelAmount = MathF.Min(acceleration * delta, addSpeed);
+                    horizontalVel += _desiredDirection * accelAmount;
+                }
+            }
+            // strafe jumping - not implemented
+            else
+            {
+
             }
         }
+        // apply deceleration if no input
         else
         {
-            // Decelerate if no input
             float speed = horizontalVel.Length();
             if (speed > 0)
             {
@@ -300,6 +311,7 @@ public class CharacterMovement
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;
     }
+
 
     private void Jump(CharacterPublicState state)
     {
