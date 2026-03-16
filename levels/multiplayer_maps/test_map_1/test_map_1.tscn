@@ -86,10 +86,10 @@ skeleton = NodePath("")
 shape = SubResource("BoxShape3D_j45q0")
 
 [node name="StaticBody3D5" type="StaticBody3D" parent="." unique_id=967179111]
-transform = Transform3D(0.081831396, 0.027505217, -0.98543125, -0.2796542, 0.23059602, 0.034748863, 0.54272765, 0.11467325, 0.16648653, 6.8347282, 1.6880598, -26.852303)
+transform = Transform3D(0.08183139, 0.027505213, -0.9854312, -0.2796542, 0.23059602, 0.03474886, 0.54272765, 0.11467324, 0.16648652, 6.8291993, 1.6916728, -30.434734)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D5" unique_id=2125878803]
-transform = Transform3D(0.98793536, 0.012577385, -0.1543552, -0.04095608, 0.9824302, -0.1820814, 0.14935312, 0.18620639, 0.9710926, 6.2651443, 7.4700947, 0.7219143)
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 material_override = ExtResource("6_j45q0")
 mesh = SubResource("BoxMesh_m0y5v")
 skeleton = NodePath("")

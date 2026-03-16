@@ -23,12 +23,11 @@ public class CharacterMovement
     public float GroundDeceleration = 100f;
     public float AirDeceleration = 5f;
 
-    public float MaxWalkableSlopeAngle = 45f;
+    public float MaxWalkableGroundAngle = 45f;
     public bool PreserveHorizontalSpeedOnSlope = true;
 
     // Internal state
     private bool _isGrounded = false;
-    private bool _isOnSlope = false;
     private Vector3 _groundNormal;
     private CapsuleShape3D _collisionCapsule;
     private Godot.Collections.Array<Rid> _characterCollisionRids = new();
@@ -112,13 +111,6 @@ public class CharacterMovement
             CheckCollidables(state);
         }
 
-
-        // Gravity
-        if (!_isGrounded)
-        {
-            state.Velocity.Y += Gravity * delta;
-        }
-
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
         VerticalVelocity = state.Velocity.Y;
 
@@ -159,14 +151,9 @@ public class CharacterMovement
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;
 
-        if (_isOnSlope)
-        {
-            state.Velocity = ProjectVelocityOnSlope(state.Velocity);
-        }
-        else
-        {
-            state.Velocity.Y = Mathf.Max(state.Velocity.Y, 0.0f);
-        }
+        state.Velocity = ProjectVelocityOnGround(state.Velocity);
+
+
     }
 
     private void HandleAerialMovement(CharacterPublicState state, Vector3 desiredMoveDir, float delta)
@@ -198,6 +185,9 @@ public class CharacterMovement
 
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;
+
+        state.Velocity.Y += Gravity * delta;
+
     }
 
     private void Jump(CharacterPublicState state)
@@ -206,7 +196,7 @@ public class CharacterMovement
         _isGrounded = false;
     }
 
-    const float GROUNDED_CHECK_DISTANCE = 0.05f;
+    const float GROUNDED_CHECK_DISTANCE = 0.1f;
 
     private void CheckGrounded(CharacterPublicState state)
     {
@@ -226,35 +216,54 @@ public class CharacterMovement
 
         var result = space.CastMotion(query);
 
-        if(result[1] < 1.0f) // check if we would collide
+        _isGrounded = false;
+
+        bool hasGroundBelow = false;
+
+        GD.Print($"result: {result[1]}");
+
+        if (result[1] < 1.0f) // check if we would collide
         {
-            _isGrounded = true;
-            state.Position += motion * result[0];
+            hasGroundBelow = true;
         }
         else
         {
-            _isGrounded = false;
+            state.Position += motion * result[0];
+
         }
 
-        if (_isGrounded)
+        if (hasGroundBelow)
         {
+            PhysicsShapeQueryParameters3D groundedQuery = new()
+            {
+                Shape = _collisionCapsule,
+                Transform = new Transform3D(Basis.Identity, state.Position + result[1] * motion),
+                Motion = motion,
+                CollideWithBodies = true,
+                CollideWithAreas = false
+            };
+            groundedQuery.SetExclude(_characterCollisionRids);
 
-            if (space.GetRestInfo(query).TryGetValue("normal", out var normal))
+            if (space.GetRestInfo(groundedQuery).TryGetValue("normal", out var normal))
             {
                 _groundNormal = (Vector3)normal;
-                _isOnSlope = OnSlope();
+                _isGrounded = IsGroundAngleWalkable();
+            }
+            else
+            {
+                GD.Print($"has ground below is true and normal not found");
+
             }
         }
         else
         {
             _groundNormal = Vector3.Zero;
-            _isOnSlope = false;
         }
 
         GD.Print($"grounded = {_isGrounded}");
     }
 
-    private Vector3 ProjectVelocityOnSlope(Vector3 velocity)
+    private Vector3 ProjectVelocityOnGround(Vector3 velocity)
     {
         return velocity - _groundNormal * velocity.Dot(_groundNormal);
     }
@@ -283,7 +292,7 @@ public class CharacterMovement
             Vector3 normal = (Vector3)n;
             float slopeAngle = Mathf.RadToDeg(Mathf.Acos(normal.Dot(Vector3.Up)));
 
-            if (slopeAngle <= MaxWalkableSlopeAngle)
+            if (slopeAngle <= MaxWalkableGroundAngle)
             {
                 Vector3 slopeRight = normal.Cross(Vector3.Up).Normalized();
                 Vector3 slopeForward = slopeRight.Cross(normal).Normalized();
@@ -313,10 +322,11 @@ public class CharacterMovement
         WasLaunched = true;
     }
 
-    public bool OnSlope()
+    public bool IsGroundAngleWalkable()
     {
-        float slopeAngle = Mathf.RadToDeg(Mathf.Acos(_groundNormal.Dot(Vector3.Up)));
-        return slopeAngle > 0f && slopeAngle < MaxWalkableSlopeAngle;
+        float groundAngle = Mathf.RadToDeg(Mathf.Acos(_groundNormal.Dot(Vector3.Up)));
+        GD.Print($"ground angle = {groundAngle}");
+        return groundAngle >= 0f && groundAngle < MaxWalkableGroundAngle;
     }
 
     private void CheckCollidables(CharacterPublicState state)
