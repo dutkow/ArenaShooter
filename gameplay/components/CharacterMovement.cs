@@ -75,19 +75,10 @@ public class CharacterMovement
 
         state.Look += cmd.Look;
 
-
-
         move = move.Normalized();
         Basis basis = Basis.FromEuler(new Vector3(0, -state.Look.X, 0));
 
-        Vector3 desiredMoveDir = (basis.Z * move.Z + basis.X * move.X).Normalized() * MaxGroundSpeed;
-
-        // Jump
-        if (cmd.Flags.HasFlag(InputFlags.JUMP) && _isGrounded)
-        {
-            Jump(state);
-        }
-
+        Vector3 direction = (basis.Z * move.Z + basis.X * move.X).Normalized() * MaxGroundSpeed;
 
 
         state.MovementMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
@@ -96,10 +87,10 @@ public class CharacterMovement
         switch (state.MovementMode)
         {
             case CharacterMoveMode.GROUNDED:
-                HandleGroundedMovement(state, desiredMoveDir, delta);
+                HandleGroundedMovement(state, cmd, direction, delta);
                 break;
             case CharacterMoveMode.FALLING:
-                HandleAerialMovement(state, desiredMoveDir, delta);
+                HandleAerialMovement(state, direction, delta);
                 break;
         }
 
@@ -129,19 +120,27 @@ public class CharacterMovement
         }
 
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
-        VerticalVelocity = state.Velocity.Z;
+        VerticalVelocity = state.Velocity.Y;
 
         return state;
     }
 
 
-    private void HandleGroundedMovement(CharacterPublicState state, Vector3 desiredMoveDir, float delta)
+    private void HandleGroundedMovement(CharacterPublicState state, ClientInputCommand cmd, Vector3 direction, float delta)
     {
+        // Jump
+        if (cmd.Flags.HasFlag(InputFlags.JUMP) && _isGrounded)
+        {
+            Jump(state);
+            HandleAerialMovement(state, direction, delta);
+            return;
+        }
+
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
 
-        if (desiredMoveDir.LengthSquared() > 0)
+        if (direction.LengthSquared() > 0)
         {
-            Vector3 dir = desiredMoveDir.Normalized();
+            Vector3 dir = direction.Normalized();
             horizontalVel = horizontalVel.MoveToward(dir * MaxGroundSpeed, GroundAcceleration * delta);
         }
         else

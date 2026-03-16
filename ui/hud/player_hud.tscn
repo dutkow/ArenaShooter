@@ -87,6 +87,7 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="ChatPanel" parent="." unique_id=1718592845 instance=ExtResource("8_3hb5n")]
+visible = false
 layout_mode = 1
 offset_left = 584.0
 offset_top = 421.0
