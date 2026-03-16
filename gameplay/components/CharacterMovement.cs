@@ -247,13 +247,21 @@ public class CharacterMovement
         // apply acceleration
         if (state.DesiredSpeed > 0)
         {
-            float currentSpeedInDir = horizontalVel.Dot(state.DesiredDirection);
-            float addSpeed = state.DesiredSpeed - currentSpeedInDir;
-            if (addSpeed > 0)
+            // Desired velocity vector
+            Vector3 desiredVelocity = state.DesiredDirection * state.DesiredSpeed;
+
+            // Velocity difference
+            Vector3 deltaV = desiredVelocity - horizontalVel;
+
+            // Clamp by max acceleration
+            float maxDelta = acceleration * delta;
+
+            if (deltaV.Length() > maxDelta)
             {
-                float accelAmount = MathF.Min(acceleration * delta, addSpeed);
-                horizontalVel += state.DesiredDirection * accelAmount;
+                deltaV = deltaV.Normalized() * maxDelta;
             }
+
+            horizontalVel += deltaV;
         }
         // apply deceleration if no input
         else
@@ -434,40 +442,53 @@ public class CharacterMovement
 
     private void CheckCollidables(CharacterPublicState state, bool isSimulating)
     {
-        var space = _character.GetWorld3D().DirectSpaceState;
 
-        PhysicsShapeQueryParameters3D query = new()
+        if(isSimulating)
         {
-            Shape = _collisionCapsule,
-            Transform = new Transform3D(Basis.Identity, state.Position),
-            CollideWithBodies = true,
-            CollideWithAreas = true,
-            CollisionMask = PhysicsConstants.CHARACTER_COLLIDABLES_MASK
-        };
-
-        var results = space.IntersectShape(query, 8);
-
-        List<ICharacterCollidable> newCollidables = new();
-
-        foreach (var result in results)
-        {
-            if (result.TryGetValue("collider_id", out var idObj))
+            foreach (var collidable in state.NewlyOverlappedCollidables)
             {
-                ulong id = (ulong)idObj;
-                var node = GodotObject.InstanceFromId(id) as Node3D;
-                if (node?.Owner is ICharacterCollidable collidable)
-                {    
-                    newCollidables.Add(collidable);
+                collidable.OnCollidedWith(_character, state, true);
+            }
+        }
+        else
+        {
+            state.NewlyOverlappedCollidables.Clear();
 
-                    if (!state.CurrentCollidables.Contains(collidable))
+            var space = _character.GetWorld3D().DirectSpaceState;
+
+            PhysicsShapeQueryParameters3D query = new()
+            {
+                Shape = _collisionCapsule,
+                Transform = new Transform3D(Basis.Identity, state.Position),
+                CollideWithBodies = true,
+                CollideWithAreas = true,
+                CollisionMask = PhysicsConstants.CHARACTER_COLLIDABLES_MASK
+            };
+
+            var results = space.IntersectShape(query, 8);
+
+            List<ICharacterCollidable> newCollidables = new();
+
+            foreach (var result in results)
+            {
+                if (result.TryGetValue("collider_id", out var idObj))
+                {
+                    ulong id = (ulong)idObj;
+                    var node = GodotObject.InstanceFromId(id) as Node3D;
+                    if (node?.Owner is ICharacterCollidable collidable)
                     {
-                        collidable.OnCollidedWith(_character, state, isSimulating);
-                        GD.Print($"collided with unknown current collidable. networkmode: {NetworkManager.Instance.NetworkMode}. is simulating: {isSimulating}");
+                        newCollidables.Add(collidable);
+
+                        if (!state.CurrentCollidables.Contains(collidable))
+                        {
+                            collidable.OnCollidedWith(_character, state, isSimulating);
+                            state.NewlyOverlappedCollidables.Add(collidable);
+                        }
                     }
                 }
             }
+            state.CurrentCollidables = newCollidables;
         }
-        state.CurrentCollidables = newCollidables;
     }
 
 
@@ -483,7 +504,7 @@ public class CharacterMovement
     {
         if (state.WasLaunched)
         {
-            GD.Print($"launching on client. is simulating: {isSimulating}. num collidables = {state.CurrentCollidables.Count}");
+            GD.Print($"launching on client. is simulating: {isSimulating}. num collidables = {state.NewlyOverlappedCollidables.Count}");
 
 
             state.Velocity += state.LaunchVelocity;

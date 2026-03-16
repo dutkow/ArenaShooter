@@ -47,7 +47,6 @@ public partial class Character : Pawn, IDamageable
 
     public HealthComponent HealthComp { get; private set; } = new();
 
-    private SortedDictionary<ushort, ClientInputCommand> _unprocessedClientInputs = new();
 
 
     private ClientInputCommand _lastProcessedClientCommand;
@@ -238,11 +237,14 @@ public partial class Character : Pawn, IDamageable
         {
             //GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
 
-            publicState.WasLaunched = _lastSimulatedState.WasLaunched;
-            publicState.CurrentCollidables = new List<ICharacterCollidable>(_lastSimulatedState.CurrentCollidables);
-            foreach (var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
+            foreach (var clientPredictionTick in ClientGame.Instance.UnprocessedPredictionTicks)
             {
-                publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
+                publicState.NewlyOverlappedCollidables = clientPredictionTick.CollisionEnteredCollidables;
+                if(clientPredictionTick.CollisionEnteredCollidables.Count > 0)
+                {
+                    GD.Print("client prediction tick in replay loop has count > 0");
+                }
+                publicState = MovementComp.Step(publicState, clientPredictionTick.InputCommand, NetworkConstants.SERVER_TICK_INTERVAL, true);
 
             }
 
@@ -397,18 +399,18 @@ public partial class Character : Pawn, IDamageable
     }
 
 
-    public override ClientInputCommand CaptureInput(ClientInputCommand cmd)
+    public override ClientPredictionTick GetClientPredictionTick(ClientPredictionTick clientPredictionTick)
     {
-        base.CaptureInput(cmd);
+        base.GetClientPredictionTick(clientPredictionTick);
 
-        if(_inputEnabled)
+        if (_inputEnabled)
         {
-            if (Input.IsActionPressed("move_forward")) cmd.Flags |= InputFlags.FORWARD;
-            if (Input.IsActionPressed("move_back")) cmd.Flags |= InputFlags.BACKWARD;
-            if (Input.IsActionPressed("move_left")) cmd.Flags |= InputFlags.STRAFE_LEFT;
-            if (Input.IsActionPressed("move_right")) cmd.Flags |= InputFlags.STRAFE_RIGHT;
-            if (Input.IsActionPressed("jump")) cmd.Flags |= InputFlags.JUMP;
-            if (Input.IsActionPressed("primary_fire")) cmd.Flags |= InputFlags.FIRE_PRIMARY;
+            if (Input.IsActionPressed("move_forward")) clientPredictionTick.InputCommand.Flags |= InputFlags.FORWARD;
+            if (Input.IsActionPressed("move_back")) clientPredictionTick.InputCommand.Flags |= InputFlags.BACKWARD;
+            if (Input.IsActionPressed("move_left")) clientPredictionTick.InputCommand.Flags |= InputFlags.STRAFE_LEFT;
+            if (Input.IsActionPressed("move_right")) clientPredictionTick.InputCommand.Flags |= InputFlags.STRAFE_RIGHT;
+            if (Input.IsActionPressed("jump")) clientPredictionTick.InputCommand.Flags |= InputFlags.JUMP;
+            if (Input.IsActionPressed("primary_fire")) clientPredictionTick.InputCommand.Flags |= InputFlags.FIRE_PRIMARY;
         }
 
         if (_weapon.FiredPredictedProjectile)
@@ -420,20 +422,30 @@ public partial class Character : Pawn, IDamageable
         _weapon.Tick(NetworkConstants.SERVER_TICK_INTERVAL, Camera.GlobalPosition, dir);
 
 
-        cmd.Look = _accumulatedLookDelta;
-        cmd.Flags |= InputFlags.LOOK;
+        clientPredictionTick.InputCommand.Look = _accumulatedLookDelta;
+        clientPredictionTick.InputCommand.Flags |= InputFlags.LOOK;
 
         if(!IsAuthority)
         {
-            PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
+            PredictedPublicState = MovementComp.Step(PredictedPublicState, clientPredictionTick.InputCommand, NetworkConstants.SERVER_TICK_INTERVAL);
             PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
             PredictedPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
+
+
+            clientPredictionTick.CollisionEnteredCollidables = PredictedPublicState.NewlyOverlappedCollidables.ToList();
+
+            if (clientPredictionTick.CollisionEnteredCollidables.Count > 0)
+            {
+                GD.Print($"saving prediction tick where entered collidables > 0");
+
+            }
         }
 
-        _weapon.HandleInput(cmd.Flags);
+        _weapon.HandleInput(clientPredictionTick.InputCommand.Flags);
 
         _accumulatedLookDelta = Vector2.Zero;
-        return cmd;
+
+        return clientPredictionTick;
     }
 
     private Vector2 _accumulatedLookDelta;

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 [Flags]
 public enum InputFlags : ushort
@@ -23,10 +24,14 @@ public struct ClientInputCommand
 {
     public ushort ClientTick;
     public InputFlags Flags;
-
     public Vector2 Look;
 
-    public ushort PredictedProjectileClientID;
+}
+
+public struct ClientPredictionTick
+{
+    public ClientInputCommand InputCommand;
+    public List<ICharacterCollidable> CollisionEnteredCollidables;
 }
 
 public class ClientCommand : Message

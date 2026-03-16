@@ -23,7 +23,7 @@ public class ClientGame
     // Client-server synchronization
     public ushort LastServerTickProcessedByClient;
     public ushort LastClientTickProcessedByServer;
-    public List<ClientInputCommand> UnprocessedClientInputs = new();
+    public List<ClientPredictionTick> UnprocessedPredictionTicks = new();
     const int REDUNDANT_INPUTS = 4;
 
     private bool _hasReceivedInitialState;
@@ -76,15 +76,21 @@ public class ClientGame
 
     public void SendCommand()
     {
-        var inputCommand = GetClientInputCommand();
+        var predictionTick = GetClientPredictionTick();
 
         if(NetworkManager.Instance.IsListenServer)
         {
-            SendListenServerCommand(inputCommand);
+            SendListenServerCommand(predictionTick.InputCommand);
         }
         else
         {
-            SendClientCommand(inputCommand);
+            UnprocessedPredictionTicks.Add(predictionTick);
+
+            if(predictionTick.CollisionEnteredCollidables.Count > 0)
+            {
+                GD.Print($"added a prediction tick w/ collison entered collidables");
+            }
+            SendClientCommand(predictionTick.InputCommand);
         }
     }
 
@@ -99,36 +105,29 @@ public class ClientGame
         ServerGame.Instance.ApplyClientCommand(ClientGame.Instance.LocalPlayerID, clientCommand);
     }
 
-    public void SendClientInput(ClientInputCommand inputCommand)
-    {
-        UnprocessedClientInputs.Add(inputCommand);
-        var commandsToSend = UnprocessedClientInputs.Skip(Math.Max(0, UnprocessedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
-        ClientCommand.Send(commandsToSend);
-    }
 
     public void SendClientCommand(ClientInputCommand cmd)
     {
-        UnprocessedClientInputs.Add(cmd);
-        var commandsToSend = UnprocessedClientInputs.Skip(Math.Max(0, UnprocessedClientInputs.Count - REDUNDANT_INPUTS)).ToArray();
+        var commandsToSend = UnprocessedPredictionTicks.Skip(Math.Max(0, UnprocessedPredictionTicks.Count - REDUNDANT_INPUTS)).Select(t => t.InputCommand).ToArray();
         ClientCommand.Send(commandsToSend);
     }
 
-    public ClientInputCommand GetClientInputCommand()
+    public ClientPredictionTick GetClientPredictionTick()
     {
-        var cmd = new ClientInputCommand();
+        var clientPredictionTick = new ClientPredictionTick();
 
         if (LocalPlayerPawn != null)
         {
-            cmd = LocalPlayerPawn.CaptureInput(cmd);
+            clientPredictionTick = LocalPlayerPawn.GetClientPredictionTick(clientPredictionTick);
         }
         else
         {
             GD.Print($"local player pawn is null");
         }
 
-        cmd.ClientTick = MatchState.Instance.CurrentTick;
+        clientPredictionTick.InputCommand.ClientTick = MatchState.Instance.CurrentTick;
 
-        return cmd;
+        return clientPredictionTick;
     }
 
     public void HandleWorldSnapshot(WorldSnapshot snapshot)
@@ -141,7 +140,7 @@ public class ClientGame
         LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
         LastServerTickProcessedByClient = snapshot.ServerTick;
 
-        UnprocessedClientInputs.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
+        UnprocessedPredictionTicks.RemoveAll(cmd => cmd.InputCommand.ClientTick <= LastClientTickProcessedByServer);
 
 
         PickupManager.Instance.ApplyPickupMask(snapshot.PickupMask);

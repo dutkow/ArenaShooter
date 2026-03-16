@@ -56,9 +56,9 @@ public partial class Pawn : Entity
 
     public virtual void OnDeath() { }
 
-    public virtual ClientInputCommand CaptureInput(ClientInputCommand cmd)
+    public virtual ClientPredictionTick GetClientPredictionTick(ClientPredictionTick clientPredictionTick)
     {
-        return cmd;
+        return clientPredictionTick;
     }
 
     public virtual void ServerProcessNextClientInput(ClientInputCommand cmd) { }

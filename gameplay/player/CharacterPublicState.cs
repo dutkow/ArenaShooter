@@ -17,6 +17,8 @@ public class CharacterPublicState
     public bool WasLaunched;
     public Vector3 LaunchVelocity;
     public List<ICharacterCollidable> CurrentCollidables = new();
+    public List<ICharacterCollidable> NewlyOverlappedCollidables = new();
+
     public Vector3 DesiredDirection;
     public float DesiredSpeed;
     public bool WantsToJump;
