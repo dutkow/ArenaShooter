@@ -30,6 +30,12 @@ size = Vector3(50, 20, 40)
 [sub_resource type="BoxShape3D" id="BoxShape3D_j45q0"]
 size = Vector3(50, 20, 40)
 
+[sub_resource type="BoxMesh" id="BoxMesh_pc4o5"]
+size = Vector3(10, 10, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cpfjo"]
+size = Vector3(10, 10, 10)
+
 [node name="TestLevel" type="Node3D" unique_id=1962331172]
 transform = Transform3D(0.999982, 0.0058062505, -0.0015373828, -0.0058046915, 0.99998266, 0.0010174644, 0.0015432592, -0.0010085289, 0.99999833, 0, 0, 0)
 script = ExtResource("1_m0y5v")
@@ -63,16 +69,6 @@ transform = Transform3D(1.0000002, 0, 0, 0, 1, 0, 0, 0, 1.0000002, 11.318419, 6.
 
 [node name="JumpPad" parent="." unique_id=655431875 instance=ExtResource("6_m0y5v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.802828, 1.1323514, 0)
-
-[node name="StaticBody3D3" type="StaticBody3D" parent="." unique_id=714145432]
-transform = Transform3D(0.5973678, -0.060224965, -0.07422684, 0.14281997, 0.25190067, -0.017746314, 0.047012366, 7.358244e-10, 0.9970834, 27.852226, -1.8875723, -4.350733)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D3" unique_id=1227250491]
-mesh = SubResource("BoxMesh_m0y5v")
-skeleton = NodePath("")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D3" unique_id=322194933]
-shape = SubResource("BoxShape3D_j45q0")
 
 [node name="StaticBody3D4" type="StaticBody3D" parent="." unique_id=1786963724]
 transform = Transform3D(0.43689215, 0.18204424, -0.0542867, -0.43170744, 0.18423058, 0.053642467, 0.047012366, 1.5948614e-09, 0.9970834, -32.351063, 1.6880598, 0.61362076)
@@ -118,3 +114,12 @@ _targetDestination = NodePath("Marker3D")
 [node name="Marker3D" type="Marker3D" parent="Teleporter" unique_id=419338207]
 transform = Transform3D(-0.703804, 0, 0.71039426, 0, 1, 0, -0.71039426, 0, -0.703804, 52.72905, 0.6987195, 7.0514946)
 gizmo_extents = 5.0
+
+[node name="StaticBody3D2" type="StaticBody3D" parent="." unique_id=592124310]
+transform = Transform3D(0.99999976, -1.8587798e-10, -4.656613e-10, 7.607923e-10, 1, 0, -1.1641532e-10, 0, 0.99999976, 31.20812, 0.18855196, -7.2682214)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2" unique_id=795539259]
+mesh = SubResource("BoxMesh_pc4o5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2" unique_id=1510185885]
+shape = SubResource("BoxShape3D_cpfjo")
