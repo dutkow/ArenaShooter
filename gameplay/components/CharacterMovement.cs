@@ -65,7 +65,7 @@ public class CharacterMovement
 
         ApplyInput(state, cmd, delta);
 
-        if(!CheckLaunch(state))
+        if(!CheckLaunch(state, isSimulating))
         {
             CheckGrounded(state);
         }
@@ -456,22 +456,18 @@ public class CharacterMovement
                 ulong id = (ulong)idObj;
                 var node = GodotObject.InstanceFromId(id) as Node3D;
                 if (node?.Owner is ICharacterCollidable collidable)
-                {
-                    
+                {    
                     newCollidables.Add(collidable);
 
                     if (!state.CurrentCollidables.Contains(collidable))
                     {
                         collidable.OnCollidedWith(_character, state, isSimulating);
+                        GD.Print($"collided with unknown current collidable. networkmode: {NetworkManager.Instance.NetworkMode}. is simulating: {isSimulating}");
                     }
-
                 }
-
             }
         }
-
         state.CurrentCollidables = newCollidables;
-
     }
 
 
@@ -483,10 +479,13 @@ public class CharacterMovement
         return state;
     }
 
-    public bool CheckLaunch(CharacterPublicState state)
+    public bool CheckLaunch(CharacterPublicState state, bool isSimulating)
     {
         if (state.WasLaunched)
         {
+            GD.Print($"launching on client. is simulating: {isSimulating}. num collidables = {state.CurrentCollidables.Count}");
+
+
             state.Velocity += state.LaunchVelocity;
             state.MovementMode = CharacterMoveMode.FALLING;
 

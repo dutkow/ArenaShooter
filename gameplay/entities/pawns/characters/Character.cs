@@ -234,43 +234,16 @@ public partial class Character : Pawn, IDamageable
     // Apply Replicated States
     public void ApplyAuthoritativePublicState(CharacterPublicState publicState)
     {
-        CharacterPublicFlags flags = publicState.Flags;
-
-
-        if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
-        {
-            publicState.Position = PredictedPublicState.Position;
-        }
-
-        if ((flags & CharacterPublicFlags.POSITION_CHANGED) == 0)
-        {
-            publicState.Look = PredictedPublicState.Look;
-        }
-
-        if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) == 0)
-        {
-            publicState.Velocity = PredictedPublicState.Velocity;
-        }
-
-        if ((flags & CharacterPublicFlags.MOVEMENT_MODE_CHANGED) == 0)
-        {
-            publicState.MovementMode = PredictedPublicState.MovementMode;
-        }
-
-        if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) == 0)
-        {
-            publicState.EquippedWeapon = PredictedPublicState.EquippedWeapon;
-        }
-
-
-
-        if(IsLocal)
+        if (IsLocal)
         {
             //GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
 
+            publicState.WasLaunched = _lastSimulatedState.WasLaunched;
+            publicState.CurrentCollidables = new List<ICharacterCollidable>(_lastSimulatedState.CurrentCollidables);
             foreach (var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
             {
                 publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
+
             }
 
             ReconcileMoveState(publicState);
@@ -280,8 +253,10 @@ public partial class Character : Pawn, IDamageable
             PlayerState.CharacterPublicState = publicState;
         }
 
+        _lastSimulatedState = publicState.Copy();
     }
 
+    private CharacterPublicState _lastSimulatedState = new();
 
     public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)
     {
@@ -536,8 +511,6 @@ public partial class Character : Pawn, IDamageable
     }
 
 
-
-
     public void Launch(Vector3 velocity, CharacterPublicState state, bool isSimulating)
     {
         if(IsAuthority)
@@ -547,7 +520,7 @@ public partial class Character : Pawn, IDamageable
         else if(IsLocal)
         {
             state = MovementComp.QueueLaunch(state, velocity);
-            GD.Print($"launch predicted ran on client. is simualting: {isSimulating}");
+            GD.Print($"launch queued on client. is simulating: {isSimulating}");
         }
     }
 

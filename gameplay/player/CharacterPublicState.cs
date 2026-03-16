@@ -32,11 +32,13 @@ public class CharacterPublicState
     {
         return new CharacterPublicState
         {
-            Flags = Flags,
-            Position = Position,
-            Velocity = Velocity,
-            Look = Look,
-            MovementMode = MovementMode,
+            Flags = this.Flags,
+            Position = this.Position,
+            Velocity = this.Velocity,
+            Look = this.Look,
+            MovementMode = this.MovementMode,
+            WasLaunched = this.WasLaunched,
+            CurrentCollidables = new List<ICharacterCollidable>(CurrentCollidables)
         };
     }
 
