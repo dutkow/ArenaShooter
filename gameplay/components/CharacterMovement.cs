@@ -20,7 +20,7 @@ public class CharacterMovement
     public float JumpSpeed = 10.0f;
     public float MaxStepHeight = 0.25f;
 
-    public float _walkAcceleration = 60.0f;
+    public float _walkAcceleration = 100.0f;
     public float _airAcceleration = 5.0f;
     public float _walkDeceleration = 100f;
     public float _airDeceleration = 0.0f;
@@ -65,7 +65,10 @@ public class CharacterMovement
     {
         ApplyInput(state, cmd, delta);
 
-        CheckGrounded(state);
+        if(!_wasLaunched)
+        {
+            CheckGrounded(state);
+        }
 
         switch (state.MovementMode)
         {
@@ -77,7 +80,6 @@ public class CharacterMovement
                 break;
         }
 
-        GD.Print($"Desired direction: {_desiredDirection}. desired speed: {_desiredSpeed}. is grounded = {_isGrounded}. ground normal: {_groundNormal}. move mode: {state.MovementMode}");
         PerformMove(state, delta);
 
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
@@ -85,6 +87,8 @@ public class CharacterMovement
 
         CheckCollidables(state);
 
+
+        GD.Print($"is grounded: {_isGrounded}");
         return state;
 
         state.MovementMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
@@ -114,6 +118,7 @@ public class CharacterMovement
     Vector3 _desiredDirection;
     float _desiredSpeed;
     bool _wantsToJump;
+    bool _wasLaunched;
 
 
     public void ApplyInput(CharacterPublicState state, ClientInputCommand cmd, float delta)
@@ -125,6 +130,7 @@ public class CharacterMovement
         if (cmd.Flags.HasFlag(InputFlags.STRAFE_RIGHT)) move.X += 1;
 
         _wantsToJump = cmd.Flags.HasFlag(InputFlags.JUMP);
+        _wasLaunched = cmd.Flags.HasFlag(InputFlags.WAS_LAUNCHED);
 
         state.Look += cmd.Look;
         Basis basis = Basis.FromEuler(new Vector3(0, -state.Look.X, 0));
@@ -140,10 +146,10 @@ public class CharacterMovement
             _desiredSpeed = 0.0f;
         }
 
-        if (WasLaunched)
+        if(_wasLaunched)
         {
-            state.Velocity = new Vector3(state.Velocity.X, cmd.LaunchVelocity.Y, state.Velocity.Z);
-            WasLaunched = false;
+            state.Velocity += LaunchVector;
+            GD.Print($"was launched true on input. applying launch vector {LaunchVector}");
         }
     }
 
@@ -213,7 +219,7 @@ public class CharacterMovement
         }
         else
         {
-            state.MovementMode |= CharacterMoveMode.FALLING;
+            state.MovementMode = CharacterMoveMode.FALLING;
         }
     }
 
@@ -355,8 +361,6 @@ public class CharacterMovement
             float safeFraction = result[0];
             Vector3 safeMotion = remainingMotion * (safeFraction - SAFE_MOTION_PADDING);
 
-            GD.Print($"perform move iteration {i}. safe fraction: {safeFraction}");
-
             // Move as far as possible safely
             state.Position += safeMotion;
 
@@ -393,6 +397,8 @@ public class CharacterMovement
 
 
             remainingMotion = remainingMotion * (1.0f - safeFraction);
+
+
             remainingMotion = remainingMotion - collisionNormal * remainingMotion.Dot(collisionNormal);
         }
     }
@@ -457,7 +463,7 @@ public class CharacterMovement
         LaunchVector = vector;
         WasLaunched = true;
 
-        GD.Print($"queue launch");
+        GD.Print($"queue launch with launch vector: {LaunchVector}");
     }
 
 

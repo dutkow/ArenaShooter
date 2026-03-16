@@ -436,6 +436,7 @@ public partial class Character : Pawn, IDamageable
         {
             cmd.Flags |= InputFlags.WAS_LAUNCHED;
             cmd.LaunchVelocity = MovementComp.LaunchVector;
+            GD.Print($"was launched is true on command");
             MovementComp.WasLaunched = false;
         }
 
@@ -461,8 +462,6 @@ public partial class Character : Pawn, IDamageable
             PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
             PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
         }
-
-
 
         _weapon.HandleInput(cmd.Flags);
 
@@ -549,6 +548,7 @@ public partial class Character : Pawn, IDamageable
 
     public void Launch(Vector3 velocity)
     {
+        GD.Print($"launch ran on char. velocity: {velocity}");
         MovementComp.QueueLaunch(velocity);
     }
 
