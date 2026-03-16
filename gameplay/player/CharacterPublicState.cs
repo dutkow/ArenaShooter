@@ -1,5 +1,7 @@
 using Godot;
 
+using System.Collections.Generic;
+
 public class CharacterPublicState
 {
     public CharacterPublicFlags Flags;
@@ -9,6 +11,13 @@ public class CharacterPublicState
     public Vector3 Velocity;
     public CharacterMoveMode MovementMode;
     public WeaponType EquippedWeapon;
+
+    // not replicated - derivable
+    public bool IsGrounded;
+    public bool WasLaunched;
+    public Vector3 LaunchVelocity;
+    public List<ICharacterCollidable> CurrentCollidables = new();
+
 
     public void ClearFlags()
     {

@@ -14,6 +14,7 @@ script = ExtResource("1_thlnv")
 _area3D = NodePath("Area3D")
 JumpStrength = 18.0
 _collisionShape = NodePath("Area3D/CollisionShape3D")
+metadata/_edit_lock_ = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1076684502]
 material_override = ExtResource("2_m60fg")

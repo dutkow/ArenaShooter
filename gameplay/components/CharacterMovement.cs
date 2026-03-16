@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using static Godot.HttpRequest;
 
 public enum CharacterMoveMode : byte
@@ -35,6 +36,9 @@ public class CharacterMovement
     public Vector3 LaunchVector;
     public bool WasLaunched;
 
+
+
+
     private bool _jumpCooldownReady = true;
     public float HorizontalVelocity { get; private set; }
     public float VerticalVelocity { get; private set; }
@@ -65,11 +69,7 @@ public class CharacterMovement
     {
         ApplyInput(state, cmd, delta);
 
-        if(_wasLaunched)
-        {
-            _wasLaunched = false;
-        }
-        else
+        if(!CheckLaunch(state))
         {
             CheckGrounded(state);
         }
@@ -89,45 +89,14 @@ public class CharacterMovement
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
         VerticalVelocity = state.Velocity.Y;
 
+        CheckCollidables(state, isSimulating);
 
-        CheckCollidables(state);
-
-
-        GD.Print($"is grounded: {_isGrounded}");
         return state;
-
-
-        /*
-        state.MovementMode = _isGrounded ? CharacterMoveMode.GROUNDED : CharacterMoveMode.FALLING;
-
-        // Movement
-
-
-        // Launch velocity
-
-        // Collision handling
-        Vector3 safeMotion = HandleCollision(state, delta);
-
-        state.Position += safeMotion;
-
-        // Server-side collidable checks
-        if (!isSimulating && _character.IsAuthority)
-        {
-            CheckCollidables(state);
-        }
-
-        HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
-        VerticalVelocity = state.Velocity.Y;
-
-        return state;*/
     }
 
     Vector3 _desiredDirection;
     float _desiredSpeed;
     bool _wantsToJump;
-    bool _wasLaunched;
-
-
 
 
     public void ApplyInput(CharacterPublicState state, ClientInputCommand cmd, float delta)
@@ -207,6 +176,7 @@ public class CharacterMovement
                 if (_groundNormal.Dot(Vector3.Up) >= _walkableThreshold)
                 {
                     _isGrounded = true;
+
                 }
             }
         }
@@ -473,13 +443,8 @@ public class CharacterMovement
     }
 
 
-    public List<ICharacterCollidable> _seenCollidables = new();
-
-    private void CheckCollidables(CharacterPublicState state)
+    private void CheckCollidables(CharacterPublicState state, bool isSimulating)
     {
-        if (_character == null || _collisionCapsule == null)
-            return;
-
         var space = _character.GetWorld3D().DirectSpaceState;
 
         PhysicsShapeQueryParameters3D query = new()
@@ -493,7 +458,7 @@ public class CharacterMovement
 
         var results = space.IntersectShape(query, 8);
 
-        List<ICharacterCollidable> newSeenCollidables = new();
+        List<ICharacterCollidable> newCollidables = new();
 
         foreach (var result in results)
         {
@@ -503,25 +468,55 @@ public class CharacterMovement
                 var node = GodotObject.InstanceFromId(id) as Node3D;
                 if (node?.Owner is ICharacterCollidable collidable)
                 {
-                    newSeenCollidables.Add(collidable);
+                    
+                    newCollidables.Add(collidable);
 
-                    if(!_seenCollidables.Contains(collidable))
+                    if (!state.CurrentCollidables.Contains(collidable))
                     {
                         collidable.OnCollidedWith(_character);
                     }
+
                 }
+
             }
         }
 
-        _seenCollidables = newSeenCollidables;
+        state.CurrentCollidables = newCollidables;
+
     }
 
 
-    public void Launch(CharacterPublicState state, Vector3 launchVelocity)
+
+
+
+    public CharacterPublicState QueueLaunch(CharacterPublicState state, Vector3 launchVelocity)
     {
-        _wasLaunched = true;
-        _isGrounded = false;
-        state.Velocity += launchVelocity;
-        state.MovementMode = CharacterMoveMode.FALLING;
+        state.WasLaunched = true;
+        state.LaunchVelocity = launchVelocity;
+
+        return state;
+    }
+
+    public bool CheckLaunch(CharacterPublicState state)
+    {
+        if (state.WasLaunched)
+        {
+
+            state.Velocity += state.LaunchVelocity;
+            state.MovementMode = CharacterMoveMode.FALLING;
+
+            state.WasLaunched = false;
+            state.IsGrounded = false;
+
+            return true;
+        }
+        return false;
+    }
+
+    public void PreConciliationReset(CharacterPublicState state)
+    {
+        state.WasLaunched = false;
+        state.CurrentCollidables.Clear();
+
     }
 }

@@ -266,12 +266,14 @@ public partial class Character : Pawn, IDamageable
         if(IsLocal)
         {
             //GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
+
+            MovementComp.PreConciliationReset(publicState);
             foreach (var unprocessedInput in ClientGame.Instance.UnprocessedClientInputs)
             {
                 publicState = MovementComp.Step(publicState, unprocessedInput, NetworkConstants.SERVER_TICK_INTERVAL, true);
             }
 
-            ReconcileMoveState(publicState);
+            //ReconcileMoveState(publicState);
         }
         else
         {
@@ -448,6 +450,7 @@ public partial class Character : Pawn, IDamageable
         {
             PredictedPublicState = MovementComp.Step(PredictedPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
             PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
+            PredictedPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
         }
 
         _weapon.HandleInput(cmd.Flags);
@@ -535,17 +538,14 @@ public partial class Character : Pawn, IDamageable
 
     public void Launch(Vector3 velocity)
     {
-        GD.Print($"launch ran on {NetworkManager.Instance.NetworkMode}");
 
         if(IsAuthority)
         {
-            GD.Print($"fired launch on owner");
-            MovementComp.Launch(PlayerState.CharacterPublicState, velocity);
+            PlayerState.CharacterPublicState = MovementComp.QueueLaunch(PlayerState.CharacterPublicState, velocity);
         }
         else if(IsLocal)
         {
-            GD.Print($"fired predicted on client");
-            MovementComp.Launch(PredictedPublicState, velocity);
+            PredictedPublicState = MovementComp.QueueLaunch(PredictedPublicState, velocity);
         }
         else
         {

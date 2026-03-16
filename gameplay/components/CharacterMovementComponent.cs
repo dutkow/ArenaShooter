@@ -27,7 +27,6 @@ public class CharacterMovementComponent
 
         _character.MoveAndSlide();
         HandleFallAcceleration(delta);
-
     }
 
     public void ApplyInput(InputFlags cmd, double delta, Node3D cameraPivot)
