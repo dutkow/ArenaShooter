@@ -126,8 +126,8 @@ public class CharacterMovement
 
     public void SnapToGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
     {
-        Vector3 start = state.Position + Vector3.Up * _collisionCapsule.MidHeight;
-        Vector3 end = state.Position + Vector3.Down * 3.0f;
+        Vector3 start = state.Position;
+        Vector3 end = state.Position + Vector3.Down * GROUNDED_CHECK_DISTANCE * 2.0f;
         var rayParams = new PhysicsRayQueryParameters3D()
         {
             From = start,
@@ -143,7 +143,7 @@ public class CharacterMovement
         {
             var position = (Vector3)value;          
 
-            state.Position = new Vector3(state.Position.X, position.Y + _collisionCapsule.MidHeight, state.Position.Z);
+            state.Position = new Vector3(state.Position.X, position.Y + GROUNDED_CHECK_DISTANCE * 0.5f, state.Position.Z);
             GD.Print($"snap to ground ran. new position: {state.Position.Y}!");
         }
     }
@@ -470,7 +470,7 @@ public class CharacterMovement
     }
 
 
-    const float GROUNDED_CHECK_DISTANCE = 0.1f;
+    const float GROUNDED_CHECK_DISTANCE = 0.01f;
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
 
