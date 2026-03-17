@@ -32,13 +32,7 @@ transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76
 shadow_enabled = true
 
 [node name="SpawnPoint3" parent="." unique_id=1982700480 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.9999997, -1.8587798e-10, -8.1490725e-10, 2.1578899e-09, 1, -2.3283064e-10, -1.1641532e-10, 0, 1.0000002, 11.404463, 2.1367671, -2.8276272)
-
-[node name="SpawnPoint5" parent="." unique_id=896187144 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.9999997, -1.8587798e-10, -8.1490725e-10, 2.1578899e-09, 1, -2.3283064e-10, -1.1641532e-10, 0, 1.0000002, 0.35955063, 2.136767, -1.3837336)
-
-[node name="SpawnPoint6" parent="." unique_id=1609247714 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.9999997, -1.8587798e-10, -8.1490725e-10, 2.1578899e-09, 1, -2.3283064e-10, -1.1641532e-10, 0, 1.0000002, 11.3466215, 2.1367648, 5.79856)
+transform = Transform3D(-0.67455494, -0.008969369, -0.73817015, -0.010471493, 0.9999418, -0.0025810387, 0.7381499, 0.0059886943, -0.67461014, -13.168817, 1.9625713, 28.183548)
 
 [node name="JumpPad" parent="." unique_id=655431875 instance=ExtResource("6_m0y5v")]
 transform = Transform3D(0.9999999, -1.8587798e-10, -2.3283064e-10, 7.6056494e-10, 1, 0, 0, 0, 0.9999999, 8.806179, 0.5549511, -0.00058749877)
@@ -69,22 +63,42 @@ depth = 10.0
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="." unique_id=734049400]
 transform = Transform3D(0.9999999, -1.8587798e-10, -2.3283064e-10, 7.6056494e-10, 1, 0, 0, 0, 0.9999999, -0.044756874, 1.3974344, -23.83415)
+use_collision = true
+size = Vector3(10, 10, 10)
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="." unique_id=751722232]
+transform = Transform3D(0.99999976, -1.8587798e-10, -4.656613e-10, 7.607923e-10, 1, 0, -1.1641532e-10, 0, 0.99999976, 0.06059976, 1.3285836, 44.434452)
+use_collision = true
+size = Vector3(10, 10, 10)
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="." unique_id=1341867443]
+transform = Transform3D(0.99999964, -1.8587798e-10, -6.9849193e-10, 1.6923423e-09, 1, 1.1641532e-10, -1.1641532e-10, 0, 0.99999964, -19.68958, 8.642604, 62.77905)
+use_collision = true
 size = Vector3(10, 10, 10)
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="." unique_id=1948896933]
 transform = Transform3D(0.9999999, -1.8587798e-10, -2.3283064e-10, 7.6056494e-10, 1, 0, 0, 0, 0.9999999, 24.845228, 1.8736615, -0.03645305)
+use_collision = true
 radius = 5.0
 height = 5.0
 
 [node name="CSGCylinder3D2" type="CSGCylinder3D" parent="." unique_id=1546900905]
 transform = Transform3D(0.99999994, -1.8587798e-10, -1.1641532e-10, 2.9478997e-10, 1, 0, 0, 0, 0.99999994, 0.03899448, -0.025482874, 25.267498)
+use_collision = true
 radius = 2.0
 height = 1.0
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="." unique_id=1714284435]
 transform = Transform3D(0.7818867, -0.0019004153, 0.6234172, -0.0006317814, 0.99999243, 0.0038407408, -0.62341964, -0.0033968885, 0.7818796, 26.194126, 1.3636954, 30.994041)
+use_collision = true
 size = Vector3(10, 10, 5)
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="." unique_id=1436329914]
 transform = Transform3D(0.8764533, -0.00022725725, -0.48148566, -0.0012070627, 0.9999957, -0.0026692147, 0.4814842, 0.0029206304, 0.87644935, 17.522448, 1.3133447, 31.00737)
+use_collision = true
 size = Vector3(10, 10, 5)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="." unique_id=2026638952]
+transform = Transform3D(0.99999475, 5.9580198e-06, -0.00309715, 0.0015378555, 0.8670581, 0.4982052, 0.002688376, -0.49820745, 0.86705315, -39.52221, -1.7490425, 60.11897)
+use_collision = true
+size = Vector3(200, 20, 50)

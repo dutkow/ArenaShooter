@@ -166,6 +166,8 @@ public class CharacterMovement
             MoveAndSlideAir(state, space, delta);
         }
 
+        SnapToGround(state, space);
+
         /*
         CheckGround(state, state.Position, space);
         if (state.IsGrounded && state.Velocity.Y <= 0.0f)
