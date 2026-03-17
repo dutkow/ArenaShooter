@@ -2,11 +2,6 @@ using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Resources;
-using System.Runtime.Serialization;
-using static Godot.HttpRequest;
-using static Godot.WebSocketPeer;
 
 public enum CharacterMoveMode : byte
 {
@@ -52,7 +47,6 @@ public class CharacterMovement
         _character = character;
 
 
-
         if (_character.CollisionShape.Shape is CapsuleShape3D capsule)
         {
             _collisionCapsule = capsule;
@@ -78,16 +72,16 @@ public class CharacterMovement
         return state;
     }
 
-    public void CheckGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
+    public void CheckGround(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
     {
-        state.IsGrounded = false;
+        //state.IsGrounded = false;
 
         Vector3 motion = Vector3.Down * GROUNDED_CHECK_DISTANCE;
 
         PhysicsShapeQueryParameters3D motionQuery = new()
         {
             Shape = _collisionCapsule,
-            Transform = new Transform3D(Basis.Identity, state.Position),
+            Transform = new Transform3D(Basis.Identity, startPosition),
             Motion = motion,
             CollideWithBodies = true,
             CollideWithAreas = false
@@ -105,7 +99,7 @@ public class CharacterMovement
             PhysicsShapeQueryParameters3D collisionQuery = new()
             {
                 Shape = _collisionCapsule,
-                Transform = new Transform3D(Basis.Identity, state.Position + unsafeMotion),
+                Transform = new Transform3D(Basis.Identity, startPosition + unsafeMotion),
                 CollideWithBodies = true,
                 CollideWithAreas = false
             };
@@ -124,10 +118,13 @@ public class CharacterMovement
         }
     }
 
+    Vector3 ABOVE_GROUND_SNAP_OFFSET = new Vector3(0.0f, 2.0f, 0.0f);
+
     public void SnapToGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
     {
-        Vector3 start = state.Position;
-        Vector3 end = state.Position + Vector3.Down * GROUNDED_CHECK_DISTANCE * 2.0f;
+
+        Vector3 start = state.Position + ABOVE_GROUND_SNAP_OFFSET;
+        Vector3 end = start + Vector3.Down * GROUNDED_CHECK_DISTANCE * 2.0f - ABOVE_GROUND_SNAP_OFFSET;
         var rayParams = new PhysicsRayQueryParameters3D()
         {
             From = start,
@@ -144,7 +141,6 @@ public class CharacterMovement
             var position = (Vector3)value;          
 
             state.Position = new Vector3(state.Position.X, position.Y + GROUNDED_CHECK_DISTANCE * 0.5f, state.Position.Z);
-            GD.Print($"snap to ground ran. new position: {state.Position.Y}!");
         }
     }
 
@@ -152,6 +148,7 @@ public class CharacterMovement
     {
         var space = _character.GetWorld3D().DirectSpaceState;
 
+        CheckGround(state, state.Position, space);
         if (state.IsGrounded)
         {
             if (state.WantsToJump)
@@ -169,14 +166,13 @@ public class CharacterMovement
             MoveAndSlideAir(state, space, delta);
         }
 
-        CheckGround(state, space);
-
+        /*
+        CheckGround(state, state.Position, space);
         if (state.IsGrounded && state.Velocity.Y <= 0.0f)
         {
             SnapToGround(state, space);
-        }
+        }*/
 
-        GD.Print($"IS GROUNDED = {state.IsGrounded}");
 
         return state;
     }
@@ -196,7 +192,7 @@ public class CharacterMovement
         }
 
         ApplyAcceleration(state, _walkAcceleration, _walkDeceleration, delta);
-        ProjectVelocityToGround(state);
+        state.Velocity = state.Velocity.Slide(state.GroundNormal);
 
         Vector3 remainingMotion = state.Velocity * delta;
 
@@ -255,8 +251,6 @@ public class CharacterMovement
                     {
                         GD.Print($"collided with {node.Name}");
                     }
-
-                    // how do i et the object and print its name
                 }
 
                 if (restInfo.TryGetValue("point", out var positionValue))
@@ -264,8 +258,6 @@ public class CharacterMovement
                     var position = (Vector3)positionValue;
                     GD.Print($"collision position: {position}");
                 }
-
-
 
                 if (restInfo.TryGetValue("normal", out var value))
                 {
@@ -275,11 +267,10 @@ public class CharacterMovement
                     // this is a walkable slope
                     if (normal.Dot(Vector3.Up) >= _walkableThreshold)
                     {
-                        GD.Print($"WALKABLE SLOPE. ");
+                        GD.Print($"WALKABLE SLOPE. "); 
 
-                        Vector3 slideVector = remainingMotion.Slide(normal);
-                        // only apply projection on the Y to maintain constant horizontal velocity
-                        remainingMotion = new Vector3(remainingMotion.X, slideVector.Y, remainingMotion.Z);
+                        Vector3 slideVector = safeMotion.Slide(normal);
+                        remainingMotion = new Vector3(safeMotion.X, slideVector.Y, safeMotion.Z);
 
                         PhysicsShapeQueryParameters3D slopeQuery = new()
                         {
@@ -296,9 +287,9 @@ public class CharacterMovement
                         var slopeSafeMovePercent = slopeResult[0];
                         var slopeSafeMotion = remainingMotion * slopeSafeMovePercent;
 
-                        remainingMotion -= safeMotion;
-                        state.Position += safeMotion;
-
+                        //remainingMotion -= safeMotion;
+                        //state.Position += safeMotion;
+                        
                         if (slopeSafeMovePercent >= 1.0f)
                         {
                             moveComplete = true;
@@ -313,22 +304,43 @@ public class CharacterMovement
                             // check if this height is steppable
                             var collisionPoint = (Vector3)collisionPointValue;
 
-                            GD.Print($"collision at Y: {collisionPoint.Y}. state pos + step height = {state.Position.Y + MaxStepHeight - _collisionCapsule.MidHeight}");
 
                            
                             // This is not steppable, treat it like a wall
                             if (collisionPoint.Y > state.Position.Y -_collisionCapsule.MidHeight + MaxStepHeight)
                             {
-                                GD.Print("NOT STEPPABLE, we should slide");
-                                Vector3 horizontalMotion = new Vector3(safeMotion.X, 0, safeMotion.Z);
-                                Vector3 slide = safeMotion.Slide(normal);
-                                safeMotion = new Vector3(slide.X, safeMotion.Y, slide.Z);
+                                GD.Print($"sliding along wall");
+                                Vector3 slideVector = safeMotion.Slide(normal);
+                                remainingMotion = new Vector3(slideVector.X, safeMotion.Y, slideVector.Z);
+
+                                PhysicsShapeQueryParameters3D wallSlideQuery = new()
+                                {
+                                    Shape = _collisionCapsule,
+                                    Transform = new Transform3D(Basis.Identity, state.Position),
+                                    Motion = remainingMotion,
+                                    CollideWithBodies = true,
+                                    CollideWithAreas = false
+                                };
+                                wallSlideQuery.SetExclude(_characterCollisionRids);
+
+                                var slopeResult = space.CastMotion(wallSlideQuery);
+
+                                var wallSlideSafePercent = slopeResult[0];
+                                var wallSlideSafeMotion = remainingMotion * wallSlideSafePercent;
+
+                                //remainingMotion -= safeMotion;
+                                //state.Position += safeMotion;
+
+                                if (wallSlideSafePercent >= 1.0f)
+                                {
+                                    moveComplete = true;
+                                }
+
                             }
                             // This is a steppable collision height
                             else
                             {
-                                // what's the right way to allow for stepping over it? like I could just project the Y height or something but i'm afraid that could inadvertently cause errors if there's a collision anyways. not sure if we need to like
-                                // cast motion again to test or something
+                                // TODO
                                 GD.Print($"STEPPABLE");
 
                             }
@@ -344,7 +356,7 @@ public class CharacterMovement
             remainingMotion -= safeMotion;
             state.Position += safeMotion;
 
-            if(!moveComplete && remainingMotion.Length() < 0.01f)
+            if (!moveComplete && remainingMotion.Length() < 0.001f)
             {
                 moveComplete = true;
             }
@@ -383,40 +395,41 @@ public class CharacterMovement
             var result = space.CastMotion(query);
 
             var safeMovePercent = result[0];
-            var safeMotion = remainingMotion * safeMovePercent;            
-            
+            var safeMotion = remainingMotion * safeMovePercent;
+
+            var unsafeMovePercent = result[1];
             if (safeMovePercent >= 1.0f)
             {
                 moveComplete = true;
             }
             else
             {
-                var unsafeMovePercent = result[1];
                 var unsafeMotion = remainingMotion * unsafeMovePercent;
 
                 // Evaluate the collision normal
                 PhysicsShapeQueryParameters3D collisionQuery = new()
                 {
                     Shape = _collisionCapsule,
-                    Transform = new Transform3D(Basis.Identity, state.Position + unsafeMotion),
+                    Transform = new Transform3D(Basis.Identity, state.Position + safeMotion),
                     CollideWithBodies = true,
                     CollideWithAreas = false
                 };
                 collisionQuery.SetExclude(_characterCollisionRids);
 
+                GD.Print($"air moving and not safe");
+
                 if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var value))
                 {
+                    GD.Print($"COLLIDED DURING AIR MOVE. ");
+
                     var normal = (Vector3)value;
-                    GD.Print($"HIT SOMETHING IN AIR MOVE");
 
                     // we have landed on a walkable slope
                     if (normal.Dot(Vector3.Up) >= _walkableThreshold)
                     {
-                        GD.Print($"LANDED ON A WALKABLE SLOPE. ");
-                        remainingMotion = safeMotion;
-                        state.IsGrounded = true;
+                        remainingMotion = Vector3.Zero;
+                        OnLanded(state, space);
                         moveComplete = true;
-                        state.Velocity = new Vector3(state.Velocity.X, 0.0f, state.Velocity.Z);
                     }
                     // this is not a walkable angle
                     else
@@ -426,21 +439,36 @@ public class CharacterMovement
                         safeMotion = new Vector3(slide.X, safeMotion.Y, slide.Z);
                     }
                 }
-                else
-                {
-                    GD.Print("unable to move but did not find normal");
-                }
             }
 
             remainingMotion -= safeMotion;
             state.Position += safeMotion;
 
-            if (!moveComplete && remainingMotion.Length() < 0.01f)
+
+
+            if (!moveComplete)
             {
                 moveComplete = true;
+
+                CheckGround(state, state.Position, space);
+
+                GD.Print($"checking ground in air move");
+                if (state.IsGrounded)
+                {
+                    OnLanded(state, space);
+                    moveComplete = true;
+                }
             }
         }
         return state;
+    }
+
+    public void OnLanded(CharacterPublicState state, PhysicsDirectSpaceState3D space)
+    {
+        GD.Print($"on landed happened");
+        state.Velocity = new Vector3(state.Velocity.X, 0.0f, state.Velocity.Y);
+        state.IsGrounded = true;
+        SnapToGround(state, space);
     }
 
 
@@ -470,7 +498,7 @@ public class CharacterMovement
     }
 
 
-    const float GROUNDED_CHECK_DISTANCE = 0.01f;
+    const float GROUNDED_CHECK_DISTANCE = 2.0f;
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
 
