@@ -197,7 +197,7 @@ public class CharacterMovement
         }
         ApplyAcceleration(state, _walkAcceleration, _walkDeceleration, delta);
 
-        ProjectVelocityOnGround(state);
+        state.Velocity = state.Velocity.Slide(state.GroundNormal);
     }
 
     private void HandleAerialMovement(CharacterPublicState state, float delta)
@@ -384,10 +384,6 @@ public class CharacterMovement
         }
     }
 
-    private void ProjectVelocityOnGround(CharacterPublicState state)
-    {
-        state.Velocity -= state.GroundNormal * state.Velocity.Dot(state.GroundNormal);
-    }
 
     private Vector3 HandleCollision(CharacterPublicState state, float delta)
     {

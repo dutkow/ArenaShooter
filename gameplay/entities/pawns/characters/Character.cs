@@ -230,6 +230,7 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
+
     // Apply Replicated States
     public void ApplyAuthoritativePublicState(CharacterPublicState publicState)
     {
@@ -248,7 +249,15 @@ public partial class Character : Pawn, IDamageable
 
             }
 
-            ReconcileMoveState(publicState);
+            if(!_skipReconciliation)
+            {
+                ReconcileMoveState(publicState);
+            }
+            else
+            {
+                _ticksUntilReconciliationResume--;
+
+            }
         }
         else
         {
@@ -351,8 +360,8 @@ public partial class Character : Pawn, IDamageable
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
         const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
-        const float INTERP_THRESHOLD_H = 0.1f;      // Horizontal lerp start
-        const float INTERP_THRESHOLD_V = 0.1f;     // Vertical lerp start
+        const float INTERP_THRESHOLD_H = 0.05f;      // Horizontal lerp start
+        const float INTERP_THRESHOLD_V = 0.05f;     // Vertical lerp start
 
         // Lerp speeds
         const float INTERP_SPEED_H = 0.25f;
@@ -366,6 +375,7 @@ public partial class Character : Pawn, IDamageable
 
         float deltaY = Math.Abs(delta.Y);
 
+        GD.Print($"horizontal error: {distXZ}.");
 
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
@@ -515,6 +525,8 @@ public partial class Character : Pawn, IDamageable
         HandleMouseLook(@event);
     }
 
+    bool _skipReconciliation => _ticksUntilReconciliationResume > 0;
+
     public override void HandleRemoteSpawn(byte playerID)
     {
         base.HandleRemoteSpawn(playerID);
@@ -522,7 +534,9 @@ public partial class Character : Pawn, IDamageable
         _weapon.OwnerPlayerID = playerID;
     }
 
-
+    int _ticksToSkipReconiliationPostLaunch = 10;
+    int _ticksUntilReconciliationResume = 10;
+    int _accumulatedSkipReconiliationTicks;
     public void Launch(Vector3 velocity, CharacterPublicState state, bool isSimulating)
     {
         if(IsAuthority)
@@ -532,6 +546,7 @@ public partial class Character : Pawn, IDamageable
         else if(IsLocal)
         {
             state = MovementComp.QueueLaunch(state, velocity);
+            _ticksUntilReconciliationResume = _ticksToSkipReconiliationPostLaunch;
             GD.Print($"launch queued on client. is simulating: {isSimulating}");
         }
     }
