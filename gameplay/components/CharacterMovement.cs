@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using static Godot.HttpRequest;
@@ -101,7 +102,7 @@ public class CharacterMovement
     {
         Vector3 motion = Vector3.Down * GROUNDED_CHECK_DISTANCE;
 
-        PhysicsShapeQueryParameters3D query = new()
+        PhysicsShapeQueryParameters3D motionQuery = new()
         {
             Shape = _collisionCapsule,
             Transform = new Transform3D(Basis.Identity, state.Position),
@@ -109,15 +110,33 @@ public class CharacterMovement
             CollideWithBodies = true,
             CollideWithAreas = false
         };
-        query.SetExclude(_characterCollisionRids);
+        motionQuery.SetExclude(_characterCollisionRids);
 
-        if (space.GetRestInfo(query).TryGetValue("normal", out var normal))
+        var motionQueryResult = space.CastMotion(motionQuery);
+
+        var unsafeMotionPercent = motionQueryResult[1];
+
+        if (unsafeMotionPercent < 1.0f)
         {
-            state.GroundNormal = (Vector3)normal;
+            var unsafeMotion = unsafeMotionPercent * motion;
 
-            if (state.GroundNormal.Dot(Vector3.Up) >= _walkableThreshold)
+            PhysicsShapeQueryParameters3D collisionQuery = new()
             {
-                state.IsGrounded = true;
+                Shape = _collisionCapsule,
+                Transform = new Transform3D(Basis.Identity, state.Position + unsafeMotion),
+                CollideWithBodies = true,
+                CollideWithAreas = false
+            };
+            collisionQuery.SetExclude(_characterCollisionRids);
+
+            if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var normal))
+            {
+                state.GroundNormal = (Vector3)normal;
+
+                if (state.GroundNormal.Dot(Vector3.Up) >= _walkableThreshold)
+                {
+                    state.IsGrounded = true;
+                }
             }
         }
     }
@@ -204,6 +223,28 @@ public class CharacterMovement
                     CollideWithAreas = false
                 };
                 collisionQuery.SetExclude(_characterCollisionRids);
+
+                if(space.GetRestInfo(collisionQuery).TryGetValue("collider_id", out var objectID))
+                {
+                    var id = (ulong)objectID;
+
+                    var collisionObject = GodotObject.InstanceFromId(id);
+
+                    if(collisionObject is Node node)
+                    {
+                        GD.Print($"collided with {node.Name}");
+                    }
+
+                    // how do i et the object and print its name
+                }
+
+                if (space.GetRestInfo(collisionQuery).TryGetValue("point", out var positionValue))
+                {
+                    var position = (Vector3)positionValue;
+                    GD.Print($"collision position: {position}");
+                }
+
+
 
                 if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var value))
                 {
@@ -376,10 +417,7 @@ public class CharacterMovement
                         var slopeResult = space.CastMotion(slopeQuery);
 
                         var slopeSafeMovePercent = slopeResult[0];
-                        var slopeSafeMotion = remainingMotion * slopeSafeMovePercent;
-
-                        remainingMotion -= safeMotion;
-                        state.Position += safeMotion;
+                        safeMotion = remainingMotion * slopeSafeMovePercent;
 
                         if (slopeSafeMovePercent >= 1.0f)
                         {
@@ -462,7 +500,7 @@ public class CharacterMovement
     }
 
 
-    const float GROUNDED_CHECK_DISTANCE = 0.0f;
+    const float GROUNDED_CHECK_DISTANCE = 1.0f;
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
 

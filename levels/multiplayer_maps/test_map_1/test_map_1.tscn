@@ -19,7 +19,7 @@ background_mode = 2
 sky = SubResource("Sky_gojnm")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_j23ab"]
-size = Vector3(200, 0.1, 200)
+size = Vector3(200, 0.01, 200)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_m0y5v"]
 size = Vector2(200, 200)
@@ -48,13 +48,13 @@ environment = SubResource("Environment_1c2mv")
 transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76057595, 0, 0, 0)
 shadow_enabled = true
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1490177417]
+[node name="StupidFloor" type="StaticBody3D" parent="." unique_id=1490177417]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=430470430]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StupidFloor" unique_id=430470430]
 shape = SubResource("BoxShape3D_j23ab")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=911361756]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.015209198, 0, 0.080890656)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StupidFloor" unique_id=911361756]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.015, 0, 0)
 material_override = ExtResource("4_m0y5v")
 mesh = SubResource("PlaneMesh_m0y5v")
 
@@ -115,13 +115,13 @@ _targetDestination = NodePath("Marker3D")
 transform = Transform3D(-0.703804, 0, 0.71039426, 0, 1, 0, -0.71039426, 0, -0.703804, 52.72905, 0.6987195, 7.0514946)
 gizmo_extents = 5.0
 
-[node name="StaticBody3D2" type="StaticBody3D" parent="." unique_id=592124310]
+[node name="StupidBox" type="StaticBody3D" parent="." unique_id=592124310]
 transform = Transform3D(0.9999996, -1.8587798e-10, -8.1490725e-10, 1.692456e-09, 1, 2.3283064e-10, -2.3283064e-10, 0, 0.9999996, 1.9362024, 0.028018534, -16.490932)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2" unique_id=795539259]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StupidBox" unique_id=795539259]
 mesh = SubResource("BoxMesh_pc4o5")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2" unique_id=1510185885]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StupidBox" unique_id=1510185885]
 shape = SubResource("BoxShape3D_cpfjo")
 
 [node name="StaticBody3D8" type="StaticBody3D" parent="." unique_id=1035760119]
