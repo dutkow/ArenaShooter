@@ -163,6 +163,7 @@ public class CharacterMovement
                 break;
             }
 
+            // QUERY THE REMAINING MOTION
             PhysicsShapeQueryParameters3D query = new()
             {
                 Shape = _collisionCapsule,
@@ -178,12 +179,12 @@ public class CharacterMovement
             var safeMovePercent = result[0];
             var safeMotion = remainingMotion * safeMovePercent;
 
+            // IF FINISHED, 
             if(safeMovePercent >= 1.0f)
             {
                 moveComplete = true;
             }
-
-            if (safeMovePercent < 1.0f)
+            else
             {
                 var unsafeMovePercent = result[1];
                 var unsafeMotion = remainingMotion * unsafeMovePercent;
@@ -201,12 +202,11 @@ public class CharacterMovement
                 if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var value))
                 {
                     var normal = (Vector3)value;
-                    GD.Print($"NORMAL = {normal} ");
 
                     // this is a walkable slope
                     if (normal.Dot(Vector3.Up) >= _walkableThreshold)
                     {
-                        GD.Print($"WALKABLE SLOPE. ");
+                        GD.Print($"WALKING UP SLOPE. NORMAL: {normal}. NORMAL DOT: {normal.Dot(Vector3.Up)} ");
 
                         Vector3 slideVector = remainingMotion.Slide(normal);
                         // only apply projection on the Y to maintain constant horizontal velocity
@@ -227,8 +227,6 @@ public class CharacterMovement
                         var slopeSafeMovePercent = slopeResult[0];
                         var slopeSafeMotion = remainingMotion * slopeSafeMovePercent;
 
-                        remainingMotion -= safeMotion;
-                        state.Position += safeMotion;
 
                         if (slopeSafeMovePercent >= 1.0f)
                         {
@@ -242,17 +240,37 @@ public class CharacterMovement
                         {
                             // check if this height is steppable
                             var collisionPoint = (Vector3)collisionPointValue;
-
-                            GD.Print($"collision at Y: {collisionPoint.Y}. state pos + step height = {state.Position.Y + MaxStepHeight - _collisionCapsule.MidHeight}");
-
                            
                             // This is not steppable, treat it like a wall
                             if (collisionPoint.Y > state.Position.Y -_collisionCapsule.MidHeight + MaxStepHeight)
                             {
-                                GD.Print("NOT STEPPABLE");
-                                Vector3 horizontalMotion = new Vector3(safeMotion.X, 0, safeMotion.Z);
+                                GD.Print("SLIDING ON WALL");
                                 Vector3 slide = safeMotion.Slide(normal);
-                                safeMotion = new Vector3(slide.X, safeMotion.Y, slide.Z);
+                                remainingMotion = new Vector3(safeMotion.X, 0, safeMotion.Z);
+
+                                // Slide collision query
+                                PhysicsShapeQueryParameters3D wallSlideQuery = new()
+                                {
+                                    Shape = _collisionCapsule,
+                                    Transform = new Transform3D(Basis.Identity, state.Position),
+                                    Motion = remainingMotion,
+                                    CollideWithBodies = true,
+                                    CollideWithAreas = false
+                                };
+                                wallSlideQuery.SetExclude(_characterCollisionRids);
+
+                                var wallSlideResult = space.CastMotion(wallSlideQuery);
+
+
+                                var wallSlideSafeMovePercent = wallSlideResult[0];
+                                var wallSlideSafeMotion = remainingMotion * wallSlideSafeMovePercent;
+
+
+                                if (wallSlideSafeMovePercent >= 1.0f)
+                                {
+                                    moveComplete = true;
+                                }
+
                             }
                             // This is a steppable collision height
                             else
@@ -269,15 +287,17 @@ public class CharacterMovement
                 {
                     GD.Print("unable to move but did not find normal");
                 }
-            }
 
+
+
+                if (!moveComplete && remainingMotion.Length() < 0.01f)
+                {
+                    moveComplete = true;
+                }
+            }
             remainingMotion -= safeMotion;
             state.Position += safeMotion;
 
-            if(!moveComplete && remainingMotion.Length() < 0.01f)
-            {
-                moveComplete = true;
-            }
         }
 
         return state;
@@ -287,8 +307,6 @@ public class CharacterMovement
     {
         ApplyAcceleration(state, _airAcceleration, _airDeceleration, delta);
         ApplyGravity(state, delta);
-
-        state.Velocity = state.Velocity.Slide(state.GroundNormal);
 
         Vector3 remainingMotion = state.Velocity * delta;
 
@@ -343,12 +361,13 @@ public class CharacterMovement
                 if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var value))
                 {
                     var normal = (Vector3)value;
-                    GD.Print($"NORMAL = {normal} ");
 
                     // we have landed on a walkable slope
                     if (normal.Dot(Vector3.Up) >= _walkableThreshold)
                     {
-                        GD.Print($"WALKABLE SLOPE. ");
+                        GD.Print($"WALKING UP SLOPE. NORMAL: {normal} ");
+
+                        moveComplete = true; // we have landed on the ground
 
                         Vector3 slideVector = remainingMotion.Slide(normal);
                         // only apply projection on the Y to maintain constant horizontal velocity
@@ -385,13 +404,12 @@ public class CharacterMovement
                             // check if this height is steppable
                             var collisionPoint = (Vector3)collisionPointValue;
 
-                            GD.Print($"collision at Y: {collisionPoint.Y}. state pos + step height = {state.Position.Y + MaxStepHeight - _collisionCapsule.MidHeight}");
 
 
                             // This is not steppable, treat it like a wall
                             if (collisionPoint.Y > state.Position.Y - _collisionCapsule.MidHeight + MaxStepHeight)
                             {
-                                GD.Print("NOT STEPPABLE");
+                                GD.Print("SLIDING ON WALL");
                                 Vector3 horizontalMotion = new Vector3(safeMotion.X, 0, safeMotion.Z);
                                 Vector3 slide = safeMotion.Slide(normal);
                                 safeMotion = new Vector3(slide.X, safeMotion.Y, slide.Z);
@@ -401,7 +419,7 @@ public class CharacterMovement
                             {
                                 // what's the right way to allow for stepping over it? like I could just project the Y height or something but i'm afraid that could inadvertently cause errors if there's a collision anyways. not sure if we need to like
                                 // cast motion again to test or something
-                                GD.Print($"STEPPABLE");
+                                GD.Print($"STEPPING");
 
                             }
                         }
@@ -453,7 +471,7 @@ public class CharacterMovement
     }
 
 
-    const float GROUNDED_CHECK_DISTANCE = 0.01f;
+    const float GROUNDED_CHECK_DISTANCE = 0.0f;
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
 
