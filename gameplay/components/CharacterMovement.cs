@@ -126,7 +126,7 @@ public class CharacterMovement
 
     public void SnapToGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
     {
-        Vector3 start = state.Position;
+        Vector3 start = state.Position + Vector3.Up * _collisionCapsule.MidHeight;
         Vector3 end = state.Position + Vector3.Down * 3.0f;
         var rayParams = new PhysicsRayQueryParameters3D()
         {
@@ -143,7 +143,7 @@ public class CharacterMovement
         {
             var position = (Vector3)value;          
 
-            state.Position = new Vector3(state.Position.X, position.Y + GROUNDED_CHECK_DISTANCE, state.Position.Z);
+            state.Position = new Vector3(state.Position.X, position.Y + _collisionCapsule.MidHeight, state.Position.Z);
             GD.Print($"snap to ground ran. new position: {state.Position.Y}!");
         }
     }
@@ -244,7 +244,8 @@ public class CharacterMovement
                 };
                 collisionQuery.SetExclude(_characterCollisionRids);
 
-                if(space.GetRestInfo(collisionQuery).TryGetValue("collider_id", out var objectID))
+                var restInfo = space.GetRestInfo(collisionQuery);
+                if(restInfo.TryGetValue("collider_id", out var objectID))
                 {
                     var id = (ulong)objectID;
 
@@ -258,7 +259,7 @@ public class CharacterMovement
                     // how do i et the object and print its name
                 }
 
-                if (space.GetRestInfo(collisionQuery).TryGetValue("point", out var positionValue))
+                if (restInfo.TryGetValue("point", out var positionValue))
                 {
                     var position = (Vector3)positionValue;
                     GD.Print($"collision position: {position}");
@@ -266,7 +267,7 @@ public class CharacterMovement
 
 
 
-                if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var value))
+                if (restInfo.TryGetValue("normal", out var value))
                 {
                     var normal = (Vector3)value;
                     GD.Print($"NORMAL = {normal} ");
@@ -306,9 +307,8 @@ public class CharacterMovement
                     // this is not a walkable angle
                     else
                     {
-
                         GD.Print($"not walkable slope");
-                        if(space.GetRestInfo(collisionQuery).TryGetValue("point", out var collisionPointValue))
+                        if(restInfo.TryGetValue("point", out var collisionPointValue))
                         {
                             // check if this height is steppable
                             var collisionPoint = (Vector3)collisionPointValue;
@@ -434,12 +434,6 @@ public class CharacterMovement
 
             remainingMotion -= safeMotion;
             state.Position += safeMotion;
-
-            if(state.IsGrounded)
-            {
-                SnapToGround(state, space);
-                GD.Print($"SNAPPING TO GROUND");
-            }
 
             if (!moveComplete && remainingMotion.Length() < 0.01f)
             {
