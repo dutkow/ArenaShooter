@@ -34,13 +34,13 @@ mesh = SubResource("CapsuleMesh_tcfo8")
 skeleton = NodePath("../../../..")
 
 [node name="ThirdPersonWeaponSocket" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh" unique_id=509591268]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.26758337, -0.43688428)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.500821, -0.43688428)
 
 [node name="IonRayGunAnimationsFinal2" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket" unique_id=779974022 instance=ExtResource("3_p3qyi")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.2215538, 0.26775348, 0.21408409)
 
 [node name="CameraPivot" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh" unique_id=1782343330]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4623046, -0.34713352)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.757373, -0.34713352)
 
 [node name="Camera3D" type="Camera3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot" unique_id=669569284]
 
