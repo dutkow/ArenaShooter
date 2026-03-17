@@ -29,7 +29,7 @@ public class CharacterMovement
 
     // Internal state
 
-    private CapsuleShape3D _collisionCapsule;
+    private Shape3D _collisionShape;
     private Godot.Collections.Array<Rid> _characterCollisionRids = new();
 
 
@@ -47,10 +47,10 @@ public class CharacterMovement
         _character = character;
 
 
-        if (_character.CollisionShape.Shape is CapsuleShape3D capsule)
+        if (_character.CollisionShape.Shape is Shape3D collisionShape)
         {
-            _collisionCapsule = capsule;
-            _characterCollisionRids.Add(capsule.GetRid());
+            _collisionShape = collisionShape;
+            _characterCollisionRids.Add(_collisionShape.GetRid());
         }
         else
         {
@@ -80,7 +80,7 @@ public class CharacterMovement
 
         PhysicsShapeQueryParameters3D motionQuery = new()
         {
-            Shape = _collisionCapsule,
+            Shape = _collisionShape,
             Transform = new Transform3D(Basis.Identity, startPosition),
             Motion = motion,
             CollideWithBodies = true,
@@ -98,7 +98,7 @@ public class CharacterMovement
 
             PhysicsShapeQueryParameters3D collisionQuery = new()
             {
-                Shape = _collisionCapsule,
+                Shape = _collisionShape,
                 Transform = new Transform3D(Basis.Identity, startPosition + unsafeMotion),
                 CollideWithBodies = true,
                 CollideWithAreas = false
@@ -182,6 +182,8 @@ public class CharacterMovement
         state.Velocity = state.Velocity.Slide(state.GroundNormal);
     }
 
+    const float SKIN_WIDTH = 0.0f;
+
     public CharacterPublicState MoveAndSlideGrounded(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta)
     {
         if (state.WantsToJump && state.IsGrounded)
@@ -207,7 +209,7 @@ public class CharacterMovement
 
             PhysicsShapeQueryParameters3D query = new()
             {
-                Shape = _collisionCapsule,
+                Shape = _collisionShape,
                 Transform = new Transform3D(Basis.Identity, state.Position),
                 Motion = remainingMotion,
                 CollideWithBodies = true,
@@ -222,6 +224,9 @@ public class CharacterMovement
 
             if(safeMovePercent >= 1.0f)
             {
+                remainingMotion -= safeMotion;
+                state.Position += safeMotion;
+
                 moveComplete = true;
             }
 
@@ -233,10 +238,10 @@ public class CharacterMovement
                 // Evaluate the collision normal
                 PhysicsShapeQueryParameters3D collisionQuery = new()
                 {
-                    Shape = _collisionCapsule,
+                    Shape = _collisionShape,
                     Transform = new Transform3D(Basis.Identity, state.Position + unsafeMotion),
-                    CollideWithBodies = true,
-                    CollideWithAreas = false
+                    CollideWithBodies = false,
+                    CollideWithAreas = true
                 };
                 collisionQuery.SetExclude(_characterCollisionRids);
 
@@ -256,7 +261,7 @@ public class CharacterMovement
                 if (restInfo.TryGetValue("point", out var positionValue))
                 {
                     var position = (Vector3)positionValue;
-                    GD.Print($"collision position: {position}");
+                    //GD.Print($"collision position: {position}");
                 }
 
                 if (restInfo.TryGetValue("normal", out var value))
@@ -264,32 +269,35 @@ public class CharacterMovement
                     var normal = (Vector3)value;
                     GD.Print($"NORMAL = {normal} ");
 
+                    Vector3 slopeMotion = remainingMotion.Slide(state.GroundNormal);
+                    slopeMotion = new Vector3(safeMotion.X, slopeMotion.Y, safeMotion.Z);
+
                     // this is a walkable slope
                     if (normal.Dot(Vector3.Up) >= _walkableThreshold)
                     {
                         GD.Print($"WALKABLE SLOPE. "); 
 
-                        Vector3 slideVector = safeMotion.Slide(normal);
-                        remainingMotion = new Vector3(safeMotion.X, slideVector.Y, safeMotion.Z);
 
                         PhysicsShapeQueryParameters3D slopeQuery = new()
                         {
-                            Shape = _collisionCapsule,
+                            Shape = _collisionShape,
                             Transform = new Transform3D(Basis.Identity, state.Position),
-                            Motion = remainingMotion,
-                            CollideWithBodies = true,
-                            CollideWithAreas = false
+                            Motion = slopeMotion,
+                            CollideWithBodies = false,
+                            CollideWithAreas = true
                         };
                         slopeQuery.SetExclude(_characterCollisionRids);
 
                         var slopeResult = space.CastMotion(slopeQuery);
 
                         var slopeSafeMovePercent = slopeResult[0];
-                        var slopeSafeMotion = remainingMotion * slopeSafeMovePercent;
+                        var slopeSafeMotion = slopeMotion * slopeSafeMovePercent;
 
-                        //remainingMotion -= safeMotion;
-                        //state.Position += safeMotion;
-                        
+                        remainingMotion -= slopeSafeMotion;
+                        state.Position += slopeSafeMotion;
+
+                        state.Velocity = slopeSafeMotion;
+
                         if (slopeSafeMovePercent >= 1.0f)
                         {
                             moveComplete = true;
@@ -298,27 +306,34 @@ public class CharacterMovement
                     // this is not a walkable angle
                     else
                     {
-                        GD.Print($"sliding along wall");
-                        Vector3 slideVector = safeMotion.Slide(normal);
-                        remainingMotion = new Vector3(slideVector.X, safeMotion.Y, slideVector.Z);
+                        Vector3 wallSlideMotion = remainingMotion.Slide(normal);
+                        GD.Print($"sliding along wall. slide motion: {wallSlideMotion}. unsafe motion length = {unsafeMotion.Length()}");
 
                         PhysicsShapeQueryParameters3D wallSlideQuery = new()
                         {
-                            Shape = _collisionCapsule,
+                            Shape = _collisionShape,
                             Transform = new Transform3D(Basis.Identity, state.Position),
-                            Motion = remainingMotion,
-                            CollideWithBodies = true,
-                            CollideWithAreas = false
+                            Motion = wallSlideMotion,
+                            CollideWithBodies = false,
+                            CollideWithAreas = true
                         };
                         wallSlideQuery.SetExclude(_characterCollisionRids);
 
                         var slopeResult = space.CastMotion(wallSlideQuery);
 
-                        var wallSlideSafePercent = slopeResult[0];
-                        var wallSlideSafeMotion = remainingMotion * wallSlideSafePercent;
 
-                        //remainingMotion -= safeMotion;
-                        //state.Position += safeMotion;
+                        float skinWidth = 0.1f; // or smaller, just enough to avoid touching
+
+                        var wallSlideSafePercent = slopeResult[0];
+                        wallSlideSafePercent -= skinWidth;
+
+                        var wallSlideSafeMotion = wallSlideMotion * wallSlideSafePercent;
+
+
+                        remainingMotion -= wallSlideSafeMotion;
+                        state.Position += wallSlideSafeMotion;
+
+                        state.Velocity = wallSlideSafeMotion;
 
                         if (wallSlideSafePercent >= 1.0f)
                         {
@@ -331,9 +346,6 @@ public class CharacterMovement
                     GD.Print("unable to move but did not find normal");
                 }
             }
-
-            remainingMotion -= safeMotion;
-            state.Position += safeMotion;
 
             if (!moveComplete && remainingMotion.Length() < 0.001f)
             {
@@ -363,7 +375,7 @@ public class CharacterMovement
 
             PhysicsShapeQueryParameters3D query = new()
             {
-                Shape = _collisionCapsule,
+                Shape = _collisionShape,
                 Transform = new Transform3D(Basis.Identity, state.Position),
                 Motion = remainingMotion,
                 CollideWithBodies = true,
@@ -388,7 +400,7 @@ public class CharacterMovement
                 // Evaluate the collision normal
                 PhysicsShapeQueryParameters3D collisionQuery = new()
                 {
-                    Shape = _collisionCapsule,
+                    Shape = _collisionShape,
                     Transform = new Transform3D(Basis.Identity, state.Position + safeMotion),
                     CollideWithBodies = true,
                     CollideWithAreas = false
@@ -562,7 +574,7 @@ public class CharacterMovement
 
             PhysicsShapeQueryParameters3D query = new()
             {
-                Shape = _collisionCapsule,
+                Shape = _collisionShape,
                 Transform = new Transform3D(Basis.Identity, state.Position),
                 CollideWithBodies = true,
                 CollideWithAreas = true,

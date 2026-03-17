@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://b708cmx0cac5h" path="res://gameplay/weapons/weapon.tscn" id="2_u04n7"]
 [ext_resource type="PackedScene" uid="uid://cdr127jylj4u" path="res://assets/external/ion_gun/ion_ray_gun_animations_final_2.tscn" id="3_p3qyi"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sbyc8"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bbqeg"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_tcfo8"]
 
@@ -24,7 +24,7 @@ _thirdPersonWeaponSocket = NodePath("Area3D/CollisionShape3D/VisualContainer/Cha
 [node name="Area3D" type="Area3D" parent="." unique_id=391929960]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=739677258]
-shape = SubResource("CapsuleShape3D_sbyc8")
+shape = SubResource("CapsuleShape3D_bbqeg")
 
 [node name="VisualContainer" type="Node3D" parent="Area3D/CollisionShape3D" unique_id=2046479173]
 
