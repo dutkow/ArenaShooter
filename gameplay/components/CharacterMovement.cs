@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Resources;
 using System.Runtime.Serialization;
 using static Godot.HttpRequest;
 using static Godot.WebSocketPeer;
@@ -69,41 +70,18 @@ public class CharacterMovement
     {
 
         ApplyInput(state, cmd, delta);
-
         MoveAndSlide(state, delta);
 
-
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
         VerticalVelocity = state.Velocity.Y;
 
-        /*
-        if(!CheckLaunch(state, isSimulating))
-        {
-            CheckGrounded(state);
-        }
-
-        switch (state.MovementMode)
-            {
-                case CharacterMoveMode.GROUNDED:
-                    HandleGroundedMovement(state, delta);
-                    break;
-                case CharacterMoveMode.FALLING:
-                    HandleAerialMovement(state, delta);
-                    break;
-            }
-
-        PerformMove(state, delta);
-
-        HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
-        VerticalVelocity = state.Velocity.Y;
-
-        CheckCollidables(state, isSimulating);
-        */
         return state;
     }
 
     public void CheckGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
     {
+        state.IsGrounded = false;
+
         Vector3 motion = Vector3.Down * GROUNDED_CHECK_DISTANCE;
 
         PhysicsShapeQueryParameters3D motionQuery = new()
@@ -144,12 +122,6 @@ public class CharacterMovement
                 }
             }
         }
-
-        if(state.IsGrounded)
-        {
-            SnapToGround(state, space);
-
-        }
     }
 
     public void SnapToGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
@@ -171,7 +143,7 @@ public class CharacterMovement
         {
             var position = (Vector3)value;          
 
-            state.Position = new Vector3(state.Position.X, position.Y + GROUNDED_CHECK_DISTANCE , state.Position.Z);
+            state.Position = new Vector3(state.Position.X, position.Y + GROUNDED_CHECK_DISTANCE, state.Position.Z);
             GD.Print($"snap to ground ran. new position: {state.Position.Y}!");
         }
     }
@@ -179,9 +151,6 @@ public class CharacterMovement
     public CharacterPublicState MoveAndSlide(CharacterPublicState state, float delta)
     {
         var space = _character.GetWorld3D().DirectSpaceState;
-
-        CheckGround(state, space);
-
 
         if (state.IsGrounded)
         {
@@ -202,6 +171,12 @@ public class CharacterMovement
 
         CheckGround(state, space);
 
+        if (state.IsGrounded && state.Velocity.Y <= 0.0f)
+        {
+            SnapToGround(state, space);
+        }
+
+        GD.Print($"IS GROUNDED = {state.IsGrounded}");
 
         return state;
     }
@@ -381,6 +356,7 @@ public class CharacterMovement
     public CharacterPublicState MoveAndSlideAir(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta)
     {
         ApplyAcceleration(state, _airAcceleration, _airDeceleration, delta);
+        ApplyGravity(state, delta);
 
         Vector3 remainingMotion = state.Velocity * delta;
 
@@ -437,8 +413,10 @@ public class CharacterMovement
                     if (normal.Dot(Vector3.Up) >= _walkableThreshold)
                     {
                         GD.Print($"LANDED ON A WALKABLE SLOPE. ");
-                        remainingMotion = unsafeMotion;
+                        remainingMotion = safeMotion;
+                        state.IsGrounded = true;
                         moveComplete = true;
+                        state.Velocity = new Vector3(state.Velocity.X, 0.0f, state.Velocity.Z);
                     }
                     // this is not a walkable angle
                     else
@@ -456,6 +434,12 @@ public class CharacterMovement
 
             remainingMotion -= safeMotion;
             state.Position += safeMotion;
+
+            if(state.IsGrounded)
+            {
+                SnapToGround(state, space);
+                GD.Print($"SNAPPING TO GROUND");
+            }
 
             if (!moveComplete && remainingMotion.Length() < 0.01f)
             {
@@ -492,7 +476,7 @@ public class CharacterMovement
     }
 
 
-    const float GROUNDED_CHECK_DISTANCE = 0.5f;
+    const float GROUNDED_CHECK_DISTANCE = 0.1f;
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
 
@@ -500,7 +484,6 @@ public class CharacterMovement
 
     public void ApplyAcceleration(CharacterPublicState state, float acceleration, float deceleration, float delta)
     {
-        ApplyGravity(state, delta);
         // Correctly clamped acceleration
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
 

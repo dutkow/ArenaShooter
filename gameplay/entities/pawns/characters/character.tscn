@@ -22,6 +22,7 @@ _visualContainer = NodePath("Area3D/CollisionShape3D/VisualContainer")
 _thirdPersonWeaponSocket = NodePath("Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=391929960]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=739677258]
 shape = SubResource("CapsuleShape3D_sbyc8")
