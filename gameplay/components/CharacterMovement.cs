@@ -298,52 +298,31 @@ public class CharacterMovement
                     // this is not a walkable angle
                     else
                     {
-                        GD.Print($"not walkable slope");
-                        if(restInfo.TryGetValue("point", out var collisionPointValue))
+                        GD.Print($"sliding along wall");
+                        Vector3 slideVector = safeMotion.Slide(normal);
+                        remainingMotion = new Vector3(slideVector.X, safeMotion.Y, slideVector.Z);
+
+                        PhysicsShapeQueryParameters3D wallSlideQuery = new()
                         {
-                            // check if this height is steppable
-                            var collisionPoint = (Vector3)collisionPointValue;
+                            Shape = _collisionCapsule,
+                            Transform = new Transform3D(Basis.Identity, state.Position),
+                            Motion = remainingMotion,
+                            CollideWithBodies = true,
+                            CollideWithAreas = false
+                        };
+                        wallSlideQuery.SetExclude(_characterCollisionRids);
 
+                        var slopeResult = space.CastMotion(wallSlideQuery);
 
-                           
-                            // This is not steppable, treat it like a wall
-                            if (collisionPoint.Y > state.Position.Y -_collisionCapsule.MidHeight + MaxStepHeight)
-                            {
-                                GD.Print($"sliding along wall");
-                                Vector3 slideVector = safeMotion.Slide(normal);
-                                remainingMotion = new Vector3(slideVector.X, safeMotion.Y, slideVector.Z);
+                        var wallSlideSafePercent = slopeResult[0];
+                        var wallSlideSafeMotion = remainingMotion * wallSlideSafePercent;
 
-                                PhysicsShapeQueryParameters3D wallSlideQuery = new()
-                                {
-                                    Shape = _collisionCapsule,
-                                    Transform = new Transform3D(Basis.Identity, state.Position),
-                                    Motion = remainingMotion,
-                                    CollideWithBodies = true,
-                                    CollideWithAreas = false
-                                };
-                                wallSlideQuery.SetExclude(_characterCollisionRids);
+                        //remainingMotion -= safeMotion;
+                        //state.Position += safeMotion;
 
-                                var slopeResult = space.CastMotion(wallSlideQuery);
-
-                                var wallSlideSafePercent = slopeResult[0];
-                                var wallSlideSafeMotion = remainingMotion * wallSlideSafePercent;
-
-                                //remainingMotion -= safeMotion;
-                                //state.Position += safeMotion;
-
-                                if (wallSlideSafePercent >= 1.0f)
-                                {
-                                    moveComplete = true;
-                                }
-
-                            }
-                            // This is a steppable collision height
-                            else
-                            {
-                                // TODO
-                                GD.Print($"STEPPABLE");
-
-                            }
+                        if (wallSlideSafePercent >= 1.0f)
+                        {
+                            moveComplete = true;
                         }
                     }
                 }
