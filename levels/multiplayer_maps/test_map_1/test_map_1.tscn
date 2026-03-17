@@ -19,7 +19,8 @@ background_mode = 2
 sky = SubResource("Sky_gojnm")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_j23ab"]
-size = Vector3(200, 0.01, 200)
+margin = 0.0
+size = Vector3(200, 1, 200)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_m0y5v"]
 size = Vector2(200, 200)
@@ -59,13 +60,13 @@ material_override = ExtResource("4_m0y5v")
 mesh = SubResource("PlaneMesh_m0y5v")
 
 [node name="SpawnPoint3" parent="." unique_id=1982700480 instance=ExtResource("2_j23ab")]
-transform = Transform3D(1, -1.8587798e-10, -2.3283064e-10, 7.602239e-10, 1, 0, 0, 0, 1.0000002, 11.379432, 6.4494324, -2.8232403)
+transform = Transform3D(0.99999994, -1.8587798e-10, -3.4924597e-10, 1.2261125e-09, 1, 0, 0, 0, 1.0000002, 11.346307, 12.155678, -2.817434)
 
 [node name="SpawnPoint5" parent="." unique_id=896187144 instance=ExtResource("2_j23ab")]
-transform = Transform3D(1, -1.8587798e-10, -2.3283064e-10, 7.602239e-10, 1, 0, 0, 0, 1.0000002, 0.33451647, 6.4494324, -1.379346)
+transform = Transform3D(0.99999994, -1.8587798e-10, -3.4924597e-10, 1.2261125e-09, 1, 0, 0, 0, 1.0000002, 0.30139294, 12.155677, -1.3735399)
 
 [node name="SpawnPoint6" parent="." unique_id=1609247714 instance=ExtResource("2_j23ab")]
-transform = Transform3D(1, -1.8587798e-10, -2.3283064e-10, 7.602239e-10, 1, 0, 0, 0, 1.0000002, 11.321593, 6.449432, 5.802949)
+transform = Transform3D(0.99999994, -1.8587798e-10, -3.4924597e-10, 1.2261125e-09, 1, 0, 0, 0, 1.0000002, 11.288468, 12.155677, 5.808755)
 
 [node name="JumpPad" parent="." unique_id=655431875 instance=ExtResource("6_m0y5v")]
 transform = Transform3D(0.9999999, -1.8587798e-10, -2.3283064e-10, 7.6056494e-10, 1, 0, 0, 0, 0.9999999, 8.806179, 0.5549511, -0.00058749877)

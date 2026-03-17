@@ -44,6 +44,8 @@ public class CharacterMovement
 
     public int _ticksToIgnoreGroundPostJump = 10;
 
+    private bool _justJumped;
+
     public void Initialize(Character character)
     {
         _character = character;
@@ -70,7 +72,6 @@ public class CharacterMovement
 
         MoveAndSlide(state, delta);
 
-        GD.Print($"is grounded: {state.IsGrounded}");
 
         HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
         VerticalVelocity = state.Velocity.Y;
@@ -132,21 +133,45 @@ public class CharacterMovement
             };
             collisionQuery.SetExclude(_characterCollisionRids);
 
-            if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var normal))
+            var restInfo = space.GetRestInfo(collisionQuery);
+            if (restInfo.TryGetValue("normal", out var normal))
             {
                 state.GroundNormal = (Vector3)normal;
 
                 if (state.GroundNormal.Dot(Vector3.Up) >= _walkableThreshold)
                 {
                     state.IsGrounded = true;
-
-                    if (space.GetRestInfo(collisionQuery).TryGetValue("point", out var pointValue))
-                    {
-                        Vector3 collisionPosition = (Vector3)pointValue;
-                        state.Position = new Vector3(state.Position.X, collisionPosition.Y + GROUNDED_CHECK_DISTANCE, state.Position.Z);
-                    }
                 }
             }
+        }
+
+        if(state.IsGrounded)
+        {
+            SnapToGround(state, space);
+
+        }
+    }
+
+    public void SnapToGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
+    {
+        Vector3 start = state.Position + Vector3.Up * 5.0f;
+        Vector3 end = state.Position + Vector3.Down * 10.0f;
+        var rayParams = new PhysicsRayQueryParameters3D()
+        {
+            From = start,
+            To = end,
+            CollideWithBodies = true,
+            CollideWithAreas = false
+        };
+        rayParams.SetExclude(_characterCollisionRids);
+
+        var result = space.IntersectRay(rayParams);
+
+        if(result.TryGetValue("position", out var value))
+        {
+            var position = (Vector3)value;          
+
+            state.Position = new Vector3(state.Position.X, position.Y + GROUNDED_CHECK_DISTANCE, state.Position.Z);
         }
     }
 
@@ -154,9 +179,12 @@ public class CharacterMovement
     {
         var space = _character.GetWorld3D().DirectSpaceState;
 
+        CheckGround(state, space);
+
+
         if (state.IsGrounded)
         {
-            if (state.WantsToJump)
+            if (state.WantsToJump && !_justJumped)
             {
                 Jump(state);
                 MoveAndSlideAir(state, space, delta);
@@ -170,6 +198,11 @@ public class CharacterMovement
         {
             MoveAndSlideAir(state, space, delta);
         }
+
+        CheckGround(state, space);
+
+
+        GD.Print($"y pos = {state.Position.Y}");
         return state;
     }
 
@@ -184,7 +217,6 @@ public class CharacterMovement
         ProjectVelocityToGround(state);
         //ApplyGravity(state, delta);
 
-        GD.Print($"move and slide grounded running");
         Vector3 remainingMotion = state.Velocity * delta;
 
         bool moveComplete = false;
@@ -370,10 +402,7 @@ public class CharacterMovement
             var result = space.CastMotion(query);
 
             var safeMovePercent = result[0];
-            var safeMotion = remainingMotion * safeMovePercent;
-
-            GD.Print($"safe percent: {safeMovePercent}");
-            
+            var safeMotion = remainingMotion * safeMovePercent;            
             
             if (safeMovePercent >= 1.0f)
             {
@@ -397,16 +426,14 @@ public class CharacterMovement
                 if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var value))
                 {
                     var normal = (Vector3)value;
-                    GD.Print($"NORMAL = {normal} ");
 
                     // we have landed on a walkable slope
                     if (normal.Dot(Vector3.Up) >= _walkableThreshold)
                     {
                         GD.Print($"LANDED ON A WALKABLE SLOPE. ");
-                        moveComplete = true;
-                        state.IsGrounded = true;
                         remainingMotion = safeMotion;
-                        state.Velocity = new Vector3(state.Velocity.X, 0.0f, state.Velocity.Z);
+                        moveComplete = true;
+
                     }
                     // this is not a walkable angle
                     else
@@ -527,49 +554,6 @@ public class CharacterMovement
         }
     }
 
-    public void SnapToGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
-    {
-        Vector3 motion = Vector3.Down * GROUNDED_CHECK_DISTANCE;
-
-        PhysicsShapeQueryParameters3D motionQuery = new()
-        {
-            Shape = _collisionCapsule,
-            Transform = new Transform3D(Basis.Identity, state.Position),
-            Motion = motion,
-            CollideWithBodies = true,
-            CollideWithAreas = false
-        };
-        motionQuery.SetExclude(_characterCollisionRids);
-
-        var motionQueryResult = space.CastMotion(motionQuery);
-
-        var unsafeMotionPercent = motionQueryResult[1];
-
-        if (unsafeMotionPercent < 1.0f)
-        {
-            var unsafeMotion = unsafeMotionPercent * motion;
-
-            PhysicsShapeQueryParameters3D collisionQuery = new()
-            {
-                Shape = _collisionCapsule,
-                Transform = new Transform3D(Basis.Identity, state.Position + unsafeMotion),
-                CollideWithBodies = true,
-                CollideWithAreas = false
-            };
-            collisionQuery.SetExclude(_characterCollisionRids);
-
-            if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var normal))
-            {
-                state.GroundNormal = (Vector3)normal;
-
-                if (state.GroundNormal.Dot(Vector3.Up) >= _walkableThreshold)
-                {
-                    state.IsGrounded = true;
-                }
-            }
-        }
-    }
-
 
     private void HandleGroundedMovement(CharacterPublicState state, float delta)
     {
@@ -581,7 +565,6 @@ public class CharacterMovement
             return;
         }
         ApplyAcceleration(state, _walkAcceleration, _walkDeceleration, delta);
-        ApplyGravity(state, delta);
         state.Velocity = state.Velocity.Slide(state.GroundNormal);
     }
 
