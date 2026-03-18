@@ -59,7 +59,6 @@ public class SceneNavigator
 
         var newScene = packedScene.Instantiate<Godot.Node>();
 
-        GD.Print($"open mp map ran END. {mapID}. network mode: {NetworkManager.Instance.NetworkMode}");
         Main.Instance.SetMainScene(newScene);
 
         ServerGame.Instance?.OnLoaded();
@@ -68,5 +67,7 @@ public class SceneNavigator
         {
             ClientGame.Instance.OnLoaded();
         }
+
+
     }
 }

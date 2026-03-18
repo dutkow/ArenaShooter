@@ -12,9 +12,12 @@ public partial class ConnectedPlayersList : Control
     {
         base._Ready();
 
-        PopulateInitialPlayerList();
-
         MatchState.Instance.PlayerJoined += AddPlayerToList;
+    }
+
+    public void Initialize()
+    {
+        PopulateInitialPlayerList();
     }
 
     public void PopulateInitialPlayerList()

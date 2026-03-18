@@ -5,8 +5,7 @@ public partial class UIRoot : Control
 {
     public static UIRoot Instance { get; private set; }
 
-    [Export] PackedScene _playerHudScene;
-    private PlayerHud _playerHud;
+    [Export] public PackedScene PlayerHudScene;
 
     public override void _Ready()
     {
@@ -18,38 +17,41 @@ public partial class UIRoot : Control
 
     public void OnPossessedCharacter(Character character)
     {
+        /*
         EnsurePlayerHud();
 
         _playerHud.AssignToCharacter(character);
 
-        ShowPlayerHud();
+        ShowPlayerHud();*/
     }
 
     public void OnPossessedArenaCharacter(ArenaCharacterOld character)
     {
+        /*
         EnsurePlayerHud();
 
         _playerHud.AssignToArenaCharacter(character);
 
-        ShowPlayerHud();
+        ShowPlayerHud();*/
     }
 
     public void EnsurePlayerHud()
     {
+        /*
         if (_playerHud == null)
         {
             _playerHud = (PlayerHud)_playerHudScene.Instantiate();
             AddChild(_playerHud);
-        }
+        }*/
     }
 
     public void ShowPlayerHud()
     {
-        _playerHud.Show();
+        //_playerHud.Show();
     }
 
     public void HidePlayerHud()
     {
-        _playerHud.Hide();
+        //_playerHud.Hide();
     }
 }

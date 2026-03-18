@@ -48,11 +48,6 @@ public class ClientGame
 
     public void OnLoaded()
     {
-        LocalPlayerController = new();
-        Game.Instance.AddChild(LocalPlayerController);
-
-        GD.Print($"on loaded ran on client game");
-
         if (NetworkManager.Instance.IsClient)
         {
             ClientLoaded.Send();
@@ -62,7 +57,13 @@ public class ClientGame
             _hasReceivedInitialState = true;
             ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, UserSettings.Instance.PlayerName));
         }
+
+        LocalPlayerController = new();
+        Game.Instance.AddChild(LocalPlayerController);
+
+        LocalPlayerController.Initialize();
     }
+
     public void SetLocalPlayerID(byte localPlayerID)
     {
         LocalPlayerID = localPlayerID;

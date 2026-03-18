@@ -8,47 +8,46 @@ public partial class PlayerController : Controller
 
     public InputMode InputMode;
 
+    private PlayerHud _playerHud;
+
     public override void _Ready()
     {
         base._Ready();
 
         GD.Print("Player controller created");
 
-        
+        _playerHud = (PlayerHud)UIRoot.Instance.PlayerHudScene.Instantiate(); // need to rethink where to store UI packed scenes for this sort of thing
+        UIRoot.Instance.AddChild(_playerHud);
+
+    }
+
+    public override void Possess(Pawn pawn)
+    {
+        base.Possess(pawn);
+
+        if(pawn is Character character)
+        {
+            _playerHud.AssignToCharacter(character);
+        }
     }
 
     public override void _Input(InputEvent @event)
     {
         base._Input(@event);
 
-       
-        if (Input.IsActionJustPressed("net_profile_great"))
+
+        if (Input.IsActionJustPressed("scoreboard"))
         {
-            NetworkSender.SetNetworkProfile(NetworkSender.NetworkProfile.GREAT);
-            GD.Print("Network profile: Great");
-        }
-        else if (Input.IsActionJustPressed("net_profile_good"))
-        {
-            NetworkSender.SetNetworkProfile(NetworkSender.NetworkProfile.GOOD);
-            GD.Print("Network profile: Good");
-        }
-        else if (Input.IsActionJustPressed("net_profile_average"))
-        {
-            NetworkSender.SetNetworkProfile(NetworkSender.NetworkProfile.AVERAGE);
-            GD.Print("Network profile: Average");
-        }
-        else if (Input.IsActionJustPressed("net_profile_bad"))
-        {
-            NetworkSender.SetNetworkProfile(NetworkSender.NetworkProfile.BAD);
-            GD.Print("Network profile: Bad");
-        }
-        else if (Input.IsActionJustPressed("net_emulation_toggle"))
-        {
-            NetworkSender.ToggleNetEmulation(!NetworkSender.EmulationEnabled);
-            GD.Print($"Emulation enabled: {NetworkSender.EmulationEnabled}");
+            _playerHud.OpenScoreboard();
         }
 
-        if(InputMode == InputMode.GAME)
+        if (Input.IsActionJustReleased("scoreboard"))
+        {
+            _playerHud.CloseScoreboard();
+        }
+
+
+        if (InputMode == InputMode.GAME)
         {
             if (Input.IsActionJustPressed("chat_all"))
             {
@@ -90,6 +89,11 @@ public partial class PlayerController : Controller
     public virtual void ApplyInput(ClientInputCommand cmd)
     {
 
+    }
+
+    public void Initialize()
+    {
+        _playerHud.Initialize();
     }
 }
 

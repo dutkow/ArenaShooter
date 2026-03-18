@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_cwasx")
-_playerHudScene = ExtResource("4_7bb3i")
+PlayerHudScene = ExtResource("4_7bb3i")
 
 [node name="CommandConsole" parent="." unique_id=1851349959 instance=ExtResource("3_i0hgf")]
 visible = false

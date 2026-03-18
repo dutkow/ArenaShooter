@@ -67,7 +67,6 @@ public partial class MatchState : Node
     public Dictionary<byte, PlayerState> ConnectedPlayers = new();
 
     public event Action<PlayerState>? PlayerJoined;
-    public event Action<PlayerState>? PlayerJoinedNew;
 
     public event Action<int, PlayerState>? PlayerLeft;
 
@@ -119,6 +118,8 @@ public partial class MatchState : Node
             GD.Print($"add existing player on client joined ran");
             AddExistingPlayerOnClientJoined(initialMatchState.PlayerStates[i]);
         }
+
+        ClientGame.Instance?.LocalPlayerController.Initialize(); // TODO. rethink this execution flow
     }
 
     public override void _Process(double delta)
@@ -211,16 +212,8 @@ public partial class MatchState : Node
   
         ConnectedPlayers[playerInfo.PlayerID] = playerState;
 
-        try
-        {
-            PlayerJoinedNew?.Invoke(playerState);
-            GD.Print($"Played joined ran invoked on match state. player name: {playerState.PlayerInfo.PlayerName}. Network Mode = {NetworkManager.Instance.NetworkMode}");
+        PlayerJoined?.Invoke(playerState);
 
-        }
-        catch (Exception e)
-        {
-            GD.PrintErr("PlayerJoined event crashed: ", e);
-        }
 
         if (ClientGame.Instance != null && playerInfo.PlayerID == ClientGame.Instance.LocalPlayerID)
         {

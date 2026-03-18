@@ -6,6 +6,8 @@ public partial class PlayerHud : Control
     [Export] private ShieldBar _shieldBar;
     [Export] private HealthBar _healthBar;
 
+    [Export] private ConnectedPlayersList _connectedPlayersList;
+
     public void AssignToArenaCharacter(ArenaCharacterOld character)
     {
         var healthComponent = character.HealthComponent;
@@ -20,5 +22,20 @@ public partial class PlayerHud : Control
 
         _shieldBar.AssignHealthComponent(healthComponent);
         _healthBar.AssignHealthComponent(healthComponent);
+    }
+
+    public void OpenScoreboard()
+    {
+        _connectedPlayersList.Visible = true;
+    }
+
+    public void CloseScoreboard()
+    {
+        _connectedPlayersList.Visible = false;
+    }
+
+    public void Initialize()
+    {
+        _connectedPlayersList.Initialize();
     }
 }

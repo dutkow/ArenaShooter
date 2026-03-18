@@ -7,7 +7,7 @@ public partial class Controller : Node
 
     public int PlayerID = -1;
 
-    public void Possess(Pawn pawn)
+    public virtual void Possess(Pawn pawn)
     {
         if (pawn == null || pawn == PossessedPawn)
         {
@@ -21,7 +21,7 @@ public partial class Controller : Node
         PossessedPawn.OnPossessed(this);
     }
 
-    public void UnPossess()
+    public virtual void UnPossess()
     {
         if (PossessedPawn == null)
         {

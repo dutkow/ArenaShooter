@@ -31,12 +31,14 @@ public static class ServerConnectionService
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
-        //PlayerJoined.Execute(playerID, playerName);
-        MatchState.Instance.AddPlayer(new PlayerInfo(playerID, playerName));
+        var joiningPlayerInfo = new PlayerInfo(playerID, playerName);
 
-        GD.Print($"calling initial match state send in client loaded");
+        MatchState.Instance.AddPlayer(joiningPlayerInfo);
+
+        PlayerJoined.Send(playerID, joiningPlayerInfo.PlayerName);
 
         var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID); // spawn the joining player
+
 
 
         GD.Print($"Server received: {msg.MessageType}");

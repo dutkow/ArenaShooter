@@ -55,7 +55,6 @@ public class ServerGame()
         {
             ClientGame.Initialize();
             ClientGame.Instance.OnLoaded();
-
             ClientProjectileManager.Initialize();
         }
 

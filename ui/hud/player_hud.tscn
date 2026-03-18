@@ -8,9 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://cqs5aptlgfj17" path="res://ui/hud/shield_bar.tscn" id="6_p1j4b"]
 [ext_resource type="PackedScene" uid="uid://fi4eb24dfgbv" path="res://ui/hud/health_bar.tscn" id="6_y2gd1"]
 [ext_resource type="PackedScene" uid="uid://8gi047ww2qwf" path="res://ui/chat/chat_panel.tscn" id="8_3hb5n"]
-[ext_resource type="PackedScene" uid="uid://br2pp11aighc" path="res://ui/hud/speed_indicator.tscn" id="9_tbnm7"]
 
-[node name="PlayerHud" type="Control" unique_id=58829785 node_paths=PackedStringArray("_shieldBar", "_healthBar")]
+[node name="PlayerHud" type="Control" unique_id=58829785 node_paths=PackedStringArray("_shieldBar", "_healthBar", "_connectedPlayersList")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,6 +19,7 @@ grow_vertical = 2
 script = ExtResource("1_boqfv")
 _shieldBar = NodePath("VBoxContainer/ShieldBar")
 _healthBar = NodePath("VBoxContainer/HealthBar")
+_connectedPlayersList = NodePath("ConnectedPlayersList")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1636130570]
 layout_mode = 1
@@ -50,6 +50,7 @@ offset_bottom = 50.0
 grow_vertical = 1
 
 [node name="MatchDebugPanel" parent="." unique_id=809404943 instance=ExtResource("4_3hb5n")]
+visible = false
 layout_mode = 1
 anchors_preset = 0
 anchor_right = 0.0
@@ -60,11 +61,17 @@ grow_horizontal = 1
 grow_vertical = 1
 
 [node name="ConnectedPlayersList" parent="." unique_id=1533867789 instance=ExtResource("5_tbnm7")]
+visible = false
 layout_mode = 1
-offset_left = 7.0
-offset_top = 63.0
-offset_right = -647.0
-offset_bottom = -398.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -400.0
+offset_right = 500.0
+offset_bottom = 400.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=865524840]
 layout_mode = 1
@@ -93,15 +100,3 @@ offset_left = 584.0
 offset_top = 421.0
 offset_right = -9.0
 offset_bottom = -12.0
-
-[node name="SpeedIndicator" parent="." unique_id=1613452437 instance=ExtResource("9_tbnm7")]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -19.0
-offset_top = 34.0
-offset_right = -19.0
-offset_bottom = 34.0
