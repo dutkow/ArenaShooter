@@ -2,7 +2,9 @@
 
 [ext_resource type="Script" uid="uid://cs5i56tofo8u4" path="res://ui/hud/PlayerListEntry.cs" id="1_2ya7y"]
 
-[node name="PlayerListEntry" type="Control" unique_id=1188735268 node_paths=PackedStringArray("_playerNameLabel")]
+[sub_resource type="Theme" id="Theme_2ya7y"]
+
+[node name="PlayerListEntry" type="Control" unique_id=1188735268 node_paths=PackedStringArray("_playerNameLabel", "_playerOwnerHighlightRect")]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 3
 anchors_preset = 15
@@ -13,33 +15,47 @@ offset_bottom = -1019.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_2ya7y")
-_playerNameLabel = NodePath("MarginContainer/HBoxContainer/PlayerNameLabel")
+_playerNameLabel = NodePath("MarginContainer2/MarginContainer/HBoxContainer/PlayerNameLabel")
+_playerOwnerHighlightRect = NodePath("HighlightRect")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1900289370]
+[node name="HighlightRect" type="ColorRect" parent="." unique_id=1859951103]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_2ya7y")
+color = Color(1, 1, 1, 0.32156864)
+
+[node name="MarginContainer2" type="MarginContainer" parent="." unique_id=1272261523]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer2" unique_id=1900289370]
+layout_mode = 2
 color = Color(0, 0, 0, 0.6862745)
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1321089604]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer2" unique_id=1321089604]
+layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 4
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=448926421]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer2/MarginContainer" unique_id=448926421]
 layout_mode = 2
 
-[node name="PlayerNameLabel" type="Label" parent="MarginContainer/HBoxContainer" unique_id=141321467]
+[node name="PlayerNameLabel" type="Label" parent="MarginContainer2/MarginContainer/HBoxContainer" unique_id=141321467]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1

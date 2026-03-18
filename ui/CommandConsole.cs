@@ -157,13 +157,13 @@ public partial class CommandConsole : Control
 
     private void HandleChangePlayerName(string[] args)
     {
-        if (args.Length > 1 && !string.IsNullOrWhiteSpace(args[1]))
+        if (args.Length > 1)
         {
-            string value = args[1];
+            string value = string.Join(" ", args[1..]);
 
             UserSettings.Instance.SetPlayerName(value);
 
-            if(NetworkManager.Instance.NetworkMode == NetworkMode.CLIENT)
+            if (NetworkManager.Instance.NetworkMode == NetworkMode.CLIENT)
             {
                 PlayerNameChangeRequest.Send(value);
             }
@@ -173,11 +173,10 @@ public partial class CommandConsole : Control
             }
 
             AddConsoleLogEntry($"Changed player name to: {value}");
-
         }
         else
         {
-            AddConsoleLogEntry($"Attempted command: {args[0]} had invalid value: {(args.Length > 1 ? args[1] : "NULL")}");
+            AddConsoleLogEntry($"Attempted command: {args[0]} had invalid value: NULL");
         }
     }
 
