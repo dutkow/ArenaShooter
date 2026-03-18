@@ -43,7 +43,7 @@ public class CharacterMovement
     public float MaxGroundSpeed = 10.0f;
     public float Gravity = 25.0f;
     public Vector3 _gravityVector => new Vector3(0.0f, -Gravity, 0.0f);
-    public float JumpStrength = 15.0f;
+    public float JumpStrength = 10.0f;
     public float MaxStepHeight = 0.5f;
 
     public float _walkAcceleration = 100.0f;
@@ -55,7 +55,6 @@ public class CharacterMovement
 
     // Internal state
 
-    private CapsuleShape3D _groundCollisionShape = new();
     private CapsuleShape3D _mainCollisionShape = new();
 
     private Godot.Collections.Array<Rid> _characterCollisionRids = new();
@@ -81,10 +80,6 @@ public class CharacterMovement
         if (_character.CollisionShape.Shape is CapsuleShape3D collisionShape)
         {
             _mainCollisionShape = collisionShape;
-            _groundCollisionShape.Height = _mainCollisionShape.Height;
-            _groundCollisionShape.MidHeight = _mainCollisionShape.MidHeight;
-            _groundCollisionShape.Radius = _mainCollisionShape.Radius - 0.01f;
-
             _characterCollisionRids.Add(_mainCollisionShape.GetRid());
         }
         else
@@ -113,7 +108,7 @@ public class CharacterMovement
 
     public void CheckGround(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
     {
-        //state.IsGrounded = false;
+        state.IsGrounded = false;
 
         Vector3 motion = Vector3.Down * GROUND_CLEARANCE;
 
@@ -137,7 +132,7 @@ public class CharacterMovement
 
             PhysicsShapeQueryParameters3D collisionQuery = new()
             {
-                Shape = _groundCollisionShape,
+                Shape = _mainCollisionShape,
                 Transform = new Transform3D(Basis.Identity, startPosition + unsafeMotion),
                 CollideWithBodies = true,
                 CollideWithAreas = false
@@ -183,8 +178,6 @@ public class CharacterMovement
         {
             MoveAndSlideAir(state, space, delta);
         }
-
-        state.LastUnstuckPosition = state.Position;
 
         return state;
     }
@@ -245,13 +238,10 @@ public class CharacterMovement
             {
                 if (sweepResult.CollisionType == CollisionType.FLOOR)
                 {
-                    GD.Print($"colliding with floor and is grounded = {state.IsGrounded}");
                     Vector3 motion = targetMotion.Slide(sweepResult.CollisionNormal);
                     motion = new Vector3(targetMotion.X, motion.Y, targetMotion.Z);
                     state.Position += sweepResult.SafeMotion;
                     remainingDistance -= sweepResult.SafeMotion.Length();
-                    
-
                 }
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
@@ -317,7 +307,12 @@ public class CharacterMovement
 
         if (trappedResult.Count > 0)
         {
+            GD.Print($"we are stuck!");
             state.Position = state.LastUnstuckPosition;
+        }
+        else
+        {
+            state.LastUnstuckPosition = state.Position;
         }
     }
 

@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://ij2ubjvy7ffe" path="res://gameplay/entities/pickups/pickup.tscn" id="7_j45q0"]
 [ext_resource type="Material" uid="uid://bldewyo7dokum" path="res://assets/materials/red_material.tres" id="8_cpfjo"]
 [ext_resource type="PackedScene" uid="uid://cbaahdrba8jrc" path="res://gameplay/entities/interactables/teleporter.tscn" id="8_pc4o5"]
+[ext_resource type="Material" uid="uid://dv7m4nprffc73" path="res://assets/materials/yellow_material.tres" id="9_2vy85"]
 [ext_resource type="Material" uid="uid://5usfvqlgual7" path="res://assets/materials/gray_material.tres" id="9_nmjgf"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hsoxx"]
@@ -30,7 +31,7 @@ _gameModeScene = ExtResource("4_h6y0w")
 environment = SubResource("Environment_1c2mv")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1590736149]
-transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76057595, 0, 0, 0)
+transform = Transform3D(0.99997985, 0.005351968, -0.0034056313, 0.0046171914, -0.24590543, 0.96928287, 0.0043501114, -0.96927893, -0.24592514, 0, 0, 0)
 shadow_enabled = true
 
 [node name="SpawnPoint3" parent="." unique_id=1982700480 instance=ExtResource("2_j23ab")]
@@ -86,7 +87,7 @@ size = Vector3(10, 1.9072876, 10)
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="." unique_id=751722232]
 transform = Transform3D(0.9999995, -1.8587798e-10, -9.313226e-10, 1.6926833e-09, 1, 2.3283064e-10, -3.4924597e-10, 0, 0.9999995, 0.060660716, 1.3311019, 41.95951)
-material_override = ExtResource("9_nmjgf")
+material_override = ExtResource("9_2vy85")
 use_collision = true
 size = Vector3(15, 15, 15)
 
