@@ -68,6 +68,8 @@ public class CharacterMovement
 
     public int _ticksToIgnoreGroundPostJump = 10;
 
+    private Vector3 _lastPosition;
+
     private bool _justJumped;
 
     public void Initialize(Character character)
@@ -99,15 +101,19 @@ public class CharacterMovement
         ApplyInput(state, cmd, delta);
         MoveAndSlide(state, delta);
 
-        HorizontalVelocity = new Vector2(state.Velocity.X, state.Velocity.Z).Length();
-        VerticalVelocity = state.Velocity.Y;
+        Vector3 deltaPos = state.Position - _lastPosition;
+
+        HorizontalVelocity = new Vector2(deltaPos.X, deltaPos.Z).Length() / delta;
+        VerticalVelocity = deltaPos.Y / delta;
+
+        _lastPosition = state.Position;
 
         return state;
     }
 
     public void CheckGround(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
     {
-        state.IsGrounded = false;
+        //state.IsGrounded = false;
 
         Vector3 motion = Vector3.Down * GROUND_CLEARANCE;
 
@@ -146,35 +152,13 @@ public class CharacterMovement
                 if (state.GroundNormal.Dot(Vector3.Up) >= _walkableThreshold)
                 {
                     state.IsGrounded = true;
+
+                    //state.Position += motion * motionQueryResult[0];
                 }
             }
         }
-    }
 
-    Vector3 ABOVE_GROUND_SNAP_OFFSET = new Vector3(0.0f, 2.0f, 0.0f);
-
-    public void SnapToGround(CharacterPublicState state, PhysicsDirectSpaceState3D space)
-    {
-
-        Vector3 start = state.Position + ABOVE_GROUND_SNAP_OFFSET;
-        Vector3 end = start + Vector3.Down * GROUND_CLEARANCE * 2.0f - ABOVE_GROUND_SNAP_OFFSET;
-        var rayParams = new PhysicsRayQueryParameters3D()
-        {
-            From = start,
-            To = end,
-            CollideWithBodies = true,
-            CollideWithAreas = false
-        };
-        rayParams.SetExclude(_characterCollisionRids);
-
-        var result = space.IntersectRay(rayParams);
-
-        if(result.TryGetValue("position", out var value))
-        {
-            var position = (Vector3)value;          
-
-            state.Position = new Vector3(state.Position.X, position.Y + GROUND_CLEARANCE * 0.5f, state.Position.Z);
-        }
+        GD.Print($"ground normal: {state.GroundNormal}. is grounded = {state.IsGrounded}");
     }
 
     public CharacterPublicState MoveAndSlide(CharacterPublicState state, float delta)
@@ -200,13 +184,10 @@ public class CharacterMovement
             MoveAndSlideAir(state, space, delta);
         }
 
+        state.LastUnstuckPosition = state.Position;
+
         return state;
     }
-
-
-    const float SKIN_WIDTH = 0.0f;
-
-    const float END_SLIDE_EPSILON = 0.01f;
 
     public CharacterPublicState MoveAndSlideGrounded(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta)
     {
@@ -219,7 +200,7 @@ public class CharacterMovement
 
         ApplyAcceleration(state, _walkAcceleration, _walkDeceleration, delta);
 
-        if(state.Velocity == Vector3.Zero)
+        if (state.Velocity == Vector3.Zero)
         {
             return state;
         }
@@ -232,7 +213,7 @@ public class CharacterMovement
         return state;
     }
 
-    public void StepAndSlide(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta, bool shouldStep)
+    public void StepAndSlide(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta, bool groundedMove)
     {
 
         Vector3 remainingMotion = state.Velocity * delta;
@@ -250,13 +231,6 @@ public class CharacterMovement
             }
 
             Vector3 targetMotion = direction * remainingDistance;
-
-            if(shouldStep)
-            {
-                CheckGround(state, state.Position, space);
-                state.Velocity = state.Velocity.Slide(state.GroundNormal);
-            }
-
 
             var sweepResult = Sweep(state, space, targetMotion);
 
@@ -276,12 +250,13 @@ public class CharacterMovement
                     motion = new Vector3(targetMotion.X, motion.Y, targetMotion.Z);
                     state.Position += sweepResult.SafeMotion;
                     remainingDistance -= sweepResult.SafeMotion.Length();
+                    
 
                 }
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
                     // THIS IS A STEPPABLE SURFACE
-                    if (shouldStep && sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight && false) // don't use for now
+                    if (groundedMove && sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight && false) // don't use for now
                     {
                         float stepUpAmount = sweepResult.CollisionPoint.Y - state.Position.Y + _mainCollisionShape.MidHeight + 1.0f;
                         Vector3 stepMotion = new Vector3(0.0f, stepUpAmount, 0.0f);
@@ -297,12 +272,22 @@ public class CharacterMovement
                     // THIS IS A WALL
                     else
                     {
-                        GD.Print($"this is a wall");
+                        GD.Print($"this is a wall. normal = {sweepResult.CollisionNormal}");
 
                         state.Position += sweepResult.SafeMotion;
+
+                        sweepResult.CollisionNormal.Y = 0.0f; // don't push us up or down
                         state.Position += sweepResult.CollisionNormal * 0.01f;
+
                         remainingMotion = targetMotion - sweepResult.SafeMotion;
+
                         remainingMotion = remainingMotion.Slide(sweepResult.CollisionNormal);
+
+                        if(groundedMove)
+                        {
+                            remainingMotion.Y = 0.0f; // don't slide vertically on a wall when grounded
+                        }
+
                         remainingDistance = remainingMotion.Length();
 
                         CheckStuck(state, space);
@@ -332,12 +317,7 @@ public class CharacterMovement
 
         if (trappedResult.Count > 0)
         {
-            GD.Print($"we are stuck!");
             state.Position = state.LastUnstuckPosition;
-        }
-        else
-        {
-            state.LastUnstuckPosition = state.Position;
         }
     }
 
@@ -415,15 +395,6 @@ public class CharacterMovement
         return state;
     }
 
-    public void OnLanded(CharacterPublicState state, PhysicsDirectSpaceState3D space)
-    {
-        GD.Print($"on landed happened");
-        state.Velocity = new Vector3(state.Velocity.X, 0.0f, state.Velocity.Z);
-        state.IsGrounded = true;
-        //SnapToGround(state, space);
-    }
-
-
     public void ApplyInput(CharacterPublicState state, ClientInputCommand cmd, float delta)
     {
         Vector3 move = Vector3.Zero;
@@ -449,7 +420,7 @@ public class CharacterMovement
         }
     }
 
-    const float GROUND_CLEARANCE = 0.01f;
+    const float GROUND_CLEARANCE = 0.5f;
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
 
