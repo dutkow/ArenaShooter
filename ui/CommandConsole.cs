@@ -21,6 +21,7 @@ public partial class CommandConsole : Control
         _commands["showfps"] = HandleShowFPS;
         _commands["vsync"] = HandleVSync;
         _commands["sv_tick"] = HandleServerTickRate;
+        _commands["name"] = HandleChangePlayerName;
 
         _lineEdit.TextSubmitted += TryCommand;
 
@@ -150,6 +151,28 @@ public partial class CommandConsole : Control
         else
         {
             AddConsoleLogEntry($"Attempted command: {args[0]} had invalid value: {args[1]}");
+        }
+    }
+
+    private void HandleChangePlayerName(string[] args)
+    {
+        if (args.Length > 1 && !string.IsNullOrWhiteSpace(args[1]))
+        {
+            string value = args[1];
+
+            UserSettings.Instance.SetPlayerName(value);
+
+            if(NetworkManager.Instance.NetworkMode == NetworkMode.CLIENT)
+            {
+                PlayerNameChangeRequest.Send(value);
+            }
+
+            AddConsoleLogEntry($"Changed player name to: {value}");
+
+        }
+        else
+        {
+            AddConsoleLogEntry($"Attempted command: {args[0]} had invalid value: {(args.Length > 1 ? args[1] : "NULL")}");
         }
     }
 

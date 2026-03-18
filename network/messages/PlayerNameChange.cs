@@ -2,39 +2,49 @@ using Godot;
 using System;
 
 
-public class PlayerNameChangeRequest : Message
+public class PlayerNameChange: Message
 {
+    public byte PlayerID;
     public string Name;
 
     protected override int BufferSize()
     {
         base.BufferSize();
+
+        Add(PlayerID);
         Add(Name);
+
         return _dataSize;
     }
 
     public override byte[] WriteMessage()
     {
         base.WriteMessage();
+
+        Write(PlayerID);
         Write(Name);
+
         return _data;
     }
 
     public override void ReadMessage(byte[] data)
     {
         base.ReadMessage(data);
+
+        Read(out PlayerID);
         Read(out Name);
     }
 
-    public static void Send(string name)
+    public static void Send(byte playerID, string name)
     {
-        var msg = new PlayerNameChangeRequest
+        var msg = new PlayerNameChange
         {
-            MessageType = Msg.C2S_CHANGE_PLAYER_NAME,
+            MessageType = Msg.S2C_PLAYER_NAME_CHANGED,
             ENetFlags = ENetPacketFlags.Reliable,
+            PlayerID = playerID,
             Name = name
         };
 
-        NetworkSender.ToServer(msg);
+        NetworkSender.Broadcast(msg);
     }
 }
