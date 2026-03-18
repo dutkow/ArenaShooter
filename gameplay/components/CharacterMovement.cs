@@ -43,7 +43,7 @@ public class CharacterMovement
     public float MaxGroundSpeed = 10.0f;
     public float Gravity = 25.0f;
     public Vector3 _gravityVector => new Vector3(0.0f, -Gravity, 0.0f);
-    public float JumpSpeed = 10.0f;
+    public float JumpStrength = 15.0f;
     public float MaxStepHeight = 0.5f;
 
     public float _walkAcceleration = 100.0f;
@@ -107,9 +107,9 @@ public class CharacterMovement
 
     public void CheckGround(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
     {
-        //state.IsGrounded = false;
+        state.IsGrounded = false;
 
-        Vector3 motion = Vector3.Down * GROUNDED_CHECK_DISTANCE;
+        Vector3 motion = Vector3.Down * GROUND_CLEARANCE;
 
         PhysicsShapeQueryParameters3D motionQuery = new()
         {
@@ -157,7 +157,7 @@ public class CharacterMovement
     {
 
         Vector3 start = state.Position + ABOVE_GROUND_SNAP_OFFSET;
-        Vector3 end = start + Vector3.Down * GROUNDED_CHECK_DISTANCE * 2.0f - ABOVE_GROUND_SNAP_OFFSET;
+        Vector3 end = start + Vector3.Down * GROUND_CLEARANCE * 2.0f - ABOVE_GROUND_SNAP_OFFSET;
         var rayParams = new PhysicsRayQueryParameters3D()
         {
             From = start,
@@ -173,7 +173,7 @@ public class CharacterMovement
         {
             var position = (Vector3)value;          
 
-            state.Position = new Vector3(state.Position.X, position.Y + GROUNDED_CHECK_DISTANCE * 0.5f, state.Position.Z);
+            state.Position = new Vector3(state.Position.X, position.Y + GROUND_CLEARANCE * 0.5f, state.Position.Z);
         }
     }
 
@@ -226,13 +226,13 @@ public class CharacterMovement
 
         state.Velocity = state.Velocity.Slide(state.GroundNormal);
 
-        StepAndSlide(state, space, delta, false);
+        StepAndSlide(state, space, delta, true);
 
 
         return state;
     }
 
-    public void StepAndSlide(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta, bool shouldStep = false)
+    public void StepAndSlide(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta, bool shouldStep)
     {
 
         Vector3 remainingMotion = state.Velocity * delta;
@@ -251,8 +251,12 @@ public class CharacterMovement
 
             Vector3 targetMotion = direction * remainingDistance;
 
-            CheckGround(state, state.Position, space);
-            state.Velocity = state.Velocity.Slide(state.GroundNormal);
+            if(shouldStep)
+            {
+                CheckGround(state, state.Position, space);
+                state.Velocity = state.Velocity.Slide(state.GroundNormal);
+            }
+
 
             var sweepResult = Sweep(state, space, targetMotion);
 
@@ -267,6 +271,7 @@ public class CharacterMovement
             {
                 if (sweepResult.CollisionType == CollisionType.FLOOR)
                 {
+                    GD.Print($"colliding with floor and is grounded = {state.IsGrounded}");
                     Vector3 motion = targetMotion.Slide(sweepResult.CollisionNormal);
                     motion = new Vector3(targetMotion.X, motion.Y, targetMotion.Z);
                     state.Position += sweepResult.SafeMotion;
@@ -276,7 +281,7 @@ public class CharacterMovement
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
                     // THIS IS A STEPPABLE SURFACE
-                    if (shouldStep && sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight)
+                    if (shouldStep && sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight && false) // don't use for now
                     {
                         float stepUpAmount = sweepResult.CollisionPoint.Y - state.Position.Y + _mainCollisionShape.MidHeight + 1.0f;
                         Vector3 stepMotion = new Vector3(0.0f, stepUpAmount, 0.0f);
@@ -400,105 +405,22 @@ public class CharacterMovement
         ApplyAcceleration(state, _airAcceleration, _airDeceleration, delta);
         ApplyGravity(state, delta);
 
-        Vector3 remainingMotion = state.Velocity * delta;
-
-
-        bool moveComplete = false;
-        int maxSlides = 4;
-        for (int i = 0; i < maxSlides; ++i)
+        if (state.Velocity == Vector3.Zero)
         {
-            if (moveComplete)
-            {
-                break;
-            }
-
-            PhysicsShapeQueryParameters3D query = new()
-            {
-                Shape = _mainCollisionShape,
-                Transform = new Transform3D(Basis.Identity, state.Position),
-                Motion = remainingMotion,
-                CollideWithBodies = true,
-                CollideWithAreas = false
-            };
-            query.SetExclude(_characterCollisionRids);
-
-            var result = space.CastMotion(query);
-
-            var safeMovePercent = result[0];
-            var safeMotion = remainingMotion * safeMovePercent;
-
-            var unsafeMovePercent = result[1];
-            if (safeMovePercent >= 1.0f)
-            {
-                moveComplete = true;
-            }
-            else
-            {
-                var unsafeMotion = remainingMotion * unsafeMovePercent;
-
-                // Evaluate the collision normal
-                PhysicsShapeQueryParameters3D collisionQuery = new()
-                {
-                    Shape = _mainCollisionShape,
-                    Transform = new Transform3D(Basis.Identity, state.Position + safeMotion),
-                    CollideWithBodies = true,
-                    CollideWithAreas = false
-                };
-                collisionQuery.SetExclude(_characterCollisionRids);
-
-                GD.Print($"air moving and not safe");
-
-                if (space.GetRestInfo(collisionQuery).TryGetValue("normal", out var value))
-                {
-                    GD.Print($"COLLIDED DURING AIR MOVE. ");
-
-                    var normal = (Vector3)value;
-
-                    // we have landed on a walkable slope
-                    if (normal.Dot(Vector3.Up) >= _walkableThreshold)
-                    {
-                        remainingMotion = Vector3.Zero;
-                        OnLanded(state, space);
-                        moveComplete = true;
-                    }
-                    // this is not a walkable angle
-                    else
-                    {
-                        Vector3 horizontalMotion = new Vector3(safeMotion.X, 0, safeMotion.Z);
-                        Vector3 slide = safeMotion.Slide(normal);
-                        safeMotion = new Vector3(slide.X, safeMotion.Y, slide.Z);
-                    }
-                }
-            }
-
-            remainingMotion -= safeMotion;
-            state.Position += safeMotion;
-
-
-
-            if (!moveComplete)
-            {
-                moveComplete = true;
-
-                CheckGround(state, state.Position, space);
-
-                GD.Print($"checking ground in air move");
-                if (state.IsGrounded)
-                {
-                    OnLanded(state, space);
-                    moveComplete = true;
-                }
-            }
+            return state;
         }
+
+        StepAndSlide(state, space, delta, false);
+
         return state;
     }
 
     public void OnLanded(CharacterPublicState state, PhysicsDirectSpaceState3D space)
     {
         GD.Print($"on landed happened");
-        state.Velocity = new Vector3(state.Velocity.X, 0.0f, state.Velocity.Y);
+        state.Velocity = new Vector3(state.Velocity.X, 0.0f, state.Velocity.Z);
         state.IsGrounded = true;
-        SnapToGround(state, space);
+        //SnapToGround(state, space);
     }
 
 
@@ -528,7 +450,6 @@ public class CharacterMovement
     }
 
     const float GROUND_CLEARANCE = 0.01f;
-    const float GROUNDED_CHECK_DISTANCE = 2.0f;
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
 
@@ -582,7 +503,7 @@ public class CharacterMovement
 
     private void Jump(CharacterPublicState state)
     {
-        state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpSpeed;
+        state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpStrength;
         state.MovementMode = CharacterMoveMode.FALLING;
         state.IsGrounded = false;
         GD.Print($"JUMP");
