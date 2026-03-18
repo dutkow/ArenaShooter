@@ -43,7 +43,7 @@ public class CharacterMovement
     public float Gravity = 25.0f;
     public Vector3 _gravityVector => new Vector3(0.0f, -Gravity, 0.0f);
     public float JumpSpeed = 10.0f;
-    public float MaxStepHeight = 0.25f;
+    public float MaxStepHeight = 0.5f;
 
     public float _walkAcceleration = 100.0f;
     public float _airAcceleration = 5.0f;
@@ -266,7 +266,16 @@ public class CharacterMovement
                 {
                     if(sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight)
                     {
-                        GD.Print($"this is a steppable surface");
+                        float stepUpAmount = sweepResult.CollisionPoint.Y - state.Position.Y + _mainCollisionShape.MidHeight + GROUND_CLEARANCE;
+                        stepUpAmount = Mathf.Min(stepUpAmount, MaxStepHeight);
+                        Vector3 stepMotion = new Vector3(0.0f, stepUpAmount, 0.0f);
+
+                        var stepSweep = Sweep(state, space, stepMotion);
+
+                        if (stepSweep.SafePercent >= 0.0f)
+                        {
+                            state.Position += stepSweep.SafeMotion;
+                        }
                     }
                     else
                     {
@@ -507,7 +516,7 @@ public class CharacterMovement
         }
     }
 
-
+    const float GROUND_CLEARANCE = 0.01f;
     const float GROUNDED_CHECK_DISTANCE = 2.0f;
     const float MAX_WALKABLE_GROUND_ANGLE = 35.0f;
     float _walkableThreshold = MathF.Cos(Mathf.DegToRad(MAX_WALKABLE_GROUND_ANGLE));
