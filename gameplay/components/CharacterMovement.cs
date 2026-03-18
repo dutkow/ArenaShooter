@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Resources;
 using static Godot.WebSocketPeer;
 
 public enum CharacterMoveMode : byte
@@ -47,7 +48,7 @@ public class CharacterMovement
     public float MaxStepHeight = 0.5f;
 
     public float _walkAcceleration = 100.0f;
-    public float _airAcceleration = 5.0f;
+    public float _airAcceleration = 25.0f;
     public float _walkDeceleration = 100f;
     public float _airDeceleration = 0.0f;
 
@@ -147,13 +148,9 @@ public class CharacterMovement
                 if (state.GroundNormal.Dot(Vector3.Up) >= _walkableThreshold)
                 {
                     state.IsGrounded = true;
-
-                    //state.Position += motion * motionQueryResult[0];
                 }
             }
         }
-
-        GD.Print($"ground normal: {state.GroundNormal}. is grounded = {state.IsGrounded}");
     }
 
     public CharacterPublicState MoveAndSlide(CharacterPublicState state, float delta)
@@ -164,27 +161,21 @@ public class CharacterMovement
 
         if (state.IsGrounded)
         {
-            if (state.WantsToJump)
-            {
-                Jump(state);
-                MoveAndSlideAir(state, space, delta);
-            }
-            else
-            {
-                MoveAndSlideGrounded(state, space, delta);
-            }
+            MoveAndSlideGrounded(state, space, delta);
         }
         else
         {
             MoveAndSlideAir(state, space, delta);
         }
 
+        state.ticksRemainingBeforeJump--;
+
         return state;
     }
 
     public CharacterPublicState MoveAndSlideGrounded(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta)
     {
-        if (state.WantsToJump && state.IsGrounded)
+        if (state.WantsToJump && state.ticksRemainingBeforeJump <= 0)
         {
             Jump(state);
             MoveAndSlideAir(state, space, delta);
@@ -262,21 +253,19 @@ public class CharacterMovement
                     // THIS IS A WALL
                     else
                     {
-                        GD.Print($"this is a wall. normal = {sweepResult.CollisionNormal}");
-
                         state.Position += sweepResult.SafeMotion;
-
-                        sweepResult.CollisionNormal.Y = 0.0f; // don't push us up or down
-                        state.Position += sweepResult.CollisionNormal * 0.01f;
 
                         remainingMotion = targetMotion - sweepResult.SafeMotion;
 
-                        remainingMotion = remainingMotion.Slide(sweepResult.CollisionNormal);
+                        float pushAmount = 0.01f;
+                        Vector3 pushVector = sweepResult.CollisionNormal * pushAmount;
 
-                        if(groundedMove)
+                        if (groundedMove)
                         {
-                            remainingMotion.Y = 0.0f; // don't slide vertically on a wall when grounded
+                            pushVector = pushVector.Slide(state.GroundNormal);
                         }
+
+                        state.Position += pushVector;
 
                         remainingDistance = remainingMotion.Length();
 
@@ -387,6 +376,7 @@ public class CharacterMovement
 
         StepAndSlide(state, space, delta, false);
 
+        GD.Print($"y height = {state.Position.Y}");
         return state;
     }
 
@@ -466,12 +456,14 @@ public class CharacterMovement
         state.Velocity.Z = horizontalVel.Z;
     }
 
+    const int MinTicksBetweenJumps = 20;
 
     private void Jump(CharacterPublicState state)
     {
         state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpStrength;
         state.MovementMode = CharacterMoveMode.FALLING;
         state.IsGrounded = false;
+        state.ticksRemainingBeforeJump = MinTicksBetweenJumps;
         GD.Print($"JUMP");
     }
 

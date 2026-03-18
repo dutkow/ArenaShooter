@@ -24,6 +24,7 @@ public class CharacterPublicState
     public bool WantsToJump;
     public Vector3 GroundNormal;
     public Vector3 LastUnstuckPosition;
+    public int ticksRemainingBeforeJump;
 
 
     public void ClearFlags()
