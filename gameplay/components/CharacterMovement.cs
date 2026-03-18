@@ -45,7 +45,7 @@ public class CharacterMovement
     public float Gravity = 25.0f;
     public Vector3 _gravityVector => new Vector3(0.0f, -Gravity, 0.0f);
     public float JumpStrength = 10.0f;
-    public const float MAX_STEP_HEIGHT = 0.5f;
+    public const float MAX_STEP_HEIGHT = 0.45f;
 
     public float _walkAcceleration = 100.0f;
     public float _airAcceleration = 25.0f;
@@ -104,6 +104,7 @@ public class CharacterMovement
 
         _lastPosition = state.Position;
 
+        state.LastUnstuckPosition = state.Position;
         return state;
     }
 
@@ -245,9 +246,12 @@ public class CharacterMovement
                         Vector3 stepPosition = state.Position;
 
                         // step back from the wall slightly
-                        Vector3 pushBack = sweepResult.CollisionNormal * 0.01f;
+
+                        float pushBackLength = 0.01f;
+                        Vector3 pushBack = sweepResult.CollisionNormal * pushBackLength;
                         pushBack = pushBack.Slide(state.GroundNormal);
                         stepPosition += pushBack;
+
 
                         Vector3 upMotion = new Vector3(0.0f, MAX_STEP_HEIGHT, 0.0f);
                         var upSweep = Sweep(state, stepPosition, space, upMotion);
@@ -259,11 +263,18 @@ public class CharacterMovement
                             stepPosition += upSweep.SafeMotion;
 
                             // Try to move in the original intended direction from the step up position
+                            float minForwardStep = 0.1f + pushBackLength;
+
+                            if(targetMotion.Length() < minForwardStep)
+                            {
+                                targetMotion = targetMotion.Normalized() * minForwardStep;
+                            }
+
                             var forwardSweep = Sweep(state, stepPosition, space, targetMotion);
 
-                            GD.Print($"forward sweep safe motion length = {forwardSweep.SafeMotion.Length()}");
+                            GD.Print($"forward sweep safe percent= {forwardSweep.SafePercent}");
 
-                            if (forwardSweep.SafePercent> 0.25f)
+                            if (forwardSweep.SafePercent >= 1.0f)
                             {
                                 GD.Print($"forward sweep success");
                                 stepPosition += forwardSweep.SafeMotion;
@@ -284,6 +295,7 @@ public class CharacterMovement
                     // STEP FAILED, THIS IS A WALL
                     if(!steppedUp)
                     {
+                        GD.Print($"SLIDING ON WALL");
                         state.Position += sweepResult.SafeMotion;
 
                         remainingMotion = targetMotion - sweepResult.SafeMotion;
@@ -331,10 +343,6 @@ public class CharacterMovement
         {
             GD.Print($"we are stuck!");
             state.Position = state.LastUnstuckPosition;
-        }
-        else
-        {
-            state.LastUnstuckPosition = state.Position;
         }
     }
 
