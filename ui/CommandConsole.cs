@@ -122,13 +122,13 @@ public partial class CommandConsole : Control
         {
             if (value == 0)
             {
-                Settings.Instance.SetShowFPS(false);
+                UserSettings.Instance.SetShowFPS(false);
                 AddConsoleLogEntry("Show FPS disabled");
 
             }
             else if (value == 1)
             {
-                Settings.Instance.SetShowFPS(true);
+                UserSettings.Instance.SetShowFPS(true);
                 AddConsoleLogEntry("Show FPS enabled");
             }
         }

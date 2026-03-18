@@ -17,7 +17,7 @@ public class NetworkClient : NetworkPeer
 
     public override void HandlePeerConnected(ENetPacketPeer peer)
     {
-        ConnectionRequest.Send(Settings.Instance.PlayerName);
+        ConnectionRequest.Send(UserSettings.Instance.PlayerName);
     }
 
     public override void HandlePeerDisconnected(ENetPacketPeer peer)

@@ -13,8 +13,8 @@ public partial class FpsCounter : Label, ITickable
 
         //ClientGame.Instance.Tickables.Add(this);
         Main.Instance.Tickables.Add(this);
-        OnShowFPSChanged(Settings.Instance.ShowFPS);
-        Settings.Instance.ShowFPSChanged += OnShowFPSChanged;
+        OnShowFPSChanged(UserSettings.Instance.ShowFPS);
+        UserSettings.Instance.ShowFPSChanged += OnShowFPSChanged;
     }
 
     public void OnShowFPSChanged(bool value)

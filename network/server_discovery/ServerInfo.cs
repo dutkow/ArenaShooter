@@ -20,7 +20,7 @@ public class ServerInfo
         IsPasswordProtected = serverParams.Password != null && serverParams.Password.Length > 0;
 
         // Add local player by default
-        ConnectedPlayers.Add(Settings.Instance.PlayerName);
+        ConnectedPlayers.Add(UserSettings.Instance.PlayerName);
     }
 
     // -----------------------

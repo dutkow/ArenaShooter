@@ -1,9 +1,9 @@
 using Godot;
 using System;
 
-public partial class Settings : Node
+public class UserSettings
 {
-    public static Settings Instance { get; private set; }
+    public static UserSettings Instance { get; private set; }
 
     private const string SettingsDir = "user://settings";
     private const string ConfigPath = "user://settings/settings.cfg";
@@ -16,10 +16,8 @@ public partial class Settings : Node
 
     public bool ShowFPS = false;
 
-    public override void _Ready()
+    public UserSettings()
     {
-        base._Ready();
-
         Instance = this;
 
         EnsureSettingsDirExists();
@@ -37,6 +35,8 @@ public partial class Settings : Node
 
     private void LoadSettings()
     {
+        CommandConsole.Instance.AddConsoleLogEntry($"Loading user settings from {ConfigPath}.");
+
         if (_config.Load(ConfigPath) != Error.Ok)
         {
             SaveSettings();
@@ -60,7 +60,6 @@ public partial class Settings : Node
         }
 
         PlayerName = newName;
-        SaveSettings();
     }
 
     public void SetShowFPS(bool showFPS)

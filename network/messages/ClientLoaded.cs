@@ -42,7 +42,7 @@ public class ClientLoaded : Message
         {
             MessageType = Msg.C2S_CLIENT_LOADED,
             ENetFlags = ENetPacketFlags.Reliable,
-            ClientInfo = new ClientInfo(Settings.Instance.PlayerName)
+            ClientInfo = new ClientInfo(UserSettings.Instance.PlayerName)
         };
         NetworkSender.ToServer(msg);
     }

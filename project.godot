@@ -22,7 +22,6 @@ config/icon="res://assets/textures/icon.svg"
 [autoload]
 
 GameData="*res://autoload/game_data.tscn"
-Settings="*res://autoload/Settings.cs"
 GameManagers="*res://autoload/game_managers.tscn"
 Game="*res://autoload/Game.cs"
 

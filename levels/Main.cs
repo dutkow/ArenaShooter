@@ -43,6 +43,8 @@ public partial class Main : Node, ITickable
 
             CommandConsole.Instance.AddConsoleLogEntry("=== INITIALIZING CLIENT ===");
 
+            UserSettings userSettings = new();
+
             OpenMainMenu();
 
         }

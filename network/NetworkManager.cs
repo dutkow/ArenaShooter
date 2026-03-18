@@ -235,7 +235,7 @@ public class NetworkManager : ITickable
         GD.Print("Connected to server peer set");
         ServerPeer = peer;
 
-        ConnectionRequest.Send(Settings.Instance.PlayerName);
+        ConnectionRequest.Send(UserSettings.Instance.PlayerName);
     }
 
     // ----------------------
