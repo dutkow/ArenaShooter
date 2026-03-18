@@ -2,11 +2,11 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class ConnectedPlayersList : Control
+public partial class Scoreboard : Control
 {
     [Export] VBoxContainer _playerListContainer;
 
-    [Export] PackedScene _playerListEntryScene;
+    [Export] PackedScene _playerScoreboardEntry;
 
     public override void _Ready()
     {
@@ -35,7 +35,7 @@ public partial class ConnectedPlayersList : Control
 
     public void AddPlayerToList(PlayerState playerState)
     {
-        var playerListEntry = (PlayerListEntry)_playerListEntryScene.Instantiate();
+        var playerListEntry = (PlayerScoreboardEntry)_playerScoreboardEntry.Instantiate();
         playerListEntry.Initialize(playerState);
         _playerListContainer.AddChild(playerListEntry);
     }

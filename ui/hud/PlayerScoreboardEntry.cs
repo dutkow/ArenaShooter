@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class PlayerListEntry : Control
+public partial class PlayerScoreboardEntry : Control
 {
     [Export] Label _playerNameLabel;
 

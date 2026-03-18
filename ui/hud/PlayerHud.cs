@@ -6,7 +6,7 @@ public partial class PlayerHud : Control
     [Export] private ShieldBar _shieldBar;
     [Export] private HealthBar _healthBar;
 
-    [Export] private ConnectedPlayersList _connectedPlayersList;
+    [Export] private Scoreboard _scoreboard;
 
     public void AssignToArenaCharacter(ArenaCharacterOld character)
     {
@@ -26,16 +26,16 @@ public partial class PlayerHud : Control
 
     public void OpenScoreboard()
     {
-        _connectedPlayersList.Visible = true;
+        _scoreboard.Visible = true;
     }
 
     public void CloseScoreboard()
     {
-        _connectedPlayersList.Visible = false;
+        _scoreboard.Visible = false;
     }
 
     public void Initialize()
     {
-        _connectedPlayersList.Initialize();
+        _scoreboard.Initialize();
     }
 }

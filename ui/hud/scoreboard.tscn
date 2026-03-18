@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://doyibe8885wuq"]
+
+[ext_resource type="Script" uid="uid://bwqk57jg0tw48" path="res://ui/hud/Scoreboard.cs" id="1_gq3im"]
+[ext_resource type="PackedScene" uid="uid://cc38q8ggx6tw4" path="res://ui/hud/player_scoreboard_entry.tscn" id="2_p1qhq"]
+
+[node name="Scoreboard" type="Control" unique_id=469119988 node_paths=PackedStringArray("_playerListContainer")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_gq3im")
+_playerListContainer = NodePath("VBoxContainer/PlayerListContainer")
+_playerScoreboardEntry = ExtResource("2_p1qhq")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=2132317348]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.3764706)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1747499750]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=1871218700]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "DEATHMATCH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=476774304]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=131457729]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+text = "PLAYER"
+
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1844515506]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "KILLS"
+
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1677111815]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "DEATHS"
+
+[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1286166307]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "PING"
+
+[node name="PlayerListContainer" type="VBoxContainer" parent="VBoxContainer" unique_id=851001018]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerListEntry" parent="VBoxContainer/PlayerListContainer" unique_id=1188735268 instance=ExtResource("2_p1qhq")]
+layout_mode = 2
+
+[node name="PlayerListEntry2" parent="VBoxContainer/PlayerListContainer" unique_id=457513992 instance=ExtResource("2_p1qhq")]
+layout_mode = 2
+
+[node name="PlayerListEntry3" parent="VBoxContainer/PlayerListContainer" unique_id=1215961607 instance=ExtResource("2_p1qhq")]
+layout_mode = 2
+
+[node name="PlayerListEntry4" parent="VBoxContainer/PlayerListContainer" unique_id=831777676 instance=ExtResource("2_p1qhq")]
+layout_mode = 2
+
+[node name="PlayerListEntry5" parent="VBoxContainer/PlayerListContainer" unique_id=766681460 instance=ExtResource("2_p1qhq")]
+layout_mode = 2
