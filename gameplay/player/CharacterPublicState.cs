@@ -23,6 +23,7 @@ public class CharacterPublicState
     public float DesiredSpeed;
     public bool WantsToJump;
     public Vector3 GroundNormal;
+    public Vector3 LastUnstuckPosition;
 
 
     public void ClearFlags()

@@ -34,7 +34,7 @@ transform = Transform3D(1, 0, 0, 0, 0.76057595, 0.64924896, 0, -0.64924896, 0.76
 shadow_enabled = true
 
 [node name="SpawnPoint3" parent="." unique_id=1982700480 instance=ExtResource("2_j23ab")]
-transform = Transform3D(0.9550157, 4.0616622e-05, -0.29655355, -0.00056285487, 0.9999981, -0.0016756605, 0.29655278, 0.0017671969, 0.955015, -22.431124, 1.915376, 21.725674)
+transform = Transform3D(0.9550156, 4.0617088e-05, -0.2965535, -0.0005628553, 0.999998, -0.00167566, 0.29655272, 0.0017671969, 0.95501477, -22.432005, 2.067729, 21.725828)
 
 [node name="JumpPad" parent="." unique_id=655431875 instance=ExtResource("6_m0y5v")]
 transform = Transform3D(0.9999999, -1.8587798e-10, -2.3283064e-10, 7.6056494e-10, 1, 0, 0, 0, 0.9999999, 8.806179, 0.5549511, -0.00058749877)
@@ -65,9 +65,14 @@ polygon = PackedVector2Array(0, 0, 0, 1, 11, 6, 22, 0)
 depth = 10.0
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="." unique_id=734049400]
-transform = Transform3D(0.9999999, -1.8587798e-10, -2.3283064e-10, 7.6056494e-10, 1, 0, 0, 0, 0.9999999, -0.044756874, 1.3974344, -23.83415)
+transform = Transform3D(0.9999998, -1.8587798e-10, -3.4924597e-10, 7.6067863e-10, 1, 0, -1.1641532e-10, 0, 0.9999998, -0.051644173, 1.4019351, -28.296953)
 use_collision = true
 size = Vector3(10, 10, 10)
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="." unique_id=22960163]
+transform = Transform3D(0.9999901, -1.8587798e-10, -1.2922101e-08, 4.1757517e-08, 1, 0, -3.4924597e-09, 0, 0.9999901, -8.510197, 0.86617005, 7.0366135)
+use_collision = true
+size = Vector3(10, 1.9072876, 10)
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="." unique_id=751722232]
 transform = Transform3D(0.9999995, -1.8587798e-10, -9.313226e-10, 1.6926833e-09, 1, 2.3283064e-10, -3.4924597e-10, 0, 0.9999995, 0.060660716, 1.3311019, 41.95951)

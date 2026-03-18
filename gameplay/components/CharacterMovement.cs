@@ -22,6 +22,7 @@ public struct SweepResult
     public Vector3 SafeMotion;
     public Vector3 UnsafeMotion;
     public Vector3 CollisionNormal;
+    public Vector3 CollisionPoint;
     public CollisionType CollisionType;
 }
 
@@ -30,7 +31,7 @@ public enum CollisionType
     NONE,
     FLOOR,
     WALL,
-    CEILING
+    CEILING,
 }
 
 public class CharacterMovement
@@ -53,7 +54,9 @@ public class CharacterMovement
 
     // Internal state
 
-    private Shape3D _collisionShape;
+    private CapsuleShape3D _groundCollisionShape = new();
+    private CapsuleShape3D _mainCollisionShape = new();
+
     private Godot.Collections.Array<Rid> _characterCollisionRids = new();
 
 
@@ -70,11 +73,16 @@ public class CharacterMovement
     {
         _character = character;
 
+        _characterCollisionRids.Add(_character.Area.GetRid());
 
-        if (_character.CollisionShape.Shape is Shape3D collisionShape)
+        if (_character.CollisionShape.Shape is CapsuleShape3D collisionShape)
         {
-            _collisionShape = collisionShape;
-            _characterCollisionRids.Add(_collisionShape.GetRid());
+            _mainCollisionShape = collisionShape;
+            _groundCollisionShape.Height = _mainCollisionShape.Height;
+            _groundCollisionShape.MidHeight = _mainCollisionShape.MidHeight;
+            _groundCollisionShape.Radius = _mainCollisionShape.Radius - 0.01f;
+
+            _characterCollisionRids.Add(_mainCollisionShape.GetRid());
         }
         else
         {
@@ -98,13 +106,12 @@ public class CharacterMovement
 
     public void CheckGround(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
     {
-        //state.IsGrounded = false;
 
         Vector3 motion = Vector3.Down * GROUNDED_CHECK_DISTANCE;
 
         PhysicsShapeQueryParameters3D motionQuery = new()
         {
-            Shape = _collisionShape,
+            Shape = _mainCollisionShape,
             Transform = new Transform3D(Basis.Identity, startPosition),
             Motion = motion,
             CollideWithBodies = true,
@@ -122,7 +129,7 @@ public class CharacterMovement
 
             PhysicsShapeQueryParameters3D collisionQuery = new()
             {
-                Shape = _collisionShape,
+                Shape = _groundCollisionShape,
                 Transform = new Transform3D(Basis.Identity, startPosition + unsafeMotion),
                 CollideWithBodies = true,
                 CollideWithAreas = false
@@ -217,11 +224,9 @@ public class CharacterMovement
 
         state.Velocity = state.Velocity.Slide(state.GroundNormal);
 
-
-
-        Vector3 totalMotion = state.Velocity * delta;
-        float remainingDistance = totalMotion.Length();
-        Vector3 direction = totalMotion.Normalized();
+        Vector3 remainingMotion = state.Velocity * delta;
+        float remainingDistance = remainingMotion.Length();
+        Vector3 direction = remainingMotion.Normalized();
 
 
         bool moveComplete = false;
@@ -240,37 +245,41 @@ public class CharacterMovement
 
             var sweepResult = Sweep(state, space, targetMotion);
 
-            if(sweepResult.SafePercent >= 1.0f)
+            if (sweepResult.SafePercent >= 1.0f)
             {
-               // state.Velocity = sweepResult.SafeMotion;
                 state.Position += sweepResult.SafeMotion;
                 remainingDistance -= sweepResult.SafeMotion.Length();
                 moveComplete = true;
+
             }
             else
             {
-                if(sweepResult.CollisionType == CollisionType.FLOOR)
+                if (sweepResult.CollisionType == CollisionType.FLOOR)
                 {
                     Vector3 motion = targetMotion.Slide(sweepResult.CollisionNormal);
                     motion = new Vector3(targetMotion.X, motion.Y, targetMotion.Z);
-
-                    //state.Velocity = sweepResult.SafeMotion;
                     state.Position += sweepResult.SafeMotion;
                     remainingDistance -= sweepResult.SafeMotion.Length();
-
-                    GD.Print($"floor collision. motion length = {motion.Length()}");
 
                 }
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
-                    Vector3 motion = targetMotion.Slide(sweepResult.CollisionNormal);
+                    if(sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight)
+                    {
+                        GD.Print($"this is a steppable surface");
+                    }
+                    else
+                    {
+                        GD.Print($"this is a wall");
 
-                    //state.Velocity = sweepResult.SafeMotion;
-                    state.Position += sweepResult.SafeMotion;
-                    remainingDistance -= sweepResult.SafeMotion.Length();
+                        state.Position += sweepResult.SafeMotion;
+                        state.Position += sweepResult.CollisionNormal * 0.01f;
+                        remainingMotion = targetMotion - sweepResult.SafeMotion;
+                        remainingMotion = remainingMotion.Slide(sweepResult.CollisionNormal);
+                        remainingDistance = remainingMotion.Length();
 
-                    GD.Print($"wall collision. motion length = {motion.Length()}. normal: {sweepResult.CollisionNormal}");
-
+                        CheckStuck(state, space);
+                    }
                 }
             }
 
@@ -283,33 +292,59 @@ public class CharacterMovement
         return state;
     }
 
-    public SweepResult Sweep(CharacterPublicState state, PhysicsDirectSpaceState3D space, Vector3 motion)
+    public void CheckStuck(CharacterPublicState state, PhysicsDirectSpaceState3D space)
     {
         PhysicsShapeQueryParameters3D query = new()
         {
-            Shape = _collisionShape,
+            Shape = _mainCollisionShape,
             Transform = new Transform3D(Basis.Identity, state.Position),
-            Motion = motion,
             CollideWithBodies = true,
             CollideWithAreas = true
         };
         query.SetExclude(_characterCollisionRids);
 
-        var queryResult = space.CastMotion(query);
+        var trappedResult = space.GetRestInfo(query);
+
+        if (trappedResult.Count > 0)
+        {
+            GD.Print($"we are stuck!");
+            state.Position = state.LastUnstuckPosition;
+        }
+        else
+        {
+            state.LastUnstuckPosition = state.Position;
+        }
+    }
+
+    public SweepResult Sweep(CharacterPublicState state, PhysicsDirectSpaceState3D space, Vector3 motion)
+    {
+
+        PhysicsShapeQueryParameters3D motionQuery = new()
+        {
+            Shape = _mainCollisionShape,
+            Transform = new Transform3D(Basis.Identity, state.Position),
+            Motion = motion,
+            CollideWithBodies = true,
+            CollideWithAreas = true
+        };
+        motionQuery.SetExclude(_characterCollisionRids);
 
         SweepResult sweepResult = new();
+
+        var queryResult = space.CastMotion(motionQuery);
+
         sweepResult.SafePercent = queryResult[0];
         sweepResult.SafeMotion = motion * sweepResult.SafePercent;
 
         // If safe motion >= 1.0f, we don't need the other results
-        if(sweepResult.SafePercent < 1.0f)
+        if (sweepResult.SafePercent < 1.0f)
         {
             sweepResult.UnsafePercent = queryResult[1];
             sweepResult.UnsafeMotion = motion * sweepResult.UnsafePercent;
 
             PhysicsShapeQueryParameters3D collisionQuery = new()
             {
-                Shape = _collisionShape,
+                Shape = _mainCollisionShape,
                 Transform = new Transform3D(Basis.Identity, state.Position + sweepResult.UnsafeMotion),
                 CollideWithBodies = true,
                 CollideWithAreas = true
@@ -317,11 +352,11 @@ public class CharacterMovement
             collisionQuery.SetExclude(_characterCollisionRids);
 
             var restInfo = space.GetRestInfo(collisionQuery);
-            if(restInfo.TryGetValue("normal", out var normal))
+            if (restInfo.TryGetValue("normal", out var normal))
             {
-                sweepResult.CollisionNormal = (Vector3) normal;
+                sweepResult.CollisionNormal = (Vector3)normal;
 
-                if(sweepResult.CollisionNormal.Dot(Vector3.Up) >= _walkableThreshold)
+                if (sweepResult.CollisionNormal.Dot(Vector3.Up) >= _walkableThreshold)
                 {
                     sweepResult.CollisionType = CollisionType.FLOOR;
                 }
@@ -329,6 +364,11 @@ public class CharacterMovement
                 {
                     sweepResult.CollisionType = CollisionType.WALL;
                 }
+            }
+
+            if (restInfo.TryGetValue("point", out var point))
+            {
+                sweepResult.CollisionPoint = (Vector3)point;
             }
         }
         return sweepResult;
@@ -354,7 +394,7 @@ public class CharacterMovement
 
             PhysicsShapeQueryParameters3D query = new()
             {
-                Shape = _collisionShape,
+                Shape = _mainCollisionShape,
                 Transform = new Transform3D(Basis.Identity, state.Position),
                 Motion = remainingMotion,
                 CollideWithBodies = true,
@@ -379,7 +419,7 @@ public class CharacterMovement
                 // Evaluate the collision normal
                 PhysicsShapeQueryParameters3D collisionQuery = new()
                 {
-                    Shape = _collisionShape,
+                    Shape = _mainCollisionShape,
                     Transform = new Transform3D(Basis.Identity, state.Position + safeMotion),
                     CollideWithBodies = true,
                     CollideWithAreas = false
@@ -553,7 +593,7 @@ public class CharacterMovement
 
             PhysicsShapeQueryParameters3D query = new()
             {
-                Shape = _collisionShape,
+                Shape = _mainCollisionShape,
                 Transform = new Transform3D(Basis.Identity, state.Position),
                 CollideWithBodies = true,
                 CollideWithAreas = true,
