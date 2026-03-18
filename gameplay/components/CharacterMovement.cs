@@ -194,10 +194,6 @@ public class CharacterMovement
         return state;
     }
 
-    public void ProjectVelocityToGround(CharacterPublicState state)
-    {
-        state.Velocity = state.Velocity.Slide(state.GroundNormal);
-    }
 
     const float SKIN_WIDTH = 0.0f;
 
@@ -213,15 +209,20 @@ public class CharacterMovement
         }
 
         ApplyAcceleration(state, _walkAcceleration, _walkDeceleration, delta);
-        state.Velocity = state.Velocity.Slide(state.GroundNormal);
 
         if(state.Velocity == Vector3.Zero)
         {
             return state;
         }
 
-        Vector3 initialMotion = state.Velocity * delta;
-        Vector3 remainingMotion = initialMotion;
+        state.Velocity = state.Velocity.Slide(state.GroundNormal);
+
+
+
+        Vector3 totalMotion = state.Velocity * delta;
+        float remainingDistance = totalMotion.Length();
+        Vector3 direction = totalMotion.Normalized();
+
 
         bool moveComplete = false;
         int maxSlides = 4;
@@ -232,38 +233,48 @@ public class CharacterMovement
                 break;
             }
 
-            var sweepResult = Sweep(state, space, remainingMotion);
+            Vector3 targetMotion = direction * remainingDistance;
+
+            CheckGround(state, state.Position, space);
+            state.Velocity = state.Velocity.Slide(state.GroundNormal);
+
+            var sweepResult = Sweep(state, space, targetMotion);
 
             if(sweepResult.SafePercent >= 1.0f)
             {
                // state.Velocity = sweepResult.SafeMotion;
                 state.Position += sweepResult.SafeMotion;
-                remainingMotion -= sweepResult.SafeMotion;
+                remainingDistance -= sweepResult.SafeMotion.Length();
                 moveComplete = true;
             }
             else
             {
                 if(sweepResult.CollisionType == CollisionType.FLOOR)
                 {
-                    Vector3 motion = remainingMotion.Slide(sweepResult.CollisionNormal);
-                    motion = new Vector3(remainingMotion.X, motion.Y, remainingMotion.Z);
+                    Vector3 motion = targetMotion.Slide(sweepResult.CollisionNormal);
+                    motion = new Vector3(targetMotion.X, motion.Y, targetMotion.Z);
 
                     //state.Velocity = sweepResult.SafeMotion;
                     state.Position += sweepResult.SafeMotion;
-                    remainingMotion -= sweepResult.SafeMotion;
+                    remainingDistance -= sweepResult.SafeMotion.Length();
+
+                    GD.Print($"floor collision. motion length = {motion.Length()}");
+
                 }
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
-                    GD.Print($"wall collision");
-                    Vector3 motion = initialMotion.Slide(sweepResult.CollisionNormal);
+                    Vector3 motion = targetMotion.Slide(sweepResult.CollisionNormal);
 
                     //state.Velocity = sweepResult.SafeMotion;
                     state.Position += sweepResult.SafeMotion;
-                    remainingMotion -= sweepResult.SafeMotion;
+                    remainingDistance -= sweepResult.SafeMotion.Length();
+
+                    GD.Print($"wall collision. motion length = {motion.Length()}. normal: {sweepResult.CollisionNormal}");
+
                 }
             }
 
-            if (!moveComplete && remainingMotion.Length() < 0.001f)
+            if (!moveComplete && remainingDistance < 0.001f)
             {
                 moveComplete = true;
             }
