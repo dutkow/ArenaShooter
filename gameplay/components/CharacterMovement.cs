@@ -263,7 +263,7 @@ public class CharacterMovement
                             stepPosition += upSweep.SafeMotion;
 
                             // Try to move in the original intended direction from the step up position
-                            float minForwardStep = 0.1f + pushBackLength;
+                            float minForwardStep = 0.25f + pushBackLength;
 
                             if(targetMotion.Length() < minForwardStep)
                             {

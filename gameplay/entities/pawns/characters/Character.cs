@@ -16,7 +16,7 @@ public partial class Character : Pawn, IDamageable
     [Export] public CollisionShape3D CollisionShape;
 
 
-    [Export] public Camera3D Camera; // assign in editor
+    [Export] private Camera3D _camera; // assign in editor
     [Export] public float MouseSensitivity = 0.005f;
 
     List<ClientInputCommand> _unacknowledgedClientInputs = new();
@@ -51,7 +51,7 @@ public partial class Character : Pawn, IDamageable
 
     private ClientInputCommand _lastProcessedClientCommand;
 
-    private bool _useInterpolation = false;
+    private bool _useInterpolation = true;
 
     private bool _lookDirty;
 
@@ -61,7 +61,11 @@ public partial class Character : Pawn, IDamageable
     {
         base._Ready();
 
-        Camera.Current = false;
+
+        _camera.Current = false;
+
+        _camera.Reparent(Level.Instance, true);
+
         SetProcessInput(false);
         ShowThirdPersonView();
 
@@ -70,8 +74,6 @@ public partial class Character : Pawn, IDamageable
         _visualContainerPosition = _visualContainer.Position;
 
         Area.Owner = this;
-
-        
     }
 
     public void ApplyDamage(int damage)
@@ -107,7 +109,6 @@ public partial class Character : Pawn, IDamageable
 
         if (IsLocal)
         {
-
             if (IsAuthority)
             {
                 LocalAuthorityInterpolation((float)delta);
@@ -128,7 +129,8 @@ public partial class Character : Pawn, IDamageable
     {
         if (_useInterpolation)
         {
-            InterpolatePosition(delta * LOCAL_SV_INTERP_RATE);
+            InterpolatePosition(10.0f, delta);
+            GlobalPosition = PlayerState.CharacterPublicState.Position;
         }
         else
         {
@@ -136,11 +138,12 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
+
     public void LocalPredictiveInterpolation(float delta)
     {
         if (_useInterpolation)
         {
-            InterpolatePosition(delta * LOCAL_SV_INTERP_RATE);
+            InterpolatePosition(1.0f, delta);
         }
         else
         {
@@ -152,7 +155,7 @@ public partial class Character : Pawn, IDamageable
     {
         if(_useInterpolation)
         {
-            InterpolatePosition(delta * REMOTE_CL_INTERP_RATE);
+            InterpolatePosition(1.0f, delta);
             InterpolateYaw(delta * 10.0f);
             InterpolatePitch(delta * 10.0f);
         }
@@ -169,11 +172,10 @@ public partial class Character : Pawn, IDamageable
     float REMOTE_CL_INTERP_RATE = 0.5f;
 
 
-    public void InterpolatePosition(float interpSpeed)
+    public void InterpolatePosition(float interpSpeed, float delta)
     {
-
-        var targetPosition = PlayerState.CharacterPublicState.Position + _visualContainerPosition;
-        _visualContainer.GlobalPosition = _visualContainer.GlobalPosition.Lerp(targetPosition, LOCAL_SV_INTERP_RATE);
+        _camera.GlobalPosition = _camera.Position.Lerp(_cameraPivot.GlobalPosition, 0.25f);
+        _camera.GlobalRotation = _cameraPivot.GlobalRotation;
     }
 
     public void InterpolateYaw(float interpSpeed)
@@ -205,7 +207,9 @@ public partial class Character : Pawn, IDamageable
         SetProcessInput(true);
         ShowFirstPersonView();
 
-        Camera.Current = true;
+        _camera.Current = true;
+
+        Level.Instance.AddChild(_camera);
 
         SetRole(NetworkRole.LOCAL);
         UIRoot.Instance.OnPossessedCharacter(this);
@@ -428,8 +432,8 @@ public partial class Character : Pawn, IDamageable
 
         }
 
-        Vector3 dir = -Camera.GlobalTransform.Basis.Z;
-        _weapon.Tick(NetworkConstants.SERVER_TICK_INTERVAL, Camera.GlobalPosition, dir);
+        Vector3 dir = -_camera.GlobalTransform.Basis.Z;
+        _weapon.Tick(NetworkConstants.SERVER_TICK_INTERVAL, _camera.GlobalPosition, dir);
 
 
         clientPredictionTick.InputCommand.Look = _accumulatedLookDelta;
@@ -677,4 +681,6 @@ public partial class Character : Pawn, IDamageable
         PlayerState.CharacterPublicState.ClearFlags();
         PlayerState.CharacterPrivateState.ClearFlags();
     }
+
+
 }

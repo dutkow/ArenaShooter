@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://dmv4wkc1nkqoq"]
+
+[ext_resource type="PackedScene" uid="uid://b708cmx0cac5h" path="res://gameplay/weapons/weapon.tscn" id="1_28jde"]
+
+[node name="FirstPersonCamera" type="Camera3D" unique_id=2129963021]
+
+[node name="Weapon" parent="." unique_id=614969977 instance=ExtResource("1_28jde")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.08669387, -0.01097849, 0.18178016)
