@@ -29,6 +29,8 @@ public class ClientGame
     private bool _hasReceivedInitialState;
 
 
+    public List<ITickable> Tickables = new();
+
     public static void Initialize()
     {
         if(ClientGame.Instance != null)
@@ -66,6 +68,11 @@ public class ClientGame
         if(_hasReceivedInitialState)
         {
             SendCommand();
+        }
+
+        foreach(var tickable in Tickables)
+        {
+            tickable.Tick((float)NetworkConstants.SERVER_TICK_RATE);
         }
     }
 

@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://fi4eb24dfgbv" path="res://ui/hud/health_bar.tscn" id="6_y2gd1"]
 [ext_resource type="PackedScene" uid="uid://8gi047ww2qwf" path="res://ui/chat/chat_panel.tscn" id="8_3hb5n"]
 [ext_resource type="PackedScene" uid="uid://br2pp11aighc" path="res://ui/hud/speed_indicator.tscn" id="9_tbnm7"]
+[ext_resource type="PackedScene" uid="uid://dxactyrq23qlg" path="res://ui/fps_counter.tscn" id="10_ywd4t"]
 
 [node name="PlayerHud" type="Control" unique_id=58829785 node_paths=PackedStringArray("_shieldBar", "_healthBar")]
 layout_mode = 3
@@ -105,3 +106,13 @@ offset_left = -19.0
 offset_top = 34.0
 offset_right = -19.0
 offset_bottom = 34.0
+
+[node name="FPSCounter" parent="." unique_id=1679768807 instance=ExtResource("10_ywd4t")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_bottom = 0.0
+offset_left = -50.0
+offset_bottom = 40.0
+grow_horizontal = 0
+grow_vertical = 1

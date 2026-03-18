@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://dxactyrq23qlg"]
+
+[ext_resource type="Script" uid="uid://c7qtc48fhas0i" path="res://ui/FpsCounter.cs" id="1_5vtak"]
+
+[node name="FPSCounter" type="Control" unique_id=1679768807 node_paths=PackedStringArray("_fpsCounterLabel")]
+custom_minimum_size = Vector2(50, 40)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_5vtak")
+_fpsCounterLabel = NodePath("Label")
+
+[node name="Label" type="Label" parent="." unique_id=880463368]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "999"
+horizontal_alignment = 1
+vertical_alignment = 1
