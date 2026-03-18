@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 public partial class Settings : Node
 {
@@ -10,6 +11,10 @@ public partial class Settings : Node
     private readonly ConfigFile _config = new();
 
     public string PlayerName { get; private set; } = "Unnamed Player";
+
+    public Action<bool> ShowFPSChanged;
+
+    public bool ShowFPS = false;
 
     public override void _Ready()
     {
@@ -56,5 +61,16 @@ public partial class Settings : Node
 
         PlayerName = newName;
         SaveSettings();
+    }
+
+    public void SetShowFPS(bool showFPS)
+    {
+        if(ShowFPS == showFPS)
+        {
+            return;
+        }
+
+        ShowFPS = showFPS;
+        ShowFPSChanged?.Invoke(ShowFPS);
     }
 }

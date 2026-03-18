@@ -8,17 +8,30 @@ public partial class FpsCounter : Control, ITickable
 
     private float _timeAccumulator;
 
-    private float _refreshTime = 1.0f;
+    private float _refreshTime = 0.5f;
 
     public override void _Ready()
     {
         base._Ready();
 
         ClientGame.Instance.Tickables.Add(this);
+
+        OnShowFPSChanged(Settings.Instance.ShowFPS);
+        Settings.Instance.ShowFPSChanged += OnShowFPSChanged;
+    }
+
+    public void OnShowFPSChanged(bool value)
+    {
+        Visible = value;
     }
 
     public void Tick(double delta)
     {
+        if(!Visible)
+        {
+            return;
+        }
+
         _timeAccumulator += (float)delta;
 
         if(_timeAccumulator > _refreshTime)

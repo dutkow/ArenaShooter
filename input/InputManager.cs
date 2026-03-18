@@ -12,6 +12,7 @@ public enum InputMode
 {
     GAME,
     UI,
+    CONSOLE
 }
 
 public enum InputBindingType

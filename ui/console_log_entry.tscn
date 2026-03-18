@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://w86hipkyhj2a"]
+
+[ext_resource type="Script" uid="uid://cotuovc53e7lx" path="res://ui/ConsoleLogEntry.cs" id="1_r3k8k"]
+
+[node name="ConsoleLogEntry" type="Label" unique_id=104154313]
+offset_right = 40.0
+offset_bottom = 23.0
+script = ExtResource("1_r3k8k")

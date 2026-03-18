@@ -44,7 +44,8 @@ public class ClientGame
 
     public void OnLoaded()
     {
-        Instance.LocalPlayerController = new();
+        LocalPlayerController = new();
+        Game.Instance.AddChild(LocalPlayerController);
 
         GD.Print($"on loaded ran on client game");
 

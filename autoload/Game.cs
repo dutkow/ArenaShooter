@@ -22,6 +22,8 @@ public partial class Game : Node
 
         ChatManager.Create();
 
+        GD.Print($"game initialized");
+
     }
 
 

@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://b1ttdis44hiaa"]
+
+[ext_resource type="Script" uid="uid://dxa7t3ja3ktci" path="res://ui/CommandConsole.cs" id="1_3w7a3"]
+[ext_resource type="PackedScene" uid="uid://w86hipkyhj2a" path="res://ui/console_log_entry.tscn" id="2_mm0ag"]
+
+[node name="CommandConsole" type="Control" unique_id=1851349959 node_paths=PackedStringArray("_lineEdit", "_consoleLog")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_3w7a3")
+_lineEdit = NodePath("VBoxContainer/Control2/VBoxContainer/HBoxContainer/LineEdit")
+_consoleLog = NodePath("VBoxContainer/Control2/VBoxContainer/ScrollContainer/ConsoleLog")
+_controlLogEntryScene = ExtResource("2_mm0ag")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1756805081]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.3137255)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=40972681]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control2" type="Control" parent="VBoxContainer" unique_id=1785922288]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/Control2" unique_id=377851458]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.18, 0.18, 0.18, 0.7647059)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control2" unique_id=307273623]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/Control2/VBoxContainer" unique_id=493799815]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ConsoleLog" type="VBoxContainer" parent="VBoxContainer/Control2/VBoxContainer/ScrollContainer" unique_id=1878567266]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Control2/VBoxContainer" unique_id=1163556752]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="Label" type="Label" parent="VBoxContainer/Control2/VBoxContainer/HBoxContainer" unique_id=704263923]
+layout_mode = 2
+text = ">"
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/Control2/VBoxContainer/HBoxContainer" unique_id=200949976]
+layout_mode = 2
+size_flags_horizontal = 3
+keep_editing_on_text_submit = true
+
+[node name="Control" type="Control" parent="VBoxContainer" unique_id=1577290217]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.5

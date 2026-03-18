@@ -1,22 +1,28 @@
 using Godot;
 using System;
 
+
+
 public partial class PlayerController : Controller
 {
     public ChatPanel ChatPanel; // TODO: want to rethink how we route player input to the UI and make a more modular setup
 
+    public InputMode InputMode;
 
     public override void _Ready()
     {
         base._Ready();
 
         GD.Print("Player controller created");
+
+        
     }
 
     public override void _Input(InputEvent @event)
     {
         base._Input(@event);
 
+       
         if (Input.IsActionJustPressed("net_profile_great"))
         {
             NetworkSender.SetNetworkProfile(NetworkSender.NetworkProfile.GREAT);
@@ -43,25 +49,47 @@ public partial class PlayerController : Controller
             GD.Print($"Emulation enabled: {NetworkSender.EmulationEnabled}");
         }
 
-        if(Input.IsActionJustPressed("chat_all"))
+        if(InputMode == InputMode.GAME)
         {
-            GD.Print($"open chat ran");
+            if (Input.IsActionJustPressed("chat_all"))
+            {
+                GD.Print($"open chat ran");
 
-            PossessedPawn?.SetInputEnabled(false);
-            ChatPanel.Open();
+                PossessedPawn?.SetInputEnabled(false);
+                ChatPanel.Open();
+            }
+
+            if (Input.IsActionJustPressed("chat_team"))
+            {
+                PossessedPawn?.SetInputEnabled(false);
+                ChatPanel.Open();
+            }
+
+            if (Input.IsActionJustPressed("send_chat"))
+            {
+                PossessedPawn?.SetInputEnabled(true);
+                ChatPanel.SendChat();
+            }
         }
 
-        if (Input.IsActionJustPressed("chat_team"))
+        if (Input.IsActionJustPressed("toggle_command_console"))
         {
-            PossessedPawn?.SetInputEnabled(false);
-            ChatPanel.Open();
+            bool toggledOn = CommandConsole.Instance.Toggle();
+
+            if(toggledOn)
+            {
+                InputMode = InputMode.CONSOLE;
+                PossessedPawn?.SetInputEnabled(false);
+            }
+            else
+            {
+                InputMode = InputMode.GAME;
+                PossessedPawn?.SetInputEnabled(true);
+            }
+
         }
 
-        if (Input.IsActionJustPressed("send_chat"))
-        {
-            PossessedPawn?.SetInputEnabled(true);
-            ChatPanel.SendChat();
-        }
+        GD.Print($"input on player controller");
     }
 
     public virtual ClientInputCommand AddInput(ClientInputCommand cmd)
