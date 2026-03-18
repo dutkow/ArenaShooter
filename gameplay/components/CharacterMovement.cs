@@ -45,7 +45,7 @@ public class CharacterMovement
     public float Gravity = 25.0f;
     public Vector3 _gravityVector => new Vector3(0.0f, -Gravity, 0.0f);
     public float JumpStrength = 10.0f;
-    public float MaxStepHeight = 0.5f;
+    public const float MAX_STEP_HEIGHT = 0.5f;
 
     public float _walkAcceleration = 100.0f;
     public float _airAcceleration = 25.0f;
@@ -193,7 +193,6 @@ public class CharacterMovement
 
         StepAndSlide(state, space, delta, true);
 
-
         return state;
     }
 
@@ -216,7 +215,7 @@ public class CharacterMovement
 
             Vector3 targetMotion = direction * remainingDistance;
 
-            var sweepResult = Sweep(state, space, targetMotion);
+            var sweepResult = Sweep(state, state.Position, space, targetMotion);
 
             if (sweepResult.SafePercent >= 1.0f)
             {
@@ -236,22 +235,54 @@ public class CharacterMovement
                 }
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
-                    // THIS IS A STEPPABLE SURFACE
-                    if (groundedMove && sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight && false) // don't use for now
+                    GD.Print($"colliding with wall");
+                    // TRY TO STEP FIRST
+                    bool steppedUp = false;
+
+                    if (groundedMove)
                     {
-                        float stepUpAmount = sweepResult.CollisionPoint.Y - state.Position.Y + _mainCollisionShape.MidHeight + 1.0f;
-                        Vector3 stepMotion = new Vector3(0.0f, stepUpAmount, 0.0f);
+                        // Test that we can move up before stepping forward
+                        Vector3 stepPosition = state.Position;
 
-                        var stepSweep = Sweep(state, space, stepMotion);
+                        // step back from the wall slightly
+                        Vector3 pushBack = sweepResult.CollisionNormal * 0.01f;
+                        pushBack = pushBack.Slide(state.GroundNormal);
+                        stepPosition += pushBack;
 
-                        if (stepSweep.SafePercent >= 0.0f)
+                        Vector3 upMotion = new Vector3(0.0f, MAX_STEP_HEIGHT, 0.0f);
+                        var upSweep = Sweep(state, stepPosition, space, upMotion);
+
+                        GD.Print($"up sweep safe motion length = {upSweep.SafeMotion.Length()}");
+
+                        if (upSweep.SafePercent > 0.25f)
                         {
-                            state.Position += stepSweep.SafeMotion;
+                            stepPosition += upSweep.SafeMotion;
 
+                            // Try to move in the original intended direction from the step up position
+                            var forwardSweep = Sweep(state, stepPosition, space, targetMotion);
+
+                            GD.Print($"forward sweep safe motion length = {forwardSweep.SafeMotion.Length()}");
+
+                            if (forwardSweep.SafePercent> 0.25f)
+                            {
+                                GD.Print($"forward sweep success");
+                                stepPosition += forwardSweep.SafeMotion;
+
+                                // Finally, sweep back down to floor
+                                var downMotion = new Vector3(0.0f, -MAX_STEP_HEIGHT, 0.0f);
+                                var downSweep = Sweep(state, stepPosition, space, downMotion);
+
+
+                                state.Position += upSweep.SafeMotion + forwardSweep.SafeMotion + downSweep.SafeMotion + new Vector3(0.0f, GROUND_CLEARANCE * 2.0f, 0.0f);
+
+                                steppedUp = true;
+                            }
+                           
                         }
                     }
-                    // THIS IS A WALL
-                    else
+
+                    // STEP FAILED, THIS IS A WALL
+                    if(!steppedUp)
                     {
                         state.Position += sweepResult.SafeMotion;
 
@@ -269,8 +300,10 @@ public class CharacterMovement
 
                         remainingDistance = remainingMotion.Length();
 
-                        CheckStuck(state, space);
                     }
+
+                    CheckStuck(state, space);
+
                 }
             }
 
@@ -305,13 +338,13 @@ public class CharacterMovement
         }
     }
 
-    public SweepResult Sweep(CharacterPublicState state, PhysicsDirectSpaceState3D space, Vector3 motion)
+    public SweepResult Sweep(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space, Vector3 motion)
     {
 
         PhysicsShapeQueryParameters3D motionQuery = new()
         {
             Shape = _mainCollisionShape,
-            Transform = new Transform3D(Basis.Identity, state.Position),
+            Transform = new Transform3D(Basis.Identity, startPosition),
             Motion = motion,
             CollideWithBodies = true,
             CollideWithAreas = true
