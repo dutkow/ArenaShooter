@@ -224,6 +224,14 @@ public class ClientGame
         MatchState.Instance.AddPlayer(playerJoined.PlayerInfo);
     }
 
+    public void HandlePlayerNameChanged(PlayerNameChange playerNameChange)
+    {
+        if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerNameChange.PlayerID, out var playerState))
+        {
+            playerState.SetPlayerName(playerNameChange.Name);
+        }
+    }
+
     private void Dispatch<T>(byte[] payload, Action<T> handler) where T : Message, new()
     {
         var msg = Message.FromData<T>(payload);
@@ -240,5 +248,7 @@ public class ClientGame
         _messageHandlers[Msg.S2C_CONNECTION_DENIED] = payload => Dispatch<ConnectionDenied>(payload, HandleConnectionDenied);
         _messageHandlers[Msg.S2C_INITIAL_MATCH_STATE] = payload => Dispatch<InitialMatchState>(payload, HandleInitialMatchState);
         _messageHandlers[Msg.S2C_WORLD_SNAPSHOT] = payload => Dispatch<WorldSnapshot>(payload, HandleWorldSnapshot);
+        _messageHandlers[Msg.S2C_PLAYER_NAME_CHANGED] = payload => Dispatch<PlayerNameChange>(payload, HandlePlayerNameChanged);
+
     }
 }

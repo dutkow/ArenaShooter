@@ -35,8 +35,6 @@ public class UserSettings
 
     private void LoadSettings()
     {
-        CommandConsole.Instance.AddConsoleLogEntry($"Loading user settings from {ConfigPath}.");
-
         if (_config.Load(ConfigPath) != Error.Ok)
         {
             SaveSettings();

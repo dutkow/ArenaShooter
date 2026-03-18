@@ -6,6 +6,8 @@ public partial class ConnectedPlayersList : Control
 {
     [Export] VBoxContainer _playerListContainer;
 
+    [Export] PackedScene _playerListEntryScene;
+
     public override void _Ready()
     {
         base._Ready();
@@ -30,9 +32,9 @@ public partial class ConnectedPlayersList : Control
 
     public void AddPlayerToList(PlayerState playerState)
     {
-        Label playerLabel = new();
-        playerLabel.Text = playerState.PlayerInfo.PlayerName;
-        _playerListContainer.AddChild(playerLabel);
+        var playerListEntry = (PlayerListEntry)_playerListEntryScene.Instantiate();
+        playerListEntry.Initialize(playerState);
+        _playerListContainer.AddChild(playerListEntry);
     }
 
 

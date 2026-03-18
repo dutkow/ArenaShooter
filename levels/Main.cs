@@ -37,13 +37,12 @@ public partial class Main : Node, ITickable
         if(true)
         {
             _clientInput = new();
+            UserSettings userSettings = new();
 
             UIRoot UIRoot = (UIRoot)_uiRootScene.Instantiate();
             AddChild(UIRoot);
 
             CommandConsole.Instance.AddConsoleLogEntry("=== INITIALIZING CLIENT ===");
-
-            UserSettings userSettings = new();
 
             OpenMainMenu();
 

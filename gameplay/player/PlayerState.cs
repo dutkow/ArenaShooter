@@ -18,6 +18,14 @@ public class PlayerState()
     public ushort Ping;
     public bool IsAlive; // Used so clients know who they need to spawn
 
+    public Action<string> PlayerNameChanged;
+
+    public void SetPlayerName(string playerName)
+    {
+        PlayerInfo.PlayerName = playerName;
+        PlayerNameChanged?.Invoke(playerName);
+    }
+
     public void ClearFlags()
     {
         Flags = 0;

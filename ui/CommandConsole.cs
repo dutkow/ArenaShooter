@@ -15,6 +15,7 @@ public partial class CommandConsole : Control
     public override void _Ready()
     {
         base._Ready();
+
         Instance = this;
 
         _commands["maxfps"] = HandleMaxFps;
@@ -165,6 +166,10 @@ public partial class CommandConsole : Control
             if(NetworkManager.Instance.NetworkMode == NetworkMode.CLIENT)
             {
                 PlayerNameChangeRequest.Send(value);
+            }
+            else if (NetworkManager.Instance.NetworkMode != NetworkMode.OFFLINE)
+            {
+                ServerGame.Instance?.ApplyPlayerNameChange(ClientGame.Instance.LocalPlayerID, value);
             }
 
             AddConsoleLogEntry($"Changed player name to: {value}");

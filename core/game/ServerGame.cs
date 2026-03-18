@@ -278,6 +278,8 @@ public class ServerGame()
         _messageHandlers[Msg.C2S_CONNECTION_REQUEST] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
         _messageHandlers[Msg.C2S_CLIENT_LOADED] = (peer, payload) => Dispatch<ClientLoaded>(peer, payload, HandleClientLoaded);
         _messageHandlers[Msg.C2S_CLIENT_COMMAND] = (peer, payload) => Dispatch<ClientCommand>(peer, payload, HandleClientCommand);
+        _messageHandlers[Msg.C2S_CHANGE_PLAYER_NAME] = (peer, payload) => Dispatch<PlayerNameChangeRequest>(peer, payload, HandlePlayerNameChangeRequest);
+
     }
 
     private void Dispatch<T>(ENetPacketPeer peer, byte[] payload, Action<ENetPacketPeer, T> handler) where T : Message, new()
@@ -318,5 +320,22 @@ public class ServerGame()
             }
         }
 
+    }
+
+    public void HandlePlayerNameChangeRequest(ENetPacketPeer peer, PlayerNameChangeRequest request)
+    {
+        byte playerID = NetUtils.GetPeerPlayerID(peer);
+
+        ApplyPlayerNameChange(playerID, request.Name);
+    }
+
+    public void ApplyPlayerNameChange(byte playerID, string name)
+    {
+        if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
+        {
+            playerState.SetPlayerName(name);
+        }
+
+        PlayerNameChange.Send(playerID, name);
     }
 }
