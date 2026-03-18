@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using static Godot.WebSocketPeer;
 
 public enum CharacterMoveMode : byte
 {
@@ -106,6 +107,7 @@ public class CharacterMovement
 
     public void CheckGround(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
     {
+        //state.IsGrounded = false;
 
         Vector3 motion = Vector3.Down * GROUNDED_CHECK_DISTANCE;
 
@@ -224,6 +226,15 @@ public class CharacterMovement
 
         state.Velocity = state.Velocity.Slide(state.GroundNormal);
 
+        StepAndSlide(state, space, delta);
+
+
+        return state;
+    }
+
+    public void StepAndSlide(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta)
+    {
+
         Vector3 remainingMotion = state.Velocity * delta;
         float remainingDistance = remainingMotion.Length();
         Vector3 direction = remainingMotion.Normalized();
@@ -233,7 +244,7 @@ public class CharacterMovement
         int maxSlides = 4;
         for (int i = 0; i < maxSlides; ++i)
         {
-            if(moveComplete)
+            if (moveComplete)
             {
                 break;
             }
@@ -264,10 +275,10 @@ public class CharacterMovement
                 }
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
-                    if(sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight)
+                    // THIS IS A STEPPABLE SURFACE
+                    if (sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight && 0 > 1)
                     {
-                        float stepUpAmount = sweepResult.CollisionPoint.Y - state.Position.Y + _mainCollisionShape.MidHeight + GROUND_CLEARANCE;
-                        stepUpAmount = Mathf.Min(stepUpAmount, MaxStepHeight);
+                        float stepUpAmount = sweepResult.CollisionPoint.Y - state.Position.Y + _mainCollisionShape.MidHeight + 1.0f;
                         Vector3 stepMotion = new Vector3(0.0f, stepUpAmount, 0.0f);
 
                         var stepSweep = Sweep(state, space, stepMotion);
@@ -275,8 +286,10 @@ public class CharacterMovement
                         if (stepSweep.SafePercent >= 0.0f)
                         {
                             state.Position += stepSweep.SafeMotion;
+
                         }
                     }
+                    // THIS IS A WALL
                     else
                     {
                         GD.Print($"this is a wall");
@@ -297,8 +310,6 @@ public class CharacterMovement
                 moveComplete = true;
             }
         }
-
-        return state;
     }
 
     public void CheckStuck(CharacterPublicState state, PhysicsDirectSpaceState3D space)
