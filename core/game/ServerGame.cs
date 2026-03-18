@@ -42,6 +42,8 @@ public class ServerGame()
 
         Instance.InitMessageHandlers();
 
+        CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Server Game ===");
+
     }
 
     public void OnLoaded()

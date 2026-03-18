@@ -1,11 +1,8 @@
 using Godot;
 using System;
 
-public partial class FpsCounter : Control, ITickable
+public partial class FpsCounter : Label, ITickable
 {
-    [Export] Label _fpsCounterLabel;
-
-
     private float _timeAccumulator;
 
     private float _refreshTime = 0.5f;
@@ -14,8 +11,8 @@ public partial class FpsCounter : Control, ITickable
     {
         base._Ready();
 
-        ClientGame.Instance.Tickables.Add(this);
-
+        //ClientGame.Instance.Tickables.Add(this);
+        Main.Instance.Tickables.Add(this);
         OnShowFPSChanged(Settings.Instance.ShowFPS);
         Settings.Instance.ShowFPSChanged += OnShowFPSChanged;
     }
@@ -46,6 +43,6 @@ public partial class FpsCounter : Control, ITickable
     {
         GD.Print("Update fps ran");
 
-        _fpsCounterLabel.Text = Mathf.RoundToInt(Engine.GetFramesPerSecond()).ToString();
+        Text = Mathf.RoundToInt(Engine.GetFramesPerSecond()).ToString();
     }
 }

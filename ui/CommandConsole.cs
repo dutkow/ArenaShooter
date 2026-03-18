@@ -29,6 +29,7 @@ public partial class CommandConsole : Control
 
     public bool Toggle()
     {
+        GD.Print($"toggle cmd console ran");
         if(Visible)
         {
             Visible = false;

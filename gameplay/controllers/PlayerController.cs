@@ -2,7 +2,6 @@ using Godot;
 using System;
 
 
-
 public partial class PlayerController : Controller
 {
     public ChatPanel ChatPanel; // TODO: want to rethink how we route player input to the UI and make a more modular setup
@@ -72,22 +71,6 @@ public partial class PlayerController : Controller
             }
         }
 
-        if (Input.IsActionJustPressed("toggle_command_console"))
-        {
-            bool toggledOn = CommandConsole.Instance.Toggle();
-
-            if(toggledOn)
-            {
-                InputMode = InputMode.CONSOLE;
-                PossessedPawn?.SetInputEnabled(false);
-            }
-            else
-            {
-                InputMode = InputMode.GAME;
-                PossessedPawn?.SetInputEnabled(true);
-            }
-
-        }
 
         GD.Print($"input on player controller");
     }

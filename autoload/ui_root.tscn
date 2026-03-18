@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bc6q206h41ks8" path="res://autoload/UIRoot.cs" id="1_cwasx"]
 [ext_resource type="PackedScene" uid="uid://b1ttdis44hiaa" path="res://ui/command_console.tscn" id="3_i0hgf"]
 [ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/player_hud.tscn" id="4_7bb3i"]
+[ext_resource type="PackedScene" uid="uid://dxactyrq23qlg" path="res://ui/fps_counter.tscn" id="4_7ciei"]
 
 [node name="UIRoot" type="Control" unique_id=1045037961]
 layout_mode = 3
@@ -17,4 +18,26 @@ _playerHudScene = ExtResource("4_7bb3i")
 
 [node name="CommandConsole" parent="." unique_id=1851349959 instance=ExtResource("3_i0hgf")]
 visible = false
+z_index = 1
 layout_mode = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=350192019]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="FPSCounter" parent="MarginContainer" unique_id=1679768807 instance=ExtResource("4_7ciei")]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+text = ""
+horizontal_alignment = 2
+vertical_alignment = 0

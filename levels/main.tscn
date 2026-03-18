@@ -1,13 +1,15 @@
-[gd_scene load_steps=5 format=3 uid="uid://pfp32j0hxv8n"]
+[gd_scene format=3 uid="uid://pfp32j0hxv8n"]
 
 [ext_resource type="PackedScene" uid="uid://bnufp106f826h" path="res://autoload/ui_root.tscn" id="1_2262g"]
 [ext_resource type="Script" uid="uid://saskhx6wlk50" path="res://levels/Main.cs" id="1_wdj6m"]
 [ext_resource type="PackedScene" uid="uid://ci8rl3endmnqc" path="res://ui/menus/main_menu/main_menu.tscn" id="2_wdj6m"]
 [ext_resource type="PackedScene" uid="uid://doianfimes2dl" path="res://ui/loading/loading_screen.tscn" id="3_m1504"]
 
-[node name="Main" type="Node"]
+[node name="Main" type="Node" unique_id=1464745477 node_paths=PackedStringArray("GameRoot")]
 script = ExtResource("1_wdj6m")
 _mainMenuScene = ExtResource("2_wdj6m")
 _loadingScreenScene = ExtResource("3_m1504")
+_uiRootScene = ExtResource("1_2262g")
+GameRoot = NodePath("GameRoot")
 
-[node name="UIRoot" parent="." instance=ExtResource("1_2262g")]
+[node name="GameRoot" type="Node" parent="." unique_id=626771753]

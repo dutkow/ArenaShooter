@@ -40,6 +40,10 @@ public class ClientGame
         Instance = new ClientGame();
 
         Instance.InitMessageHandlers();
+
+        CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Client Game ===");
+
+
     }
 
     public void OnLoaded()
