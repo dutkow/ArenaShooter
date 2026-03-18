@@ -226,13 +226,13 @@ public class CharacterMovement
 
         state.Velocity = state.Velocity.Slide(state.GroundNormal);
 
-        StepAndSlide(state, space, delta);
+        StepAndSlide(state, space, delta, false);
 
 
         return state;
     }
 
-    public void StepAndSlide(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta)
+    public void StepAndSlide(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta, bool shouldStep = false)
     {
 
         Vector3 remainingMotion = state.Velocity * delta;
@@ -276,7 +276,7 @@ public class CharacterMovement
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
                     // THIS IS A STEPPABLE SURFACE
-                    if (sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight && 0 > 1)
+                    if (shouldStep && sweepResult.CollisionPoint.Y < state.Position.Y + MaxStepHeight)
                     {
                         float stepUpAmount = sweepResult.CollisionPoint.Y - state.Position.Y + _mainCollisionShape.MidHeight + 1.0f;
                         Vector3 stepMotion = new Vector3(0.0f, stepUpAmount, 0.0f);
