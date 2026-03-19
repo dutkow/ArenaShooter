@@ -173,10 +173,12 @@ public static class NetworkSender
         byte[] data = message.WriteMessage();
         int flags = (int)message.Flags;
 
-        foreach (var peer in NetworkPeer.Instance.ReadyPeers)
+        foreach (var peer in NetworkServer.Instance.ReadyPeers)
         {
             if (peer != null)
+            {
                 SendInternal(peer, 0, data, flags, false);
+            }
         }
     }
 
@@ -188,12 +190,14 @@ public static class NetworkSender
         byte[] data = message.WriteMessage();
         int flags = (int)message.Flags;
 
-        foreach (var kvp in NetworkManager.Instance.PlayerIDsToPeers)
+        foreach (var peer in NetworkServer.Instance.ReadyPeers)
         {
-            if (kvp.Key == excludedPlayerID)
+            if (NetUtils.GetPeerPlayerID(peer) == excludedPlayerID)
+            {
                 continue;
+            }
 
-            SendInternal(kvp.Value, 0, data, flags, false);
+            SendInternal(peer, 0, data, flags, false);
         }
     }
 

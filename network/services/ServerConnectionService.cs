@@ -26,7 +26,7 @@ public static class ServerConnectionService
         byte playerID = NetworkManager.Instance.PeerIDsToPlayerIDs[peerID];
         string playerName = NetworkManager.Instance.PlayerIDsToPlayerStates[playerID].PlayerInfo.PlayerName;
 
-        NetworkPeer.Instance.ReadyPeers.Add(peer);
+        NetworkServer.Instance.ReadyPeers.Add(peer);
 
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;

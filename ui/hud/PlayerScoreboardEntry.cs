@@ -14,6 +14,7 @@ public partial class PlayerScoreboardEntry : Control
         _playerNameLabel.Text = playerState.PlayerInfo.PlayerName;
 
         playerState.PlayerNameChanged += OnPlayerNameChanged;
+        playerState.PlayerLeft += OnPlayerLeft;
 
         if(playerState.PlayerInfo.PlayerID == ClientGame.Instance.LocalPlayerID)
         {
@@ -24,6 +25,11 @@ public partial class PlayerScoreboardEntry : Control
     public void OnPlayerNameChanged(string playerName)
     {
         _playerNameLabel.Text = playerName;
+    }
+
+    public void OnPlayerLeft()
+    {
+        QueueFree();
     }
 
     public void Highlight()

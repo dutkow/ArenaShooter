@@ -1,7 +1,5 @@
 using Godot;
-using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
 
 public enum ServerMode
 {
@@ -23,6 +21,8 @@ public class NetworkServer : NetworkPeer
     byte _nextAvailablePeerID;
 
     private ServerAdvertiser _advertiser;
+
+    public HashSet<ENetPacketPeer> ReadyPeers = new();
 
     public static NetworkServer Initialize()
     {
@@ -55,7 +55,6 @@ public class NetworkServer : NetworkPeer
 
     public override void HandlePeerConnected(ENetPacketPeer peer)
     {
-        GD.Print($"peer connected to network server");
         byte peerID = GetNextAvailablePeerID();
         NetUtils.SetPeerID(peer, GetNextAvailablePeerID());
         PeersByPeerID[peerID] = peer;
@@ -63,9 +62,18 @@ public class NetworkServer : NetworkPeer
 
     public override void HandlePeerDisconnected(ENetPacketPeer peer)
     {
-        byte peerID = NetUtils.GetPeerID(peer);
-    }
+        ReadyPeers.Remove(peer);
+        PeersByPeerID.Remove(NetUtils.GetPeerPlayerID(peer));
+        PeersByPlayerID.Remove(NetUtils.GetPeerPlayerID(peer));
 
+        byte playerID = NetUtils.GetPeerPlayerID(peer);
+
+        if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
+        {
+            playerState.PlayerLeft?.Invoke();
+            PlayerLeft.Send(playerID);
+        }
+    }
 
     public override void HandleReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
     {

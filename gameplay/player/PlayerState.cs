@@ -23,7 +23,12 @@ public class PlayerState()
     public bool IsSpawned; // Used so clients know who they need to spawn
 
     public Action<string> PlayerNameChanged;
+    public Action PlayerLeft;
+
+
     public Character Character; // instance, not replicated
+
+
 
     public void SetPlayerName(string playerName)
     {

@@ -58,8 +58,6 @@ public class NetworkPeer : ITickable
 
     private Dictionary<string, ServerInfo> _discoveredLanServers = new();
 
-    public HashSet<ENetPacketPeer> ReadyPeers = new();
-
 
     public NetworkPeer()
     {
@@ -179,7 +177,6 @@ public class NetworkPeer : ITickable
 
         GD.Print($"Peer disconnected: {peerId}");
 
-        ReadyPeers.Remove(peer);
 
         OnPeerDisconnectedEvent?.Invoke(peerId);
     }

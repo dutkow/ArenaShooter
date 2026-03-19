@@ -224,7 +224,7 @@ public class ServerGame()
     {
         byte playerID = NetUtils.GetPeerPlayerID(peer);
 
-        NetworkPeer.Instance.ReadyPeers.Add(peer);
+        NetworkServer.Instance.ReadyPeers.Add(peer);
 
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
@@ -233,9 +233,14 @@ public class ServerGame()
 
         SpawnManager.Instance.ServerSpawnPlayer(playerID);
 
+
         InitialMatchState.Send(peer);
 
+        PlayerJoined.Send(playerID, request.ClientInfo.PlayerName);
+
         CommandConsole.Instance.AddConsoleLogEntry($"Sending initial match state to player. Player ID: {playerID}. Player name: {request.ClientInfo.PlayerName}");
+
+
     }
 
     public void ApplyClientLoaded(PlayerInfo playerInfo)

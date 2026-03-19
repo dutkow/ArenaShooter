@@ -51,6 +51,6 @@ public class PlayerJoined : Message
             ENetFlags = ENetPacketFlags.Reliable,
             PlayerInfo = playerInfo,
         };
-        NetworkSender.Broadcast(msg);
+        NetworkSender.BroadcastExcept(playerID, msg);
     }
 }

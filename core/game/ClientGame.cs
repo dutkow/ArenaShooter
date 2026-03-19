@@ -224,6 +224,11 @@ public class ClientGame
         MatchState.Instance.AddPlayer(playerJoined.PlayerInfo);
     }
 
+    public void HandlePlayerLeft(PlayerLeft playerLeft)
+    {
+        MatchState.Instance.HandlePlayerLeft(playerLeft.PlayerID);
+    }
+
     public void HandlePlayerNameChanged(PlayerNameChanged playerNameChange)
     {
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerNameChange.PlayerID, out var playerState))
@@ -256,5 +261,8 @@ public class ClientGame
         _messageHandlers[Msg.S2C_WORLD_SNAPSHOT] = payload => Dispatch<WorldSnapshot>(payload, HandleWorldSnapshot);
         _messageHandlers[Msg.S2C_PLAYER_NAME_CHANGED] = payload => Dispatch<PlayerNameChanged>(payload, HandlePlayerNameChanged);
         _messageHandlers[Msg.S2C_TICK_RATE_CHANGED] = payload => Dispatch<PlayerNameChanged>(payload, HandlePlayerNameChanged);
+        _messageHandlers[Msg.S2C_PLAYER_JOINED] = payload => Dispatch<PlayerJoined>(payload, HandlePlayerJoined);
+        _messageHandlers[Msg.S2C_PLAYER_LEFT] = payload => Dispatch<PlayerLeft>(payload, HandlePlayerLeft);
+
     }
 }

@@ -234,21 +234,12 @@ public partial class MatchState : Node
         }
     }
 
-    private void HandlePeerDisconnected(byte peerId)
+    public void HandlePlayerLeft(byte playerID)
     {
-        /*
-        if (ConnectedPlayers.TryGetValue(peerId, out var player))
+        if(ConnectedPlayers.TryGetValue(playerID, out var playerState))
         {
-            ConnectedPlayers.Remove(peerId);
-
-            GD.Print($"Player left: {peerId} ({player.PlayerName})");
-
-            PlayerLeft?.Invoke(peerId, player);
-
-            // TODO: Broadcast to other clients that a player left
-            // NetworkHandler.Instance.BroadcastPlayerLeft(peerId);
-        }*/
+            playerState.PlayerLeft?.Invoke();
+            ConnectedPlayers.Remove(playerID);
+        }
     }
-
-
 }
