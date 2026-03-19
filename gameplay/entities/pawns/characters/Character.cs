@@ -364,8 +364,8 @@ public partial class Character : Pawn, IDamageable
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
         const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
-        const float INTERP_THRESHOLD_H = 0.05f;      // Horizontal lerp start
-        const float INTERP_THRESHOLD_V = 0.05f;     // Vertical lerp start
+        const float INTERP_THRESHOLD_H = 0.01f;      // Horizontal lerp start
+        const float INTERP_THRESHOLD_V = 0.01f;     // Vertical lerp start
 
         // Lerp speeds
         const float INTERP_SPEED_H = 0.25f;
@@ -379,7 +379,7 @@ public partial class Character : Pawn, IDamageable
 
         float deltaY = Math.Abs(delta.Y);
 
-        //GD.Print($"horizontal error: {distXZ}.");
+        GD.Print($"horizontal error: {distXZ}.");
 
         // --- Horizontal correction ---
         if (distXZ > SNAP_THRESHOLD_H)
