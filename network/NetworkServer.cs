@@ -95,13 +95,12 @@ public class NetworkServer : NetworkPeer
 
     public void StartServerShutdown()
     {
+        CommandConsole.Instance.AddConsoleLogEntry("===  Starting server shutdown ===");
         _serverShuttingDown = true;
 
         ServerNotification.Broadcast(ServerNotificationType.DISCONNECTION_SERVER_SHUTDOWN);
 
         Connection?.Flush();
-
-        GD.Print($"connection is valid on shutdown: {Connection != null}");
 
         _advertiser.StopBroadcast();
         _advertiser = null;

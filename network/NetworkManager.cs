@@ -41,7 +41,6 @@ public class NetworkManager : ITickable
     private Queue<byte> _availablePlayerIDs = new();
 
     private NetworkPeer _networkPeer;
-    private LanServerAdvertiser _lanBroadcaster;
 
     public ServerInfo ServerInfo;
     private bool _isHosting = false;
@@ -113,7 +112,7 @@ public class NetworkManager : ITickable
     {
         SetMode(NetworkMode.LISTEN_SERVER);
 
-        NetworkServer.Initialize();
+        _networkPeer = NetworkServer.Initialize();
         ServerGame.Initialize();
         ClientGame.Initialize();
 
@@ -135,7 +134,7 @@ public class NetworkManager : ITickable
     {
         SetMode(NetworkMode.CLIENT);
 
-        NetworkClient.Initialize();
+        _networkPeer = NetworkClient.Initialize();
         ClientGame.Initialize();
 
         ServerInfo = serverInfo;
@@ -153,15 +152,20 @@ public class NetworkManager : ITickable
     {
         JoinedServer?.Invoke(ServerInfo);
 
-        CommandConsole.Instance.AddConsoleLogEntry($"Connection request accepted. Joining server... Server Name: {ServerInfo.Name}.");
-
+        if(NetworkManager.Instance.NetworkMode == NetworkMode.CLIENT)
+        {
+            CommandConsole.Instance.AddConsoleLogEntry($"Connection request accepted. Joining server... Server Name: {ServerInfo.Name}.");
+        }
     }
 
     public async void ShutdownServer()
     {
         SetMode(NetworkMode.OFFLINE);
 
-        await Task.Delay(NetworkConstants.SERVER_SHUTDOWN_DELAY_MS);
+        if(_networkPeer.Connection.GetPeers().Count > 0) // only wait if someone is in the game to notify them
+        {
+            await Task.Delay(NetworkConstants.SERVER_SHUTDOWN_DELAY_MS);
+        }
 
         ShutdownNetworkPeer();
     }
@@ -170,12 +174,13 @@ public class NetworkManager : ITickable
     {
         _networkPeer.Shutdown();
         _networkPeer = null;
+
+        CommandConsole.Instance.AddConsoleLogEntry($"=== Server shutdown complete ===");
     }
 
     public void DisconnectFromServer()
     {
         SetMode(NetworkMode.OFFLINE);
-
         ShutdownNetworkPeer();
     }
 }
