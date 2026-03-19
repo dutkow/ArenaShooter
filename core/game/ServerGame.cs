@@ -40,14 +40,14 @@ public class ServerGame()
 
         Instance = new ServerGame();
 
+        CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Server Game ===");
+
         Instance.InitMessageHandlers();
     }
 
     public void PostLoad()
     {
-        CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Server Game ===");
         ServerProjectileManager.Initialize();
-
     }
 
     public void Tick(double delta)
@@ -59,26 +59,9 @@ public class ServerGame()
         var newSnapshot = WorldSnapshot.Build();
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
 
-        foreach (var playerState in newSnapshot.PlayerStates)
-        {
-            // Instead of clearing flags, mark everything as changed
-            playerState.CharacterPublicState.Flags =
-                CharacterPublicFlags.POSITION_CHANGED |
-                CharacterPublicFlags.VELOCITY_CHANGED |
-                CharacterPublicFlags.ROTATION_CHANGED |
-                CharacterPublicFlags.MOVEMENT_MODE_CHANGED |
-                CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
+        NetworkSender.Broadcast(newSnapshot);
 
-            playerState.CharacterPrivateState.Flags =
-                CharacterPrivateFlags.HEALTH_CHANGED |
-                CharacterPrivateFlags.MAX_HEALTH_CHANGED |
-                CharacterPrivateFlags.ARMOR_CHANGED |
-                CharacterPrivateFlags.MAX_ARMOR_CHANGED |
-                CharacterPrivateFlags.WEAPONS_CHANGED |
-                CharacterPrivateFlags.AMMO_CHANGED;
-        }
-
-        SendWorldSnapshotDeltas(newSnapshot); // in this we send the snapshot prior to updating the next client input. we could alternatively, process client inputs, then update?
+        //SendWorldSnapshotDeltas(newSnapshot);
 
     }
 
@@ -215,13 +198,15 @@ public class ServerGame()
 
     public void HandleConnectionRequest(ENetPacketPeer peer, ConnectionRequest connectionRequest)
     {
-        GD.Print($"handle connection request ran.");
+        CommandConsole.Instance.AddConsoleLogEntry($"Receiving connection request. Player name: {connectionRequest.PlayerName}.");
 
         if (_isServerFull)
         {
             GD.Print($"server is full denied");
 
             ConnectionDenied.Send(peer, "Server full");
+            CommandConsole.Instance.AddConsoleLogEntry($"Sending connection request denied. Player name: {connectionRequest.PlayerName}.");
+
             return;
         }
 
@@ -230,25 +215,27 @@ public class ServerGame()
 
         NetworkServer.Instance.PeersByPlayerID[playerID] = peer;
 
+        CommandConsole.Instance.AddConsoleLogEntry($"Sending connection request accepted. Player name: {connectionRequest.PlayerName}.");
+
         ConnectionAccepted.Send(peer, playerID);
     }
 
-    public void HandleClientLoaded(ENetPacketPeer peer, InitialMatchStateRequest clientLoaded)
+    public void HandleInitialMatchStateRequest(ENetPacketPeer peer, InitialMatchStateRequest request)
     {
         byte playerID = NetUtils.GetPeerPlayerID(peer);
-        NetworkPeer.Instance.ReadyPeers.Add(peer);
 
+        NetworkPeer.Instance.ReadyPeers.Add(peer);
 
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
-        ApplyClientLoaded(new PlayerInfo(playerID, clientLoaded.ClientInfo.PlayerName));
+        ApplyClientLoaded(new PlayerInfo(playerID, request.ClientInfo.PlayerName));
 
         SpawnManager.Instance.ServerSpawnPlayer(playerID);
 
         InitialMatchState.Send(peer);
 
-        GD.Print($"sending initial match state from server");
+        CommandConsole.Instance.AddConsoleLogEntry($"Sending initial match state to player. Player ID: {playerID}. Player name: {request.ClientInfo.PlayerName}");
     }
 
     public void ApplyClientLoaded(PlayerInfo playerInfo)
@@ -266,7 +253,7 @@ public class ServerGame()
     public virtual void InitMessageHandlers()
     {
         _messageHandlers[Msg.C2S_CONNECTION_REQUEST] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
-        _messageHandlers[Msg.C2S_INITIAL_MATCH_STATE_REQUEST] = (peer, payload) => Dispatch<InitialMatchStateRequest>(peer, payload, HandleClientLoaded);
+        _messageHandlers[Msg.C2S_INITIAL_MATCH_STATE_REQUEST] = (peer, payload) => Dispatch<InitialMatchStateRequest>(peer, payload, HandleInitialMatchStateRequest);
         _messageHandlers[Msg.C2S_CLIENT_COMMAND] = (peer, payload) => Dispatch<ClientCommand>(peer, payload, HandleClientCommand);
         _messageHandlers[Msg.C2S_CHANGE_PLAYER_NAME] = (peer, payload) => Dispatch<PlayerNameChangeRequest>(peer, payload, HandlePlayerNameChangeRequest);
 

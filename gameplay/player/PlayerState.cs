@@ -46,84 +46,48 @@ public class PlayerState()
 
         msg.AddEnum(Flags);
 
-        if (forceFull)
-        {
-            msg.Add(PlayerInfo.PlayerName);
 
-            msg.Add(Stats.Kills);
-            msg.Add(Stats.Deaths);
+        msg.Add(PlayerInfo.PlayerName);
 
-            msg.Add(Ping);
-            msg.Add(IsSpawned);
+        msg.Add(Stats.Kills);
+        msg.Add(Stats.Deaths);
 
-
-        }
-        else
-        {
-            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Add(Stats.Kills);
-            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Add(Stats.Deaths);
-            if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Add(Ping);
-            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Add(IsSpawned);
-        }
+        msg.Add(Ping);
+        msg.Add(IsSpawned);
 
         CharacterPublicState.Add(msg, forceFull);
         CharacterPrivateState.Add(msg, forceFull);
     }
 
-    internal void Write(Message msg, byte clientPlayerID, bool forceFull = false)
+    internal void Write(Message msg, byte clientPlayerID)
     {
         msg.Write(PlayerInfo.PlayerID);
 
-        if (forceFull)
-        {
-            msg.Write(PlayerInfo.PlayerName);
+        msg.Write(PlayerInfo.PlayerName);
 
-            msg.Write(Stats.Kills);
-            msg.Write(Stats.Deaths);
+        msg.Write(Stats.Kills);
+        msg.Write(Stats.Deaths);
 
-            msg.Write(Ping);
-            msg.Write(IsSpawned);
-        }
-        else
-        {
-            msg.WriteEnum(Flags);
+        msg.Write(Ping);
+        msg.Write(IsSpawned);
 
-            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Write(Stats.Kills);
-            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Write(Stats.Deaths);
-
-            if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Write(Ping);
-            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Write(IsSpawned);
-        }
-
-        CharacterPublicState.Write(msg, forceFull);
-        CharacterPrivateState.Write(msg, forceFull);
+        CharacterPublicState.Write(msg);
+        CharacterPrivateState.Write(msg);
     }
 
-    internal void Read(Message msg, byte clientPlayerID, bool forceFull = false)
+    internal void Read(Message msg, byte clientPlayerID)
     {
         msg.Read(out PlayerInfo.PlayerID);
 
-        if (forceFull)
-        {
-            msg.Read(out PlayerInfo.PlayerName);
 
-            msg.Read(out Stats.Kills);
-            msg.Read(out Stats.Deaths);
-            msg.Read(out Ping);
-            msg.Read(out IsSpawned);
+        msg.Read(out PlayerInfo.PlayerName);
 
-        }
-        else
-        {
-            msg.ReadEnum(out Flags);
+        msg.Read(out Stats.Kills);
+        msg.Read(out Stats.Deaths);
+        msg.Read(out Ping);
+        msg.Read(out IsSpawned);
 
-            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Read(out Stats.Kills);
-            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Read(out Stats.Deaths);
-
-            if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Read(out Ping);
-            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Read(out IsSpawned);
-        }
-        CharacterPublicState.Read(msg, forceFull);
-        CharacterPrivateState.Read(msg, forceFull);
+        CharacterPublicState.Read(msg);
+        CharacterPrivateState.Read(msg);
     }
 }

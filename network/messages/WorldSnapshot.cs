@@ -38,7 +38,7 @@ public class WorldSnapshot : Message
         {
             foreach(var playerState in PlayerStates)
             {
-                playerState.Add(this, ReceivingPlayerID);
+                playerState.Add(this, ReceivingPlayerID, true);
             }
         }    
 

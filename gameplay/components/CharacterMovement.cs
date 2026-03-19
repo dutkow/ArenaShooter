@@ -416,7 +416,6 @@ public class CharacterMovement
 
         StepAndSlide(state, space, delta, false);
 
-        GD.Print($"y height = {state.Position.Y}");
         return state;
     }
 
