@@ -211,8 +211,6 @@ public partial class Character : Pawn, IDamageable
 
         _camera.Current = true;
 
-        Level.Instance.AddChild(_camera);
-
         SetRole(NetworkRole.LOCAL);
         UIRoot.Instance.OnPossessedCharacter(this);
 
