@@ -25,7 +25,7 @@ public class NetworkClient : NetworkPeer
 
     public override void HandlePeerDisconnected(ENetPacketPeer peer)
     {
-
+        NetworkManager.Instance.HandleDisconnectedFromServer();
     }
 
 
@@ -65,7 +65,5 @@ public class NetworkClient : NetworkPeer
     {
         Connection?.Flush();
         ServerPeer.PeerDisconnect();
-
-        NetworkManager.Instance.DisconnectFromServer();
     }
 }

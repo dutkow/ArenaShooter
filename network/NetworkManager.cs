@@ -56,7 +56,6 @@ public class NetworkManager : ITickable
     public Action<List<ServerInfo>>? OnServerRefreshFinished;
     public Action? OnConnectedToServer;
     public Action? OnFailedToConnect;
-    public Action? OnDisconnectedFromServer;
 
     public Action? OnConnectionToServerAccepted;
     public Action<NetworkMode> OnRoleChanged;
@@ -178,7 +177,7 @@ public class NetworkManager : ITickable
         CommandConsole.Instance.AddConsoleLogEntry($"=== Server shutdown complete ===");
     }
 
-    public void DisconnectFromServer()
+    public void HandleDisconnectedFromServer()
     {
         SetMode(NetworkMode.OFFLINE);
         ShutdownNetworkPeer();

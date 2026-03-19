@@ -115,6 +115,11 @@ public class ServerGame : Singleton<ServerGame>
                 continue;
             }
 
+            if(peer == null)
+            {
+                continue;
+            }
+
             if (snapshotDeltas.TryGetValue(lastProcessedServerTick, out var deltaSnapshot))
             {
                 newSnapshot = deltaSnapshot;
