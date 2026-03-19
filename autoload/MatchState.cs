@@ -240,6 +240,11 @@ public partial class MatchState : Node
         {
             playerState.PlayerLeft?.Invoke();
             ConnectedPlayers.Remove(playerID);
+
+            if (playerState.Character != null)
+            {
+                playerState.Character.HandleDeath();
+            }
         }
     }
 }

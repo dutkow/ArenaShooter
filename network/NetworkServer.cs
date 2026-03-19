@@ -68,11 +68,8 @@ public class NetworkServer : NetworkPeer
 
         byte playerID = NetUtils.GetPeerPlayerID(peer);
 
-        if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
-        {
-            playerState.PlayerLeft?.Invoke();
-            PlayerLeft.Send(playerID);
-        }
+        MatchState.Instance.HandlePlayerLeft(playerID);
+        PlayerLeft.Send(playerID);
     }
 
     public override void HandleReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)

@@ -685,4 +685,9 @@ public partial class Character : Pawn, IDamageable
     }
 
 
+    public void HandleDeath()
+    {
+        QueueFree();
+    }
+
 }
