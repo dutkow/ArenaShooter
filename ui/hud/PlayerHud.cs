@@ -35,9 +35,4 @@ public partial class PlayerHud : Control
     {
         _scoreboard.Visible = false;
     }
-
-    public void Initialize()
-    {
-        _scoreboard.Initialize();
-    }
 }

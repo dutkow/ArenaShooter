@@ -13,26 +13,28 @@ public partial class Scoreboard : Control
         base._Ready();
 
         MatchState.Instance.PlayerJoined += AddPlayerToList;
+
+        ClearPlayerList();
     }
 
-    public void Initialize()
-    {
-        PopulateInitialPlayerList();
-    }
+ 
 
     public void PopulateInitialPlayerList()
     {
-        foreach(var child in _playerListContainer.GetChildren())
-        {
-            child.QueueFree();
-        }
-
         foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
             AddPlayerToList(kvp.Value);
         }
     }
 
+
+    public void ClearPlayerList()
+    {
+        foreach (var child in _playerListContainer.GetChildren())
+        {
+            child.QueueFree();
+        }
+    }
     public void AddPlayerToList(PlayerState playerState)
     {
         var playerListEntry = (PlayerScoreboardEntry)_playerScoreboardEntry.Instantiate();

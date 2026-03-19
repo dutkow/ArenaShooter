@@ -32,8 +32,8 @@ public partial class Level : Node3D
 
 
         var levelUI = (LevelUI)gameMode.LevelUIScene.Instantiate();
+        
         AddChild(levelUI);
-
 
         if (NetworkManager.Instance.NetworkMode != NetworkMode.CLIENT)
         {

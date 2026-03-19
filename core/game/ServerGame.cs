@@ -228,7 +228,17 @@ public class ServerGame()
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
-        ApplyClientLoaded(new PlayerInfo(playerID, request.ClientInfo.PlayerName));
+        string baseName = request.ClientInfo.PlayerName;
+        string requestedPlayerName = baseName;
+        int counter = 1;
+
+        while (MatchState.Instance.ConnectedPlayers.Values.Any(p => p.PlayerInfo.PlayerName == requestedPlayerName))
+        {
+            requestedPlayerName = $"{baseName} ({counter})";
+            counter++;
+        }
+
+        ApplyClientLoaded(new PlayerInfo(playerID, requestedPlayerName));
 
         SpawnManager.Instance.ServerSpawnPlayer(playerID);
 

@@ -53,6 +53,7 @@ public class ClientGame
         {
             _hasReceivedInitialState = true;
             ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, UserSettings.Instance.PlayerName));
+            GameUI.Instance.PopulateInitialPlayerList();
         }
 
         LocalPlayerController = new();
@@ -212,7 +213,7 @@ public class ClientGame
         _hasReceivedInitialState = true;
 
         MatchState.Instance.OnReceivedInitialMatchState(initialMatchState);
-
+        GameUI.Instance.PopulateInitialPlayerList();
         var tickManager = TickManager.Create();
         tickManager.SetServerTickRate(initialMatchState.ServerTickRate);
         Level.Instance.Tickables.Add(tickManager);

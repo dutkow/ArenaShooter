@@ -11,9 +11,9 @@ public partial class GameUI : LevelUI
     [Export] GameMenu _menu;
     [Export] SettingsMenu _settingsMenu;
 
-    public override void _Ready()
+    public override void _EnterTree()
     {
-        base._Ready();
+        base._EnterTree();
 
         Instance = this;
     }
@@ -82,5 +82,10 @@ public partial class GameUI : LevelUI
     {
         _playerHud.AssignToCharacter(character);
         _playerHud.Show();
+    }
+
+    public void PopulateInitialPlayerList()
+    {
+        _scoreboard.PopulateInitialPlayerList();
     }
 }
