@@ -47,6 +47,7 @@ public class ServerGame()
     {
         CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Server Game ===");
         ServerProjectileManager.Initialize();
+
     }
 
     public void Tick()
@@ -235,7 +236,6 @@ public class ServerGame()
         byte playerID = NetUtils.GetPeerPlayerID(peer);
         NetworkPeer.Instance.ReadyPeers.Add(peer);
 
-        GD.Print($"handle client loaded ran. adding last processed tick 0 for player id: {playerID}");
 
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
@@ -245,6 +245,8 @@ public class ServerGame()
         SpawnManager.Instance.ServerSpawnPlayer(playerID);
 
         InitialMatchState.Send(peer);
+
+        GD.Print($"sending initial match state from server");
     }
 
     public void ApplyClientLoaded(PlayerInfo playerInfo)

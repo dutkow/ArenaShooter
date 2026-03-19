@@ -18,7 +18,7 @@ public class ClientProjectileManager
     {
         if (Instance != null)
         {
-            GD.PushError("Server projectile manager already exists!");
+            GD.PushError("Client projectile manager already exists!");
         }
 
         Instance = new();

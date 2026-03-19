@@ -29,8 +29,6 @@ public class ClientGame
     private bool _hasReceivedInitialState;
 
 
-    public List<ITickable> Tickables = new();
-
     public static void Initialize()
     {
         if(ClientGame.Instance != null)
@@ -46,11 +44,9 @@ public class ClientGame
 
     public void PostLoad()
     {
-
-
         if (NetworkManager.Instance.IsClient)
         {
-            ClientLoaded.Send();
+            //ClientLoaded.Send();
         }
         else
         {
@@ -64,7 +60,6 @@ public class ClientGame
         LocalPlayerController.Initialize();
 
         ClientProjectileManager.Initialize();
-
     }
 
     public void SetLocalPlayerID(byte localPlayerID)
@@ -77,11 +72,6 @@ public class ClientGame
         if(_hasReceivedInitialState)
         {
             SendCommand();
-        }
-
-        foreach(var tickable in Tickables)
-        {
-            tickable.Tick((float)NetworkConstants.SERVER_TICK_RATE);
         }
     }
 
@@ -207,8 +197,6 @@ public class ClientGame
         GD.Print($"Starting client. NetworkMode = {NetworkManager.Instance.NetworkMode}");
 
         NetworkManager.Instance.BroadcastServerJoined();
-
-        ClientProjectileManager.Initialize();
     }
 
     public void HandleConnectionDenied(ConnectionDenied connectionDenied)
@@ -221,6 +209,10 @@ public class ClientGame
         _hasReceivedInitialState = true;
 
         MatchState.Instance.OnReceivedInitialMatchState(initialMatchState);
+
+        var tickManager = TickManager.Create();
+        tickManager.SetServerTickRate(initialMatchState.ServerTickRate);
+        Level.Instance.Tickables.Add(tickManager);
     }
 
     public void HandlePlayerJoined(PlayerJoined playerJoined)

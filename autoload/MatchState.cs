@@ -101,8 +101,9 @@ public partial class MatchState : Node
         ServerGame.Instance?.Tick();
         ClientGame.Instance?.Tick();
 
-        CurrentTick++;
+        GD.Print($" tick: {CurrentTick}");
 
+        CurrentTick++;
     }
 
     public void OnReceivedInitialMatchState(InitialMatchState initialMatchState)

@@ -69,9 +69,6 @@ public partial class PlayerController : Controller
                 ChatPanel.SendChat();
             }
         }
-
-
-        GD.Print($"input on player controller");
     }
 
     public virtual ClientInputCommand AddInput(ClientInputCommand cmd)

@@ -11,8 +11,6 @@ public struct PlayerStats
 public class PlayerState()
 {
     public PlayerInfo PlayerInfo;
- 
-    public Character Character; // instance, not replicated
 
     public CharacterPublicState CharacterPublicState = new();
     public CharacterPrivateState CharacterPrivateState = new();
@@ -25,6 +23,7 @@ public class PlayerState()
     public bool IsSpawned; // Used so clients know who they need to spawn
 
     public Action<string> PlayerNameChanged;
+    public Character Character; // instance, not replicated
 
     public void SetPlayerName(string playerName)
     {

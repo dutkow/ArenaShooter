@@ -31,6 +31,8 @@ public static class NetworkConstants
     public const string SERVER_KEY_NUM_CONNECTED_PLAYERS = "num_connected_players";
     public const string SERVER_KEY_CONNECTED_PLAYER_NAMES = "connected_player_names";
     public const string SERVER_KEY_IS_PASSWORD_PROTECTED = "is_password_protected";
+    public const string SERVER_KEY_TICK_RATE = "tick_rate";
+
 
     // Server browser addresses
     public const string REGISTER_SERVER_URL_ADDRESS = "https://vincegamedev.pythonanywhere.com/register_lobby";

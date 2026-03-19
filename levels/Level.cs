@@ -1,6 +1,6 @@
 using Godot;
 using System;
-using System.Security.Cryptography;
+using System.Collections.Generic;
 
 public partial class Level : Node3D
 {
@@ -8,6 +8,7 @@ public partial class Level : Node3D
 
     [Export] private PackedScene _gameModeScene;
 
+    public List<ITickable> Tickables = new();
 
     public override void _EnterTree()
     {
@@ -23,22 +24,20 @@ public partial class Level : Node3D
         var gameMode = (GameMode)_gameModeScene.Instantiate();
         AddChild(gameMode);
 
-
         SpawnManager.Initialize();
         PickupManager.Initialize();
         MatchState.Initialize();
 
 
-        ServerTickManager serverTickManager = new();
-        AddChild(serverTickManager);
 
-
+        // this should only be client
         var levelUI = (LevelUI)gameMode.LevelUIScene.Instantiate();
         AddChild(levelUI);
 
 
         if (NetworkManager.Instance.NetworkMode != NetworkMode.CLIENT)
         {
+            Tickables.Add(TickManager.Create());
             ServerGame.Instance.PostLoad();
         }
         if(NetworkManager.Instance.NetworkMode != NetworkMode.DEDICATED_SERVER)
@@ -53,5 +52,15 @@ public partial class Level : Node3D
     {
         ServerGame.Instance?.StartMatch();
 
+    }
+
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
+
+        foreach(var tickable in Tickables)
+        {
+            tickable.Tick(delta);
+        }
     }
 }

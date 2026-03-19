@@ -51,7 +51,7 @@ public partial class Character : Pawn, IDamageable
 
     private ClientInputCommand _lastProcessedClientCommand;
 
-    private bool _useInterpolation = true;
+    private bool _useInterpolation = false;
 
     private bool _lookDirty;
 
@@ -64,7 +64,10 @@ public partial class Character : Pawn, IDamageable
 
         _camera.Current = false;
 
-        _camera.Reparent(Level.Instance, true);
+        if(_useInterpolation)
+        {
+            _camera.Reparent(Level.Instance, true);
+        }
 
         SetProcessInput(false);
         ShowThirdPersonView();
@@ -416,6 +419,8 @@ public partial class Character : Pawn, IDamageable
     public override ClientPredictionTick GetClientPredictionTick(ClientPredictionTick clientPredictionTick)
     {
         base.GetClientPredictionTick(clientPredictionTick);
+
+        GD.Print($"get client prediction tick ran");
 
         if (_inputEnabled)
         {

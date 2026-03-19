@@ -8,6 +8,8 @@ using System.Linq;
 /// </summary>
 public class InitialMatchState : Message
 {
+    public int ServerTickRate;
+
     public PlayerState[] PlayerStates;
 
     // ----------------------
@@ -17,6 +19,8 @@ public class InitialMatchState : Message
     protected override int BufferSize()
     {
         base.BufferSize();
+
+        Add(ServerTickRate);
 
         byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
         Add(playerStatesCount);
@@ -35,6 +39,8 @@ public class InitialMatchState : Message
     public override byte[] WriteMessage()
     {
         base.WriteMessage();
+
+        Write(ServerTickRate);
 
         // Player States
         byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
@@ -55,7 +61,9 @@ public class InitialMatchState : Message
     {
         base.ReadMessage(data);
 
+        Read(out ServerTickRate);
         // Read the number of players
+
         byte playerStatesCount;
         Read(out playerStatesCount);
 
@@ -76,27 +84,15 @@ public class InitialMatchState : Message
     // ----------------------
     // Sending
     // ----------------------
-
-
     public static void Send(ENetPacketPeer client)
     {
-        var playerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray();
-
         var msg = new InitialMatchState
         {
             MessageType = Msg.S2C_INITIAL_MATCH_STATE,
             ENetFlags = ENetPacketFlags.Reliable,
-            PlayerStates = playerStates
+            PlayerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray(),
+            ServerTickRate = NetworkServer.Instance.ServerInfo.TickRate
         };
-
-        GD.Print($"SENDING INITIAL MATCH STATE");
-
-        foreach (var playerState in msg.PlayerStates)
-        {
-            GD.Print($"initial match state SEND PLAYER DATA. playerID: {playerState.PlayerInfo.PlayerID}. is alive: {playerState.IsSpawned}. player name: {playerState.PlayerInfo.PlayerName}. player position: {playerState.CharacterPublicState.Position}");
-        }
-        GD.Print($"---------------------------");
-
 
         NetworkSender.ToClient(client, msg);
     }

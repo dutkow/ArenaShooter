@@ -47,6 +47,9 @@ public class ServerInfo
     [JsonPropertyName(SERVER_KEY_IS_PASSWORD_PROTECTED)]
     public bool IsPasswordProtected { get; set; }
 
+    [JsonPropertyName(SERVER_KEY_TICK_RATE)]
+    public int TickRate { get; set; }
+
     /// <summary>
     /// Server-reported count. Used when deserializing from the server.
     /// When sending, ConnectedPlayers.Count is used instead.

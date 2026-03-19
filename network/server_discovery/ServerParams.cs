@@ -11,4 +11,6 @@ public class ServerParams
     public int MaxPlayers { get; set; }
 
     public string Password { get; set; }
+
+    public int TickRate { get; set; }
 }

@@ -150,7 +150,7 @@ public class NetworkManager : ITickable
         SetMode(NetworkMode.LISTEN_SERVER);
 
         ServerInfo = serverInfo;
-        var error = NetworkServer.Instance.StartLanServer(serverInfo.IP, serverInfo.Port, serverInfo);
+        var error = NetworkServer.Instance.StartLanServer(serverInfo.IP, serverInfo.Port + 1, serverInfo);
 
         if(error == Error.Ok)
         {

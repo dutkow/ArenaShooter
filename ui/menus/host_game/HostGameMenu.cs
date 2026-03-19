@@ -39,6 +39,7 @@ public partial class HostGameMenu : Control
         serverInfo.Port = NetworkConstants.DEFAULT_PORT;   
         serverInfo.Name = "Test Server";
         serverInfo.MapID = (string)_mapOptionButton.GetItemMetadata(_mapOptionButton.Selected);
+        serverInfo.TickRate = 64;
 
         NetworkManager.Instance.HostLanServer(serverInfo);
     }
