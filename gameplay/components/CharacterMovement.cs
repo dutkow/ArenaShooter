@@ -429,8 +429,10 @@ public class CharacterMovement
 
         state.WantsToJump = cmd.Flags.HasFlag(InputFlags.JUMP);
 
-        state.Yaw += cmd.Look.X;
-        state.Pitch += cmd.Look.Y;
+        state.Yaw -= cmd.Look.X;
+        state.Pitch -= cmd.Look.Y;
+
+        GD.Print($"look yaw = {cmd.Look.X}. network mode: {NetworkManager.Instance.NetworkMode}");
 
         Basis basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
 
@@ -491,7 +493,6 @@ public class CharacterMovement
         {
             horizontalVel = horizontalVel.Normalized() * MaxGroundSpeed;
         }
-
 
         state.Velocity.X = horizontalVel.X;
         state.Velocity.Z = horizontalVel.Z;

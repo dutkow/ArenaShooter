@@ -437,10 +437,13 @@ public partial class Character : Pawn, IDamageable
         Vector3 dir = -_camera.GlobalTransform.Basis.Z;
         _weapon.Tick((float)TickManager.Instance.ServerTickInterval, _camera.GlobalPosition, dir);
 
+        if(_accumulatedLookDelta != Vector2.Zero)
+        {
+            clientPredictionTick.InputCommand.Look = _accumulatedLookDelta;
+            clientPredictionTick.InputCommand.Flags |= InputFlags.LOOK;
+        }
 
-        clientPredictionTick.InputCommand.Look = _accumulatedLookDelta;
-
-        if(!IsAuthority)
+        if (!IsAuthority)
         {
             PredictedPublicState = MovementComp.Step(PredictedPublicState, clientPredictionTick.InputCommand, (float)TickManager.Instance.ServerTickInterval);
 

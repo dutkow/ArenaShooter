@@ -57,7 +57,9 @@ public class ClientCommand : Message
             AddEnum(cmd.Flags);
 
             if (cmd.Flags.HasFlag(InputFlags.LOOK))
+            {
                 Add(cmd.Look);
+            }
         }
 
         return _dataSize;
@@ -79,7 +81,9 @@ public class ClientCommand : Message
             WriteEnum(cmd.Flags);
 
             if (cmd.Flags.HasFlag(InputFlags.LOOK))
+            {
                 Write(cmd.Look);
+            }
         }
 
         return _data;
@@ -106,7 +110,9 @@ public class ClientCommand : Message
             cmd.Flags = (InputFlags)mask;
 
             if (cmd.Flags.HasFlag(InputFlags.LOOK))
+            {
                 Read(out cmd.Look);
+            }
 
             Commands[i] = cmd;
         }
