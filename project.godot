@@ -29,6 +29,8 @@ Game="*res://autoload/Game.cs"
 
 window/size/viewport_width=1000
 window/size/viewport_height=750
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [dotnet]
 

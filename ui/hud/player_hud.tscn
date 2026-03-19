@@ -50,7 +50,6 @@ offset_bottom = 50.0
 grow_vertical = 1
 
 [node name="MatchDebugPanel" parent="." unique_id=809404943 instance=ExtResource("4_3hb5n")]
-visible = false
 layout_mode = 1
 anchors_preset = 0
 anchor_right = 0.0
