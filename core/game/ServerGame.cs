@@ -59,7 +59,7 @@ public class ServerGame()
         var newSnapshot = WorldSnapshot.Build();
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
 
-        NetworkSender.Broadcast(newSnapshot);
+        //NetworkSender.Broadcast(newSnapshot);
 
         //SendWorldSnapshotDeltas(newSnapshot);
 
