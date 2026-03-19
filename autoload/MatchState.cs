@@ -227,7 +227,7 @@ public partial class MatchState : Node
         if(playerState.IsSpawned)
         {
 
-            SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Pitch);
+            SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Yaw);
 
             GD.Print($"client is spawning {playerState.PlayerInfo.PlayerID} at position {playerState.CharacterPublicState.Position}");
 

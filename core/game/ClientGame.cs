@@ -172,6 +172,8 @@ public class ClientGame
                 else if(playerState.IsSpawned)
                 {
                     SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Yaw);
+
+                    GD.Print($"spawning player on client w/ yaw: {playerState.CharacterPublicState.Yaw}");
                 }
             }
         }

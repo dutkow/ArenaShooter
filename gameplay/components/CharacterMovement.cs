@@ -432,8 +432,6 @@ public class CharacterMovement
         state.Yaw -= cmd.Look.X;
         state.Pitch -= cmd.Look.Y;
 
-        GD.Print($"look yaw = {cmd.Look.X}. network mode: {NetworkManager.Instance.NetworkMode}");
-
         Basis basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
 
         if (move != Vector3.Zero)
