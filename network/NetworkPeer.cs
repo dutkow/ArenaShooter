@@ -9,12 +9,11 @@ using System.Data;
 /// </summary>
 public class NetworkPeer : ITickable
 {
-    public static NetworkPeer Instance;
-
     // ----------------------
     // General state
     // ----------------------
     public ENetConnection Connection;
+
 
     public virtual void Tick(double delta)
     {

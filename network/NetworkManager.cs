@@ -103,27 +103,6 @@ public class NetworkManager : ITickable
         }
 
         NetworkMode = mode;
-
-        switch (NetworkMode)
-        {
-            case NetworkMode.DEDICATED_SERVER:
-                _networkPeer = NetworkServer.Initialize();
-                ServerGame.Initialize();
-                break;
-            case NetworkMode.OFFLINE:
-            case NetworkMode.LISTEN_SERVER:
-                _networkPeer = NetworkServer.Initialize();
-                ServerGame.Initialize();
-                ClientGame.Initialize();
-                break;
-
-            case NetworkMode.CLIENT:
-                _networkPeer = NetworkClient.Initialize();
-                ClientGame.Initialize();
-                break;
-        }
-
-        //_router.Initialize(mode);
         OnRoleChanged?.Invoke(NetworkMode);
     }
 
@@ -133,6 +112,10 @@ public class NetworkManager : ITickable
     public void HostLanServer(ServerInfo serverInfo)
     {
         SetMode(NetworkMode.LISTEN_SERVER);
+
+        NetworkServer.Initialize();
+        ServerGame.Initialize();
+        ClientGame.Initialize();
 
         ServerInfo = serverInfo;
         var error = NetworkServer.Instance.StartLanServer(serverInfo.IP, serverInfo.Port, serverInfo);
@@ -151,6 +134,9 @@ public class NetworkManager : ITickable
     public void JoinServer(ServerInfo serverInfo)
     {
         SetMode(NetworkMode.CLIENT);
+
+        NetworkClient.Initialize();
+        ClientGame.Initialize();
 
         ServerInfo = serverInfo;
 
@@ -173,6 +159,8 @@ public class NetworkManager : ITickable
 
     public async void ShutdownServer()
     {
+        SetMode(NetworkMode.OFFLINE);
+
         await Task.Delay(NetworkConstants.SERVER_SHUTDOWN_DELAY_MS);
 
         ShutdownNetworkPeer();
@@ -186,6 +174,8 @@ public class NetworkManager : ITickable
 
     public void DisconnectFromServer()
     {
-        _networkPeer = null;
+        SetMode(NetworkMode.OFFLINE);
+
+        ShutdownNetworkPeer();
     }
 }

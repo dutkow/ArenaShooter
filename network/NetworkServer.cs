@@ -101,6 +101,8 @@ public class NetworkServer : NetworkPeer
 
         Connection?.Flush();
 
+        GD.Print($"connection is valid on shutdown: {Connection != null}");
+
         _advertiser.StopBroadcast();
         _advertiser = null;
 
@@ -112,8 +114,12 @@ public class NetworkServer : NetworkPeer
 
     public override void Shutdown()
     {
-        base.Shutdown();
+        foreach(var peer in Connection.GetPeers())
+        {
+            peer.PeerDisconnectNow();
+        }
 
+        Connection.Flush();
         Connection.Destroy();
     }
 }
