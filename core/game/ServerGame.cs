@@ -50,9 +50,11 @@ public class ServerGame()
 
     }
 
-    public void Tick()
+    public void Tick(double delta)
     {
-        ProcessNextClientInputCommands();
+        float deltaFloat = (float)delta;
+
+        ProcessNextClientInputCommands(deltaFloat);
 
         var newSnapshot = WorldSnapshot.Build();
         AddSnapshotToHistory(MatchState.Instance.CurrentTick, newSnapshot);
@@ -80,7 +82,7 @@ public class ServerGame()
 
     }
 
-    public void ProcessNextClientInputCommands()
+    public void ProcessNextClientInputCommands(float delta)
     {
         foreach (var kvp in MatchState.Instance.ConnectedPlayers)
         {
@@ -115,7 +117,7 @@ public class ServerGame()
                 nextInputCommand = lastCommand;
             }
 
-            character.ServerProcessNextClientInput(nextInputCommand);
+            character.ServerProcessNextClientInput(nextInputCommand, delta);
             _unprocessedClientInputs[playerID] = queue;
         }
     }
@@ -324,6 +326,6 @@ public class ServerGame()
             playerState.SetPlayerName(name);
         }
 
-        PlayerNameChange.Send(playerID, name);
+        PlayerNameChanged.Send(playerID, name);
     }
 }

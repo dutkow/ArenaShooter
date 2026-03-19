@@ -31,7 +31,7 @@ public class ClientProjectileManager
         return nextAvailable;
     }
 
-    public void HandleUnackedProjectiles(ProjectileSpawnData[] unackedProjectileSpawnDataArray)
+    public void HandleUnackedProjectiles(ProjectileSpawnData[] unackedProjectileSpawnDataArray, float delta)
     {
         foreach(var spawnData in unackedProjectileSpawnDataArray)
         {
@@ -40,7 +40,7 @@ public class ClientProjectileManager
                 var projectile = FindPredictedProjectile();
                 if(projectile != null)
                 {
-                    projectile.Reconcile(spawnData);
+                    projectile.Reconcile(spawnData, delta);
                     projectile.State.ProjectileID = spawnData.ProjectileID;
 
                     _knownProjectiles[spawnData.ProjectileID] = projectile;

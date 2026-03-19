@@ -96,12 +96,11 @@ public partial class Character : Pawn, IDamageable
 
 
 
-    public override void ServerProcessNextClientInput(ClientInputCommand cmd)
+    public override void ServerProcessNextClientInput(ClientInputCommand cmd, float delta)
     {
-        base.ServerProcessNextClientInput(cmd);
+        base.ServerProcessNextClientInput(cmd, delta);
 
-        PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, NetworkConstants.SERVER_TICK_INTERVAL);
-
+        PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, delta);
         _weapon.ProcessClientInput(cmd.Flags);
     }
 
@@ -239,7 +238,7 @@ public partial class Character : Pawn, IDamageable
 
 
     // Apply Replicated States
-    public void ApplyAuthoritativePublicState(CharacterPublicState publicState)
+    public void ApplyAuthoritativePublicState(CharacterPublicState publicState, float delta)
     {
         if (IsLocal)
         {
@@ -252,7 +251,7 @@ public partial class Character : Pawn, IDamageable
                 {
                     GD.Print("client prediction tick in replay loop has count > 0");
                 }
-                publicState = MovementComp.Step(publicState, clientPredictionTick.InputCommand, NetworkConstants.SERVER_TICK_INTERVAL, true);
+                publicState = MovementComp.Step(publicState, clientPredictionTick.InputCommand, delta, true);
 
             }
 
@@ -438,7 +437,7 @@ public partial class Character : Pawn, IDamageable
         }
 
         Vector3 dir = -_camera.GlobalTransform.Basis.Z;
-        _weapon.Tick(NetworkConstants.SERVER_TICK_INTERVAL, _camera.GlobalPosition, dir);
+        _weapon.Tick((float)TickManager.Instance.ServerTickInterval, _camera.GlobalPosition, dir);
 
 
         clientPredictionTick.InputCommand.Look = _accumulatedLookDelta;
@@ -446,7 +445,7 @@ public partial class Character : Pawn, IDamageable
 
         if(!IsAuthority)
         {
-            PredictedPublicState = MovementComp.Step(PredictedPublicState, clientPredictionTick.InputCommand, NetworkConstants.SERVER_TICK_INTERVAL);
+            PredictedPublicState = MovementComp.Step(PredictedPublicState, clientPredictionTick.InputCommand, (float)TickManager.Instance.ServerTickInterval);
             PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
             PredictedPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
 

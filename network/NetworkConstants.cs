@@ -8,9 +8,6 @@ public static class NetworkConstants
     // Match settings
     public const int MAX_PLAYERS = 16;
 
-    // Server tick
-    public const int SERVER_TICK_RATE = 100;
-    public const float SERVER_TICK_INTERVAL = 1.0f / SERVER_TICK_RATE;
 
     // Server discovery
 
@@ -42,6 +39,7 @@ public static class NetworkConstants
     public const float INTERNET_SERVER_BROADCAST_INTERVAL = 2.0f;
     public const float LAN_SERVER_BROADCAST_INTERVAL = 1.0f;
 
+    public const int MAX_SERVER_TICK_RATE = 256;
 
     public static string GetLocalIP()
     {

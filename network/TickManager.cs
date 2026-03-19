@@ -15,7 +15,7 @@ public class TickManager : ITickable
     // History of snapshots, keyed by server tick
 
     public int ServerTickRate = 64;
-    private double _serverTickInterval = 0.125;
+    public double ServerTickInterval = 0.125;
 
     // ---- For traffic tracking ----
     private int _bytesSentThisPeriod = 0;
@@ -40,18 +40,17 @@ public class TickManager : ITickable
 
     public void SetServerTickRate(int serverTickRate)
     {
-        _serverTickInterval = 1.0 / serverTickRate;
+        ServerTickInterval = 1.0 / serverTickRate;
     }
 
     public void Tick(double delta)
     {
         _accumulator += delta;
 
-        while (_accumulator >= _serverTickInterval)
+        while (_accumulator >= ServerTickInterval)
         {
-            _accumulator -= _serverTickInterval;            
-            MatchState.Instance.Tick();
-
+            _accumulator -= ServerTickInterval;            
+            MatchState.Instance.Tick(ServerTickInterval);
         }
 
     }

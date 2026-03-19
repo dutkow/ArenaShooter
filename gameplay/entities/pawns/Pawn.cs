@@ -61,7 +61,7 @@ public partial class Pawn : Entity
         return clientPredictionTick;
     }
 
-    public virtual void ServerProcessNextClientInput(ClientInputCommand cmd) { }
+    public virtual void ServerProcessNextClientInput(ClientInputCommand cmd, float delta) { }
 
     public virtual void ApplySnapshot(CharacterSnapshot snapshot) { }
 

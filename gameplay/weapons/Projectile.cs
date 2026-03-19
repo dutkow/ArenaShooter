@@ -132,7 +132,7 @@ public abstract partial class Projectile : Entity
         }
     }
 
-    public virtual void Reconcile(ProjectileSpawnData spawnData)
+    public virtual void Reconcile(ProjectileSpawnData spawnData, float delta)
     {
 
     }

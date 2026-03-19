@@ -146,6 +146,13 @@ public partial class CommandConsole : Control
         {
             if (value > 0)
             {
+                value = Math.Min(value, NetworkConstants.MAX_SERVER_TICK_RATE);
+
+                if(TickManager.Instance != null && NetworkManager.Instance.NetworkMode != NetworkMode.CLIENT)
+                {
+                    TickManager.Instance.SetServerTickRate(value);
+                    TickRateChanged.Send((ushort)value);
+                }
                 AddConsoleLogEntry($"Server tick rate set to {value}");
             }
         }

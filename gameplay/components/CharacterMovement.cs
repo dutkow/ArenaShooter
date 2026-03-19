@@ -93,7 +93,6 @@ public class CharacterMovement
     // Step function now takes CharacterPublicState and returns it
     public CharacterPublicState Step(CharacterPublicState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
-
         ApplyInput(state, cmd, delta);
         MoveAndSlide(state, delta);
 

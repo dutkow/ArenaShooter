@@ -299,7 +299,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
                 foreach (var cmd in _commandHistory.Where(c => c.ClientTick > ClientGame.Instance.LastClientTickProcessedByServer))
                 {
                     // Apply movement inputs to your movement component manually
-                    MovementComp.Tick(cmd.Flags, NetworkConstants.SERVER_TICK_INTERVAL, CameraPivot);
+                    MovementComp.Tick(cmd.Flags, TickManager.Instance.ServerTickRate, CameraPivot);
                     GlobalPosition = _predictedPosition;
                 }
 
@@ -415,9 +415,9 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
 
             _tickAccumulator += delta;
 
-            if (_tickAccumulator >= NetworkConstants.SERVER_TICK_INTERVAL)
+            if (_tickAccumulator >= TickManager.Instance.ServerTickRate)
             {
-                _tickAccumulator -= NetworkConstants.SERVER_TICK_INTERVAL;
+                _tickAccumulator -= TickManager.Instance.ServerTickRate;
                 SendClientCommand(cmd);
             }
         }

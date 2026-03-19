@@ -46,7 +46,7 @@ public partial class PlayerController : Controller
             _playerHud.CloseScoreboard();
         }
 
-
+        /*
         if (InputMode == InputMode.GAME)
         {
             if (Input.IsActionJustPressed("chat_all"))
@@ -68,7 +68,7 @@ public partial class PlayerController : Controller
                 PossessedPawn?.SetInputEnabled(true);
                 ChatPanel.SendChat();
             }
-        }
+        }*/
     }
 
     public virtual ClientInputCommand AddInput(ClientInputCommand cmd)

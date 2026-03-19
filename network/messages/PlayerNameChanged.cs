@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 
-public class PlayerNameChange: Message
+public class PlayerNameChanged: Message
 {
     public byte PlayerID;
     public string Name;
@@ -37,7 +37,7 @@ public class PlayerNameChange: Message
 
     public static void Send(byte playerID, string name)
     {
-        var msg = new PlayerNameChange
+        var msg = new PlayerNameChanged
         {
             MessageType = Msg.S2C_PLAYER_NAME_CHANGED,
             ENetFlags = ENetPacketFlags.Reliable,

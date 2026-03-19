@@ -67,7 +67,7 @@ public class ClientGame
         LocalPlayerID = localPlayerID;
     }
 
-    public void Tick()
+    public void Tick(double delta)
     {
         if(_hasReceivedInitialState)
         {
@@ -160,7 +160,7 @@ public class ClientGame
                 Character character = foundPlayerState.Character;
                 if (character != null)
                 {
-                    character.ApplyAuthoritativePublicState(playerState.CharacterPublicState);
+                    character.ApplyAuthoritativePublicState(playerState.CharacterPublicState, (float)TickManager.Instance.ServerTickInterval);
 
                     if(playerState.PlayerInfo.PlayerID == ClientGame.Instance.LocalPlayerID)
                     {
@@ -220,13 +220,19 @@ public class ClientGame
         MatchState.Instance.AddPlayer(playerJoined.PlayerInfo);
     }
 
-    public void HandlePlayerNameChanged(PlayerNameChange playerNameChange)
+    public void HandlePlayerNameChanged(PlayerNameChanged playerNameChange)
     {
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerNameChange.PlayerID, out var playerState))
         {
             playerState.SetPlayerName(playerNameChange.Name);
         }
     }
+
+    public void HandleTickRateChanged(TickRateChanged tickRateChanged)
+    {
+        TickManager.Instance.SetServerTickRate(tickRateChanged.TickRate);
+    }
+
 
     private void Dispatch<T>(byte[] payload, Action<T> handler) where T : Message, new()
     {
@@ -244,7 +250,7 @@ public class ClientGame
         _messageHandlers[Msg.S2C_CONNECTION_DENIED] = payload => Dispatch<ConnectionDenied>(payload, HandleConnectionDenied);
         _messageHandlers[Msg.S2C_INITIAL_MATCH_STATE] = payload => Dispatch<InitialMatchState>(payload, HandleInitialMatchState);
         _messageHandlers[Msg.S2C_WORLD_SNAPSHOT] = payload => Dispatch<WorldSnapshot>(payload, HandleWorldSnapshot);
-        _messageHandlers[Msg.S2C_PLAYER_NAME_CHANGED] = payload => Dispatch<PlayerNameChange>(payload, HandlePlayerNameChanged);
-
+        _messageHandlers[Msg.S2C_PLAYER_NAME_CHANGED] = payload => Dispatch<PlayerNameChanged>(payload, HandlePlayerNameChanged);
+        _messageHandlers[Msg.S2C_TICK_RATE_CHANGED] = payload => Dispatch<PlayerNameChanged>(payload, HandlePlayerNameChanged);
     }
 }

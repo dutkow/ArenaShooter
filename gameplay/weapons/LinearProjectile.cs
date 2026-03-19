@@ -89,12 +89,11 @@ public partial class LinearProjectile : Projectile
         return state;
     }
 
-    public override void Reconcile(ProjectileSpawnData spawnData)
+    public override void Reconcile(ProjectileSpawnData spawnData, float delta)
     {
-        base.Reconcile(spawnData);
+        base.Reconcile(spawnData, delta);
 
         int tickCount = ClientGame.Instance.LastServerTickProcessedByClient - spawnData.ServerTickOnSpawn;
-        float tickDelta = NetworkConstants.SERVER_TICK_INTERVAL;
 
         // Start from spawn
         Vector3 estimatedPos = spawnData.SpawnLocation;
@@ -103,7 +102,7 @@ public partial class LinearProjectile : Projectile
         // Simulate each tick without collision or applying to GlobalPosition
         for (int i = 0; i < tickCount; i++)
         {
-            Step(tempState, tickDelta, skipCollision: true);
+            Step(tempState, delta, skipCollision: true);
         }
 
         // Actual position from current state

@@ -96,12 +96,10 @@ public partial class MatchState : Node
     }
 
  
-    public void Tick()
+    public void Tick(double delta)
     {
-        ServerGame.Instance?.Tick();
-        ClientGame.Instance?.Tick();
-
-        GD.Print($" tick: {CurrentTick}");
+        ServerGame.Instance?.Tick(delta);
+        ClientGame.Instance?.Tick(delta);
 
         CurrentTick++;
     }
