@@ -60,4 +60,12 @@ public class NetworkClient : NetworkPeer
     {
         NetworkSender.ToServer(message);
     }
+
+    public void DisconnectFromServer()
+    {
+        Connection?.Flush();
+        ServerPeer.PeerDisconnect();
+
+        NetworkManager.Instance.DisconnectFromServer();
+    }
 }

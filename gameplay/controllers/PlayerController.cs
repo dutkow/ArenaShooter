@@ -8,7 +8,7 @@ public partial class PlayerController : Controller
 
     public InputMode InputMode;
 
-    private PlayerHud _playerHud;
+
 
     public override void _Ready()
     {
@@ -16,9 +16,31 @@ public partial class PlayerController : Controller
 
         GD.Print("Player controller created");
 
-        _playerHud = (PlayerHud)UIRoot.Instance.PlayerHudScene.Instantiate(); // need to rethink where to store UI packed scenes for this sort of thing
-        UIRoot.Instance.AddChild(_playerHud);
 
+
+    }
+
+    public void SetInputMode(InputMode mode)
+    {
+        if(InputMode == mode)
+        {
+            return;
+        }
+
+        InputMode = mode;
+
+        switch(InputMode)
+        {
+            case InputMode.GAME:
+                PossessedPawn?.SetInputEnabled(true);
+                Input.MouseMode = Input.MouseModeEnum.Captured;
+                break;
+
+            case InputMode.UI:
+                PossessedPawn?.SetInputEnabled(false);
+                Input.MouseMode = Input.MouseModeEnum.Visible;
+                break;
+        }
     }
 
     public override void Possess(Pawn pawn)
@@ -27,7 +49,8 @@ public partial class PlayerController : Controller
 
         if(pawn is Character character)
         {
-            _playerHud.AssignToCharacter(character);
+            GameUI.Instance.OnPossessedCharacter(character);
+            //_playerHud.AssignToCharacter(character);
         }
     }
 
@@ -38,12 +61,18 @@ public partial class PlayerController : Controller
 
         if (Input.IsActionJustPressed("scoreboard"))
         {
-            _playerHud.OpenScoreboard();
+            GameUI.Instance.ShowScoreboard();
         }
 
         if (Input.IsActionJustReleased("scoreboard"))
         {
-            _playerHud.CloseScoreboard();
+            GameUI.Instance.HideScoreboard();
+        }
+
+        if (Input.IsActionJustPressed("menu"))
+        {
+            GameUI.Instance.ShowGameMenu();
+            SetInputMode(InputMode.UI);
         }
 
         /*
@@ -88,9 +117,28 @@ public partial class PlayerController : Controller
 
     }
 
+    public void OnNavigateBackPressed()
+    {
+        /*
+        if(_playerHud.PauseMenu.Visible)
+        {
+            _playerHud.PauseMenu.Visible = false;
+            Input.MouseMode = Input.MouseModeEnum.Captured;
+            PossessedPawn?.SetInputEnabled(true);
+        }
+        else
+        {
+            _playerHud.PauseMenu.Visible = true;
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+            PossessedPawn?.SetInputEnabled(false);
+        }*/
+    }
+
     public void Initialize()
     {
-        _playerHud.Initialize();
+        //_playerHud.Initialize();
     }
+
+
 }
 

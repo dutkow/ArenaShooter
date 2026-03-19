@@ -74,4 +74,6 @@ public enum Msg : byte
     S2C_PLAYER_DIED,
 
     S2C_TICK_RATE_CHANGED,
+
+    S2C_SERVER_NOTIFICATION,
 }

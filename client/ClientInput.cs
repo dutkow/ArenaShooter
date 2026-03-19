@@ -12,9 +12,9 @@ public class ClientInput
         Instance = this;
     }
 
-    public void Input (InputEvent @event)
+    public void HandleInput(InputEvent @event)
     {
-        if (Godot.Input.IsActionJustPressed("toggle_command_console"))
+        if (Input.IsActionJustPressed("toggle_command_console"))
         {
             bool toggledOn = CommandConsole.Instance.Toggle();
 
@@ -31,5 +31,27 @@ public class ClientInput
                 ClientGame.Instance?.LocalPlayerController?.PossessedPawn?.SetInputEnabled(true);
             }
         }
+
+        if(Input.IsActionJustPressed("navigate_back"))
+        {
+            ClientGame.Instance?.LocalPlayerController?.OnNavigateBackPressed(); // todo: rethink input handling and UI navigation
+            GD.Print("navigate back pressed!");
+        }
+
+        if (Input.IsActionJustPressed("toggle_cursor_lock"))
+        {
+            if (Input.MouseMode == Input.MouseModeEnum.Captured)
+            {
+                Input.MouseMode = Input.MouseModeEnum.Visible;
+                ClientGame.Instance?.LocalPlayerController?.PossessedPawn?.SetInputEnabled(false);
+            }
+            else if (Input.MouseMode == Input.MouseModeEnum.Visible)
+            {
+                Input.MouseMode = Input.MouseModeEnum.Captured;
+                ClientGame.Instance?.LocalPlayerController?.PossessedPawn?.SetInputEnabled(true);
+            }
+        }
     }
+
+
 }

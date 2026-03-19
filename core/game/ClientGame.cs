@@ -244,6 +244,17 @@ public class ClientGame
         TickManager.Instance.SetServerTickRate(tickRateChanged.TickRate);
     }
 
+    public void HandleServerNotification(ServerNotification notification)
+    {
+        switch(notification.Type)
+        {
+            case ServerNotificationType.DISCONNECTION_SERVER_SHUTDOWN:
+                GD.Print($"RECEIVED SERVER SHUTDOWN NOTICE");
+                SceneNavigator.OpenMainMenu();
+                break;
+        }
+    }
+
 
     private void Dispatch<T>(byte[] payload, Action<T> handler) where T : Message, new()
     {
@@ -262,9 +273,11 @@ public class ClientGame
         _messageHandlers[Msg.S2C_INITIAL_MATCH_STATE] = payload => Dispatch<InitialMatchState>(payload, HandleInitialMatchState);
         _messageHandlers[Msg.S2C_WORLD_SNAPSHOT] = payload => Dispatch<WorldSnapshot>(payload, HandleWorldSnapshot);
         _messageHandlers[Msg.S2C_PLAYER_NAME_CHANGED] = payload => Dispatch<PlayerNameChanged>(payload, HandlePlayerNameChanged);
-        _messageHandlers[Msg.S2C_TICK_RATE_CHANGED] = payload => Dispatch<PlayerNameChanged>(payload, HandlePlayerNameChanged);
+        _messageHandlers[Msg.S2C_TICK_RATE_CHANGED] = payload => Dispatch<TickRateChanged>(payload, HandleTickRateChanged);
         _messageHandlers[Msg.S2C_PLAYER_JOINED] = payload => Dispatch<PlayerJoined>(payload, HandlePlayerJoined);
         _messageHandlers[Msg.S2C_PLAYER_LEFT] = payload => Dispatch<PlayerLeft>(payload, HandlePlayerLeft);
+        _messageHandlers[Msg.S2C_SERVER_NOTIFICATION] = payload => Dispatch<ServerNotification>(payload, HandleServerNotification);
+
 
     }
 }

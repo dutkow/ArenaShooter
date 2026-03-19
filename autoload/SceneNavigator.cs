@@ -61,4 +61,31 @@ public class SceneNavigator
 
         Main.Instance.SetMainScene(newScene);
     }
+
+    public static async void OpenMainMenu(float delayBeforeLoad = 0.5f)
+    {
+
+        Main.Instance.OpenLoadingScreen();
+
+        if (delayBeforeLoad > 0f)
+        {
+            // Pure C# delay instead of ToSignal
+            await Task.Delay((int)(delayBeforeLoad * 1000));
+        }
+
+        var packedScene = (Godot.PackedScene)Godot.ResourceLoader.Load("res://ui/menus/main_menu/main_menu.tscn");
+        if (packedScene == null)
+        {
+            return;
+        }
+
+        var newScene = packedScene.Instantiate<Godot.Node>();
+
+        Main.Instance.SetMainScene(newScene);
+    }
+
+    public static void QuitToDesktop()
+    {
+        Main.Instance.GetTree().Quit();
+    }
 }

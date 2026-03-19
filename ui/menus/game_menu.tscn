@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://bap81nb1dd65y"]
+
+[ext_resource type="Script" uid="uid://xy0n12s3r24n" path="res://ui/menus/GameMenu.cs" id="1_gljo2"]
+
+[node name="GameMenu" type="Control" unique_id=1202452550 node_paths=PackedStringArray("_resumeButton", "_settingsButton", "_quitToMainMenuButton", "_quitGameButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_gljo2")
+_resumeButton = NodePath("ColorRect2/MarginContainer/VBoxContainer/ResumeButton")
+_settingsButton = NodePath("ColorRect2/MarginContainer/VBoxContainer/SettingsButton")
+_quitToMainMenuButton = NodePath("ColorRect2/MarginContainer/VBoxContainer/QuitToMainMenuButton")
+_quitGameButton = NodePath("ColorRect2/MarginContainer/VBoxContainer/QuitGameButton")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1844007621]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.18039216)
+
+[node name="ColorRect2" type="ColorRect" parent="." unique_id=1336162613]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -125.0
+offset_right = 200.0
+offset_bottom = 125.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.090575494, 0.083758526, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="ColorRect2" unique_id=1220675480]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ColorRect2/MarginContainer" unique_id=1199766708]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="ResumeButton" type="Button" parent="ColorRect2/MarginContainer/VBoxContainer" unique_id=685253729]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "RESUME"
+
+[node name="SettingsButton" type="Button" parent="ColorRect2/MarginContainer/VBoxContainer" unique_id=161109069]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "SETTINGS"
+
+[node name="QuitToMainMenuButton" type="Button" parent="ColorRect2/MarginContainer/VBoxContainer" unique_id=2061109164]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "QUIT TO MAIN MENU"
+
+[node name="QuitGameButton" type="Button" parent="ColorRect2/MarginContainer/VBoxContainer" unique_id=914930748]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "QUIT GAME"

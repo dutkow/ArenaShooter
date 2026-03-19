@@ -495,22 +495,6 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
-    public void DebugInput()
-    {
-        if (Input.IsActionJustPressed("toggle_cursor_lock"))
-        {
-            if (Input.MouseMode == Input.MouseModeEnum.Captured)
-            {
-                Input.MouseMode = Input.MouseModeEnum.Visible;
-                SetInputEnabled(false);
-            }
-            else if (Input.MouseMode == Input.MouseModeEnum.Visible)
-            {
-                Input.MouseMode = Input.MouseModeEnum.Captured;
-                SetInputEnabled(true);
-            }
-        }
-    }
 
     public override void _Input(InputEvent @event)
     {
@@ -520,8 +504,6 @@ public partial class Character : Pawn, IDamageable
         {
             return;
         }
-
-        DebugInput();
 
         if(!_inputEnabled)
         {

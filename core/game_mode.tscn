@@ -2,12 +2,9 @@
 
 [ext_resource type="Script" uid="uid://boo408k7s368l" path="res://core/GameMode.cs" id="1_2ollm"]
 [ext_resource type="PackedScene" uid="uid://ckn5b0j16otei" path="res://gameplay/entities/pawns/characters/character.tscn" id="2_xrwxx"]
-[ext_resource type="PackedScene" uid="uid://bmtkb45r7yy6j" path="res://core/level_ui.tscn" id="3_61523"]
-[ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/player_hud.tscn" id="3_xrwxx"]
+[ext_resource type="PackedScene" uid="uid://b3i21qfgu6wnd" path="res://core/game_ui.tscn" id="3_61523"]
 
-
-[node name="GameMode" type="Node"]
+[node name="GameMode" type="Node" unique_id=265757635]
 script = ExtResource("1_2ollm")
 DefaultPawnScene = ExtResource("2_xrwxx")
-MatchStateScene = ExtResource("3_xrwxx")
 LevelUIScene = ExtResource("3_61523")

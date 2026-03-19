@@ -66,10 +66,12 @@ public class NetworkServer : NetworkPeer
         PeersByPeerID.Remove(NetUtils.GetPeerPlayerID(peer));
         PeersByPlayerID.Remove(NetUtils.GetPeerPlayerID(peer));
 
-        byte playerID = NetUtils.GetPeerPlayerID(peer);
-
-        MatchState.Instance.HandlePlayerLeft(playerID);
-        PlayerLeft.Send(playerID);
+        if(!_serverShuttingDown)
+        {
+            byte playerID = NetUtils.GetPeerPlayerID(peer);
+            MatchState.Instance.HandlePlayerLeft(playerID);
+            PlayerLeft.Send(playerID);
+        }
     }
 
     public override void HandleReceivedPacketFromPeer(ENetPacketPeer peer, byte[] packet)
@@ -89,5 +91,18 @@ public class NetworkServer : NetworkPeer
             }
         }
         return byte.MaxValue;
+    }
+
+    private bool _serverShuttingDown = false;
+
+    public void StartServerShutdown()
+    {
+        _serverShuttingDown = true;
+
+        ServerNotification.Broadcast(ServerNotificationType.DISCONNECTION_SERVER_SHUTDOWN);
+
+        Connection?.Flush();
+
+        NetworkManager.Instance.QueueServerShutdown();
     }
 }

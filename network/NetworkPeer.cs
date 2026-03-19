@@ -227,5 +227,9 @@ public class NetworkPeer : ITickable
         lanListenTimer = listenSeconds;
     }
 
+    public virtual void Disconnect()
+    {
+
+    }
 
 }

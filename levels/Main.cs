@@ -120,6 +120,6 @@ public partial class Main : Node, ITickable
     {
         base._Input(@event);
 
-        _clientInput?.Input(@event);
+        _clientInput?.HandleInput(@event);
     }
 }

@@ -24,13 +24,13 @@ public partial class Level : Node3D
         var gameMode = (GameMode)_gameModeScene.Instantiate();
         AddChild(gameMode);
 
+
+
         SpawnManager.Initialize();
         PickupManager.Initialize();
         MatchState.Initialize();
 
 
-
-        // this should only be client
         var levelUI = (LevelUI)gameMode.LevelUIScene.Instantiate();
         AddChild(levelUI);
 

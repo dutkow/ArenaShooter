@@ -8,7 +8,6 @@ public partial class GameMode : Node
 
     [Export] public PackedScene DefaultPawnScene;
 
-    [Export] public PackedScene MatchStateScene;
 
     [Export] public PackedScene LevelUIScene;
 

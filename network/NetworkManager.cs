@@ -72,6 +72,7 @@ public class NetworkManager : ITickable
 
     public Action<ServerInfo> JoinedServer;
 
+    private float _accumulatedTime;
 
     // ----------------------
     // Initialization
@@ -108,6 +109,16 @@ public class NetworkManager : ITickable
     public virtual void Tick(double delta)
     {
         _networkPeer?.Tick(delta);
+
+        _accumulatedTime += (float)delta;
+
+        if(_isShuttingDownServer)
+        {
+            if(_serverShutdownTime >=  _accumulatedTime)
+            {
+                ShutdownServer();
+            }
+        }
     }
 
     public void SetMode(NetworkMode mode)
@@ -317,5 +328,26 @@ public class NetworkManager : ITickable
 
     }
 
+    private const float _serverShutdownDelay = 2.0f;
+
+    private float _serverShutdownTime;
+
+    private bool _isShuttingDownServer = false;
+
+    public void QueueServerShutdown()
+    {
+        _isShuttingDownServer = true;
+        _serverShutdownTime = _accumulatedTime + _serverShutdownDelay;
+    }
+
+    public void ShutdownServer()
+    {
+        _networkPeer = null;
+    }
+
+    public void DisconnectFromServer()
+    {
+        _networkPeer = null;
+    }
 
 }

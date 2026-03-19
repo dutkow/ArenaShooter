@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://b3i21qfgu6wnd"]
+
+[ext_resource type="Script" uid="uid://cape75ga45unw" path="res://core/GameUI.cs" id="1_i0cwh"]
+[ext_resource type="PackedScene" uid="uid://m4y05jbaa545" path="res://ui/hud/player_hud.tscn" id="2_81dy6"]
+[ext_resource type="PackedScene" uid="uid://cd8hrwi66gg10" path="res://match_hud.tscn" id="3_3iaur"]
+[ext_resource type="PackedScene" uid="uid://doyibe8885wuq" path="res://ui/hud/scoreboard.tscn" id="4_ldo1m"]
+[ext_resource type="PackedScene" uid="uid://bap81nb1dd65y" path="res://ui/menus/game_menu.tscn" id="5_ldo1m"]
+
+[node name="GameUI" type="CanvasLayer" unique_id=1830378262 node_paths=PackedStringArray("_playerHud", "_scoreboard", "_matchHud", "_menu", "_settingsMenu")]
+script = ExtResource("1_i0cwh")
+_playerHud = NodePath("PlayerHud")
+_scoreboard = NodePath("Scoreboard")
+_matchHud = NodePath("MatchHud")
+_menu = NodePath("GameMenu")
+_settingsMenu = NodePath("")
+
+[node name="MatchHud" parent="." unique_id=1132521997 instance=ExtResource("3_3iaur")]
+
+[node name="PlayerHud" parent="." unique_id=58829785 instance=ExtResource("2_81dy6")]
+visible = false
+
+[node name="Scoreboard" parent="." unique_id=469119988 instance=ExtResource("4_ldo1m")]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -400.0
+offset_right = 500.0
+offset_bottom = 400.0
+
+[node name="GameMenu" parent="." unique_id=1202452550 instance=ExtResource("5_ldo1m")]
+visible = false

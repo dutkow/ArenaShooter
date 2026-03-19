@@ -8,6 +8,8 @@ public partial class PlayerHud : Control
 
     [Export] private Scoreboard _scoreboard;
 
+    [Export] public GameMenu PauseMenu;
+
     public void AssignToArenaCharacter(ArenaCharacterOld character)
     {
         var healthComponent = character.HealthComponent;
