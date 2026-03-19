@@ -34,7 +34,7 @@ public partial class SpawnManager : Node3D
         var spawnPoint = GetSpawnPoint();
         if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var player))
         {
-            player.IsAlive = true;
+            player.IsSpawned = true;
             GD.Print($"setting player is alive to true for player id {playerID}");
 
 

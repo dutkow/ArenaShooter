@@ -60,14 +60,5 @@ public class SceneNavigator
         var newScene = packedScene.Instantiate<Godot.Node>();
 
         Main.Instance.SetMainScene(newScene);
-
-        ServerGame.Instance?.OnLoaded();
-
-        if(NetworkManager.Instance.IsClient)
-        {
-            ClientGame.Instance.OnLoaded();
-        }
-
-
     }
 }

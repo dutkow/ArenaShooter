@@ -2,6 +2,12 @@ using Godot;
 using System;
 
 
+public struct PlayerStats
+{
+    public ushort Kills;
+    public ushort Deaths;
+}
+
 public class PlayerState()
 {
     public PlayerInfo PlayerInfo;
@@ -13,10 +19,10 @@ public class PlayerState()
 
     public PlayerStateFlags Flags;
 
-    public byte Kills;
-    public byte Deaths;
+    public PlayerStats Stats;
+
     public ushort Ping;
-    public bool IsAlive; // Used so clients know who they need to spawn
+    public bool IsSpawned; // Used so clients know who they need to spawn
 
     public Action<string> PlayerNameChanged;
 
@@ -45,19 +51,20 @@ public class PlayerState()
         {
             msg.Add(PlayerInfo.PlayerName);
 
-            msg.Add(Kills);
-            msg.Add(Deaths);
+            msg.Add(Stats.Kills);
+            msg.Add(Stats.Deaths);
+
             msg.Add(Ping);
-            msg.Add(IsAlive);
+            msg.Add(IsSpawned);
 
 
         }
         else
         {
-            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Add(Kills);
-            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Add(Deaths);
+            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Add(Stats.Kills);
+            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Add(Stats.Deaths);
             if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Add(Ping);
-            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Add(IsAlive);
+            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Add(IsSpawned);
         }
 
         CharacterPublicState.Add(msg, forceFull);
@@ -72,19 +79,21 @@ public class PlayerState()
         {
             msg.Write(PlayerInfo.PlayerName);
 
-            msg.Write(Kills);
-            msg.Write(Deaths);
+            msg.Write(Stats.Kills);
+            msg.Write(Stats.Deaths);
+
             msg.Write(Ping);
-            msg.Write(IsAlive);
+            msg.Write(IsSpawned);
         }
         else
         {
             msg.WriteEnum(Flags);
 
-            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Write(Kills);
-            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Write(Deaths);
+            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Write(Stats.Kills);
+            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Write(Stats.Deaths);
+
             if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Write(Ping);
-            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Write(IsAlive);
+            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Write(IsSpawned);
         }
 
         CharacterPublicState.Write(msg, forceFull);
@@ -99,20 +108,21 @@ public class PlayerState()
         {
             msg.Read(out PlayerInfo.PlayerName);
 
-            msg.Read(out Kills);
-            msg.Read(out Deaths);
+            msg.Read(out Stats.Kills);
+            msg.Read(out Stats.Deaths);
             msg.Read(out Ping);
-            msg.Read(out IsAlive);
+            msg.Read(out IsSpawned);
 
         }
         else
         {
             msg.ReadEnum(out Flags);
 
-            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Read(out Kills);
-            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Read(out Deaths);
+            if ((Flags & PlayerStateFlags.KILLS_CHANGED) != 0) msg.Read(out Stats.Kills);
+            if ((Flags & PlayerStateFlags.DEATHS_CHANGED) != 0) msg.Read(out Stats.Deaths);
+
             if ((Flags & PlayerStateFlags.PING_CHANGED) != 0) msg.Read(out Ping);
-            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Read(out IsAlive);
+            if ((Flags & PlayerStateFlags.IS_ALIVE_CHANGED) != 0) msg.Read(out IsSpawned);
         }
         CharacterPublicState.Read(msg, forceFull);
         CharacterPrivateState.Read(msg, forceFull);

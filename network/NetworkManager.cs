@@ -123,12 +123,13 @@ public class NetworkManager : ITickable
         {
             case NetworkMode.DEDICATED_SERVER:
                 _networkPeer = NetworkServer.Initialize();
+                ServerGame.Initialize();
                 break;
             case NetworkMode.OFFLINE:
             case NetworkMode.LISTEN_SERVER:
                 _networkPeer = NetworkServer.Initialize();
-                NetworkClient.Initialize();
                 ServerGame.Initialize();
+                ClientGame.Initialize();
                 break;
 
             case NetworkMode.CLIENT:

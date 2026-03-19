@@ -41,25 +41,12 @@ public class ServerGame()
         Instance = new ServerGame();
 
         Instance.InitMessageHandlers();
-
-        CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Server Game ===");
-
     }
 
-    public void OnLoaded()
+    public void PostLoad()
     {
+        CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Server Game ===");
         ServerProjectileManager.Initialize();
-
-
-        if (IsListenServer)
-        {
-            ClientGame.Initialize();
-            ClientGame.Instance.OnLoaded();
-            ClientProjectileManager.Initialize();
-        }
-
-        GD.Print($"on loaded ran on server game");
-        StartMatch();
     }
 
     public void Tick()

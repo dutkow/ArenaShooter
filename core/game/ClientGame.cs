@@ -37,17 +37,17 @@ public class ClientGame
         {
             GD.Print($"Client game already exists");
         }
-        Instance = new ClientGame();
-
-        Instance.InitMessageHandlers();
 
         CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Client Game ===");
 
-
+        Instance = new ClientGame();
+        Instance.InitMessageHandlers();
     }
 
-    public void OnLoaded()
+    public void PostLoad()
     {
+
+
         if (NetworkManager.Instance.IsClient)
         {
             ClientLoaded.Send();
@@ -62,6 +62,9 @@ public class ClientGame
         Game.Instance.AddChild(LocalPlayerController);
 
         LocalPlayerController.Initialize();
+
+        ClientProjectileManager.Initialize();
+
     }
 
     public void SetLocalPlayerID(byte localPlayerID)
@@ -175,7 +178,7 @@ public class ClientGame
                     }
                 }
                 // Client doesn't know about this character but it's alive, spawn it
-                else if(playerState.IsAlive)
+                else if(playerState.IsSpawned)
                 {
                     SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Look.X);
                 }

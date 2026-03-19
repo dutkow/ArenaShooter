@@ -225,7 +225,7 @@ public partial class MatchState : Node
     {
         ConnectedPlayers[playerState.PlayerInfo.PlayerID] = playerState;
 
-        if(playerState.IsAlive)
+        if(playerState.IsSpawned)
         {
 
             SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Look.Y);
