@@ -21,7 +21,7 @@ public class MessageRouter
         {
             // Connection state
             RegisterFromClient(Msg.C2S_CONNECTION_REQUEST, ServerConnectionService.HandleConnectionRequest);
-            RegisterFromClient(Msg.C2S_CLIENT_LOADED, ServerConnectionService.HandleClientLoaded);
+            RegisterFromClient(Msg.C2S_INITIAL_MATCH_STATE_REQUEST, ServerConnectionService.HandleClientLoaded);
 
             // Gameplay
             RegisterFromClient(Msg.C2S_CLIENT_COMMAND, ServerGameplayService.HandleClientCommand);

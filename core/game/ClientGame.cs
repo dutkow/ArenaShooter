@@ -46,7 +46,8 @@ public class ClientGame
     {
         if (NetworkManager.Instance.IsClient)
         {
-            //ClientLoaded.Send();
+            CommandConsole.Instance.AddConsoleLogEntry($"Level fully loaded. Requesting initial match state.");
+            InitialMatchStateRequest.Send();
         }
         else
         {
@@ -213,6 +214,9 @@ public class ClientGame
         var tickManager = TickManager.Create();
         tickManager.SetServerTickRate(initialMatchState.ServerTickRate);
         Level.Instance.Tickables.Add(tickManager);
+
+        CommandConsole.Instance.AddConsoleLogEntry($"Received initial match state from server.");
+
     }
 
     public void HandlePlayerJoined(PlayerJoined playerJoined)

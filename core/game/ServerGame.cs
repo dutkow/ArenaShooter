@@ -233,7 +233,7 @@ public class ServerGame()
         ConnectionAccepted.Send(peer, playerID);
     }
 
-    public void HandleClientLoaded(ENetPacketPeer peer, ClientLoaded clientLoaded)
+    public void HandleClientLoaded(ENetPacketPeer peer, InitialMatchStateRequest clientLoaded)
     {
         byte playerID = NetUtils.GetPeerPlayerID(peer);
         NetworkPeer.Instance.ReadyPeers.Add(peer);
@@ -266,7 +266,7 @@ public class ServerGame()
     public virtual void InitMessageHandlers()
     {
         _messageHandlers[Msg.C2S_CONNECTION_REQUEST] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
-        _messageHandlers[Msg.C2S_CLIENT_LOADED] = (peer, payload) => Dispatch<ClientLoaded>(peer, payload, HandleClientLoaded);
+        _messageHandlers[Msg.C2S_INITIAL_MATCH_STATE_REQUEST] = (peer, payload) => Dispatch<InitialMatchStateRequest>(peer, payload, HandleClientLoaded);
         _messageHandlers[Msg.C2S_CLIENT_COMMAND] = (peer, payload) => Dispatch<ClientCommand>(peer, payload, HandleClientCommand);
         _messageHandlers[Msg.C2S_CHANGE_PLAYER_NAME] = (peer, payload) => Dispatch<PlayerNameChangeRequest>(peer, payload, HandlePlayerNameChangeRequest);
 

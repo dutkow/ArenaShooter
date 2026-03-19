@@ -7,7 +7,7 @@ public struct ClientInfo(string playerName)
 /// <summary>
 /// Sent from Client → Server after the client finishes loading the level/scene.
 /// </summary>
-public class ClientLoaded : Message
+public class InitialMatchStateRequest : Message
 {
     public ClientInfo ClientInfo;
 
@@ -38,9 +38,9 @@ public class ClientLoaded : Message
 
     public static void Send()
     {
-        var msg = new ClientLoaded
+        var msg = new InitialMatchStateRequest
         {
-            MessageType = Msg.C2S_CLIENT_LOADED,
+            MessageType = Msg.C2S_INITIAL_MATCH_STATE_REQUEST,
             ENetFlags = ENetPacketFlags.Reliable,
             ClientInfo = new ClientInfo(UserSettings.Instance.PlayerName)
         };

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Net;
 using System.Threading.Tasks.Dataflow;
 
 public class NetworkClient : NetworkPeer
@@ -18,6 +19,8 @@ public class NetworkClient : NetworkPeer
     public override void HandlePeerConnected(ENetPacketPeer peer)
     {
         ConnectionRequest.Send(UserSettings.Instance.PlayerName);
+        CommandConsole.Instance.AddConsoleLogEntry($"Connection to server established. Sending connection request.");
+
     }
 
     public override void HandlePeerDisconnected(ENetPacketPeer peer)
@@ -39,12 +42,15 @@ public class NetworkClient : NetworkPeer
         if (error != Error.Ok)
         {
             Connection = null;
+            CommandConsole.Instance.AddConsoleLogEntry($"Failed to join server");
             return;
         }
 
         ServerPeer = Connection.ConnectToHost(ipAddress, port);
 
-        if(ServerPeer == null )
+        CommandConsole.Instance.AddConsoleLogEntry($"Attempting to join server. IP: {ipAddress}. Port: {port}");
+
+        if (ServerPeer == null )
         {
             return;
         }

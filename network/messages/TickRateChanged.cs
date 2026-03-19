@@ -35,7 +35,7 @@ public class TickRateChanged : Message
     {
         var msg = new TickRateChanged
         {
-            MessageType = Msg.S2C_PLAYER_NAME_CHANGED,
+            MessageType = Msg.S2C_TICK_RATE_CHANGED,
             ENetFlags = ENetPacketFlags.Reliable,
             TickRate = tickRate
         };

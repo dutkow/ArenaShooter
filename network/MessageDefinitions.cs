@@ -56,7 +56,7 @@ public enum Msg : byte
     C2S_SEND_CONNECTING_PLAYER_INFO,
 
     // **New handshake packet**
-    C2S_CLIENT_LOADED, // client informs server they're loaded
+    C2S_INITIAL_MATCH_STATE_REQUEST,
 
     // Chat
     S2C_CHAT_MESSAGE,

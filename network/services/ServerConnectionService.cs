@@ -18,7 +18,7 @@ public static class ServerConnectionService
 
     public static void HandleClientLoaded(ENetPacketPeer peer, byte[] data)
     {
-        var msg = new ClientLoaded();
+        var msg = new InitialMatchStateRequest();
         msg.ReadMessage(data);
 
         int peerID = (int)peer.GetMeta("id");

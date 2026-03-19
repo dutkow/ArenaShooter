@@ -419,8 +419,6 @@ public partial class Character : Pawn, IDamageable
     {
         base.GetClientPredictionTick(clientPredictionTick);
 
-        GD.Print($"get client prediction tick ran");
-
         if (_inputEnabled)
         {
             if (Input.IsActionPressed("move_forward")) clientPredictionTick.InputCommand.Flags |= InputFlags.FORWARD;
