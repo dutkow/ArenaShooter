@@ -45,5 +45,4 @@ public static class NetUtils
             byte.Parse(parts[3])
         );
     }
-
 }

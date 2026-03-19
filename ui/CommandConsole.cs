@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class CommandConsole : Control
 {
@@ -23,6 +24,7 @@ public partial class CommandConsole : Control
         _commands["vsync"] = HandleVSync;
         _commands["sv_tick"] = HandleServerTickRate;
         _commands["name"] = HandleChangePlayerName;
+        _commands["playerlist"] = PrintPlayerList;
 
         _lineEdit.TextSubmitted += TryCommand;
 
@@ -184,6 +186,16 @@ public partial class CommandConsole : Control
         else
         {
             AddConsoleLogEntry($"Attempted command: {args[0]} had invalid value: NULL");
+        }
+    }
+
+    public void PrintPlayerList(string[] args)
+    {
+        AddConsoleLogEntry($"--- Connected players ---");
+
+        foreach (var player in MatchState.Instance.ConnectedPlayers.Values.OrderBy(p => p.PlayerInfo.PlayerName, StringComparer.OrdinalIgnoreCase))
+        {
+            AddConsoleLogEntry($"-{player.PlayerInfo.PlayerName}, Player ID: {player.PlayerInfo.PlayerID}");
         }
     }
 

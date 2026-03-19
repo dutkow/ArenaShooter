@@ -41,6 +41,8 @@ public static class NetworkConstants
 
     public const int MAX_SERVER_TICK_RATE = 256;
 
+    public const int MAX_PLAYER_NAME_LENGTH = 20;
+
     public static string GetLocalIP()
     {
         string localIP = "127.0.0.1"; // fallback

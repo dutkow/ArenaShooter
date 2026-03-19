@@ -52,7 +52,7 @@ public class ClientGame
         else
         {
             _hasReceivedInitialState = true;
-            ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, UserSettings.Instance.PlayerName));
+            ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, ServerGame.Instance.ValidatePlayerName(UserSettings.Instance.PlayerName)));
         }
 
         LocalPlayerController = new();

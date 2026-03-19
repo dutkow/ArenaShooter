@@ -228,17 +228,8 @@ public class ServerGame()
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
-        string baseName = request.ClientInfo.PlayerName;
-        string requestedPlayerName = baseName;
-        int counter = 1;
-
-        while (MatchState.Instance.ConnectedPlayers.Values.Any(p => p.PlayerInfo.PlayerName == requestedPlayerName))
-        {
-            requestedPlayerName = $"{baseName} ({counter})";
-            counter++;
-        }
-
-        ApplyClientLoaded(new PlayerInfo(playerID, requestedPlayerName));
+        string assignedName = ValidatePlayerName(request.ClientInfo.PlayerName);
+        ApplyClientLoaded(new PlayerInfo(playerID, assignedName));
 
         SpawnManager.Instance.ServerSpawnPlayer(playerID);
 
@@ -250,6 +241,26 @@ public class ServerGame()
         CommandConsole.Instance.AddConsoleLogEntry($"Sending initial match state to player. Player ID: {playerID}. Player name: {request.ClientInfo.PlayerName}");
 
 
+    }
+
+    public string ValidatePlayerName(string requestedName)
+    {
+        int maxLength = NetworkConstants.MAX_PLAYER_NAME_LENGTH;
+        if (requestedName.Length > maxLength)
+        {
+            requestedName = requestedName.Substring(0, maxLength);
+        }
+
+        string baseName = requestedName;
+        int counter = 1;
+
+        while (MatchState.Instance.ConnectedPlayers.Values.Any(p => p.PlayerInfo.PlayerName == requestedName))
+        {
+            requestedName = $"{baseName} ({counter})";
+            counter++;
+        }
+
+        return requestedName;
     }
 
     public void ApplyClientLoaded(PlayerInfo playerInfo)
