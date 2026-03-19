@@ -127,3 +127,6 @@ transform = Transform3D(0.9999963, -0.000109510846, -0.002576604, 0.0011799153, 
 material_override = ExtResource("4_m0y5v")
 use_collision = true
 size = Vector3(200, 20, 50)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=178860852]
+transform = Transform3D(0.99999994, 7.454446e-10, 4.4237822e-09, 2.9478997e-10, 1, 6.868504e-09, 0, 0, 0.99999994, -0.019958116, 3.4382145, 0.0034983451)

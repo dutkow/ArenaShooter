@@ -20,8 +20,8 @@ public partial class CommandConsole : Control
         Instance = this;
 
         _commands["maxfps"] = HandleMaxFps;
-        _commands["showfps.on"] = HandleShowFPSOn;
-        _commands["showfps.off"] = HandleShowFPSOff;
+        _commands["fps.on"] = HandleFPSOn;
+        _commands["fps.off"] = HandleFPSOff;
         _commands["vsync"] = HandleVSync;
         _commands["sv.tick"] = HandleServerTickRate;
         _commands["name"] = HandleChangePlayerName;
@@ -127,13 +127,13 @@ public partial class CommandConsole : Control
         }
     }
 
-    private void HandleShowFPSOn(string[] args)
+    private void HandleFPSOn(string[] args)
     {
         UserSettings.Instance.SetShowFPS(true);
         AddConsoleLogEntry("Show FPS enabled");
     }
 
-    private void HandleShowFPSOff(string[] args)
+    private void HandleFPSOff(string[] args)
     {
         UserSettings.Instance.SetShowFPS(false);
         AddConsoleLogEntry("Show FPS disabled");

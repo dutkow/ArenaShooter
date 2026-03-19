@@ -57,25 +57,30 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=125350700]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 2
+size_flags_stretch_ratio = 2.0
+theme_override_font_sizes/font_size = 24
 text = "Server Name"
 horizontal_alignment = 1
 
 [node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=372832033]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "Map"
 horizontal_alignment = 1
 
 [node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=2001341625]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "Players"
 horizontal_alignment = 1
 
 [node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=2063875699]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "Ping"
 horizontal_alignment = 1
 
@@ -84,10 +89,12 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/Control" unique_id=68224919]
-layout_mode = 0
-offset_top = 4.0
-offset_right = 800.0
-offset_bottom = 546.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_vertical = 3
 
 [node name="ServerResultsContainer" type="VBoxContainer" parent="VBoxContainer/Control/ScrollContainer" unique_id=70439588]

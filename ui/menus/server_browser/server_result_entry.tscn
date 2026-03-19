@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bxcaafo6blio2"]
+[gd_scene format=3 uid="uid://bxcaafo6blio2"]
 
 [ext_resource type="Script" uid="uid://cxib41chpk27k" path="res://ui/menus/server_browser/ServerResultEntry.cs" id="1_p5soc"]
 
-[node name="ServerResultEntry" type="Control" node_paths=PackedStringArray("_serverNameLabel", "_mapLabel", "_playerCountLabel", "_pingLabel", "_joinButton")]
+[node name="ServerResultEntry" type="Control" unique_id=1852236463 node_paths=PackedStringArray("_serverNameLabel", "_mapLabel", "_playerCountLabel", "_pingLabel", "_joinButton")]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 3
 anchors_preset = 15
@@ -19,7 +19,7 @@ _playerCountLabel = NodePath("HBoxContainer/PlayerCountLabel")
 _pingLabel = NodePath("HBoxContainer/PingLabel")
 _joinButton = NodePath("HBoxContainer/JoinButton")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1029237107]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -27,26 +27,33 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ServerNameLabel" type="Label" parent="HBoxContainer"]
+[node name="ServerNameLabel" type="Label" parent="HBoxContainer" unique_id=1420460489]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
 text = "[Server Name]"
 
-[node name="MapLabel" type="Label" parent="HBoxContainer"]
+[node name="MapLabel" type="Label" parent="HBoxContainer" unique_id=206113510]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "[Map]"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="PlayerCountLabel" type="Label" parent="HBoxContainer"]
+[node name="PlayerCountLabel" type="Label" parent="HBoxContainer" unique_id=1164189809]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "[1/16]"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="PingLabel" type="Label" parent="HBoxContainer"]
+[node name="PingLabel" type="Label" parent="HBoxContainer" unique_id=657530222]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "256"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="JoinButton" type="Button" parent="HBoxContainer"]
+[node name="JoinButton" type="Button" parent="HBoxContainer" unique_id=810317833]
 layout_mode = 2
 text = "JOIN"

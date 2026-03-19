@@ -38,8 +38,6 @@ public partial class PlayerController : Controller
             return;
         }
 
-        _previousInputMode = InputMode;
-
         InputMode = mode;
 
         switch(InputMode)
@@ -52,6 +50,10 @@ public partial class PlayerController : Controller
             case InputMode.UI:
                 PossessedPawn?.SetInputEnabled(false);
                 Input.MouseMode = Input.MouseModeEnum.Visible;
+                break;
+
+            case InputMode.CONSOLE:
+                _previousInputMode = InputMode;
                 break;
         }
     }

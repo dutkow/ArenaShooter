@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://doianfimes2dl"]
+[gd_scene format=3 uid="uid://doianfimes2dl"]
 
 [ext_resource type="Script" uid="uid://cjctj6dgesxif" path="res://ui/loading/LoadingScreen.cs" id="1_mggpi"]
 
-[node name="LoadingScreen" type="Control" node_paths=PackedStringArray("_loadingProgressBar")]
+[node name="LoadingScreen" type="Control" unique_id=1064225363 node_paths=PackedStringArray("_loadingProgressBar")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,16 +12,16 @@ grow_vertical = 2
 script = ExtResource("1_mggpi")
 _loadingProgressBar = NodePath("LoadingProgressBar")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=749897503]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1.7447397e-07, 0.12774843, 0.22584575, 1)
+color = Color(0, 0.018247442, 0.049925625, 1)
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=1693541442]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -34,9 +34,10 @@ offset_right = 37.5
 offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_font_sizes/font_size = 36
 text = "Loading..."
 
-[node name="LoadingProgressBar" type="ProgressBar" parent="."]
+[node name="LoadingProgressBar" type="ProgressBar" parent="." unique_id=296565763]
 visible = false
 layout_mode = 1
 anchors_preset = 8
