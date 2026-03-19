@@ -244,8 +244,8 @@ public class ClientGame : Singleton<ClientGame>
         switch(notification.Type)
         {
             case ServerNotificationType.DISCONNECTION_SERVER_SHUTDOWN:
-                GD.Print($"RECEIVED SERVER SHUTDOWN NOTICE");
-                SceneNavigator.OpenMainMenu();
+                GameUI.Instance.ShowPopup("SERVER SHUTDOWN", "The server was shut down", "Return to Main Menu", () => SceneNavigator.OpenMainMenu());
+                NetworkClient.Instance.DisconnectFromServer();
                 break;
         }
     }

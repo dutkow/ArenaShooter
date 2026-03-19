@@ -5,14 +5,15 @@
 [ext_resource type="PackedScene" uid="uid://cd8hrwi66gg10" path="res://match_hud.tscn" id="3_3iaur"]
 [ext_resource type="PackedScene" uid="uid://doyibe8885wuq" path="res://ui/hud/scoreboard.tscn" id="4_ldo1m"]
 [ext_resource type="PackedScene" uid="uid://bap81nb1dd65y" path="res://ui/menus/game_menu.tscn" id="5_ldo1m"]
+[ext_resource type="PackedScene" uid="uid://ddwu1laqoasjt" path="res://ui/popup.tscn" id="6_dc76n"]
 
-[node name="GameUI" type="CanvasLayer" unique_id=1830378262 node_paths=PackedStringArray("_playerHud", "_scoreboard", "_matchHud", "_menu", "_settingsMenu")]
+[node name="GameUI" type="CanvasLayer" unique_id=1830378262 node_paths=PackedStringArray("_playerHud", "_scoreboard", "_matchHud", "_menu", "_popup")]
 script = ExtResource("1_i0cwh")
 _playerHud = NodePath("PlayerHud")
 _scoreboard = NodePath("Scoreboard")
 _matchHud = NodePath("MatchHud")
 _menu = NodePath("GameMenu")
-_settingsMenu = NodePath("")
+_popup = NodePath("Popup")
 
 [node name="MatchHud" parent="." unique_id=1132521997 instance=ExtResource("3_3iaur")]
 
@@ -32,4 +33,7 @@ offset_right = 500.0
 offset_bottom = 400.0
 
 [node name="GameMenu" parent="." unique_id=1202452550 instance=ExtResource("5_ldo1m")]
+visible = false
+
+[node name="Popup" parent="." unique_id=1339202838 instance=ExtResource("6_dc76n")]
 visible = false

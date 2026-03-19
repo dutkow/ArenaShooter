@@ -33,6 +33,7 @@ public class ServerNotification : Message
     public static void Send(ENetPacketPeer peer, ServerNotificationType type)
     {
         ServerNotification serverNotification = new();
+        serverNotification.MessageType = Msg.S2C_SERVER_NOTIFICATION;
         serverNotification.Type = type;
         NetworkSender.ToClient(peer, serverNotification);
     }
@@ -40,6 +41,7 @@ public class ServerNotification : Message
     public static void Broadcast(ServerNotificationType type)
     {
         ServerNotification serverNotification = new();
+        serverNotification.MessageType = Msg.S2C_SERVER_NOTIFICATION;
         serverNotification.Type = type;
         NetworkSender.Broadcast(serverNotification);
     }

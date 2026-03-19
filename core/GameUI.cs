@@ -10,6 +10,7 @@ public partial class GameUI : LevelUI
     [Export] MatchHud _matchHud;
     [Export] GameMenu _menu;
     [Export] SettingsMenu _settingsMenu;
+    [Export] Popup _popup;
 
     public override void _EnterTree()
     {
@@ -87,5 +88,11 @@ public partial class GameUI : LevelUI
     public void PopulateInitialPlayerList()
     {
         _scoreboard.PopulateInitialPlayerList();
+    }
+
+    public void ShowPopup(string titleText, string descriptionText, string confirmButtonText, Action onConfirm)
+    {
+        _popup.Push(titleText, descriptionText, confirmButtonText, onConfirm);
+        ClientGame.Instance?.LocalPlayerController?.SetInputMode(InputMode.UI);
     }
 }

@@ -1,6 +1,14 @@
 using Godot;
 using System;
 
+public enum InputMode
+{
+    GAME,
+    UI,
+    CHAT,
+    CONSOLE,
+}
+
 
 public partial class PlayerController : Controller
 {
@@ -8,6 +16,7 @@ public partial class PlayerController : Controller
 
     public InputMode InputMode;
 
+    private InputMode _previousInputMode;
 
 
     public override void _Ready()
@@ -15,9 +24,11 @@ public partial class PlayerController : Controller
         base._Ready();
 
         GD.Print("Player controller created");
+    }
 
-
-
+    public void RestorePreviousInputMode()
+    {
+        SetInputMode(_previousInputMode);
     }
 
     public void SetInputMode(InputMode mode)
@@ -26,6 +37,8 @@ public partial class PlayerController : Controller
         {
             return;
         }
+
+        _previousInputMode = InputMode;
 
         InputMode = mode;
 
@@ -75,7 +88,7 @@ public partial class PlayerController : Controller
             SetInputMode(InputMode.UI);
         }
 
-        /*
+
         if (InputMode == InputMode.GAME)
         {
             if (Input.IsActionJustPressed("chat_all"))
@@ -84,20 +97,29 @@ public partial class PlayerController : Controller
 
                 PossessedPawn?.SetInputEnabled(false);
                 ChatPanel.Open();
+
+                SetInputMode(InputMode.CHAT);
             }
 
             if (Input.IsActionJustPressed("chat_team"))
             {
                 PossessedPawn?.SetInputEnabled(false);
                 ChatPanel.Open();
-            }
 
+                SetInputMode(InputMode.CHAT);
+            }
+        }
+
+        if(InputMode == InputMode.CHAT)
+        {
             if (Input.IsActionJustPressed("send_chat"))
             {
                 PossessedPawn?.SetInputEnabled(true);
                 ChatPanel.SendChat();
+
+                SetInputMode(InputMode.GAME);
             }
-        }*/
+        }
     }
 
     public virtual ClientInputCommand AddInput(ClientInputCommand cmd)
@@ -136,7 +158,7 @@ public partial class PlayerController : Controller
 
     public void Initialize()
     {
-        //_playerHud.Initialize();
+        //_playerHud.Push();
     }
 
 

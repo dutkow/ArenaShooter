@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://ddwu1laqoasjt"]
+
+[ext_resource type="Script" uid="uid://dt83sigoet3bl" path="res://ui/Popup.cs" id="1_vl531"]
+
+[node name="Popup" type="Control" unique_id=1339202838 node_paths=PackedStringArray("_titleLabel", "_descriptionLabel", "_confirmButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_vl531")
+_titleLabel = NodePath("ColorRect2/MarginContainer/VBoxContainer/TitleLabel")
+_descriptionLabel = NodePath("ColorRect2/MarginContainer/VBoxContainer/DescriptionLabel")
+_confirmButton = NodePath("ColorRect2/MarginContainer/VBoxContainer/HBoxContainer/ConfirmButton")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=778530361]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.10980392)
+
+[node name="ColorRect2" type="ColorRect" parent="." unique_id=1046329332]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -150.0
+offset_right = 300.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.16445974, 0.16445976, 0.16445974, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="ColorRect2" unique_id=1046016961]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ColorRect2/MarginContainer" unique_id=782174478]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="ColorRect2/MarginContainer/VBoxContainer" unique_id=536617829]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "PROMPT TITLE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DescriptionLabel" type="Label" parent="ColorRect2/MarginContainer/VBoxContainer" unique_id=2086951606]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 24
+text = "This is an example prompt description."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ColorRect2/MarginContainer/VBoxContainer" unique_id=999105892]
+layout_mode = 2
+alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="ColorRect2/MarginContainer/VBoxContainer/HBoxContainer" unique_id=233130857]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 24
+text = "CONFIRM"
+icon_alignment = 1

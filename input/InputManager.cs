@@ -8,12 +8,6 @@ using System.Text.Json;
 using static InputActions;
 
 
-public enum InputMode
-{
-    GAME,
-    UI,
-    CONSOLE
-}
 
 public enum InputBindingType
 {

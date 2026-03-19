@@ -40,7 +40,7 @@ public partial class ProjectileManager : Node3D
                 //spawnedProjectile.GlobalRotation = direction.Normalized().ToEuler();
             }
 
-            // Initialize using direction
+            // Push using direction
             spawnedProjectile.Initialize(position, direction, projectileID, isPredicted);
             return spawnedProjectile;
         }

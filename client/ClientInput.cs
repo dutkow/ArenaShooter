@@ -22,11 +22,16 @@ public class ClientInput
             {
                 Mode = InputMode.CONSOLE;
 
+                ClientGame.Instance?.LocalPlayerController?.SetInputMode(InputMode.CONSOLE);
+
+
                 ClientGame.Instance?.LocalPlayerController?.PossessedPawn?.SetInputEnabled(false);
             }
             else
             {
                 Mode = InputMode.GAME;
+
+                ClientGame.Instance?.LocalPlayerController?.RestorePreviousInputMode();
 
                 ClientGame.Instance?.LocalPlayerController?.PossessedPawn?.SetInputEnabled(true);
             }
