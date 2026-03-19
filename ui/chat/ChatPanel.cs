@@ -12,6 +12,7 @@ public partial class ChatPanel : Control
 
         ClientGame.Instance.LocalPlayerController.ChatPanel = this;
     }
+
     public void Open()
     {
         CallDeferred(nameof(GrabFocus)); // deferred to ignore input bound to open chat

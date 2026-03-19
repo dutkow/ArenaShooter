@@ -5,11 +5,10 @@ using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
-public class ServerGame()
+public class ServerGame : Singleton<ServerGame>
 {
     const int MAX_PLAYERS = 16;
     private bool _isServerFull => MatchState.Instance.ConnectedPlayers.Count >= MAX_PLAYERS;
-    public static ServerGame Instance { get; private set; }
 
     public bool IsListenServer => NetworkManager.Instance.NetworkMode == NetworkMode.LISTEN_SERVER;
 
@@ -30,19 +29,10 @@ public class ServerGame()
     // Bandwidth tracking
     private int _bytesSentThisPeriod = 0;
 
-
-    public static void Initialize()
+    protected override void OnInitialize()
     {
-        if(Instance != null)
-        {
-            GD.Print($"Server game already exists!");
-        }
-
-        Instance = new ServerGame();
-
         CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Server Game ===");
-
-        Instance.InitMessageHandlers();
+        InitMessageHandlers();
     }
 
     public void PostLoad()

@@ -36,17 +36,11 @@ public class NetworkManager : ITickable
     // Connected player info
     // ----------------------
     public int MaxPlayers { get; private set; } = 8;
-    public Dictionary<byte, PlayerState> PlayerIDsToPlayerStates = new();
-    public Dictionary<int, byte> PeerIDsToPlayerIDs = new();
-    public Dictionary<int, ENetPacketPeer> PeerIDsToPeers = new();
 
     public Dictionary<byte, ENetPacketPeer> PlayerIDsToPeers = new();
     private Queue<byte> _availablePlayerIDs = new();
 
-    public bool IsServerFull => PlayerIDsToPlayerStates.Count >= MaxPlayers;
-
     private NetworkPeer _networkPeer;
-    private MessageRouter _router;
     private LanServerAdvertiser _lanBroadcaster;
 
     public ServerInfo ServerInfo;
@@ -72,7 +66,6 @@ public class NetworkManager : ITickable
 
     public Action<ServerInfo> JoinedServer;
 
-    private float _accumulatedTime;
 
     // ----------------------
     // Initialization
@@ -95,30 +88,11 @@ public class NetworkManager : ITickable
         {
             _availablePlayerIDs.Enqueue(i);
         }
-
-
-        //_networkPeer.OnServerStarted += HandleServerStarted;
-        //_networkHandler.OnPeerConnected += HandlePeerConnected;
-        //_networkPeer.OnPeerDisconnectedEvent += HandlePeerDisconnected;
-        //_networkPeer.OnDisconnectedFromServer += HandleFailedToConnect;
-
-        _router = new MessageRouter();
-
     }
 
     public virtual void Tick(double delta)
     {
         _networkPeer?.Tick(delta);
-
-        _accumulatedTime += (float)delta;
-
-        if(_isShuttingDownServer)
-        {
-            if(_serverShutdownTime >=  _accumulatedTime)
-            {
-                ShutdownServer();
-            }
-        }
     }
 
     public void SetMode(NetworkMode mode)
@@ -171,43 +145,6 @@ public class NetworkManager : ITickable
         _isHosting = true;
     }
 
-    public void StopHosting()
-    {
-        SetMode(NetworkMode.OFFLINE);
-
-        if (!_isHosting)
-        {
-            return;
-        }
-
-        _lanBroadcaster = null;
-        _isHosting = false;
-        OnSessionStopped?.Invoke();
-    }
-
-    private void HandleServerStarted()
-    {
-        OnSessionStarted?.Invoke(ServerInfo);
-
-    }
-
-    private void HandlePeerDisconnected(int _peerID)
-    {
-        if (PeerIDsToPlayerIDs.TryGetValue(_peerID, out byte _playerID))
-        {
-            PeerIDsToPlayerIDs.Remove(_peerID);
-            PlayerIDsToPlayerStates.Remove(_playerID);
-            PeerIDsToPeers.Remove(_peerID);
-            PlayerIDsToPeers.Remove(_playerID);
-            _availablePlayerIDs.Enqueue(_playerID);
-            OnPlayerLeft?.Invoke(_playerID);
-        }
-        else
-        {
-            GD.PushError($"_peerID {_peerID} disconnected but no _playerID was assigned");
-        }
-    }
-
     // ----------------------
     // Joining / Client
     // ----------------------
@@ -226,100 +163,6 @@ public class NetworkManager : ITickable
         NetworkClient.Instance.JoinServer(serverInfo.IP, serverInfo.Port);
     }
 
-    private void HandleFailedToConnect()
-    {
-        GD.Print("Failed to connect to server");
-        OnFailedToConnect?.Invoke();
-    }
-
-    public void HandleDisconnectedFromServer()
-    {
-        OnDisconnectedFromServer?.Invoke();
-    }
-
-    public void HandleConnectedToServer(ENetPacketPeer peer)
-    {
-        if (peer == null || ServerPeer == peer)
-        {
-            return;
-        }
-
-        GD.Print("Connected to server peer set");
-        ServerPeer = peer;
-
-        ConnectionRequest.Send(UserSettings.Instance.PlayerName);
-    }
-
-    // ----------------------
-    // Message Routing
-    // ----------------------
-    public void HandleReceivedMessage(ENetPacketPeer peer, byte[] data)
-    {
-        if (_router == null)
-        {
-            GD.PrintErr("No message router assigned!");
-            return;
-        }
-
-        DeliverMessage(peer, data);
-    }
-
-    private void DeliverMessage(ENetPacketPeer peer, byte[] data)
-    {
-        switch (NetworkMode)
-        {
-            case NetworkMode.LISTEN_SERVER:
-                _router.RouteClientMessage(peer, data);
-                break;
-
-            case NetworkMode.CLIENT:
-                _router.RouteServerMessage(data);
-                break;
-        }
-    }
-
-    public void HandleConnectionToServerAccepted()
-    {
-        OnConnectionToServerAccepted?.Invoke();
-    }
-
-    public void HandleConnectionRequest(ENetPacketPeer peer, string playerName)
-    {
-        int peerID = (int)peer.GetMeta("id");
-
-        if (IsServerFull)
-        {
-            GD.Print($"Connection request from peer {peerID} denied: server full");
-            ConnectionDenied.Send(peer, "Server full");
-            return;
-        }
-
-        byte playerID = _availablePlayerIDs.Dequeue();
-
-        PeerIDsToPlayerIDs[peerID] = playerID;
-        PlayerIDsToPeers[playerID] = peer;
-
-        PeerIDsToPeers[peerID] = peer;
-
-        PlayerIDsToPlayerStates[playerID] = new PlayerState()
-        {
-            PlayerInfo = new PlayerInfo(playerID, playerName)
-        };
-
-        GameMode.Instance.AddPlayerController(playerID);
-
-        GD.Print($"Connection request accepted: peerID={peerID}, playerID={playerID}, name={playerName}");
-        OnPlayerJoined?.Invoke(playerID, playerName);
-
-        ConnectionAccepted.Send(peer, playerID);
-    }
-
-    public void HandlePlayerJoined(byte playerID, string playerName)
-    {
-        OnPlayerJoined?.Invoke(playerID, playerName);
-    }
-
-
     public void BroadcastServerJoined()
     {
         JoinedServer?.Invoke(ServerInfo);
@@ -328,20 +171,16 @@ public class NetworkManager : ITickable
 
     }
 
-    private const float _serverShutdownDelay = 2.0f;
-
-    private float _serverShutdownTime;
-
-    private bool _isShuttingDownServer = false;
-
-    public void QueueServerShutdown()
+    public async void ShutdownServer()
     {
-        _isShuttingDownServer = true;
-        _serverShutdownTime = _accumulatedTime + _serverShutdownDelay;
+        await Task.Delay(NetworkConstants.SERVER_SHUTDOWN_DELAY_MS);
+
+        ShutdownNetworkPeer();
     }
 
-    public void ShutdownServer()
+    public void ShutdownNetworkPeer()
     {
+        _networkPeer.Shutdown();
         _networkPeer = null;
     }
 
@@ -349,5 +188,4 @@ public class NetworkManager : ITickable
     {
         _networkPeer = null;
     }
-
 }

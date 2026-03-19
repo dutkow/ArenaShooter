@@ -3,16 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-public partial class SpawnManager : Node3D
+public class SpawnManager : Singleton<SpawnManager>
 {
-    public static SpawnManager Instance;
-
     public List<SpawnPoint> _playerSpawnPoints = new();
 
-    public static void Initialize()
-    {
-        Instance = new SpawnManager();
-    }
 
     public void RegisterSpawnPoint(SpawnPoint spawnPoint)
     {

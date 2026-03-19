@@ -31,20 +31,14 @@ public class LanServerAdvertiser : ServerAdvertiser
 
     public override void Broadcast()
     {
-        try
+        byte[] data = Encoding.UTF8.GetBytes(_info.ToJson());
+
+        IPAddress IP = IPAddress.Parse(NetworkConstants.GetBroadcastIP());
+        IPEndPoint endPoint = new IPEndPoint(IP, _info.Port);
+
+        if (_udp != null)
         {
-            if (_udp == null) return;
-
-            byte[] data = Encoding.UTF8.GetBytes(_info.ToJson());
-
-            IPAddress IP = IPAddress.Parse(NetworkConstants.GetBroadcastIP());
-            IPEndPoint endPoint = new IPEndPoint(IP, _info.Port);
-
             _udp.Send(data, data.Length, endPoint);
-        }
-        catch (Exception ex)
-        {
-            GD.PrintErr("Broadcast failed: " + ex);
         }
     }
 

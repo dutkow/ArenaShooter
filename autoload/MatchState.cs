@@ -11,9 +11,7 @@ public enum MatchPhase
     POST_MATCH,
 }
 
-
-
-public partial class MatchState : Node
+public class MatchState : ITickable
 {
     public static MatchState Instance { get; private set; }
 
@@ -74,15 +72,6 @@ public partial class MatchState : Node
     public ushort CurrentTick { get; private set; } = 0;
 
 
-
-    public override void _EnterTree()
-    {
-        base._EnterTree();
-
-        Instance = this;
-
-    }
-
     public static void Initialize()
     {
         if(Instance != null)
@@ -95,6 +84,11 @@ public partial class MatchState : Node
 
     }
 
+    public static void Shutdown()
+    {
+        Instance = null;
+    }
+
  
     public void Tick(double delta)
     {
@@ -102,6 +96,21 @@ public partial class MatchState : Node
         ClientGame.Instance?.Tick(delta);
 
         CurrentTick++;
+
+
+        if (!IsPhaseTimed(MatchPhase))
+        {
+            return;
+        }
+
+        _secondAccumulator += delta;
+
+        while (_secondAccumulator >= 1.0)
+        {
+            _secondAccumulator -= 1.0;
+            TickOneSecond();
+        }
+
     }
 
     public void OnReceivedInitialMatchState(InitialMatchState initialMatchState)
@@ -119,22 +128,6 @@ public partial class MatchState : Node
         }
 
         ClientGame.Instance?.LocalPlayerController.Initialize(); // TODO. rethink this execution flow
-    }
-
-    public override void _Process(double delta)
-    {
-        if (!IsPhaseTimed(MatchPhase))
-        {
-            return;
-        }
-
-        _secondAccumulator += delta;
-
-        while (_secondAccumulator >= 1.0)
-        {
-            _secondAccumulator -= 1.0;
-            TickOneSecond();
-        }
     }
 
     private void TickOneSecond()

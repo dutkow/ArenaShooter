@@ -21,6 +21,11 @@ public class PickupManager
         Instance = new PickupManager();
     }
 
+    public static void Shutdown()
+    {
+        Instance = null;
+    }
+
     public void RegisterPickup(Pickup pickup)
     {
         Pickups.Add(pickup);

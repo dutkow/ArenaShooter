@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-public class ClientGame
+public class ClientGame : Singleton<ClientGame>
 {
-    public static ClientGame Instance { get; private set; }
 
     // Player elements
     public PlayerController LocalPlayerController { get; private set; }
@@ -29,16 +28,12 @@ public class ClientGame
     private bool _hasReceivedInitialState;
 
 
-    public static void Initialize()
-    {
-        if(ClientGame.Instance != null)
-        {
-            GD.Print($"Client game already exists");
-        }
 
+
+    protected override void OnInitialize()
+    {
         CommandConsole.Instance.AddConsoleLogEntry($"=== Initializing Client Game ===");
 
-        Instance = new ClientGame();
         Instance.InitMessageHandlers();
     }
 

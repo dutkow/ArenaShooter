@@ -19,17 +19,23 @@ public partial class Level : Node3D
         Initialize();
     }
 
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+
+        SpawnManager.Shutdown();
+        PickupManager.Shutdown();
+        MatchState.Shutdown();
+    }
+
     public void Initialize()
     {
         var gameMode = (GameMode)_gameModeScene.Instantiate();
         AddChild(gameMode);
 
-
-
         SpawnManager.Initialize();
         PickupManager.Initialize();
         MatchState.Initialize();
-
 
         var levelUI = (LevelUI)gameMode.LevelUIScene.Instantiate();
         

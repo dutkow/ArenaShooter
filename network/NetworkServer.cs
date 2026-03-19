@@ -47,8 +47,6 @@ public class NetworkServer : NetworkPeer
         _advertiser = new LanServerAdvertiser();
         _advertiser.StartBroadcast(ServerInfo);
 
-        OnServerStarted?.Invoke();
-
         return error;
     }
 
@@ -103,6 +101,19 @@ public class NetworkServer : NetworkPeer
 
         Connection?.Flush();
 
-        NetworkManager.Instance.QueueServerShutdown();
+        _advertiser.StopBroadcast();
+        _advertiser = null;
+
+        ClientGame.Shutdown();
+        ServerGame.Shutdown();
+
+        NetworkManager.Instance.ShutdownServer();
+    }
+
+    public override void Shutdown()
+    {
+        base.Shutdown();
+
+        Connection.Destroy();
     }
 }

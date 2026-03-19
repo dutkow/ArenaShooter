@@ -8,6 +8,7 @@ public static class NetworkConstants
     // Match settings
     public const int MAX_PLAYERS = 16;
 
+    public const int SERVER_SHUTDOWN_DELAY_MS = 2000;
 
     // Server discovery
 
