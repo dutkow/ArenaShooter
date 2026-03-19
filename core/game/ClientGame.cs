@@ -53,7 +53,6 @@ public class ClientGame
         {
             _hasReceivedInitialState = true;
             ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, UserSettings.Instance.PlayerName));
-            GameUI.Instance.PopulateInitialPlayerList();
         }
 
         LocalPlayerController = new();

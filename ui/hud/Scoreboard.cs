@@ -8,16 +8,15 @@ public partial class Scoreboard : Control
 
     [Export] PackedScene _playerScoreboardEntry;
 
-    public override void _Ready()
+    public override void _EnterTree()
     {
-        base._Ready();
+        base._EnterTree();
 
         MatchState.Instance.PlayerJoined += AddPlayerToList;
 
         ClearPlayerList();
     }
 
- 
 
     public void PopulateInitialPlayerList()
     {
