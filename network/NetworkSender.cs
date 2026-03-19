@@ -56,9 +56,38 @@ public static class NetworkSender
     // -------------------------------------------------
     // Network Emulation Control
     // -------------------------------------------------
-    public static void ToggleNetEmulation(bool enabled)
+    public static void EnableNetEmulation()
     {
-        EmulationEnabled = enabled;
+        EmulationEnabled = true;
+    }
+
+    public static void DisableNetEmulation()
+    {
+        EmulationEnabled = false;
+    }
+    public static void SetNetEmulationRTT(int rtt)
+    {
+        float rttMs = Math.Max(0, rtt);
+
+        ClientToServerBasePingMs = rttMs;
+        ServerToClientBasePingMs = rttMs;
+    }
+
+    public static void SetNetEmulationVariance(int variance)
+    {
+        float varMs = Math.Max(0, variance);
+
+        ClientToServerVarianceMs = varMs;
+        ServerToClientVarianceMs = varMs;
+    }
+
+    public static void SetNetEmulationPacketLoss(int packetLossPercent)
+    {
+        // Clamp 0–100 and convert to 0–1 range
+        float loss = Math.Clamp(packetLossPercent, 0, 100) / 100f;
+
+        ClientToServerPacketLossPercent = loss;
+        ServerToClientPacketLossPercent = loss;
     }
 
     public static void SetNetworkProfile(NetworkProfile profile)

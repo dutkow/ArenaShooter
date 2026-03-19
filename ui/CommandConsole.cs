@@ -20,11 +20,18 @@ public partial class CommandConsole : Control
         Instance = this;
 
         _commands["maxfps"] = HandleMaxFps;
-        _commands["showfps"] = HandleShowFPS;
+        _commands["showfps.on"] = HandleShowFPSOn;
+        _commands["showfps.off"] = HandleShowFPSOff;
         _commands["vsync"] = HandleVSync;
-        _commands["sv_tick"] = HandleServerTickRate;
+        _commands["sv.tick"] = HandleServerTickRate;
         _commands["name"] = HandleChangePlayerName;
         _commands["playerlist"] = PrintPlayerList;
+        _commands["netsim.on"] = HandleNetSimOn;
+        _commands["netsim.off"] = HandleNetSimOff;
+        _commands["netsim.rtt"] = HandleNetSimRTT;
+        _commands["netsim.var"] = HandleNetSimVariance;
+        _commands["netsim.loss"] = HandleNetSimLoss;
+
 
         _lineEdit.TextSubmitted += TryCommand;
 
@@ -120,26 +127,16 @@ public partial class CommandConsole : Control
         }
     }
 
-    private void HandleShowFPS(string[] args)
+    private void HandleShowFPSOn(string[] args)
     {
-        if (args.Length > 1 && int.TryParse(args[1], out int value))
-        {
-            if (value == 0)
-            {
-                UserSettings.Instance.SetShowFPS(false);
-                AddConsoleLogEntry("Show FPS disabled");
+        UserSettings.Instance.SetShowFPS(true);
+        AddConsoleLogEntry("Show FPS enabled");
+    }
 
-            }
-            else if (value == 1)
-            {
-                UserSettings.Instance.SetShowFPS(true);
-                AddConsoleLogEntry("Show FPS enabled");
-            }
-        }
-        else
-        {
-            AddConsoleLogEntry("Unknown vsync value");
-        }
+    private void HandleShowFPSOff(string[] args)
+    {
+        UserSettings.Instance.SetShowFPS(false);
+        AddConsoleLogEntry("Show FPS disabled");
     }
 
     private void HandleServerTickRate(string[] args)
@@ -196,6 +193,57 @@ public partial class CommandConsole : Control
         foreach (var player in MatchState.Instance.ConnectedPlayers.Values.OrderBy(p => p.PlayerInfo.PlayerName, StringComparer.OrdinalIgnoreCase))
         {
             AddConsoleLogEntry($"-{player.PlayerInfo.PlayerName}, Player ID: {player.PlayerInfo.PlayerID}");
+        }
+    }
+
+    private void HandleNetSimOn(string[] args)
+    {
+        NetworkSender.EnableNetEmulation();
+        AddConsoleLogEntry("Network emulation enabled");
+    }
+
+    private void HandleNetSimOff(string[] args)
+    {
+        NetworkSender.DisableNetEmulation();
+        AddConsoleLogEntry("Network emulation disabled");
+    }
+
+    private void HandleNetSimRTT(string[] args)
+    {
+        if (args.Length > 1 && int.TryParse(args[1], out int rtt))
+        {
+            NetworkSender.SetNetEmulationRTT(rtt);
+            AddConsoleLogEntry($"Network RTT set to {rtt} ms");
+        }
+        else
+        {
+            AddConsoleLogEntry("Usage: netsim.rtt <ms>");
+        }
+    }
+
+    private void HandleNetSimVariance(string[] args)
+    {
+        if (args.Length > 1 && int.TryParse(args[1], out int var))
+        {
+            NetworkSender.SetNetEmulationVariance(var);
+            AddConsoleLogEntry($"Network variance set to {var} ms");
+        }
+        else
+        {
+            AddConsoleLogEntry("Usage: netsim.var <ms>");
+        }
+    }
+
+    private void HandleNetSimLoss(string[] args)
+    {
+        if (args.Length > 1 && int.TryParse(args[1], out int loss))
+        {
+            NetworkSender.SetNetEmulationPacketLoss(loss);
+            AddConsoleLogEntry($"Network packet loss set to {loss}%");
+        }
+        else
+        {
+            AddConsoleLogEntry("Usage: netsim.loss <percent>");
         }
     }
 
