@@ -164,8 +164,8 @@ public partial class Character : Pawn, IDamageable
         else
         {
             GlobalPosition = PlayerState.CharacterPublicState.Position;
-            GlobalRotation = new Vector3(0.0f, -PlayerState.CharacterPublicState.Look.X, 0.0f);
-            _thirdPersonWeaponSocket.Rotation = new Vector3(-PlayerState.CharacterPublicState.Look.Y, 0.0f, 0.0f);
+            GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Yaw, 0.0f);
+            _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Pitch, 0.0f, 0.0f);
         }
     }
 
@@ -183,14 +183,14 @@ public partial class Character : Pawn, IDamageable
     public void InterpolateYaw(float interpSpeed)
     {
         Vector3 rot = GlobalRotation;
-        rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Look.X, interpSpeed);
+        rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Yaw, interpSpeed);
         GlobalRotation = rot;
     }
 
     public void InterpolatePitch(float interpSpeed)
     {
         Vector3 camRot = _thirdPersonWeaponMesh.GlobalRotation;
-        camRot.X = Mathf.Lerp(camRot.X, PlayerState.CharacterPublicState.Look.Y, interpSpeed);
+        camRot.X = Mathf.Lerp(camRot.X, PlayerState.CharacterPublicState.Pitch, interpSpeed);
         _thirdPersonWeaponMesh.GlobalRotation = camRot;
     }
 
@@ -231,7 +231,7 @@ public partial class Character : Pawn, IDamageable
         if(!IsAuthority)
         {
             PredictedPublicState = PlayerState.CharacterPublicState.Copy();
-            PredictedPublicState.Look = new Vector2(GlobalRotation.Y, 0.0f);
+            PredictedPublicState.Yaw = GlobalRotation.Y;
             GD.Print($"client copied pub state");
         }
     }
@@ -439,13 +439,10 @@ public partial class Character : Pawn, IDamageable
 
 
         clientPredictionTick.InputCommand.Look = _accumulatedLookDelta;
-        clientPredictionTick.InputCommand.Flags |= InputFlags.LOOK;
 
         if(!IsAuthority)
         {
             PredictedPublicState = MovementComp.Step(PredictedPublicState, clientPredictionTick.InputCommand, (float)TickManager.Instance.ServerTickInterval);
-            PredictedPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
-            PredictedPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
 
 
             clientPredictionTick.CollisionEnteredCollidables = PredictedPublicState.NewlyOverlappedCollidables.ToList();
@@ -560,7 +557,7 @@ public partial class Character : Pawn, IDamageable
     public void Teleport(Vector3 position, float yawRotation)
     {
         PlayerState.CharacterPublicState.Position = position;
-        PlayerState.CharacterPublicState.Look.X = yawRotation;
+        PlayerState.CharacterPublicState.Yaw = yawRotation;
     }
 
 
@@ -627,7 +624,7 @@ public partial class Character : Pawn, IDamageable
 
     public void UpdateRotationState(Vector2 look)
     {
-        PlayerState.CharacterPublicState.Look = new Vector2(look.X, look.Y);
+        //PlayerState.CharacterPublicState.Yaw = new Vector2(look.X, look.Y);
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
     }
 

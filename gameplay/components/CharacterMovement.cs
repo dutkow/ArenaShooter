@@ -429,8 +429,10 @@ public class CharacterMovement
 
         state.WantsToJump = cmd.Flags.HasFlag(InputFlags.JUMP);
 
-        state.Look += cmd.Look;
-        Basis basis = Basis.FromEuler(new Vector3(0, -state.Look.X, 0));
+        state.Yaw += cmd.Look.X;
+        state.Pitch += cmd.Look.Y;
+
+        Basis basis = Basis.FromEuler(new Vector3(0, state.Yaw, 0));
 
         if (move != Vector3.Zero)
         {

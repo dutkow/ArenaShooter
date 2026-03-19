@@ -171,7 +171,7 @@ public class ClientGame
                 // Client doesn't know about this character but it's alive, spawn it
                 else if(playerState.IsSpawned)
                 {
-                    SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Look.X);
+                    SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Yaw);
                 }
             }
         }

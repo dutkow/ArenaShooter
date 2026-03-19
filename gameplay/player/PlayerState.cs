@@ -60,8 +60,8 @@ public class PlayerState()
         msg.Add(Ping);
         msg.Add(IsSpawned);
 
-        CharacterPublicState.Add(msg, forceFull);
-        CharacterPrivateState.Add(msg, forceFull);
+        CharacterPublicState.Add(msg);
+        CharacterPrivateState.Add(msg);
     }
 
     internal void Write(Message msg, byte clientPlayerID)

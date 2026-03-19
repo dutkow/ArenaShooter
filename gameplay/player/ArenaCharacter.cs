@@ -95,7 +95,7 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
 
     public void OnRotationChanged(float globalYaw, float localPitch)
     {
-        PublicState.Look = new Vector2(globalYaw, localPitch);
+        //PublicState.Look = new Vector2(globalYaw, localPitch);
         PublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
     }
 
@@ -148,6 +148,7 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
     {
         CharacterPublicFlags flags = publicState.Flags;
 
+
         if ((flags & CharacterPublicFlags.POSITION_CHANGED) != 0)
         {
             PublicState.Position = publicState.Position;
@@ -155,7 +156,7 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
 
         if ((flags & CharacterPublicFlags.ROTATION_CHANGED) != 0)
         {
-            PublicState.Look = publicState.Look;
+            //PublicState.Look = publicState.Look;
         }
 
         if ((flags & CharacterPublicFlags.VELOCITY_CHANGED) != 0)
