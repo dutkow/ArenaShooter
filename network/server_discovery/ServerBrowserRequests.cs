@@ -44,7 +44,7 @@ public class ServerBrowserRequests
                 PropertyNameCaseInsensitive = true,
                 Converters =
             {
-                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) // handles GameMode enum
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) // handles GameRules enum
             }
             };
 

@@ -29,9 +29,32 @@ public class SpawnManager : Singleton<SpawnManager>
         if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var player))
         {
             player.IsSpawned = true;
-            GD.Print($"setting player is alive to true for player id {playerID}");
 
+            player.CharacterPrivateState.HeldWeaponsFlags = 0;
 
+            player.CharacterPrivateState.HeldWeaponsFlags = WeaponFlags.NONE;
+
+            var startingWeapons = GameRules.Instance.StartingWeapons;
+            foreach(var startingWeapon in startingWeapons)
+            {
+                player.CharacterPrivateState.HeldWeaponsFlags |= (WeaponFlags)(1 << (startingWeapon.WeaponIndex));
+
+                int ammoOverride = startingWeapon.AmmoOverride;
+                if (ammoOverride > -1)
+                {
+                    player.CharacterPrivateState.Ammo[startingWeapon.WeaponIndex] = (byte)ammoOverride;
+                }
+                else
+                {
+                    WeaponData weaponData = GameRules.Instance.Weapons[startingWeapon.WeaponIndex];
+                    if(weaponData == null)
+                    {
+                        GD.PushError($"Weapon data is null for weapon index: {startingWeapon.WeaponIndex}");
+                        return player.Character;
+                    }
+                    player.CharacterPrivateState.Ammo[startingWeapon.WeaponIndex] = (byte)weaponData.DefaultStartingAmmo;
+                }
+            }
         }
         Character spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
@@ -44,6 +67,8 @@ public class SpawnManager : Singleton<SpawnManager>
         player.CharacterPublicState.Position = spawnPoint.GlobalPosition;
         player.CharacterPublicState.Yaw = spawnPoint.GlobalRotation.Y;
 
+       
+
         return spawnedPlayer;
     }
 
@@ -54,7 +79,7 @@ public class SpawnManager : Singleton<SpawnManager>
         {
             GD.Print($"client game is null");
         }
-        var spawnedPlayer = (Character)GameMode.Instance.DefaultPawnScene.Instantiate();
+        var spawnedPlayer = (Character)GameRules.Instance.DefaultPawnScene.Instantiate();
 
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
         {

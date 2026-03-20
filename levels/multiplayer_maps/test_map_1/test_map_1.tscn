@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cxmw8aq3awmhi" path="res://levels/Level.cs" id="1_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c73km35fjx3wx" path="res://gameplay/spawn/spawn_point.tscn" id="2_j23ab"]
-[ext_resource type="PackedScene" uid="uid://cm5541sq1kv43" path="res://core/game_mode.tscn" id="4_h6y0w"]
+[ext_resource type="PackedScene" uid="uid://cm5541sq1kv43" path="res://core/game_rules.tscn" id="4_h6y0w"]
 [ext_resource type="Material" uid="uid://cq4akbweyf2lw" path="res://assets/materials/green_material.tres" id="4_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://c7v5l5n1d2ri" path="res://gameplay/entities/interactables/jump_pad.tscn" id="6_m0y5v"]
 [ext_resource type="PackedScene" uid="uid://ij2ubjvy7ffe" path="res://gameplay/entities/pickups/pickup.tscn" id="7_j45q0"]

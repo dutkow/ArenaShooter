@@ -2,9 +2,10 @@ using Godot;
 using Godot.Collections;
 using System;
 
-public partial class GameMode : Node
+
+public partial class GameRules : Node
 {
-    public static GameMode Instance { get; private set; }
+    public static GameRules Instance { get; private set; }
 
     [Export] public PackedScene DefaultPawnScene;
 
@@ -17,7 +18,7 @@ public partial class GameMode : Node
     [ExportCategory("Weapons")]
     [Export] public Array<WeaponData> Weapons;
 
-    [Export] int StartingWeaponIndex = 0;
+    [Export] public Array<StartingWeaponData> StartingWeapons;
 
 
     public override void _EnterTree()

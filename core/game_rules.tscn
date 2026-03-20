@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://cm5541sq1kv43"]
+
+[ext_resource type="Script" uid="uid://boo408k7s368l" path="res://core/GameRules.cs" id="1_xpam2"]
+[ext_resource type="PackedScene" uid="uid://ckn5b0j16otei" path="res://gameplay/entities/pawns/characters/character.tscn" id="2_4hkjg"]
+[ext_resource type="PackedScene" uid="uid://b3i21qfgu6wnd" path="res://core/game_ui.tscn" id="3_wg43g"]
+[ext_resource type="Resource" uid="uid://bxmusb4c5jyeh" path="res://gameplay/weapons/assault_rifle/assault_rifle.tres" id="4_05836"]
+[ext_resource type="Resource" uid="uid://d1mte0sftmpmx" path="res://gameplay/weapons/ion_ray/ion_ray.tres" id="5_w1qcg"]
+[ext_resource type="Script" uid="uid://de06yjuw4nqr" path="res://gameplay/weapons/StartingWeaponData.cs" id="6_rtkrx"]
+
+[sub_resource type="Resource" id="Resource_4sib6"]
+script = ExtResource("6_rtkrx")
+metadata/_custom_type_script = "uid://de06yjuw4nqr"
+
+[node name="GameRules" type="Node" unique_id=265757635]
+script = ExtResource("1_xpam2")
+DefaultPawnScene = ExtResource("2_4hkjg")
+LevelUIScene = ExtResource("3_wg43g")
+Weapons = Array[Object]([ExtResource("4_05836"), ExtResource("5_w1qcg")])
+StartingWeapons = Array[Object]([SubResource("Resource_4sib6")])

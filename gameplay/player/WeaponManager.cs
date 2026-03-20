@@ -28,12 +28,12 @@ public class WeaponManager
 
     public void EquipWeapon(int weaponIndex)
     {
-        if (weaponIndex >= GameMode.Instance.Weapons.Count)
+        if (weaponIndex >= GameRules.Instance.Weapons.Count)
         {
             return;
         }
 
-        PackedScene weaponScene = GameMode.Instance.Weapons[weaponIndex].FirstPersonScene;
+        PackedScene weaponScene = GameRules.Instance.Weapons[weaponIndex].FirstPersonScene;
         if(weaponScene == null)
         {
             return;

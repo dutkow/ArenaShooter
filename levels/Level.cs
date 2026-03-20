@@ -30,7 +30,7 @@ public partial class Level : Node3D
 
     public void Initialize()
     {
-        var gameMode = (GameMode)_gameModeScene.Instantiate();
+        var gameMode = (GameRules)_gameModeScene.Instantiate();
         AddChild(gameMode);
 
         SpawnManager.Initialize();
