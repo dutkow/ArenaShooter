@@ -4,8 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://dastj3mb6lt4j" path="res://ui/chat/chat_message_entry.tscn" id="2_eeh83"]
 
 [node name="ChatLog" type="ScrollContainer" unique_id=1747456559 node_paths=PackedStringArray("_chatMessagesContainer")]
-offset_right = 481.0
-offset_bottom = 147.0
+offset_right = 908.0
+offset_bottom = 646.0
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 3
 script = ExtResource("1_wdv4d")
 _chatMessageEntryScene = ExtResource("2_eeh83")
 _chatMessagesContainer = NodePath("ChatMessagesContainer")
@@ -14,6 +16,7 @@ _chatMessagesContainer = NodePath("ChatMessagesContainer")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+alignment = 2
 
 [node name="ChatMessageEntry" parent="ChatMessagesContainer" unique_id=134562744 instance=ExtResource("2_eeh83")]
 layout_mode = 2
@@ -31,22 +34,4 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="ChatMessageEntry6" parent="ChatMessagesContainer" unique_id=1278334316 instance=ExtResource("2_eeh83")]
-layout_mode = 2
-
-[node name="ChatMessageEntry7" parent="ChatMessagesContainer" unique_id=1264063747 instance=ExtResource("2_eeh83")]
-layout_mode = 2
-
-[node name="ChatMessageEntry8" parent="ChatMessagesContainer" unique_id=31853058 instance=ExtResource("2_eeh83")]
-layout_mode = 2
-
-[node name="ChatMessageEntry9" parent="ChatMessagesContainer" unique_id=18558376 instance=ExtResource("2_eeh83")]
-layout_mode = 2
-
-[node name="ChatMessageEntry10" parent="ChatMessagesContainer" unique_id=1897828253 instance=ExtResource("2_eeh83")]
-layout_mode = 2
-
-[node name="ChatMessageEntry11" parent="ChatMessagesContainer" unique_id=1835069962 instance=ExtResource("2_eeh83")]
-layout_mode = 2
-
-[node name="ChatMessageEntry12" parent="ChatMessagesContainer" unique_id=1858152727 instance=ExtResource("2_eeh83")]
 layout_mode = 2

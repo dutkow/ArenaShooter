@@ -195,7 +195,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
         snapshot.Yaw = Yaw;
         snapshot.Pitch = AimPitch;
         snapshot.Health = (byte)HealthComponent.Health;
-        snapshot.Shield = (byte)HealthComponent.Shield;
+        snapshot.Armor = (byte)HealthComponent.Armor;
 
         return snapshot;
     }
@@ -256,10 +256,10 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
             HealthComponent.SetHealth(snapshot.Health);
         }
 
-        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.SHIELD))
+        if (snapshot.DirtyFlags.HasFlag(CharacterSnapshotFlags.ARMOR))
         {
-            LastSnapshot.Shield = snapshot.Shield;
-            HealthComponent.SetShield(snapshot.Shield);
+            LastSnapshot.Armor = snapshot.Armor;
+            HealthComponent.SetArmor(snapshot.Armor);
         }
 
 

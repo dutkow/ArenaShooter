@@ -1,11 +1,5 @@
-[gd_scene load_steps=3 format=3 uid="uid://fi4eb24dfgbv"]
+[gd_scene format=3 uid="uid://bqrojpa0e8j2l"]
 
-[ext_resource type="Script" uid="uid://bugew678vtjep" path="res://ui/hud/HealthBar.cs" id="1_ecrmp"]
-[ext_resource type="StyleBox" uid="uid://mlmgylvbgopa" path="res://ui/hud/health_bar_style_box.tres" id="1_pb328"]
+[ext_resource type="PackedScene" uid="uid://fi4eb24dfgbv" path="res://ui/hud/health_stat_bar.tscn" id="1_ecrmp"]
 
-[node name="HealthBar" type="ProgressBar"]
-offset_right = 300.0
-offset_bottom = 27.0
-theme_override_styles/fill = ExtResource("1_pb328")
-value = 50.0
-script = ExtResource("1_ecrmp")
+[node name="HealthBar" unique_id=789625283 instance=ExtResource("1_ecrmp")]

@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://bepgsd667ut4d"]
+
+[ext_resource type="Script" uid="uid://dg3gowxpbl1g1" path="res://ui/hud/WeaponBar.cs" id="1_p0pwr"]
+[ext_resource type="PackedScene" uid="uid://d0sajx2uxbxmn" path="res://ui/hud/weapon_bar_entry.tscn" id="2_igah0"]
+
+[node name="WeaponBar" type="HBoxContainer" unique_id=612560743]
+offset_top = 756.0
+offset_right = 125.0
+offset_bottom = 756.0
+script = ExtResource("1_p0pwr")
+
+[node name="WeaponBarEntry" parent="." unique_id=1879868272 instance=ExtResource("2_igah0")]
+layout_mode = 2
+
+[node name="WeaponBarEntry2" parent="." unique_id=889838701 instance=ExtResource("2_igah0")]
+layout_mode = 2
+
+[node name="WeaponBarEntry3" parent="." unique_id=2107137564 instance=ExtResource("2_igah0")]
+layout_mode = 2
+
+[node name="WeaponBarEntry4" parent="." unique_id=498140421 instance=ExtResource("2_igah0")]
+layout_mode = 2
+
+[node name="WeaponBarEntry5" parent="." unique_id=908882788 instance=ExtResource("2_igah0")]
+layout_mode = 2
+
+[node name="WeaponBarEntry6" parent="." unique_id=1876813002 instance=ExtResource("2_igah0")]
+layout_mode = 2
+
+[node name="WeaponBarEntry7" parent="." unique_id=1022311332 instance=ExtResource("2_igah0")]
+layout_mode = 2
+
+[node name="WeaponBarEntry8" parent="." unique_id=69726533 instance=ExtResource("2_igah0")]
+layout_mode = 2
+
+[node name="WeaponBarEntry9" parent="." unique_id=749637176 instance=ExtResource("2_igah0")]
+layout_mode = 2

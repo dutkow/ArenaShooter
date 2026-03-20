@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://cfqgyrcr7kgfj"]
+
+[ext_resource type="Script" uid="uid://dvgryolfs8lgh" path="res://ui/hud/HealthStatPanel.cs" id="1_7cyr7"]
+[ext_resource type="Texture2D" uid="uid://coje1qlmtltaa" path="res://assets/textures/health-normal.png" id="1_egje6"]
+[ext_resource type="PackedScene" uid="uid://fi4eb24dfgbv" path="res://ui/hud/health_stat_bar.tscn" id="2_gdhk0"]
+[ext_resource type="PackedScene" uid="uid://b2bxupy4es7gu" path="res://ui/hud/health_stat_display.tscn" id="3_aswqm"]
+
+[node name="HealthStatPanel" type="Control" unique_id=1199505523 node_paths=PackedStringArray("_healthStatDisplay", "_healthStatBar")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_right = -1657.0
+offset_bottom = -1010.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7cyr7")
+_healthStatDisplay = NodePath("HBoxContainer/VBoxContainer/HealthStatDisplay")
+_healthStatBar = NodePath("HBoxContainer/VBoxContainer/HealthStatBar")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=2087237551]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer" unique_id=217409616]
+layout_mode = 2
+texture = ExtResource("1_egje6")
+expand_mode = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1433468130]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HealthStatDisplay" parent="HBoxContainer/VBoxContainer" unique_id=609430579 instance=ExtResource("3_aswqm")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HealthStatBar" parent="HBoxContainer/VBoxContainer" unique_id=789625283 instance=ExtResource("2_gdhk0")]
+layout_mode = 2
+size_flags_vertical = 3

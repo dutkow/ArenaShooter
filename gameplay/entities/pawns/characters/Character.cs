@@ -544,7 +544,7 @@ public partial class Character : Pawn, IDamageable
     }
 
 
-    // Health & Armor
+    // Health & ARMOR
     public int GetHealth()
     {
         return PlayerState.CharacterPrivateState.Health;

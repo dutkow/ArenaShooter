@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://b2bxupy4es7gu"]
+
+[ext_resource type="Script" uid="uid://bf60ymfegrk1r" path="res://ui/hud/HealthStatDisplay.cs" id="1_rfvcb"]
+
+[node name="HealthStatDisplay" type="Control" unique_id=609430579 node_paths=PackedStringArray("_healthStatLabel", "_maxHealthStatLabel")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 200.0
+offset_bottom = 109.0
+script = ExtResource("1_rfvcb")
+_healthStatLabel = NodePath("HealthDisplay/HealthStat")
+_maxHealthStatLabel = NodePath("HealthDisplay/MaxHealthStat")
+
+[node name="HealthDisplay" type="HBoxContainer" parent="." unique_id=697423953]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="HealthStat" type="Label" parent="HealthDisplay" unique_id=879377364]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "100"
+vertical_alignment = 2
+
+[node name="MaxHealthStat" type="Label" parent="HealthDisplay" unique_id=1686941271]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "/100"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -41,7 +41,7 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
     private CharacterPublicState PublicState = new CharacterPublicState();
     private CharacterPrivateState PrivateState = new CharacterPrivateState();
 
-    // Health & Armor
+    // Health & ARMOR
     public int GetHealth()
     {
         return PrivateState.Health;

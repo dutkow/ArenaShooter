@@ -4,36 +4,32 @@ using System;
 public class HealthComponent : Component
 {
     /// <summary>
-    /// Base health and shield stats
+    /// Base health and armor stats
     /// </summary>
 
     public int MaxHealth { get; private set; } = 100;
     public int Health { get; private set; } = 100;
 
     public float HealthPercent => (float)Health / MaxHealth;
-    public int MaxShield { get; private set; } = 100;
-    public int Shield { get; private set; } = 100;
+    public int MaxArmor { get; private set; } = 100;
+    public int Armor { get; private set; } = 100;
 
-    public float ShieldPercent => (float)Shield / MaxShield;
+    public float ArmorPercent => (float)Armor / MaxArmor;
 
 
-    private bool _hasShield => MaxShield > 0;
+    private bool _hasArmor => MaxArmor > 0;
 
-    // Whether or not health and shield automatically recharge after a period of time post-taking damage
     private bool _healthRecharges;
-    private bool _shieldRecharges;
+    private bool _armorRecharges;
 
-    // Amount of time which must pass without taking damage before recharge begins
     private float _healthRechargeDelay;
-    private float _shieldRechargeDelay;
+    private float _armorRechargeDelay;
 
-    // When recharging, how much time passes before each regeneration event
     private float _healthRechargeInterval;
-    private float _shieldRechargeInterval;
+    private float _armorRechargeInterval;
 
-    // When recharging, amount which recharges in each generation event
     private int _healthRechargeAmount;
-    private int _shieldRechargeAmount;
+    private int _armorRechargeAmount;
 
 
     /// <summary>
@@ -42,71 +38,71 @@ public class HealthComponent : Component
     public event Action<int> HealthChanged;
     public event Action<int> MaxHealthChanged;
 
-    public event Action<int> ShieldChanged;
-    public event Action<int> MaxShieldChanged;
+    public event Action<int> ArmorChanged;
+    public event Action<int> MaxArmorChanged;
 
     public event Action<float> HealthPercentChanged;
-    public event Action<float> ShieldPercentChanged;
+    public event Action<float> ArmorPercentChanged;
 
     public event Action HealthDamaged;
-    public event Action ShieldDamaged;
+    public event Action ArmorDamaged;
 
     public event Action Death;
-    public event Action ShieldExhausted;
+    public event Action ArmorExhausted;
 
     public event Action HealthPartiallyRestored;
-    public event Action ShieldPartiallyRestored;
+    public event Action ArmorPartiallyRestored;
 
     public event Action HealthFullyRestored;
-    public event Action ShieldFullyRestored;
+    public event Action ArmorFullyRestored;
 
     public event Action HealthRechargeStarted;
-    public event Action ShieldRechargeStarted;
+    public event Action ArmorRechargeStarted;
 
     public event Action HealthRechargeStopped;
-    public event Action ShieldRechargeStopped;
+    public event Action ArmorRechargeStopped;
 
     /// <summary>
     /// State related variables
     /// </summary>
 
     private bool _isHealthFull => Health == MaxHealth;
-    private bool _isShieldFull => Shield == MaxShield;
+    private bool _isArmorFull => Armor == MaxArmor;
 
     public bool IsAlive => Health > 0;
-    private bool _isShieldExhausted => Shield <= 0;
+    private bool _isArmorExhausted => Armor <= 0;
 
-    private bool _isHealthAndShieldFull => _isHealthFull && _isShieldFull;
+    private bool _isHealthAndArmorFull => _isHealthFull && _isArmorFull;
 
     private double _timeSinceLastDamaged;
 
 
     private bool _isHealthRecharging;
-    private bool _isShieldRecharging;
+    private bool _isArmorRecharging;
 
     private double _healthRechargeAccumulator;
-    private double _shieldRechargeAccumulator;
+    private double _armorRechargeAccumulator;
 
     public void Tick(double delta)
     {
         _timeSinceLastDamaged += delta;
 
-        if (_shieldRecharges && !_isShieldFull)
+        if (_armorRecharges && !_isArmorFull)
         {
-            if (!_isShieldRecharging && _timeSinceLastDamaged >= _shieldRechargeDelay)
+            if (!_isArmorRecharging && _timeSinceLastDamaged >= _armorRechargeDelay)
             {
-                StartShieldRecharge();
+                StartArmorRecharge();
             }
         }
 
-        if (_isShieldRecharging)
+        if (_isArmorRecharging)
         {
-            _shieldRechargeAccumulator += delta;
+            _armorRechargeAccumulator += delta;
 
-            if (_shieldRechargeAccumulator >= _shieldRechargeInterval)
+            if (_armorRechargeAccumulator >= _armorRechargeInterval)
             {
-                _shieldRechargeAccumulator -= _shieldRechargeInterval;
-                ShieldRechargeEvent();
+                _armorRechargeAccumulator -= _armorRechargeInterval;
+                ArmorRechargeEvent();
             }
         }
 
@@ -140,14 +136,14 @@ public class HealthComponent : Component
         SetHealth(Health - amount);
     }
 
-    public void ApplyShieldDamage(int amount)
+    public void ApplyArmorDamage(int amount)
     {
-        if (amount <= 0 || _isShieldExhausted)
+        if (amount <= 0 || _isArmorExhausted)
         {
             return;
         }
 
-        SetShield(Shield - amount);
+        SetArmor(Armor - amount);
     }
 
     public void ReceiveHealth(int amount)
@@ -160,12 +156,12 @@ public class HealthComponent : Component
         SetHealth(Health + amount);
     }
 
-    public void ReceiveShield(int amount)
+    public void ReceiveArmor(int amount)
     {
-        if (amount <= 0 || _isShieldFull)
+        if (amount <= 0 || _isArmorFull)
             return;
 
-        SetShield(Shield + amount);
+        SetArmor(Armor + amount);
     }
 
     public void ApplyDamage(int amount)
@@ -182,17 +178,17 @@ public class HealthComponent : Component
             StopHealthRecharge();
         }
 
-        if (_isShieldRecharging)
+        if (_isArmorRecharging)
         {
-            StopShieldRecharge();
+            StopArmorRecharge();
         }
 
-        if (_hasShield && Shield > 0)
+        if (_hasArmor && Armor > 0)
         {
-            int shieldDamage = Math.Min(Shield, amount);
-            ApplyShieldDamage(shieldDamage);
+            int armorDamage = Math.Min(Armor, amount);
+            ApplyArmorDamage(armorDamage);
 
-            int remainingDamage = amount - shieldDamage;
+            int remainingDamage = amount - armorDamage;
             if (remainingDamage > 0)
             {
                 ApplyHealthDamage(remainingDamage);
@@ -211,7 +207,7 @@ public class HealthComponent : Component
             }
             else if (playerEntity.IsPlayerControlled())
             {
-                //HealthUpdate.Send(playerEntity.GetPlayerID(), Health, Shield);
+                //HealthUpdate.Send(playerEntity.GetPlayerID(), Health, ARMOR);
             }
         }
     }
@@ -222,10 +218,10 @@ public class HealthComponent : Component
         HealthRechargeStarted?.Invoke();
     }
 
-    public void StartShieldRecharge()
+    public void StartArmorRecharge()
     {
-        _isShieldRecharging = true;
-        ShieldRechargeStarted?.Invoke();
+        _isArmorRecharging = true;
+        ArmorRechargeStarted?.Invoke();
     }
 
     public void StopHealthRecharge()
@@ -234,10 +230,10 @@ public class HealthComponent : Component
         HealthRechargeStopped?.Invoke();
     }
 
-    public void StopShieldRecharge()
+    public void StopArmorRecharge()
     {
-        _isShieldRecharging = false;
-        ShieldRechargeStopped?.Invoke();
+        _isArmorRecharging = false;
+        ArmorRechargeStopped?.Invoke();
     }
 
     public void HealthRechargeEvent()
@@ -250,13 +246,13 @@ public class HealthComponent : Component
         }
     }
 
-    public void ShieldRechargeEvent()
+    public void ArmorRechargeEvent()
     {
-        ReceiveShield(_shieldRechargeAmount);
+        ReceiveArmor(_armorRechargeAmount);
 
-        if (_isShieldFull)
+        if (_isArmorFull)
         {
-            StopShieldRecharge();
+            StopArmorRecharge();
         }
     }
 
@@ -301,41 +297,41 @@ public class HealthComponent : Component
         }
     }
 
-    public void SetShield(int shield)
+    public void SetArmor(int armor)
     {
-        shield = Math.Clamp(shield, 0, MaxShield);
+        armor = Math.Clamp(armor, 0, MaxArmor);
 
-        if (Shield == shield)
+        if (Armor == armor)
         {
             return;
         }
 
-        bool decreased = shield < Shield;
-        bool increased = shield > Shield;
+        bool decreased = armor < Armor;
+        bool increased = armor > Armor;
 
-        Shield = shield;
+        Armor = armor;
 
-        ShieldChanged?.Invoke(Shield);
-        ShieldPercentChanged?.Invoke(ShieldPercent);
+        ArmorChanged?.Invoke(Armor);
+        ArmorPercentChanged?.Invoke(ArmorPercent);
 
         if (decreased)
         {
-            ShieldDamaged?.Invoke();
+            ArmorDamaged?.Invoke();
 
-            if (_isShieldExhausted)
+            if (_isArmorExhausted)
             {
-                ShieldExhausted?.Invoke();
+                ArmorExhausted?.Invoke();
             }
         }
         else if (increased)
         {
-            if (_isShieldFull)
+            if (_isArmorFull)
             {
-                ShieldFullyRestored?.Invoke();
+                ArmorFullyRestored?.Invoke();
             }
             else
             {
-                ShieldPartiallyRestored?.Invoke();
+                ArmorPartiallyRestored?.Invoke();
             }
         }
     }

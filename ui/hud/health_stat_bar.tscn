@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://fi4eb24dfgbv"]
+
+[ext_resource type="StyleBox" uid="uid://mlmgylvbgopa" path="res://ui/hud/health_bar_style_box.tres" id="1_xyjyp"]
+[ext_resource type="Script" uid="uid://bugew678vtjep" path="res://ui/hud/HealthStatBar.cs" id="2_2dp78"]
+
+[node name="HealthArmorBar" type="ProgressBar" unique_id=789625283]
+offset_right = 300.0
+offset_bottom = 27.0
+theme_override_styles/fill = ExtResource("1_xyjyp")
+value = 50.0
+show_percentage = false
+script = ExtResource("2_2dp78")

@@ -20,7 +20,7 @@ public enum CharacterSnapshotFlags : ushort
     FIRE_SECONDARY = 1 << 6,
 
     HEALTH = 1 << 7,
-    SHIELD = 1 << 8,
+    ARMOR = 1 << 8,
 }
 
 public struct CharacterSnapshot
@@ -34,7 +34,7 @@ public struct CharacterSnapshot
     public float Pitch;
     public CharacterMoveMode MoveMode;
     public byte Health;
-    public byte Shield;
+    public byte Armor;
 
 
     public CharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
@@ -49,7 +49,7 @@ public struct CharacterSnapshot
         Pitch = pitch;
         MoveMode = moveMode;
         Health = health;
-        Shield = shield;
+        Armor = shield;
         DirtyFlags = dirtyFlags;
     }
 
@@ -62,7 +62,7 @@ public struct CharacterSnapshot
                    CharacterSnapshotFlags.PITCH |
                    CharacterSnapshotFlags.MOVE_MODE |
                    CharacterSnapshotFlags.HEALTH |
-                   CharacterSnapshotFlags.SHIELD;
+                   CharacterSnapshotFlags.ARMOR;
 
         CharacterSnapshotFlags flags = CharacterSnapshotFlags.NONE;
 
@@ -86,8 +86,8 @@ public struct CharacterSnapshot
         if (current.Health != previous.Value.Health)
             flags |= CharacterSnapshotFlags.HEALTH;
 
-        if (current.Shield != previous.Value.Shield)
-            flags |= CharacterSnapshotFlags.SHIELD;
+        if (current.Armor != previous.Value.Armor)
+            flags |= CharacterSnapshotFlags.ARMOR;
 
         return flags;
     }

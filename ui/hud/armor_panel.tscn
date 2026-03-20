@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cw3cx6ibg5rca"]
+
+[ext_resource type="PackedScene" uid="uid://cfqgyrcr7kgfj" path="res://ui/hud/health_stat_panel.tscn" id="1_k420n"]
+[ext_resource type="Texture2D" uid="uid://bscdw3rmvw3rw" path="res://assets/textures/layered-armor.png" id="2_rdrlm"]
+[ext_resource type="StyleBox" uid="uid://dj3pisflvepyw" path="res://ui/hud/armor_bar_style_box.tres" id="3_5vgwj"]
+
+[node name="ArmorPanel" unique_id=1199505523 instance=ExtResource("1_k420n")]
+_healthStatType = 1
+
+[node name="TextureRect" parent="HBoxContainer" parent_id_path=PackedInt32Array(2087237551) index="0" unique_id=217409616]
+modulate = Color(0, 0.7137255, 0.76862746, 1)
+texture = ExtResource("2_rdrlm")
+
+[node name="HealthStatBar" parent="HBoxContainer/VBoxContainer" parent_id_path=PackedInt32Array(1433468130) index="1" unique_id=789625283]
+theme_override_styles/fill = ExtResource("3_5vgwj")
