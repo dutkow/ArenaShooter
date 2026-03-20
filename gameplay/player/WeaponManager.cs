@@ -33,7 +33,7 @@ public class WeaponManager
             return;
         }
 
-        PackedScene weaponScene = GameMode.Instance.Weapons[weaponIndex];
+        PackedScene weaponScene = GameMode.Instance.Weapons[weaponIndex].FirstPersonScene;
         if(weaponScene == null)
         {
             return;

@@ -15,7 +15,7 @@ public partial class GameMode : Node
 
     // Weapons
     [ExportCategory("Weapons")]
-    [Export] public Array<PackedScene> Weapons;
+    [Export] public Array<WeaponData> Weapons;
 
     [Export] int StartingWeaponIndex = 0;
 

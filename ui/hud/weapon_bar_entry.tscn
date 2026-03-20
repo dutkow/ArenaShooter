@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://d0sajx2uxbxmn"]
 
 [ext_resource type="Texture2D" uid="uid://d016r7wljyge3" path="res://assets/textures/water-gun.png" id="1_i8hqh"]
+[ext_resource type="Script" uid="uid://d3uq4ta3bhrrm" path="res://ui/hud/WeaponBarEntry.cs" id="1_rtnrf"]
 
 [node name="WeaponBarEntry" type="Control" unique_id=1879868272]
 custom_minimum_size = Vector2(125, 80)
@@ -12,6 +13,7 @@ offset_right = -1841.0
 offset_bottom = -1035.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_rtnrf")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=315170576]
 layout_mode = 1
