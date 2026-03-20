@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 public partial class ChatLog : ScrollContainer
 {
@@ -28,10 +29,17 @@ public partial class ChatLog : ScrollContainer
             RemoveOldestMessage();
         }
 
-        if(_isScrolledToBottom)
+        // This feels hacky and might not be consistent but if we delay one frame the added child isn't fully initialized, so calling deferred twice to defer two frames, which appears to fix the
+        // automatic downward scrolling
+        if (_isScrolledToBottom)
         {
-            ScrollToBottom();
+            CallDeferred(nameof(DeferredScroll));
         }
+    }
+
+    public void DeferredScroll()
+    {
+        CallDeferred(nameof(ScrollToBottom));
     }
 
     public void RemoveOldestMessage()

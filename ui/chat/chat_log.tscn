@@ -35,3 +35,6 @@ layout_mode = 2
 
 [node name="ChatMessageEntry6" parent="ChatMessagesContainer" unique_id=1278334316 instance=ExtResource("2_eeh83")]
 layout_mode = 2
+
+[node name="ChatMessageEntry7" parent="ChatMessagesContainer" unique_id=1726380038 instance=ExtResource("2_eeh83")]
+layout_mode = 2
