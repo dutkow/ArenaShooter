@@ -229,7 +229,7 @@ public class ClientGame : Singleton<ClientGame>
     {
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerNameChange.PlayerID, out var playerState))
         {
-            playerState.SetPlayerName(playerNameChange.Name);
+            playerState.SetName(playerNameChange.Name);
         }
     }
 

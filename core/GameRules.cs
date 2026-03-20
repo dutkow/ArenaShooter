@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Collections;
 using System;
+using System.Collections.Generic;
 
 
 public partial class GameRules : Node
@@ -26,11 +27,31 @@ public partial class GameRules : Node
     [Export] public int StartingArmor = 0;
     [Export] public int MaxArmor = 100;
 
+    public int StartingWeaponIndex;
+
+
+    public HashSet<int> StartingWeaponIndices = new();
+
     public override void _EnterTree()
     {
         base._EnterTree();
 
         Instance = this;
+
+
+        int largestIndex = 0;
+        foreach (var startingWeaponData in StartingWeapons)
+        {
+            StartingWeaponIndices.Add(startingWeaponData.WeaponIndex);
+
+            if (startingWeaponData.WeaponIndex > largestIndex)
+            {
+                largestIndex = startingWeaponData.WeaponIndex;
+            }
+        }
+
+        StartingWeaponIndex = largestIndex;
+
     }
 
     public void Initialize()

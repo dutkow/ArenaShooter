@@ -301,7 +301,7 @@ public class ServerGame : Singleton<ServerGame>
     {
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
         {
-            playerState.SetPlayerName(name);
+            playerState.SetName(name);
         }
 
         PlayerNameChanged.Send(playerID, name);

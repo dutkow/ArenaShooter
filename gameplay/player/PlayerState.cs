@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Linq;
+using System.Xml.Linq;
 
 
 public struct PlayerStats
@@ -8,29 +10,56 @@ public struct PlayerStats
     public ushort Deaths;
 }
 
+public struct CharacterMoveState
+{
+    public Vector3 Position;
+    public float Yaw;
+    public float Pitch;
+    public Vector3 Velocity;
+}
+
 public class PlayerState()
 {
-    public PlayerInfo PlayerInfo;
+    // FLATTENED CLASS
 
-    public CharacterPublicState CharacterPublicState = new();
-    public CharacterPrivateState CharacterPrivateState = new();
+    // Player info. Replicated to all on init and change, not included in world state
+    public string Name;
+    public byte ID;
 
-    public PlayerStateFlags Flags;
-
-    public PlayerStats Stats;
-
+    // Player stats. Replicated to all via world snapshots
+    public short Kills; // signed in case we want to subtract kills for death and allow negative kills
+    public ushort Deaths;
     public ushort Ping;
-    public bool IsSpawned; // Used so clients know who they need to spawn
 
-    public Action<string> PlayerNameChanged;
-    public Action PlayerLeft;
+    // Character state
 
-    public Action<int> GainedWeapon;
-    public Action<int, int> WeaponAmmoChanged;
+    // Character state variables replicated to all
+    public bool IsSpawned;
+    public CharacterMoveState MoveState;
+    public byte EquippedWeaponIndex;
 
-    public Action<int> EquippedWeaponChanged;
+    // Character state variables replicated only to owner (and maybe eventually spectators)
+    public byte Health;
+    public byte MaxHealth;
+    public byte Armor;
+    public byte MaxArmor;
 
-    public Character Character; // instance, not replicated
+    public WeaponFlags HeldWeaponsFlags;
+    public WeaponFlags AmmoChangedFlags;
+    public byte[] Ammo;
+    public byte[] MaxAmmo;
+
+
+    //END OF FLATTENED
+
+    // EVENTS
+    public Action<string> NameChanged;
+
+    public Action<int> KillsChanged;
+    public Action<int> DeathsChanged;
+    public Action<int> PingChanged;
+
+    public Action<bool> IsSpawnedChanged;
 
     public Action<int> HealthChanged;
     public Action<int> MaxHealthChanged;
@@ -38,47 +67,181 @@ public class PlayerState()
     public Action<int> ArmorChanged;
     public Action<int> MaxArmorChanged;
 
+    public Action<int> GainedWeapon;
 
-    public Action<int> PingChanged;
+    public Action<int, int> AmmoChanged;
 
-    public void SetPlayerName(string playerName)
+
+    // METHODS
+    public void SetID(byte id)
     {
-        if(PlayerInfo.PlayerName != playerName)
+        ID = id;
+    }
+
+    public void SetName(string name)
+    {
+        if (Name != name)
         {
-            PlayerInfo.PlayerName = playerName;
-            PlayerNameChanged?.Invoke(playerName);
+            Name = name;
+            PlayerNameChanged?.Invoke(name);
         }
+    }
+
+    public void AddKill()
+    {
+        Kills++;
+
+        KillsChanged?.Invoke(Kills);
+    }
+
+    public void SubtractKill() // i.e., penalty for suicide or team kill
+    {
+        Kills--;
+
+        KillsChanged?.Invoke(Kills);
+    }
+
+    public void AddDeath()
+    {
+        Deaths++;
+
+        DeathsChanged?.Invoke(Deaths);
+    }
+
+    public void SetPing(ushort ping)
+    {
+        if (Ping != ping)
+        {
+            Ping = ping;
+            PingChanged?.Invoke(ping);
+        }
+    }
+
+    public void SetIsSpawned(bool isSpawned)
+    {
+        if (IsSpawned != isSpawned)
+        {
+            IsSpawned = isSpawned;
+            IsSpawnedChanged?.Invoke(IsSpawned);
+        }
+    }
+
+    public void AddWeapon(int weaponIndex)
+    {
+        if ((HeldWeaponsFlags & (WeaponFlags)(1 << weaponIndex)) == 0)
+        {
+            HeldWeaponsFlags |= (WeaponFlags)(1 << weaponIndex);
+            GainedWeapon?.Invoke(weaponIndex);
+        }
+    }
+
+    public void AddAmmo(int weaponIndex, int amount)
+    {
+        if (Ammo.Length > weaponIndex)
+        {
+            SetAmmo(weaponIndex, Ammo[weaponIndex] + amount);
+        }
+    }
+
+    public void SubtractAmmo(int weaponIndex, int amount)
+    {
+        if (Ammo.Length > weaponIndex)
+        {
+            SetAmmo(weaponIndex, Ammo[weaponIndex] - amount);
+        }
+    }
+
+    public void SetAmmo(int weaponIndex, int amount)
+    {
+        if (amount != 0)
+        {
+            Ammo[weaponIndex] = (byte)amount;
+            AmmoChanged?.Invoke(weaponIndex, amount);
+        }
+    }
+
+    public void SetEquippedWeapon(int weaponIndex)
+    {
+        if(EquippedWeaponIndex != weaponIndex)
+        {
+            EquippedWeaponIndex = (byte)weaponIndex;
+            EquippedWeaponChanged?.Invoke(weaponIndex);
+        }
+    }
+
+    public void AddHealth(int amount)
+    {
+        SetHealth(Health + amount);
+    }
+
+    public void SubtractHealth(int amount)
+    {
+        SetHealth(Health - amount);
     }
 
     public void SetHealth(int value)
     {
-        if(CharacterPrivateState.Health != value)
+        value = Math.Clamp(value, 0, MaxHealth);
+
+        if (Health != value)
         {
-            CharacterPrivateState.Health = (byte)value;
+            Health = (byte)value;
+
             HealthChanged?.Invoke(value);
+
+            if (Health == 0)
+            {
+                HandleDeath();
+            }
         }
     }
 
     public void SetMaxHealth(int value)
     {
-        if (CharacterPrivateState.MaxHealth != value)
+        value = Math.Max(0, value);
+
+        if (MaxHealth != value)
         {
-            CharacterPrivateState.MaxHealth = (byte)value;
+            MaxHealth = (byte)value;
             MaxHealthChanged?.Invoke(value);
         }
     }
 
+    public void AddArmor(int amount)
+    {
+        SetArmor(Armor + amount);
+    }
+
+    public void SubtractArmor(int amount)
+    {
+        SetArmor(Armor - amount);
+    }
+
     public void SetArmor(int value)
     {
-        if (CharacterPrivateState.Armor != value)
+        value = Math.Clamp(value, 0, MaxArmor);
+
+        if (Armor != value)
         {
-            CharacterPrivateState.Armor = (byte)value;
+            Armor = (byte)value;
             ArmorChanged?.Invoke(value);
         }
     }
 
+    public void AddMaxArmor(int amount)
+    {
+        SetMaxArmor(MaxArmor + amount);
+    }
+
+    public void SubtractMaxArmor(int amount)
+    {
+        SetMaxArmor(MaxArmor - amount);
+    }
+
     public void SetMaxArmor(int value)
     {
+        value = Math.Max(0, value);
+
         if (CharacterPrivateState.MaxArmor != value)
         {
             CharacterPrivateState.MaxArmor = (byte)value;
@@ -95,11 +258,56 @@ public class PlayerState()
         }
     }
 
-    public void SetEquippedWeapon(byte weaponIndex)
+
+    public void HandleSpawn()
     {
-        CharacterPublicState.EquippedWeaponIndex = weaponIndex;
-        EquippedWeaponChanged?.Invoke(weaponIndex);
+        SetIsSpawned(true);
+
+        SetMaxHealth(GameRules.Instance.MaxHealth);
+        SetHealth(GameRules.Instance.StartingHealth);
+
+        SetMaxArmor(GameRules.Instance.MaxArmor);
+        SetArmor(GameRules.Instance.MaxArmor);
+
+        foreach(var weaponIndex in GameRules.Instance.StartingWeaponIndices)
+        {
+            AddWeapon(weaponIndex);
+        }
+
+        SetEquippedWeapon(GameRules.Instance.StartingWeaponIndex);
     }
+
+    public void HandleDeath()
+    {
+        AddDeath();
+        SetIsSpawned(false);
+    }
+
+
+
+    public PlayerInfo PlayerInfo;
+
+    public CharacterPublicState CharacterPublicState = new();
+    public CharacterPrivateState CharacterPrivateState = new();
+
+    public PlayerStateFlags Flags;
+
+    public PlayerStats Stats;
+
+ 
+
+    public Action<string> PlayerNameChanged;
+    public Action PlayerLeft;
+
+    public Action<int, int> WeaponAmmoChanged;
+
+    public Action<int> EquippedWeaponChanged;
+
+    public Character Character; // instance, not replicated
+
+
+
+
 
     public void ClearFlags()
     {
