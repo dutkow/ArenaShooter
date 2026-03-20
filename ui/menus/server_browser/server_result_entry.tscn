@@ -31,11 +31,13 @@ grow_vertical = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
+theme_override_font_sizes/font_size = 24
 text = "[Server Name]"
 
 [node name="MapLabel" type="Label" parent="HBoxContainer" unique_id=206113510]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "[Map]"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -43,6 +45,7 @@ vertical_alignment = 1
 [node name="PlayerCountLabel" type="Label" parent="HBoxContainer" unique_id=1164189809]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "[1/16]"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -50,10 +53,12 @@ vertical_alignment = 1
 [node name="PingLabel" type="Label" parent="HBoxContainer" unique_id=657530222]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "256"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="JoinButton" type="Button" parent="HBoxContainer" unique_id=810317833]
 layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "JOIN"

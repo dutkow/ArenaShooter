@@ -25,6 +25,9 @@ public class PlayerState()
     public Action<string> PlayerNameChanged;
     public Action PlayerLeft;
 
+    public Action<int> GainedWeapon;
+    public Action<int, int> WeaponAmmoChanged;
+
 
     public Character Character; // instance, not replicated
 
