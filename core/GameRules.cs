@@ -2,6 +2,7 @@ using Godot;
 using Godot.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 
 public partial class GameRules : Node
@@ -29,6 +30,8 @@ public partial class GameRules : Node
 
     public int StartingWeaponIndex;
 
+    public int[] MaxAmmoAmounts;
+
 
     public HashSet<int> StartingWeaponIndices = new();
 
@@ -38,6 +41,12 @@ public partial class GameRules : Node
 
         Instance = this;
 
+        MaxAmmoAmounts = new int[Weapons.Count];
+        
+        for(int i = 0; i < MaxAmmoAmounts.Length; ++i)
+        {
+            MaxAmmoAmounts[i] = Weapons[i].MaxAmmo;
+        }
 
         int largestIndex = 0;
         foreach (var startingWeaponData in StartingWeapons)

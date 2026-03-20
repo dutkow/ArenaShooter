@@ -18,9 +18,12 @@ public struct CharacterMoveState
     public Vector3 Velocity;
 }
 
+/// <summary>
+/// Contains replicated player data
+/// </summary>
 public class PlayerState()
 {
-    // FLATTENED CLASS
+    // PERSISTENT PLAYER DATA
 
     // Player info. Replicated to all on init and change, not included in world state
     public string Name;
@@ -31,7 +34,8 @@ public class PlayerState()
     public ushort Deaths;
     public ushort Ping;
 
-    // Character state
+    // CHARACTER STATE
+    public Character Character; // Character instance. Not replicated, just assigned.
 
     // Character state variables replicated to all
     public bool IsSpawned;
@@ -47,10 +51,8 @@ public class PlayerState()
     public WeaponFlags HeldWeaponsFlags;
     public WeaponFlags AmmoChangedFlags;
     public byte[] Ammo;
-    public byte[] MaxAmmo;
 
-
-    //END OF FLATTENED
+    public byte[] MaxAmmo; // Not replicated anywhere, purely initialized from Game Rules once as this is not a dynamic variable so clients can safely initialize
 
     // EVENTS
     public Action<string> NameChanged;
@@ -68,11 +70,28 @@ public class PlayerState()
     public Action<int> MaxArmorChanged;
 
     public Action<int> GainedWeapon;
+    public Action<int> LostWeapon;
 
     public Action<int, int> AmmoChanged;
+    public Action<int, int> MaxAmmoChanged;
 
 
     // METHODS
+    public void Initialize(byte id)
+    {
+        SetID(id);
+
+        int numWeapons = GameRules.Instance.Weapons.Count;
+
+        Ammo = new byte[numWeapons];
+        MaxAmmo = new byte[numWeapons];
+
+        for(int i = 0; i < numWeapons; ++i)
+        {
+            SetMaxAmmo(i, GameRules.Instance.MaxAmmoAmounts[i]);
+        }
+    }
+
     public void SetID(byte id)
     {
         ID = id;
@@ -153,10 +172,19 @@ public class PlayerState()
 
     public void SetAmmo(int weaponIndex, int amount)
     {
-        if (amount != 0)
+        if (amount >= 0)
         {
             Ammo[weaponIndex] = (byte)amount;
             AmmoChanged?.Invoke(weaponIndex, amount);
+        }
+    }
+
+    public void SetMaxAmmo(int weaponIndex, int amount)
+    {
+        if(amount >= 0 && MaxAmmo.Length > weaponIndex)
+        {
+            MaxAmmo[weaponIndex] = (byte)amount;
+            MaxAmmoChanged?.Invoke(weaponIndex, amount);
         }
     }
 
@@ -258,9 +286,10 @@ public class PlayerState()
         }
     }
 
-
-    public void HandleSpawn()
+    public void HandleSpawn(Character character)
     {
+        Character = character;
+
         SetIsSpawned(true);
 
         SetMaxHealth(GameRules.Instance.MaxHealth);
@@ -269,9 +298,26 @@ public class PlayerState()
         SetMaxArmor(GameRules.Instance.MaxArmor);
         SetArmor(GameRules.Instance.MaxArmor);
 
-        foreach(var weaponIndex in GameRules.Instance.StartingWeaponIndices)
+        // Initialize starting weapons from game rules
+        foreach(var startingWeaponData in GameRules.Instance.StartingWeapons)
         {
-            AddWeapon(weaponIndex);
+            AddWeapon(startingWeaponData.WeaponIndex);
+
+            if (startingWeaponData.AmmoOverride >= 0)
+            {
+                SetAmmo(startingWeaponData.WeaponIndex, startingWeaponData.AmmoOverride);
+            }
+            else
+            {
+                if(GameRules.Instance.Weapons.Count > startingWeaponData.WeaponIndex)
+                {
+                    var weaponData = GameRules.Instance.Weapons[startingWeaponData.WeaponIndex];
+                    if (weaponData != null)
+                    {
+                        SetAmmo(startingWeaponData.WeaponIndex, weaponData.DefaultStartingAmmo);
+                    }
+                }
+            }
         }
 
         SetEquippedWeapon(GameRules.Instance.StartingWeaponIndex);
@@ -282,7 +328,6 @@ public class PlayerState()
         AddDeath();
         SetIsSpawned(false);
     }
-
 
 
     public PlayerInfo PlayerInfo;
@@ -302,8 +347,6 @@ public class PlayerState()
     public Action<int, int> WeaponAmmoChanged;
 
     public Action<int> EquippedWeaponChanged;
-
-    public Character Character; // instance, not replicated
 
 
 
