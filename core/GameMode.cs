@@ -13,6 +13,13 @@ public partial class GameMode : Node
 
     public System.Collections.Generic.Dictionary<byte, PlayerController> PlayerControllers = new();
 
+    // Weapons
+    [ExportCategory("Weapons")]
+    [Export] Array<PackedScene> Weapons;
+
+    [Export] int StartingWeaponIndex = 0;
+
+
     public override void _EnterTree()
     {
         base._EnterTree();

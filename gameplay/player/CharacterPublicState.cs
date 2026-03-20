@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class CharacterPublicState
 {
+    // Replicated variables
     public CharacterPublicFlags Flags;
 
     public Vector3 Position;
@@ -13,7 +14,7 @@ public class CharacterPublicState
     public CharacterMoveMode MovementMode;
     public WeaponType EquippedWeapon;
 
-    // not replicated - derivable
+    // not replicated - derivable (A LOT OF THESE WILL BE DELETED
     public bool IsGrounded;
     public bool WasLaunched;
     public Vector3 LaunchVelocity;
