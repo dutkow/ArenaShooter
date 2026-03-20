@@ -25,24 +25,24 @@ public class PlayerState()
 {
     // PERSISTENT PLAYER DATA
 
-    // Player info. Replicated to all on init and change, not included in world state
+    // Player info. Replicated reliably to all on init and change, not included in world snapshots
     public string Name;
     public byte ID;
 
-    // Player stats. Replicated to all via world snapshots
-    public short Kills; // signed in case we want to subtract kills for death and allow negative kills
+    // Player stats
+    public short Kills; // signed for kill penalties to allow negative values (i.e., suicide or team-killing can result in negative kills)
     public ushort Deaths;
     public ushort Ping;
 
     // CHARACTER STATE
-    public Character Character; // Character instance. Not replicated, just assigned.
+    public Character Character; // Character instance. Not replicated, just assigned on spawn for convenience
 
-    // Character state variables replicated to all
-    public bool IsSpawned;
+    // Replicated to all
+    public bool IsSpawned; // since health is not sent to all, replicated to avoid needing to send spawn data (1) reliably, to existing players or (2) in the initial match state sent to joining players
     public CharacterMoveState MoveState;
     public byte EquippedWeaponIndex;
 
-    // Character state variables replicated only to owner (and maybe eventually spectators)
+    // Replicated only to owner (and maybe eventually to clients which are viewing this character, although that would require a small delay to synchronize when a client spectates a new player)
     public byte Health;
     public byte MaxHealth;
     public byte Armor;
@@ -52,7 +52,8 @@ public class PlayerState()
     public WeaponFlags AmmoChangedFlags;
     public byte[] Ammo;
 
-    public byte[] MaxAmmo; // Not replicated anywhere, purely initialized from Game Rules once as this is not a dynamic variable so clients can safely initialize
+    // Not replicated, purely initialized from Game Rules once as this is not a dynamic variable so clients can initialize. Eventually, will need to include game rules in initial match state
+    public byte[] MaxAmmo; 
 
     // EVENTS
     public Action<string> NameChanged;
@@ -145,12 +146,45 @@ public class PlayerState()
         }
     }
 
+
+    public void SetPosition(Vector3 position)
+    {
+        MoveState.Position = position;
+    }
+
+
+    public void SetVelocity(Vector3 velocity)
+    {
+        MoveState.Velocity = velocity;
+    }
+
+
+    public void SetYaw(float yaw)
+    {
+        MoveState.Yaw = yaw;
+    }
+
+    public void SetPitch(float pitch)
+    {
+        MoveState.Pitch = pitch;
+    }
+
     public void AddWeapon(int weaponIndex)
     {
         if ((HeldWeaponsFlags & (WeaponFlags)(1 << weaponIndex)) == 0)
         {
             HeldWeaponsFlags |= (WeaponFlags)(1 << weaponIndex);
             GainedWeapon?.Invoke(weaponIndex);
+        }
+    }
+
+    public void RemoveWeapon(int weaponIndex)
+    {
+        if ((HeldWeaponsFlags & (WeaponFlags)(1 << weaponIndex)) != 0)
+        {
+            HeldWeaponsFlags &= ~(WeaponFlags)(1 << weaponIndex);
+
+            LostWeapon?.Invoke(weaponIndex);
         }
     }
 
@@ -291,6 +325,11 @@ public class PlayerState()
         Character = character;
 
         SetIsSpawned(true);
+
+        MoveState.Position = character.GlobalPosition;
+        MoveState.Velocity = Vector3.Zero;
+        MoveState.Yaw = character.GlobalRotation.Y;
+        MoveState.Pitch = 0.0f;
 
         SetMaxHealth(GameRules.Instance.MaxHealth);
         SetHealth(GameRules.Instance.StartingHealth);
