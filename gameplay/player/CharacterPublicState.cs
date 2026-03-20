@@ -12,7 +12,7 @@ public class CharacterPublicState
     public float Pitch;
     public Vector3 Velocity;
     public CharacterMoveMode MovementMode;
-    public WeaponType EquippedWeapon;
+    public byte EquippedWeaponIndex;
 
     // not replicated - derivable (A LOT OF THESE WILL BE DELETED
     public bool IsGrounded;
@@ -56,7 +56,7 @@ public class CharacterPublicState
         msg.Add(Yaw);
         msg.Add(Velocity);
         msg.AddEnum(MovementMode);
-        msg.AddEnum(EquippedWeapon);
+        msg.Add(EquippedWeaponIndex);
     }
 
     internal void Write(Message msg)
@@ -66,7 +66,7 @@ public class CharacterPublicState
         msg.Write(Pitch);
         msg.Write(Velocity);
         msg.WriteEnum(MovementMode);
-        msg.WriteEnum(EquippedWeapon);
+        msg.Write(EquippedWeaponIndex);
     }
 
     internal void Read(Message msg, bool forceFull = false)
@@ -76,7 +76,7 @@ public class CharacterPublicState
         msg.Read(out Pitch);
         msg.Read(out Velocity);
         msg.ReadEnum(out MovementMode);
-        msg.ReadEnum(out EquippedWeapon);
+        msg.Read(out EquippedWeaponIndex);
 
 
     }

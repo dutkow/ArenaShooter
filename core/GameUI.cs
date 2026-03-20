@@ -81,7 +81,7 @@ public partial class GameUI : LevelUI
 
     public void OnPossessedCharacter(Character character)
     {
-        _playerHud.AssignToCharacter(character);
+        //_playerHud.Initialize(character);
         _playerHud.Show();
     }
 

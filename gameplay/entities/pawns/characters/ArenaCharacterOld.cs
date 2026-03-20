@@ -16,7 +16,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
     // Exports & Components
     // ----------------------
     [Export] public MeshInstance3D CharacterMesh;
-    [Export] public Weapon Weapon;
+    //[Export] public Weapon Weapon;
     [Export] public MeshInstance3D ThirdPersonWeaponMesh;
     [Export] public Camera3D Camera;
     [Export] public Marker3D CameraPivot;
@@ -151,12 +151,10 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
     public void ShowFirstPersonView()
     {
         HideThirdPersonView();
-        Weapon._weaponScene.Visible = true;
     }
 
     public void HideFirstPersonView()
     {
-        Weapon._weaponScene.Visible = false;
     }
 
     public void ShowThirdPersonView()
@@ -405,7 +403,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
             }
 
             Vector3 dir = -Camera.GlobalTransform.Basis.Z;
-            Weapon.Tick(delta, Camera.GlobalPosition, dir);
+            //Weapon.Tick(delta, Camera.GlobalPosition, dir);
         }
 
         if (NetworkedComponent.IsLocal && !NetworkedComponent.IsAuthority)
@@ -436,7 +434,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
 
         LastInputCommand = cmd;
 
-        Weapon.HandleInput(cmd);
+        //Weapon.HandleInput(cmd);
 
         return cmd;
     }

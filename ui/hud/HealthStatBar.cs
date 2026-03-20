@@ -9,23 +9,23 @@ public enum HealthStat
 
 public partial class HealthStatBar : ProgressBar
 {
-    public void AssignHealthComponent(HealthComponent healthComponent, HealthStat healthStatType)
+    public void Initialize(PlayerState playerState, HealthStat healthStatType)
     {
         if(healthStatType == HealthStat.HEALTH)
         {
-            Value = healthComponent.Health;
-            MaxValue = healthComponent.MaxHealth;
+            Value = playerState.CharacterPrivateState.Health;
+            MaxValue = playerState.CharacterPrivateState.MaxHealth;
 
-            healthComponent.HealthChanged += UpdateStat;
-            healthComponent.MaxHealthChanged += UpdateMaxStat;
+            playerState.HealthChanged += UpdateStat;
+            playerState.MaxHealthChanged += UpdateMaxStat;
         }
         else if(healthStatType == HealthStat.ARMOR)
         {
-            Value = healthComponent.Armor;
-            MaxValue = healthComponent.MaxArmor;
+            Value = playerState.CharacterPrivateState.Armor;
+            MaxValue = playerState.CharacterPrivateState.MaxArmor;
 
-            healthComponent.ArmorChanged += UpdateStat;
-            healthComponent.MaxArmorChanged += UpdateMaxStat;
+            playerState.ArmorChanged += UpdateStat;
+            playerState.MaxArmorChanged += UpdateMaxStat;
         }
     }
 

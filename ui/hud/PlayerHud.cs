@@ -6,19 +6,16 @@ public partial class PlayerHud : Control
     [Export] private HealthStatPanel _armorPanel;
     [Export] private HealthStatPanel _healthPanel;
 
-    public void AssignToArenaCharacter(ArenaCharacterOld character)
+    public override void _Ready()
     {
-        var healthComponent = character.HealthComponent;
+        base._Ready();
 
-        //.AssignHealthComponent(healthComponent);
-        //_healthPanel.AssignHealthComponent(healthComponent);
+
+        var playerState = ClientGame.Instance.LocalPlayerState;
+
+        _armorPanel.Initialize(playerState);
+        _healthPanel.Initialize(playerState);
+
     }
 
-    public void AssignToCharacter(Character character)
-    {
-        var healthComponent = character.HealthComp;
-
-        _armorPanel.AssignToHealthComponent(healthComponent);
-        _healthPanel.AssignToHealthComponent(healthComponent);
-    }
 }

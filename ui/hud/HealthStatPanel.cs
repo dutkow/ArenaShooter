@@ -7,10 +7,10 @@ public partial class HealthStatPanel : Control
     [Export] HealthStatDisplay _healthStatDisplay;
     [Export] HealthStatBar _healthStatBar;
 
-    public void AssignToHealthComponent(HealthComponent healthComp)
-    {
-        _healthStatDisplay.AssignHealthComponent(healthComp, _healthStatType);
 
-        _healthStatBar.AssignHealthComponent(healthComp, _healthStatType);
+    public void Initialize(PlayerState playerState)
+    {
+        _healthStatDisplay.Initialize(playerState, _healthStatType);
+        _healthStatBar.Initialize(playerState, _healthStatType);
     }
 }

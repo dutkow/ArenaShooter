@@ -111,9 +111,9 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
         PublicState.Flags |= CharacterPublicFlags.MOVEMENT_MODE_CHANGED;
     }
 
-    public void OnEquippedWeaponChanged(WeaponType weaponType)
+    public void OnEquippedWeaponChanged(byte weaponIndex)
     {
-        PublicState.EquippedWeapon = weaponType;
+        PublicState.EquippedWeaponIndex = weaponIndex;
         PublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
     }
 
@@ -171,7 +171,7 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
 
         if ((flags & CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED) != 0)
         {
-            PublicState.EquippedWeapon = publicState.EquippedWeapon;
+            PublicState.EquippedWeaponIndex = publicState.EquippedWeaponIndex;
         }
     }
 

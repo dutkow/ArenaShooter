@@ -3,56 +3,69 @@ using System;
 
 public class WeaponManager
 {
+    private Character _character;
+
     public WeaponFlags HeldWeaponsFlags;
 
-    public int EquippedWeaponIndex;
+    private int _equippedWeaponIndex = -1;
 
-    public Weapon[] Weapons = new Weapon[WeaponConstants.TOTAL_WEAPON_SLOTS];
+    public Weapon[] Weapons = new Weapon[GameRules.Instance.Weapons.Count];
 
     private Weapon _currentWeapon;
 
-    public void ChangeWeapon(int weaponIndex)
+    public void Initialize(Character character)
     {
-        if (weaponIndex == EquippedWeaponIndex || weaponIndex < 0 || weaponIndex >= WeaponConstants.TOTAL_WEAPON_SLOTS)
-        {
-            return;
-        }
-
-        WeaponFlags weaponFlag = (WeaponFlags)(1 << weaponIndex);
-
-        if ((HeldWeaponsFlags & weaponFlag) != 0)
-        {
-            EquipWeapon(weaponIndex);
-        }
+        _character = character;
     }
 
-    public void EquipWeapon(int weaponIndex)
+    public void ShowFirstPerson()
     {
-        if (weaponIndex >= GameRules.Instance.Weapons.Count)
-        {
-            return;
-        }
+        _currentWeapon?.ShowFirstPerson();
+    }
+    public void ShowThirdPerson()
+    {
+        _currentWeapon?.ShowThirdPerson();
+    }
 
-        PackedScene weaponScene = GameRules.Instance.Weapons[weaponIndex].FirstPersonScene;
-        if(weaponScene == null)
-        {
-            return;
-        }
+    public void ProcessClientInput(InputFlags cmd)
+    {
+        HandleInput(cmd);
+    }
 
-        if (Weapons[weaponIndex] == null)
+    public void HandleInput(InputFlags cmd)
+    {
+        bool wantsPrimaryFire = cmd.HasFlag(InputFlags.FIRE_PRIMARY);
+
+        if (wantsPrimaryFire)
         {
-            var weapon = (Weapon)weaponScene.Instantiate();
-            Weapons[weaponIndex] = weapon;
+            _currentWeapon?.HandlePrimaryFirePressed();
         }
         else
         {
-            // fetch the weapon, set it visible, etc.
+            _currentWeapon?.HandlePrimaryFireReleased();
         }
-        //WeaponSlot.AddChild(weapon);
+    }
+    public void EquipWeapon(int weaponIndex)
+    {
+        if (weaponIndex == _equippedWeaponIndex || weaponIndex < 0 || weaponIndex >= GameRules.Instance.Weapons.Count)
+        {
+            return;
+        }
 
-        // anims or whatever
+        //WeaponFlags weaponFlag = (WeaponFlags)(1 << weaponIndex);
 
-        //
-        EquippedWeaponIndex = weaponIndex;
+        var weaponToEquip = Weapons[weaponIndex];
+        if (weaponToEquip == null)
+        {
+            weaponToEquip = new();
+            Weapons[weaponIndex] = weaponToEquip;
+            weaponToEquip.Initialize(_character, GameRules.Instance.Weapons[weaponIndex]);
+        }
+        // if is local
+
+        weaponToEquip.ShowFirstPerson();
+
+        // else show third person
+        _equippedWeaponIndex = weaponIndex;
     }
 }

@@ -6,23 +6,23 @@ public partial class HealthStatDisplay : Control
     [Export] Label _healthStatLabel;
     [Export] Label _maxHealthStatLabel;
 
-    public void AssignHealthComponent(HealthComponent healthComp, HealthStat healthStatType)
+    public void Initialize(PlayerState playerState, HealthStat healthStatType)
     {
         if (healthStatType == HealthStat.HEALTH)
         {
-            UpdateStat(healthComp.Health);
-            UpdateMaxStat(healthComp.MaxHealth);
+            UpdateStat(playerState.CharacterPrivateState.Health);
+            UpdateMaxStat(playerState.CharacterPrivateState.MaxHealth);
 
-            healthComp.HealthChanged += UpdateStat;
-            healthComp.MaxHealthChanged += UpdateMaxStat;
+            playerState.HealthChanged += UpdateStat;
+            playerState.MaxHealthChanged += UpdateMaxStat;
         }
         else if (healthStatType == HealthStat.ARMOR)
         {
-            UpdateStat(healthComp.Armor);
-            UpdateMaxStat(healthComp.MaxArmor);
+            UpdateStat(playerState.CharacterPrivateState.Armor);
+            UpdateMaxStat(playerState.CharacterPrivateState.MaxArmor);
 
-            healthComp.ArmorChanged += UpdateStat;
-            healthComp.MaxArmorChanged += UpdateMaxStat;
+            playerState.ArmorChanged += UpdateStat;
+            playerState.MaxArmorChanged += UpdateMaxStat;
         }
     }
 

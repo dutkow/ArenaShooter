@@ -10,7 +10,6 @@ public class ClientGame : Singleton<ClientGame>
     // Player elements
     public PlayerController LocalPlayerController { get; private set; }
     public PlayerState LocalPlayerState { get; private set; }
-    public PlayerStateNew LocalPlayerStateNew { get; private set; }
 
     public Pawn LocalPlayerPawn => LocalPlayerController.PossessedPawn;
 

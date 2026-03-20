@@ -20,7 +20,7 @@ public partial class UIRoot : Control
         /*
         EnsurePlayerHud();
 
-        _playerHud.AssignToCharacter(character);
+        _playerHud.Initialize(character);
 
         ShowPlayerHud();*/
     }

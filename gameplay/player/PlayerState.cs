@@ -28,15 +28,77 @@ public class PlayerState()
     public Action<int> GainedWeapon;
     public Action<int, int> WeaponAmmoChanged;
 
+    public Action<int> EquippedWeaponChanged;
 
     public Character Character; // instance, not replicated
 
+    public Action<int> HealthChanged;
+    public Action<int> MaxHealthChanged;
 
+    public Action<int> ArmorChanged;
+    public Action<int> MaxArmorChanged;
+
+
+    public Action<int> PingChanged;
 
     public void SetPlayerName(string playerName)
     {
-        PlayerInfo.PlayerName = playerName;
-        PlayerNameChanged?.Invoke(playerName);
+        if(PlayerInfo.PlayerName != playerName)
+        {
+            PlayerInfo.PlayerName = playerName;
+            PlayerNameChanged?.Invoke(playerName);
+        }
+    }
+
+    public void SetHealth(int value)
+    {
+        if(CharacterPrivateState.Health != value)
+        {
+            CharacterPrivateState.Health = (byte)value;
+            HealthChanged?.Invoke(value);
+        }
+    }
+
+    public void SetMaxHealth(int value)
+    {
+        if (CharacterPrivateState.MaxHealth != value)
+        {
+            CharacterPrivateState.MaxHealth = (byte)value;
+            MaxHealthChanged?.Invoke(value);
+        }
+    }
+
+    public void SetArmor(int value)
+    {
+        if (CharacterPrivateState.Armor != value)
+        {
+            CharacterPrivateState.Armor = (byte)value;
+            ArmorChanged?.Invoke(value);
+        }
+    }
+
+    public void SetMaxArmor(int value)
+    {
+        if (CharacterPrivateState.MaxArmor != value)
+        {
+            CharacterPrivateState.MaxArmor = (byte)value;
+            MaxArmorChanged?.Invoke(value);
+        }
+    }
+
+    public void SetPing(int value)
+    {
+        if (Ping != value)
+        {
+            Ping = (ushort)value;
+            PingChanged?.Invoke(value);
+        }
+    }
+
+    public void SetEquippedWeapon(byte weaponIndex)
+    {
+        CharacterPublicState.EquippedWeaponIndex = weaponIndex;
+        EquippedWeaponChanged?.Invoke(weaponIndex);
     }
 
     public void ClearFlags()

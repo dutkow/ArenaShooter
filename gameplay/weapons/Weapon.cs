@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System;
 
 public enum FireMode
@@ -8,9 +9,11 @@ public enum FireMode
     BURST,       // optional later
 }
 
-public partial class Weapon : Entity
+public partial class Weapon : ITickable
 {
     public byte OwnerPlayerID;
+
+    public Character Character;
 
     private FireMode _fireMode = FireMode.FULL_AUTO;
 
@@ -24,15 +27,30 @@ public partial class Weapon : Entity
     [Export] public float PrimaryFireCooldown = 1.0f;
     [Export] PackedScene _projectileScene;
 
+    Node3D _weaponFP;
+    Node3D _weaponTP;
+
     public bool IsPredictingProjectiles { get; private set; } = true;
 
     public bool FiredPredictedProjectile;
 
-    public override void _Process(double delta)
+    public void Initialize(Character character, WeaponData weaponData)
     {
-        base._Process(delta);
+        Character = character;
 
-        if(IsAuthority || IsPredictingProjectiles)
+        _weaponFP = (Node3D)weaponData.FirstPersonScene.Instantiate();
+        _weaponTP = (Node3D)weaponData.ThirdPersonScene.Instantiate();
+
+        _weaponFP.Visible = true;
+        _weaponTP.Visible = false; // will cusotmize later by net role etc.
+
+        Character.WeaponSocketFP.AddChild(_weaponFP);
+        Character.WeaponSocketTP.AddChild(_weaponTP);
+    }
+
+    public void Tick(double delta)
+    {
+        if(Character.IsAuthority || IsPredictingProjectiles)
         {
             if (_cooldownTimer > 0f)
             {
@@ -41,7 +59,7 @@ public partial class Weapon : Entity
         }
     }
 
-    public void StartPrimaryFire()
+    public virtual void HandlePrimaryFirePressed()
     {
         _isTriggerHeld = true;
 
@@ -52,29 +70,10 @@ public partial class Weapon : Entity
         }
     }
 
-    public void StopPrimaryFire()
+    public virtual void HandlePrimaryFireReleased()
     {
         _isTriggerHeld = false;
         _hasFiredSincePress = false;
-    }
-
-    public void ProcessClientInput(InputFlags cmd)
-    {
-        HandleInput(cmd);
-    }
-
-    public void HandleInput(InputFlags cmd)
-    {
-        bool wantsPrimaryFire = cmd.HasFlag(InputFlags.FIRE_PRIMARY);
-
-        if (wantsPrimaryFire)
-        {
-            StartPrimaryFire();
-        }
-        else
-        {
-            StopPrimaryFire();
-        }
     }
 
     public void Tick(double delta, Vector3 origin, Vector3 direction)
@@ -119,18 +118,40 @@ public partial class Weapon : Entity
 
     public void Fire(ProjectileSpawnData spawnData)
     {
-        if (!IsAuthority && IsPredictingProjectiles)
+        if (!Character.IsAuthority && IsPredictingProjectiles)
         {
             ClientProjectileManager.Instance?.SpawnPredictedProjectile(spawnData);
             FiredPredictedProjectile = true;
         }
 
-        if(IsAuthority)
+        if(Character.IsAuthority)
         {
             spawnData.ServerTickOnSpawn = MatchState.Instance.CurrentTick;
             ServerProjectileManager.Instance.CreateProjectilePendingSpawn(spawnData, IsPredictingProjectiles);
         }
 
         _cooldownTimer = PrimaryFireCooldown;
+    }
+
+    public void ShowFirstPerson()
+    {
+        HideThirdPerson();
+        _weaponFP.Show();
+    }
+
+    public void ShowThirdPerson()
+    {
+        HideFirstPerson();
+        _weaponTP.Show();
+    }
+
+    public void HideFirstPerson()
+    {
+        _weaponFP.Hide();
+    }
+
+    public void HideThirdPerson()
+    {
+        _weaponTP.Hide();
     }
 }

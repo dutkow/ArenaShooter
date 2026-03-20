@@ -35,6 +35,8 @@ public class SpawnManager : Singleton<SpawnManager>
             player.CharacterPrivateState.HeldWeaponsFlags = WeaponFlags.NONE;
 
             var startingWeapons = GameRules.Instance.StartingWeapons;
+
+            int largestIndex = 0;
             foreach(var startingWeapon in startingWeapons)
             {
                 player.CharacterPrivateState.HeldWeaponsFlags |= (WeaponFlags)(1 << (startingWeapon.WeaponIndex));
@@ -54,8 +56,24 @@ public class SpawnManager : Singleton<SpawnManager>
                     }
                     player.CharacterPrivateState.Ammo[startingWeapon.WeaponIndex] = (byte)weaponData.DefaultStartingAmmo;
                 }
+                if(startingWeapon.WeaponIndex > largestIndex)
+                {
+                    largestIndex = startingWeapon.WeaponIndex;
+                }
             }
+            player.CharacterPublicState.EquippedWeaponIndex = (byte)largestIndex;
+
         }
+
+        // Set max values first to avoid weirdness with UI failing to update values due to them being out of bounds if max is uninitialized
+        player.SetMaxHealth(GameRules.Instance.MaxHealth);
+        player.SetMaxArmor(GameRules.Instance.MaxArmor);
+
+        player.SetHealth(GameRules.Instance.StartingHealth);
+        player.SetArmor(GameRules.Instance.StartingArmor);
+
+
+
         Character spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
         player.Flags |= PlayerStateFlags.IS_ALIVE_CHANGED;
@@ -84,6 +102,7 @@ public class SpawnManager : Singleton<SpawnManager>
         if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
         {
             playerState.Character = spawnedPlayer;
+            spawnedPlayer.PlayerState = playerState;
         }
 
         Level.Instance.AddChild(spawnedPlayer);

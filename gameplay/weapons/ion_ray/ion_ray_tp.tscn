@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://ct7pc6qwxnx0v"]
+
+[ext_resource type="PackedScene" uid="uid://2lh0gaifg66o" path="res://assets/external/ion_gun/IonRayGunAnimationsFinal2.glb" id="1_h7wtw"]
+
+[node name="IonRayTP" type="Node3D" unique_id=431115005]
+
+[node name="IonRayGunAnimationsFinal2" parent="." unique_id=109260709 instance=ExtResource("1_h7wtw")]

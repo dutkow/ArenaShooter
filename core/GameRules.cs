@@ -20,6 +20,11 @@ public partial class GameRules : Node
 
     [Export] public Array<StartingWeaponData> StartingWeapons;
 
+    [Export] public int StartingHealth = 100;
+    [Export] public int MaxHealth = 100;
+
+    [Export] public int StartingArmor = 0;
+    [Export] public int MaxArmor = 100;
 
     public override void _EnterTree()
     {

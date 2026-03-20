@@ -2,11 +2,14 @@
 
 [ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/linear_projectile.tscn" id="1_pb6w8"]
 [ext_resource type="Script" uid="uid://c74jx858rpm56" path="res://gameplay/weapons/WeaponData.cs" id="1_ri7tt"]
+[ext_resource type="PackedScene" uid="uid://c5gv1fqwr4x3e" path="res://gameplay/weapons/ion_ray/ion_ray_fp.tscn" id="1_s6cc3"]
+[ext_resource type="PackedScene" uid="uid://ct7pc6qwxnx0v" path="res://gameplay/weapons/ion_ray/ion_ray_tp.tscn" id="3_4muyu"]
 
 [resource]
 script = ExtResource("1_ri7tt")
+FirstPersonScene = ExtResource("1_s6cc3")
+ThirdPersonScene = ExtResource("3_4muyu")
 Name = "ION_RAY"
 FireType = 1
 ProjectileScene = ExtResource("1_pb6w8")
-ProjectileSpeed = 50.0
 metadata/_custom_type_script = "uid://c74jx858rpm56"

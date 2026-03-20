@@ -34,12 +34,12 @@ public partial class Character : Pawn, IDamageable
 
     // Components
     [Export] MeshInstance3D _characterMesh;
-    [Export] Node3D _thirdPersonWeaponMesh;
     [Export] Node3D _cameraPivot;
-    [Export] Weapon _weapon;
     [Export] Node3D _visualContainer;
 
-    [Export] Node3D _thirdPersonWeaponSocket;
+    [Export] public Node3D WeaponSocketFP;
+
+    [Export] public Node3D WeaponSocketTP;
 
     private Vector3 _visualContainerPosition;
 
@@ -56,6 +56,8 @@ public partial class Character : Pawn, IDamageable
     private bool _lookDirty;
 
     public CharacterPublicState PredictedPublicState = new();
+
+    private WeaponManager _weaponManager;
 
     public override void _Ready()
     {
@@ -77,6 +79,11 @@ public partial class Character : Pawn, IDamageable
         _visualContainerPosition = _visualContainer.Position;
 
         Area.Owner = this;
+
+        _weaponManager = new();
+        _weaponManager.Initialize(this);
+
+        _weaponManager.EquipWeapon(PlayerState.CharacterPublicState.EquippedWeaponIndex);
     }
 
     public void ApplyDamage(int damage)
@@ -101,7 +108,7 @@ public partial class Character : Pawn, IDamageable
         base.ServerProcessNextClientInput(cmd, delta);
 
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, delta);
-        _weapon.ProcessClientInput(cmd.Flags);
+        _weaponManager?.ProcessClientInput(cmd.Flags);
     }
 
 
@@ -165,7 +172,7 @@ public partial class Character : Pawn, IDamageable
         {
             GlobalPosition = PlayerState.CharacterPublicState.Position;
             GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Yaw, 0.0f);
-            _thirdPersonWeaponSocket.Rotation = new Vector3(PlayerState.CharacterPublicState.Pitch, 0.0f, 0.0f);
+            WeaponSocketTP.Rotation = new Vector3(PlayerState.CharacterPublicState.Pitch, 0.0f, 0.0f);
         }
     }
 
@@ -189,9 +196,7 @@ public partial class Character : Pawn, IDamageable
 
     public void InterpolatePitch(float interpSpeed)
     {
-        Vector3 camRot = _thirdPersonWeaponMesh.GlobalRotation;
-        camRot.X = Mathf.Lerp(camRot.X, PlayerState.CharacterPublicState.Pitch, interpSpeed);
-        _thirdPersonWeaponMesh.GlobalRotation = camRot;
+
     }
 
     /// <summary>
@@ -223,8 +228,10 @@ public partial class Character : Pawn, IDamageable
             GD.Print($"player state is null");
         }
 
-        _weapon.OwnerPlayerID = PlayerState.PlayerInfo.PlayerID;
-        _weapon.SetIsAuthority(IsAuthority);
+
+
+        //_weapon.OwnerPlayerID = PlayerState.PlayerInfo.PlayerID;
+        //_weapon.SetIsAuthority(IsAuthority);
 
         if(!IsAuthority)
         {
@@ -232,6 +239,8 @@ public partial class Character : Pawn, IDamageable
             PredictedPublicState.Yaw = GlobalRotation.Y;
             GD.Print($"client copied pub state");
         }
+
+        EquipStartingWeapon();
     }
 
 
@@ -317,6 +326,23 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
+    public void EquipStartingWeapon()
+    {
+        var weaponDataArray = GameRules.Instance.Weapons;
+
+        if (weaponDataArray.Count <= PlayerState.CharacterPublicState.EquippedWeaponIndex)
+        {
+            GD.PushError($"Weapon index {PlayerState.CharacterPublicState.EquippedWeaponIndex} not found");
+            return;
+        }
+
+        if (IsLocal)
+        {
+
+            GD.Print($"weapon flags on spawn: {PlayerState.CharacterPrivateState.HeldWeaponsFlags}. Equipped weapon: {PlayerState.CharacterPublicState.EquippedWeaponIndex}");
+        }
+    }
+
     public override void OnUnpossessed()
     {
         base.OnUnpossessed();
@@ -330,12 +356,10 @@ public partial class Character : Pawn, IDamageable
     public void ShowFirstPersonView()
     {
         HideThirdPersonView();
-        _weapon._weaponScene.Visible = true;
     }
 
     public void HideFirstPersonView()
     {
-        _weapon._weaponScene.Visible = false;
     }
 
     public void ShowThirdPersonView()
@@ -344,14 +368,14 @@ public partial class Character : Pawn, IDamageable
 
         _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
         //_thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
-        _thirdPersonWeaponMesh.Visible = true;
+        //_thirdPersonWeaponMesh.Visible = true;
     }
 
     public void HideThirdPersonView()
     {
         _characterMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
         //_thirdPersonWeaponMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
-        _thirdPersonWeaponMesh.Visible = false;
+        //_thirdPersonWeaponMesh.Visible = false;
 
         GD.Print($"hiding third person view");
     }
@@ -427,13 +451,14 @@ public partial class Character : Pawn, IDamageable
             if (Input.IsActionPressed("primary_fire")) clientPredictionTick.InputCommand.Flags |= InputFlags.FIRE_PRIMARY;
         }
 
+        /*
         if (_weapon.FiredPredictedProjectile)
         {
 
-        }
+        }*/
 
         Vector3 dir = -_camera.GlobalTransform.Basis.Z;
-        _weapon.Tick((float)TickManager.Instance.ServerTickInterval, _camera.GlobalPosition, dir);
+        //_weaponManager.Tick((float)TickManager.Instance.ServerTickInterval, _camera.GlobalPosition, dir);
 
         if(_accumulatedLookDelta != Vector2.Zero)
         {
@@ -455,7 +480,7 @@ public partial class Character : Pawn, IDamageable
             }
         }
 
-        _weapon.HandleInput(clientPredictionTick.InputCommand.Flags);
+        _weaponManager.HandleInput(clientPredictionTick.InputCommand.Flags);
 
         _accumulatedLookDelta = Vector2.Zero;
 
@@ -517,7 +542,6 @@ public partial class Character : Pawn, IDamageable
     {
         base.HandleRemoteSpawn(playerID);
 
-        _weapon.OwnerPlayerID = playerID;
     }
 
     int _ticksToSkipReconiliationPostLaunch = 10;
@@ -623,9 +647,9 @@ public partial class Character : Pawn, IDamageable
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.MOVEMENT_MODE_CHANGED;
     }
 
-    public void OnEquippedWeaponChanged(WeaponType weaponType)
+    public void OnEquippedWeaponChanged(byte weaponIndex)
     {
-        PlayerState.CharacterPublicState.EquippedWeapon = weaponType;
+        PlayerState.CharacterPublicState.EquippedWeaponIndex = weaponIndex;
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.EQUIPPED_WEAPON_CHANGED;
     }
 

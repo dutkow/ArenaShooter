@@ -65,7 +65,7 @@ public partial class PlayerController : Controller
         if(pawn is Character character)
         {
             GameUI.Instance.OnPossessedCharacter(character);
-            //_playerHud.AssignToCharacter(character);
+            //_playerHud.Initialize(character);
         }
     }
 
