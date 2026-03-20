@@ -151,12 +151,12 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
     public void ShowFirstPersonView()
     {
         HideThirdPersonView();
-        Weapon.FirstPersonWeaponMesh.Visible = true;
+        Weapon._weaponScene.Visible = true;
     }
 
     public void HideFirstPersonView()
     {
-        Weapon.FirstPersonWeaponMesh.Visible = false;
+        Weapon._weaponScene.Visible = false;
     }
 
     public void ShowThirdPersonView()

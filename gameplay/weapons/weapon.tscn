@@ -2,11 +2,8 @@
 
 [ext_resource type="Script" uid="uid://cyl8dsxv6iyjh" path="res://gameplay/weapons/Weapon.cs" id="1_mw06c"]
 [ext_resource type="PackedScene" uid="uid://uqo3i4jed6bi" path="res://gameplay/weapons/linear_projectile.tscn" id="2_45nnk"]
-[ext_resource type="PackedScene" uid="uid://hm0jih3hgjn3" path="res://assets/external/shot_gun_final_2.tscn" id="3_45nnk"]
 
 [node name="Weapon" type="Node3D" unique_id=423505351 node_paths=PackedStringArray("FirstPersonWeaponMesh")]
 script = ExtResource("1_mw06c")
-FirstPersonWeaponMesh = NodePath("ShotGunFinal2")
+FirstPersonWeaponMesh = NodePath("")
 _projectileScene = ExtResource("2_45nnk")
-
-[node name="ShotGunFinal2" parent="." unique_id=1468187778 instance=ExtResource("3_45nnk")]

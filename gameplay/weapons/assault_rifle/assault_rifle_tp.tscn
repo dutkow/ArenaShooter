@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://3sm6ywimps2j"]
+
+[ext_resource type="PackedScene" uid="uid://rqe2mx5njoru" path="res://assets/external/utopia/Models/AssaultRifle2.glb" id="1_m7j4c"]
+
+[node name="AssaultRifleTP" type="Node3D" unique_id=431115005]
+
+[node name="AssaultRifle2" parent="." unique_id=1733357714 instance=ExtResource("1_m7j4c")]

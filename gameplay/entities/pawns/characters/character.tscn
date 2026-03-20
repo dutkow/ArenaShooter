@@ -4,6 +4,7 @@
 [ext_resource type="Material" uid="uid://dfwluwkwpcsjl" path="res://assets/materials/orange_material.tres" id="2_smvd3"]
 [ext_resource type="PackedScene" uid="uid://b708cmx0cac5h" path="res://gameplay/weapons/weapon.tscn" id="2_u04n7"]
 [ext_resource type="PackedScene" uid="uid://hm0jih3hgjn3" path="res://assets/external/shot_gun_final_2.tscn" id="3_bbqeg"]
+[ext_resource type="PackedScene" uid="uid://dphb73e4wciop" path="res://gameplay/weapons/assault_rifle/assault_rifle_fp.tscn" id="5_yiaon"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bbqeg"]
 
@@ -38,11 +39,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.500821, -0.43688428)
 
 [node name="ShotGunFinal2" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/ThirdPersonWeaponSocket" unique_id=1468187778 instance=ExtResource("3_bbqeg")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.18134469, 0.258106, 0.16228473)
+visible = false
 
 [node name="CameraPivot" type="Node3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh" unique_id=1782343330]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.757373, -0.34713352)
 
 [node name="Camera3D" type="Camera3D" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot" unique_id=617147515]
 
-[node name="Weapon" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D" unique_id=2073651018 instance=ExtResource("2_u04n7")]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0.15629578, -0.023188889, 0.12715006)
+[node name="Weapon" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D" unique_id=2073651018 node_paths=PackedStringArray("_weaponScene") instance=ExtResource("2_u04n7")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+_weaponScene = NodePath("AssaultRifleFP")
+
+[node name="AssaultRifleFP" parent="Area3D/CollisionShape3D/VisualContainer/CharacterMesh/CameraPivot/Camera3D/Weapon" unique_id=431115005 instance=ExtResource("5_yiaon")]

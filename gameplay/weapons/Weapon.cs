@@ -20,7 +20,7 @@ public partial class Weapon : Entity
     private bool _hasFiredSincePress = false;
     private float _cooldownTimer = 0f;
 
-    [Export] public Node3D FirstPersonWeaponMesh;
+    [Export] public Node3D _weaponScene;
     [Export] public float PrimaryFireCooldown = 1.0f;
     [Export] PackedScene _projectileScene;
 

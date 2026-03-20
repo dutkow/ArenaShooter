@@ -330,12 +330,12 @@ public partial class Character : Pawn, IDamageable
     public void ShowFirstPersonView()
     {
         HideThirdPersonView();
-        _weapon.FirstPersonWeaponMesh.Visible = true;
+        _weapon._weaponScene.Visible = true;
     }
 
     public void HideFirstPersonView()
     {
-        _weapon.FirstPersonWeaponMesh.Visible = false;
+        _weapon._weaponScene.Visible = false;
     }
 
     public void ShowThirdPersonView()

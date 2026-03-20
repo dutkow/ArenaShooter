@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://bxmusb4c5jyeh"]
+
+[ext_resource type="Script" uid="uid://c74jx858rpm56" path="res://gameplay/weapons/WeaponData.cs" id="1_2eack"]
+[ext_resource type="PackedScene" uid="uid://dphb73e4wciop" path="res://gameplay/weapons/assault_rifle/assault_rifle_fp.tscn" id="1_7sfti"]
+[ext_resource type="ArrayMesh" uid="uid://cq40uk3n17a7k" path="res://assets/external/kenney_blaster-kit_2.1/Models/OBJ format/clip-large.obj" id="1_gcm7e"]
+[ext_resource type="Texture2D" uid="uid://bcfu04a41t8k5" path="res://assets/textures/heavy-bullets.png" id="1_slk2i"]
+[ext_resource type="PackedScene" uid="uid://3sm6ywimps2j" path="res://gameplay/weapons/assault_rifle/assault_rifle_tp.tscn" id="2_r7guy"]
+[ext_resource type="ArrayMesh" uid="uid://bymrid72wgej6" path="res://assets/external/kenney_blaster-kit_2.1/Models/OBJ format/blaster-d.obj" id="3_l3gsl"]
+[ext_resource type="Texture2D" uid="uid://cr1tk3c34t066" path="res://assets/external/kenney_blaster-kit_2.1/Previews/blaster-d.png" id="6_6mpxg"]
+
+[resource]
+script = ExtResource("1_2eack")
+FirstPersonScene = ExtResource("1_7sfti")
+ThirdPersonScene = ExtResource("2_r7guy")
+PickupMesh = ExtResource("3_l3gsl")
+AmmoPickupMesh = ExtResource("1_gcm7e")
+Name = "ASSAULT_RIFLE"
+WeaponIcon = ExtResource("6_6mpxg")
+AmmoIcon = ExtResource("1_slk2i")
+metadata/_custom_type_script = "uid://c74jx858rpm56"
