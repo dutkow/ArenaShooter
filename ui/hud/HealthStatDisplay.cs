@@ -6,27 +6,33 @@ public partial class HealthStatDisplay : Control
     [Export] Label _healthStatLabel;
     [Export] Label _maxHealthStatLabel;
 
-    public void AssignHealthComponent(HealthComponent healthComponent, HealthStat healthStatType)
+    public void AssignHealthComponent(HealthComponent healthComp, HealthStat healthStatType)
     {
         if (healthStatType == HealthStat.HEALTH)
         {
-            healthComponent.HealthChanged += OnStatChanged;
-            healthComponent.MaxHealthChanged += OnMaxStatChanged;
+            UpdateStat(healthComp.Health);
+            UpdateMaxStat(healthComp.MaxHealth);
+
+            healthComp.HealthChanged += UpdateStat;
+            healthComp.MaxHealthChanged += UpdateMaxStat;
         }
         else if (healthStatType == HealthStat.ARMOR)
         {
-            healthComponent.ArmorChanged += OnStatChanged;
-            healthComponent.MaxArmorChanged += OnMaxStatChanged;
+            UpdateStat(healthComp.Armor);
+            UpdateMaxStat(healthComp.MaxArmor);
+
+            healthComp.ArmorChanged += UpdateStat;
+            healthComp.MaxArmorChanged += UpdateMaxStat;
         }
     }
 
-    public void OnStatChanged(int value)
+    public void UpdateStat(int value)
     {
         _healthStatLabel.Text = value.ToString();
     }
 
-    public void OnMaxStatChanged(int value)
+    public void UpdateMaxStat(int value)
     {
-        _maxHealthStatLabel.Text = value.ToString();
+        _maxHealthStatLabel.Text = "/" + value.ToString();
     }
 }

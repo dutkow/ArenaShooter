@@ -9,7 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 /// 
 
 public class ChatMessage : Message
-{
+{    
     public ChatMessageInfo Info;
 
     protected override int BufferSize()

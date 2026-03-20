@@ -310,14 +310,18 @@ public class ServerGame : Singleton<ServerGame>
     public void HandleChatMessageRequest(ENetPacketPeer peer, ChatMessageRequest request)
     {
         // Note: the incoming request contains the target player (if sending a private msg), but the outgoing info should contain the sender ID
+        byte playerID = NetUtils.GetPeerPlayerID(peer);
         var info = new ChatMessageInfo(request.Info.Channel, request.Info.Text, NetUtils.GetPeerPlayerID(peer));
 
-        info.Text = NetUtils.ValidateChatMessage(info.Text);
-        ClientGame.Instance?.ApplyChatMessage(info);
-
-        ChatMessage.Send(info);
+        ApplyChatMessageRequest(playerID, info);
     }
 
+    public void ApplyChatMessageRequest(byte playerID, ChatMessageInfo info)
+    {
+        info.Text = NetUtils.ValidateChatMessage(info.Text);
+        ClientGame.Instance?.ApplyChatMessage(info);
+        ChatMessage.Send(info);
+    }
 
     private readonly Dictionary<Msg, Action<ENetPacketPeer, byte[]>> _messageHandlers = new();
 

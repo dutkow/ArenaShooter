@@ -13,22 +13,28 @@ public partial class HealthStatBar : ProgressBar
     {
         if(healthStatType == HealthStat.HEALTH)
         {
-            healthComponent.HealthChanged += OnStatChanged;
-            healthComponent.MaxHealthChanged += OnMaxStatChanged;
+            Value = healthComponent.Health;
+            MaxValue = healthComponent.MaxHealth;
+
+            healthComponent.HealthChanged += UpdateStat;
+            healthComponent.MaxHealthChanged += UpdateMaxStat;
         }
         else if(healthStatType == HealthStat.ARMOR)
         {
-            healthComponent.ArmorChanged += OnStatChanged;
-            healthComponent.MaxArmorChanged += OnMaxStatChanged;
+            Value = healthComponent.Armor;
+            MaxValue = healthComponent.MaxArmor;
+
+            healthComponent.ArmorChanged += UpdateStat;
+            healthComponent.MaxArmorChanged += UpdateMaxStat;
         }
     }
 
-    public void OnStatChanged(int value)
+    public void UpdateStat(int value)
     {
         Value = value;
     }
 
-    public void OnMaxStatChanged(int value)
+    public void UpdateMaxStat(int value)
     {
         MaxValue = value;
     }

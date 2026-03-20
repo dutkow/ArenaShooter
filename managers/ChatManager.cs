@@ -9,9 +9,9 @@ public enum ChatChannel : byte
     SYSTEM,
 }
 
-public class ChatMessageInfo
+public struct ChatMessageInfo
 {
-    public ChatChannel Channel;
+    public ChatChannel Channel = ChatChannel.ALL;
     public string Text;
     public byte PlayerID;
 

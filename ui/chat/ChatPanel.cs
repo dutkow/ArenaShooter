@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using static System.Net.Mime.MediaTypeNames;
 
 public partial class ChatPanel : Control
 {
@@ -27,11 +28,7 @@ public partial class ChatPanel : Control
 
     public void SendChat()
     {
-        if(_chatInputField.Text.Length > 0)
-        {
-            ChatMessageRequest.Send(new ChatMessageInfo(ChatChannel.ALL, _chatInputField.Text)); // keeping simple for now
-            _chatInputField.Clear();
-        }
+        _chatInputField.ConfirmChat();
         Close();
     }
 

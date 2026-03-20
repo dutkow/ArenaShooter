@@ -70,6 +70,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 1
 theme_override_font_sizes/font_size = 24
 text = "0"
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DeathsLabel" type="Label" parent="MarginContainer2/MarginContainer/HBoxContainer" unique_id=1996261362]
@@ -78,6 +79,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 1
 theme_override_font_sizes/font_size = 24
 text = "0"
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="PingLabel" type="Label" parent="MarginContainer2/MarginContainer/HBoxContainer" unique_id=1382546942]
@@ -86,4 +88,5 @@ size_flags_horizontal = 3
 size_flags_vertical = 1
 theme_override_font_sizes/font_size = 24
 text = "0"
+horizontal_alignment = 1
 vertical_alignment = 1

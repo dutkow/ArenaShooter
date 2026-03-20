@@ -3,16 +3,23 @@ using System;
 
 public partial class ChatInputField : LineEdit
 {
+    private bool _justTrimmedText;
+
     public override void _Ready()
     {
         base._Ready();
 
-        TextSubmitted += SendMessageRequest;
+        MaxLength = NetworkConstants.MAX_CHAT_MESSAGE_CHARACTERS;
     }
 
-    public void SendMessageRequest(string text)
+    public void ConfirmChat()
     {
-        var info = new ChatMessageInfo(ChatChannel.ALL, text);
+        if(Text.Length == 0)
+        {
+            return;
+        }
+
+        var info = new ChatMessageInfo(ChatChannel.ALL, Text);
 
         if(NetworkManager.Instance.IsClient)
         {
@@ -20,8 +27,9 @@ public partial class ChatInputField : LineEdit
         }
         else
         {
-            info.Text = NetUtils.ValidateChatMessage(text);
-            ClientGame.Instance?.ApplyChatMessage(info);
+            ServerGame.Instance.ApplyChatMessageRequest(ClientGame.Instance.LocalPlayerID, info);
         }
+
+        Clear();
     }
 }

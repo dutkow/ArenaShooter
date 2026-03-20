@@ -1,10 +1,9 @@
 using Godot;
 using System;
-using static System.Net.Mime.MediaTypeNames;
 
 public class ChatMessageRequest : Message
 {
-    public ChatMessageInfo Info;
+    public ChatMessageInfo Info = new();
 
     protected override int BufferSize()
     {
@@ -35,6 +34,8 @@ public class ChatMessageRequest : Message
     public static void Send(ChatMessageInfo info)
     {
         ChatMessage chatMessage = new();
+        chatMessage.ENetFlags = ENetPacketFlags.Reliable;
+        chatMessage.MessageType = Msg.C2S_CHAT_MESSAGE_REQUEST;
         chatMessage.Info = info;
         NetworkSender.ToServer(chatMessage);
     }

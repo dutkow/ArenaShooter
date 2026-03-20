@@ -38,29 +38,47 @@ text = "DEATHMATCH"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=476774304]
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=237711160]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer" unique_id=476774304]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=131457729]
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/HBoxContainer" unique_id=131457729]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
+theme_override_font_sizes/font_size = 24
 text = "PLAYER"
+vertical_alignment = 1
 
-[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1844515506]
+[node name="Label2" type="Label" parent="VBoxContainer/MarginContainer/HBoxContainer" unique_id=1844515506]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "KILLS"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1677111815]
+[node name="Label3" type="Label" parent="VBoxContainer/MarginContainer/HBoxContainer" unique_id=1677111815]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "DEATHS"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1286166307]
+[node name="Label4" type="Label" parent="VBoxContainer/MarginContainer/HBoxContainer" unique_id=1286166307]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "PING"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PlayerListContainer" type="VBoxContainer" parent="VBoxContainer" unique_id=851001018]
 layout_mode = 2

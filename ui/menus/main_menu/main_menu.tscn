@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://dpeblvinig3d3" path="res://ui/menus/host_game/host_game_menu.tscn" id="1_06t4h"]
 [ext_resource type="Script" uid="uid://bu1pxpyefq2b0" path="res://ui/menus/main_menu/MainMenu.cs" id="1_7vrkn"]
+[ext_resource type="Script" uid="uid://cheyefh2jmtks" path="res://ui/menus/PlayerNameInputField.cs" id="2_txwgg"]
 [ext_resource type="PackedScene" uid="uid://dmvq5swhuqelu" path="res://ui/menus/server_browser/server_browser.tscn" id="3_fu7sn"]
 
 [node name="MainMenu" type="Control" unique_id=2138158856 node_paths=PackedStringArray("_hostGameButton", "_joinGameButton", "_hostGameMenu", "_serverBrowser", "_playerNameLineEdit")]
@@ -66,6 +67,7 @@ text = "Enter player name: "
 layout_mode = 2
 size_flags_horizontal = 3
 text = "[No Name]"
+script = ExtResource("2_txwgg")
 
 [node name="HostGameMenu" parent="." unique_id=1055556082 instance=ExtResource("1_06t4h")]
 visible = false
