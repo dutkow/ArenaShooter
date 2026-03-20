@@ -24,7 +24,6 @@ public class ChatMessageInfo
 }
 public class ChatManager
 {
-
     public static ChatManager Instance { get; private set; }
 
     public event Action<ChatMessageInfo>? ChatMessageReceived;

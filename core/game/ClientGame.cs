@@ -47,7 +47,7 @@ public class ClientGame : Singleton<ClientGame>
         else
         {
             _hasReceivedInitialState = true;
-            ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, ServerGame.Instance.ValidatePlayerName(UserSettings.Instance.PlayerName)));
+            ServerGame.Instance.ApplyClientLoaded(new PlayerInfo(ClientGame.Instance.LocalPlayerID, NetUtils.ValidatePlayerName(UserSettings.Instance.PlayerName)));
         }
 
         LocalPlayerController = new();
@@ -250,6 +250,16 @@ public class ClientGame : Singleton<ClientGame>
         }
     }
 
+    public void HandleChatMessage(ChatMessage chatMessage)
+    {
+        ApplyChatMessage(chatMessage.Info);
+    }
+
+    public void ApplyChatMessage(ChatMessageInfo info)
+    {
+        ChatManager.Instance.BroadcastChatMessageReceived(info);
+    }
+
 
     private void Dispatch<T>(byte[] payload, Action<T> handler) where T : Message, new()
     {
@@ -272,6 +282,7 @@ public class ClientGame : Singleton<ClientGame>
         _messageHandlers[Msg.S2C_PLAYER_JOINED] = payload => Dispatch<PlayerJoined>(payload, HandlePlayerJoined);
         _messageHandlers[Msg.S2C_PLAYER_LEFT] = payload => Dispatch<PlayerLeft>(payload, HandlePlayerLeft);
         _messageHandlers[Msg.S2C_SERVER_NOTIFICATION] = payload => Dispatch<ServerNotification>(payload, HandleServerNotification);
+        _messageHandlers[Msg.S2C_CHAT_MESSAGE] = payload => Dispatch<ChatMessage>(payload, HandleChatMessage);
 
 
     }

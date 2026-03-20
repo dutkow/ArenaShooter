@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Linq;
 
 
 public static class NetUtils
@@ -44,5 +45,34 @@ public static class NetUtils
             (byte.Parse(parts[2]) << 8) |
             byte.Parse(parts[3])
         );
+    }
+
+    public static string ValidatePlayerName(string requestedName)
+    {
+        int maxLength = NetworkConstants.MAX_PLAYER_NAME_LENGTH;
+        if (requestedName.Length > maxLength)
+        {
+            requestedName = requestedName.Substring(0, maxLength);
+        }
+
+        string baseName = requestedName;
+        int counter = 1;
+
+        while (MatchState.Instance.ConnectedPlayers.Values.Any(p => p.PlayerInfo.PlayerName == requestedName))
+        {
+            requestedName = $"{baseName} ({counter})";
+            counter++;
+        }
+
+        return requestedName;
+    }
+
+    public static string ValidateChatMessage(string messageText)
+    {
+        if (messageText.Length > NetworkConstants.MAX_CHAT_MESSAGE_CHARACTERS)
+        {
+            messageText = messageText.Substring(0, NetworkConstants.MAX_CHAT_MESSAGE_CHARACTERS);
+        }
+        return messageText;
     }
 }

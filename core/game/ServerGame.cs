@@ -223,7 +223,7 @@ public class ServerGame : Singleton<ServerGame>
         ServerGame.Instance.LastProcessedServerTicksByPlayerID[playerID] = 0;
         ServerGame.Instance.LastProcessedClientTicksByPlayerID[playerID] = 0;
 
-        string assignedName = ValidatePlayerName(request.ClientInfo.PlayerName);
+        string assignedName = NetUtils.ValidatePlayerName(request.ClientInfo.PlayerName);
         ApplyClientLoaded(new PlayerInfo(playerID, assignedName));
 
         SpawnManager.Instance.ServerSpawnPlayer(playerID);
@@ -238,25 +238,6 @@ public class ServerGame : Singleton<ServerGame>
 
     }
 
-    public string ValidatePlayerName(string requestedName)
-    {
-        int maxLength = NetworkConstants.MAX_PLAYER_NAME_LENGTH;
-        if (requestedName.Length > maxLength)
-        {
-            requestedName = requestedName.Substring(0, maxLength);
-        }
-
-        string baseName = requestedName;
-        int counter = 1;
-
-        while (MatchState.Instance.ConnectedPlayers.Values.Any(p => p.PlayerInfo.PlayerName == requestedName))
-        {
-            requestedName = $"{baseName} ({counter})";
-            counter++;
-        }
-
-        return requestedName;
-    }
 
     public void ApplyClientLoaded(PlayerInfo playerInfo)
     {
@@ -268,16 +249,6 @@ public class ServerGame : Singleton<ServerGame>
         ApplyClientCommand(NetUtils.GetPeerPlayerID(peer), clientCommand);
     }
 
-    private readonly Dictionary<Msg, Action<ENetPacketPeer, byte[]>> _messageHandlers = new();
-
-    public virtual void InitMessageHandlers()
-    {
-        _messageHandlers[Msg.C2S_CONNECTION_REQUEST] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
-        _messageHandlers[Msg.C2S_INITIAL_MATCH_STATE_REQUEST] = (peer, payload) => Dispatch<InitialMatchStateRequest>(peer, payload, HandleInitialMatchStateRequest);
-        _messageHandlers[Msg.C2S_CLIENT_COMMAND] = (peer, payload) => Dispatch<ClientCommand>(peer, payload, HandleClientCommand);
-        _messageHandlers[Msg.C2S_CHANGE_PLAYER_NAME] = (peer, payload) => Dispatch<PlayerNameChangeRequest>(peer, payload, HandlePlayerNameChangeRequest);
-
-    }
 
     private void Dispatch<T>(ENetPacketPeer peer, byte[] payload, Action<ENetPacketPeer, T> handler) where T : Message, new()
     {
@@ -335,4 +306,29 @@ public class ServerGame : Singleton<ServerGame>
 
         PlayerNameChanged.Send(playerID, name);
     }
+
+    public void HandleChatMessageRequest(ENetPacketPeer peer, ChatMessageRequest request)
+    {
+        // Note: the incoming request contains the target player (if sending a private msg), but the outgoing info should contain the sender ID
+        var info = new ChatMessageInfo(request.Info.Channel, request.Info.Text, NetUtils.GetPeerPlayerID(peer));
+
+        info.Text = NetUtils.ValidateChatMessage(info.Text);
+        ClientGame.Instance?.ApplyChatMessage(info);
+
+        ChatMessage.Send(info);
+    }
+
+
+    private readonly Dictionary<Msg, Action<ENetPacketPeer, byte[]>> _messageHandlers = new();
+
+    public virtual void InitMessageHandlers()
+    {
+        _messageHandlers[Msg.C2S_CONNECTION_REQUEST] = (peer, payload) => Dispatch<ConnectionRequest>(peer, payload, HandleConnectionRequest);
+        _messageHandlers[Msg.C2S_INITIAL_MATCH_STATE_REQUEST] = (peer, payload) => Dispatch<InitialMatchStateRequest>(peer, payload, HandleInitialMatchStateRequest);
+        _messageHandlers[Msg.C2S_CLIENT_COMMAND] = (peer, payload) => Dispatch<ClientCommand>(peer, payload, HandleClientCommand);
+        _messageHandlers[Msg.C2S_CHANGE_PLAYER_NAME] = (peer, payload) => Dispatch<PlayerNameChangeRequest>(peer, payload, HandlePlayerNameChangeRequest);
+        _messageHandlers[Msg.C2S_CHAT_MESSAGE_REQUEST] = (peer, payload) => Dispatch<ChatMessageRequest>(peer, payload, HandleChatMessageRequest);
+
+    }
+
 }

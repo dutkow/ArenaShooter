@@ -13,6 +13,8 @@ public static class NetworkConstants
     // Server discovery
 
 
+    public const int MAX_CHAT_MESSAGE_CHARACTERS = 50;
+
     // -------------------
     // Server Browser
     // -------------------

@@ -12,6 +12,16 @@ public partial class ChatInputField : LineEdit
 
     public void SendMessageRequest(string text)
     {
-        ChatMessageRequest.Send(new ChatMessageInfo(ChatChannel.ALL, text)); // no channels yet
+        var info = new ChatMessageInfo(ChatChannel.ALL, text);
+
+        if(NetworkManager.Instance.IsClient)
+        {
+            ChatMessageRequest.Send(info);
+        }
+        else
+        {
+            info.Text = NetUtils.ValidateChatMessage(text);
+            ClientGame.Instance?.ApplyChatMessage(info);
+        }
     }
 }
