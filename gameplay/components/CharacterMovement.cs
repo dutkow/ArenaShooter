@@ -12,12 +12,6 @@ public enum CharacterMovementMode : byte
     FALLING,
 }
 
-public struct SlideResult
-{
-    public float SafePercent;
-    public Vector3 Motion;
-}
-
 public struct SweepResult
 {
     public float SafePercent;
@@ -102,8 +96,6 @@ public class CharacterMovement
 
     private Godot.Collections.Array<Rid> _characterCollisionRids = new();
 
-
-
     public float HorizontalVelocity { get; private set; }
     public float VerticalVelocity { get; private set; }
 
@@ -114,8 +106,12 @@ public class CharacterMovement
 
     private bool _justJumped;
 
-    public void Initialize()
+
+    public void OnCharacterSpawned(Character character)
     {
+        Character = character;
+
+        _space = Character.GetWorld3D().DirectSpaceState;
 
         _characterCollisionRids.Add(Character.Area.GetRid());
 
@@ -124,17 +120,6 @@ public class CharacterMovement
             _mainCollisionShape = collisionShape;
             _characterCollisionRids.Add(_mainCollisionShape.GetRid());
         }
-        else
-        {
-            GD.PushError("Character does not have a CapsuleShape3D set as its collision shape.");
-        }
-    }
-
-    public void OnCharacterSpawned(Character character)
-    {
-        Character = character;
-
-        _space = Character.GetWorld3D().DirectSpaceState;
 
         SetPosition(Character.GlobalPosition);
         SetVelocity(Vector3.Zero);
@@ -248,7 +233,6 @@ public class CharacterMovement
 
     public void StepAndSlide(ref CharacterMoveState state, float delta, bool groundedMove)
     {
-
         Vector3 remainingMotion = state.Velocity * delta;
         float remainingDistance = remainingMotion.Length();
         Vector3 direction = remainingMotion.Normalized();
@@ -271,7 +255,6 @@ public class CharacterMovement
                 state.Position += sweepResult.SafeMotion;
                 remainingDistance -= sweepResult.SafeMotion.Length();
                 moveComplete = true;
-
             }
             else
             {
@@ -284,9 +267,9 @@ public class CharacterMovement
                 }
                 else if (sweepResult.CollisionType == CollisionType.WALL)
                 {
-                    GD.Print($"colliding with wall");
-                    // TRY TO STEP FIRST
                     bool steppedUp = false;
+
+                    // TRY TO STEP FIRST
 
                     if (groundedMove)
                     {
@@ -339,11 +322,10 @@ public class CharacterMovement
                            
                         }
                     }
-
+                    
                     // STEP FAILED, THIS IS A WALL
-                    if(!steppedUp)
+                    if (!steppedUp)
                     {
-                        GD.Print($"SLIDING ON WALL");
                         state.Position += sweepResult.SafeMotion;
 
                         remainingMotion = targetMotion - sweepResult.SafeMotion;
