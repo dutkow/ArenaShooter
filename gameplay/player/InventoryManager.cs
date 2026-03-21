@@ -23,7 +23,7 @@ public struct InventoryState
 
 public class InventoryManager
 {
-    InventoryState State;
+    public InventoryState State;
 
     private Character _character;
 
@@ -185,6 +185,22 @@ public class InventoryManager
         {
             State.EquippedWeaponIndex = (byte)weaponIndex;
             EquippedWeaponChanged?.Invoke(weaponIndex);
+        }
+    }
+
+    public void ApplyState(InventoryState state)
+    {
+        if ((state.Flags & InventoryStateFlags.EQUIPPED_WEAPON_CHANGED) != 0)
+        {
+        }
+
+        if ((state.Flags & InventoryStateFlags.HELD_WEAPONS_CHANGED) != 0)
+        {
+        }
+
+        if ((state.Flags & InventoryStateFlags.AMMO_CHANGED) != 0)
+        {
+
         }
     }
 }

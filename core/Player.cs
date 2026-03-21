@@ -2,24 +2,16 @@ using Godot;
 using System;
 
 
+
 [Flags]
 public enum PlayerFlags : byte // 8 values
 {
     NONE = 0,
 
     PLAYER_STATE_CHANGED = 1 << 0,
-    MOVE_STATE_CHANGED = 1 << 1,
-    HEALTH_STATE_CHANGED = 1 << 2,
-    INVENTORY_STATE_CHANGED = 1 << 3,
+    CHARACTER_STATE_CHANGED = 1 << 1,
 }
 
-public struct PlayerSnapshot
-{
-    public PlayerState PlayerState;
-    public CharacterMoveState CharacterMoveState;
-    public HealthState HealthState;
-    public InventoryState InventoryState;
-}
 
 [Flags]
 public enum PlayerStateFlags : byte // 8 values
@@ -40,6 +32,13 @@ public enum PlayerStatFlags : byte // 8 values
     DEATHS_CHANGED = 1 << 1,
 }
 
+public struct PlayerSnapshot
+{
+    public PlayerFlags Flags;
+    public PlayerState PlayerState;
+    public CharacterState CharacterState;
+}
+
 public struct PlayerState
 {
     public byte ID; // not changed
@@ -57,7 +56,6 @@ public class Player
 {
     PlayerState State;
     Character Character;
-    InventoryManager InventoryManager;
 
     public Action<string> NameChanged;
     public Action<int> PingChanged;
@@ -119,23 +117,35 @@ public class Player
 
     public void AddKill()
     {
-        State.Stats.Kills++;
-
-        KillsChanged?.Invoke(State.Stats.Kills);
+        SetKills(State.Stats.Kills + 1);
     }
 
     public void SubtractKill() // i.e., penalty for suicide or team kill
     {
-        State.Stats.Kills--;
+        SetKills(State.Stats.Kills - 1);
+    }
 
-        KillsChanged?.Invoke(State.Stats.Kills);
+    public void SetKills(int kills)
+    {
+        if(State.Stats.Kills != (byte)kills)
+        {
+            State.Stats.Kills = (byte)kills;
+            KillsChanged?.Invoke(State.Stats.Kills);
+        }
     }
 
     public void AddDeath()
     {
-        State.Stats.Deaths++;
+        SetDeaths(State.Stats.Deaths + 1);
+    }
 
-        DeathsChanged?.Invoke(State.Stats.Deaths);
+    public void SetDeaths(int deaths)
+    {
+        if (State.Stats.Deaths != (byte)deaths)
+        {
+            State.Stats.Deaths = (byte)deaths;
+            DeathsChanged?.Invoke(State.Stats.Deaths);
+        }
     }
 
     public void HandleSpawn(Character character)
@@ -145,7 +155,6 @@ public class Player
         Character = character;
         Character.OnSpawned();
 
-        InventoryManager.OnSpawned();
     }
 
     public void OnDeath()
@@ -161,12 +170,59 @@ public class Player
         if(State.Flags != 0)
         {
             snapshot.PlayerState = State;
+            snapshot.Flags |= PlayerFlags.PLAYER_STATE_CHANGED;
         }
 
-        if(Character != null)
+        if (State.IsSpawned && Character != null && Character.State.Flags != 0)
         {
+            snapshot.CharacterState = Character.State;
+            snapshot.Flags |= PlayerFlags.CHARACTER_STATE_CHANGED;
         }
 
-        return default;
+        return snapshot;
+    }
+
+    public void ApplyPlayerSnapshot(PlayerSnapshot snapshot)
+    {
+        if (snapshot.Flags == 0)
+        {
+            return;
+        }
+
+        // Player State 
+        if ((snapshot.Flags & PlayerFlags.PLAYER_STATE_CHANGED) != 0)
+        {
+            if ((snapshot.PlayerState.Flags & PlayerStateFlags.PING_CHANGED) != 0)
+            {
+                SetPing(snapshot.PlayerState.Ping);
+            }
+
+            if ((snapshot.PlayerState.Flags & PlayerStateFlags.IS_SPAWNED_CHANGED) != 0)
+            {
+                SetIsSpawned(snapshot.PlayerState.IsSpawned);
+            }
+
+            // Stats
+            if ((snapshot.PlayerState.Flags & PlayerStateFlags.STATS_CHANGED) != 0)
+            {
+                if ((snapshot.PlayerState.StatFlags & PlayerStatFlags.KILLS_CHANGED) != 0)
+                {
+                    SetKills(snapshot.PlayerState.Stats.Kills);
+                }
+
+                if ((snapshot.PlayerState.StatFlags & PlayerStatFlags.DEATHS_CHANGED) != 0)
+                {
+                    SetDeaths(snapshot.PlayerState.Stats.Deaths);
+                }
+            }
+        }
+        // Character state 
+        if (Character != null)
+        {
+            if ((snapshot.Flags & PlayerFlags.CHARACTER_STATE_CHANGED) != 0)
+            {
+                Character.ApplyState(snapshot.CharacterState);
+            }
+        }
     }
 }

@@ -7,6 +7,8 @@ using System.Linq;
 [Flags]
 public enum CharacterStateFlags : byte
 {
+    NONE = 0,
+
     MOVE_STATE_CHANGED,
     HEALTH_STATE_CHANGED,
     INVENTORY_STATE_CHANGED,
@@ -75,7 +77,7 @@ public partial class Character : Pawn, IDamageable
 
     public CharacterPublicState PredictedPublicState = new();
 
-    private InventoryManager _weaponManager;
+    private InventoryManager InventoryManager;
 
     public override void _Ready()
     {
@@ -98,10 +100,10 @@ public partial class Character : Pawn, IDamageable
 
         Area.Owner = this;
 
-        _weaponManager = new();
-        _weaponManager.Initialize(this);
+        InventoryManager = new();
+        InventoryManager.Initialize(this);
 
-        _weaponManager.EquipWeapon(PlayerState.CharacterPublicState.EquippedWeaponIndex);
+        InventoryManager.EquipWeapon(PlayerState.CharacterPublicState.EquippedWeaponIndex);
     }
 
     public void ApplyDamage(int damage)
@@ -126,7 +128,7 @@ public partial class Character : Pawn, IDamageable
         base.ServerProcessNextClientInput(cmd, delta);
 
         PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, delta);
-        _weaponManager?.ProcessClientInput(cmd.Flags);
+        InventoryManager?.ProcessClientInput(cmd.Flags);
     }
 
 
@@ -476,7 +478,7 @@ public partial class Character : Pawn, IDamageable
         }*/
 
         Vector3 dir = -_camera.GlobalTransform.Basis.Z;
-        //_weaponManager.Tick((float)TickManager.Instance.ServerTickInterval, _camera.GlobalPosition, dir);
+        //InventoryManager.Tick((float)TickManager.Instance.ServerTickInterval, _camera.GlobalPosition, dir);
 
         if(_accumulatedLookDelta != Vector2.Zero)
         {
@@ -498,7 +500,7 @@ public partial class Character : Pawn, IDamageable
             }
         }
 
-        _weaponManager.HandleInput(clientPredictionTick.InputCommand.Flags);
+        InventoryManager.HandleInput(clientPredictionTick.InputCommand.Flags);
 
         _accumulatedLookDelta = Vector2.Zero;
 
@@ -717,5 +719,56 @@ public partial class Character : Pawn, IDamageable
     {
         MovementComp.OnSpawned();
         HealthComp.OnSpawned();
+    }
+
+
+
+    public CharacterState GetState()
+    {
+        CharacterState state = new();
+
+        state.MoveState = MovementComp.State;
+        state.HealthState = HealthComp.State;
+        state.InventoryState = InventoryManager.State;
+
+        if(state.MoveState.Flags != 0)
+        {
+            state.Flags |= CharacterStateFlags.MOVE_STATE_CHANGED;
+        }
+
+        if (state.HealthState.Flags != 0)
+        {
+            state.Flags |= CharacterStateFlags.HEALTH_STATE_CHANGED;
+        }
+
+        if (state.InventoryState.Flags != 0)
+        {
+            state.Flags |= CharacterStateFlags.INVENTORY_STATE_CHANGED;
+        }
+
+        return state;
+    }
+
+    public void ApplyState(CharacterState state)
+    {
+        if (state.Flags == 0)
+        {
+            return;
+        }
+
+        if ((state.Flags & CharacterStateFlags.MOVE_STATE_CHANGED) != 0)
+        {
+            MovementComp.ApplyState(state.MoveState);
+        }
+
+        if ((state.Flags & CharacterStateFlags.HEALTH_STATE_CHANGED) != 0)
+        {
+            HealthComp.ApplyState(state.HealthState);
+        }
+
+        if ((state.Flags & CharacterStateFlags.INVENTORY_STATE_CHANGED) != 0)
+        {
+            InventoryManager.ApplyState(state.InventoryState);
+        }
     }
 }

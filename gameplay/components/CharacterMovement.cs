@@ -609,4 +609,43 @@ public class CharacterMovement
         State.Yaw = _character.GlobalRotation.Y;
         State.Pitch = 0.0f;
     }
+
+    public void ApplyState(CharacterMoveState state)
+    {
+        if ((state.Flags & CharacterMoveStateFlags.POSITION_CHANGED) != 0)
+        {
+            SetPosition(state.Position);
+        }
+
+        if ((state.Flags & CharacterMoveStateFlags.VELOCITY_CHANGED) != 0)
+        {
+            SetVelocity(state.Velocity);
+        }
+
+        if ((state.Flags & CharacterMoveStateFlags.ROTATION_CHANGED) != 0)
+        {
+            SetYaw(state.Yaw);
+            SetPitch(state.Pitch);
+        }
+    }
+
+    public void SetPosition(Vector3 position)
+    {
+        State.Position = position;
+    }
+
+    public void SetVelocity(Vector3 velocity)
+    {
+        State.Velocity = velocity;
+    }
+
+    public void SetYaw(float yaw)
+    {
+        State.Yaw = yaw;
+    }
+
+    public void SetPitch(float pitch)
+    {
+        State.Pitch = pitch;
+    }
 }

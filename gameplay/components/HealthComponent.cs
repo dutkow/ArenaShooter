@@ -22,7 +22,7 @@ public struct HealthState
 
 public class HealthComponent : Component
 {
-    public HealthState HealthState;
+    public HealthState State;
 
     /// <summary>
     /// Base health and armor stats
@@ -318,6 +318,17 @@ public class HealthComponent : Component
         }
     }
 
+    public void SetMaxHealth(int maxHealth)
+    {
+        maxHealth = Math.Max(0, maxHealth);
+
+        if (MaxHealth != maxHealth)
+        {
+            MaxHealth = maxHealth;
+            MaxHealthChanged?.Invoke(maxHealth);
+        }
+    }
+
     public void SetArmor(int armor)
     {
         armor = Math.Clamp(armor, 0, MaxArmor);
@@ -357,6 +368,17 @@ public class HealthComponent : Component
         }
     }
 
+    public void SetMaxArmor(int maxArmor)
+    {
+        maxArmor = Math.Max(0, maxArmor);
+
+        if (MaxArmor != maxArmor)
+        {
+            MaxArmor = maxArmor;
+            MaxArmorChanged?.Invoke(maxArmor);
+        }
+    }
+
     public void OnSpawned()
     {
         //SetMaxHealth(GameRules.Instance.MaxHealth);
@@ -364,5 +386,28 @@ public class HealthComponent : Component
 
         //SetMaxArmor(GameRules.Instance.MaxArmor);
         SetArmor(GameRules.Instance.MaxArmor);
+    }
+
+    public void ApplyState(HealthState state)
+    {
+        if ((state.Flags & HealthStateFlags.HEALTH_CHANGED) != 0)
+        {
+            SetHealth(state.Health);
+        }
+
+        if ((state.Flags & HealthStateFlags.MAX_HEALTH_CHANGED) != 0)
+        {
+            SetMaxHealth(state.MaxHealth);
+        }
+
+        if ((state.Flags & HealthStateFlags.ARMOR_CHANGED) != 0)
+        {
+            SetArmor(state.Armor);
+        }
+
+        if ((state.Flags & HealthStateFlags.MAX_ARMOR_CHANGED) != 0)
+        {
+            SetMaxArmor(state.MaxArmor);
+        }
     }
 }
