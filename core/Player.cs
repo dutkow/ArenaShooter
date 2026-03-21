@@ -32,12 +32,6 @@ public enum PlayerStatFlags : byte // 8 values
     DEATHS_CHANGED = 1 << 1,
 }
 
-public struct PlayerSnapshot
-{
-    public PlayerFlags Flags;
-    public PlayerState PlayerState;
-    public CharacterState CharacterState;
-}
 
 public struct PlayerState
 {

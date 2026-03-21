@@ -38,7 +38,7 @@ public class WorldSnapshot : Message
         {
             foreach(var playerSnapshot in PlayerSnapshots)
             {
-                //playerSnapshot.Add(this, ReceivingPlayerID, true);
+                playerSnapshot.Add(this, ReceivingPlayerID, true);
             }
         }    
 
@@ -85,7 +85,7 @@ public class WorldSnapshot : Message
         {
             foreach (var playerSnapshot in PlayerSnapshots)
             {
-                //playerSnapshot.Write(this, ReceivingPlayerID);
+                playerSnapshot.Write(this, ReceivingPlayerID);
             }
         }
 
@@ -137,7 +137,7 @@ public class WorldSnapshot : Message
             {
                 PlayerSnapshot playerSnapshot = new();
                 PlayerSnapshots[i] = playerSnapshot;
-                //playerSnapshot.Read(this, ReceivingPlayerID);
+                playerSnapshot.Read(this, ReceivingPlayerID);
             }
         }
 

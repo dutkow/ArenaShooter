@@ -203,6 +203,8 @@ public class MatchState : ITickable
 
         var playerState = new PlayerStateOld();
         playerState.PlayerInfo = playerInfo;
+
+        Player.Create(playerInfo);
   
         ConnectedPlayers[playerInfo.PlayerID] = playerState;
 
