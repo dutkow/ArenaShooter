@@ -262,13 +262,13 @@ public struct PlayerSnapshot
 
         if (forceFull)
         {
-            // Player State
+            // Player AuthoritativeState
             msg.Read(out PlayerState.Ping);
             msg.Read(out PlayerState.IsSpawned);
             msg.Read(out PlayerState.Stats.Kills);
             msg.Read(out PlayerState.Stats.Deaths);
 
-            // Character State
+            // Character AuthoritativeState
             msg.Read(out CharacterState.MoveState.Position);
             msg.Read(out CharacterState.MoveState.Velocity);
             msg.Read(out CharacterState.MoveState.Yaw);

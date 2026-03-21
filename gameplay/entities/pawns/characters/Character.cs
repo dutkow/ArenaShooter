@@ -151,11 +151,11 @@ public partial class Character : Pawn, IDamageable
         if (_useInterpolation)
         {
             //InterpolatePosition(10.0f, delta);
-            //GlobalPosition = MovementComp.State.Position;
+            //GlobalPosition = MovementComp.AuthoritativeState.Position;
         }
         else
         {
-            GlobalPosition = MovementComp.State.Position;
+            GlobalPosition = MovementComp.AuthoritativeState.Position;
         }
     }
 
@@ -182,9 +182,9 @@ public partial class Character : Pawn, IDamageable
         }
         else
         {
-            GlobalPosition = MovementComp.State.Position;
-            GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
-            WeaponSocketTP.Rotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
+            GlobalPosition = MovementComp.AuthoritativeState.Position;
+            GlobalRotation = new Vector3(0.0f, MovementComp.AuthoritativeState.Yaw, 0.0f);
+            WeaponSocketTP.Rotation = new Vector3(MovementComp.AuthoritativeState.Pitch, 0.0f, 0.0f);
         }
     }
 
@@ -554,7 +554,7 @@ public partial class Character : Pawn, IDamageable
     {
         if(IsAuthority)
         {
-            MovementComp.State = MovementComp.QueueLaunch(MovementComp.State, velocity);
+            MovementComp.AuthoritativeState = MovementComp.QueueLaunch(MovementComp.AuthoritativeState, velocity);
         }
         else if(IsLocal)
         {
@@ -617,7 +617,7 @@ public partial class Character : Pawn, IDamageable
         PlayerState.CharacterPrivateState.Flags |= CharacterPrivateFlags.MAX_ARMOR_CHANGED;
     }
 
-    // Public State Changes
+    // Public AuthoritativeState Changes
 
     public void UpdatePositionState(Vector3 position)
     {
@@ -713,7 +713,7 @@ public partial class Character : Pawn, IDamageable
     {
         CharacterState state = new();
 
-        state.MoveState = MovementComp.State;
+        state.MoveState = MovementComp.AuthoritativeState;
         state.HealthState = HealthComp.State;
         state.InventoryState = InventoryManager.State;
 
@@ -744,7 +744,7 @@ public partial class Character : Pawn, IDamageable
 
         if ((state.Flags & CharacterStateFlags.MOVE_STATE_CHANGED) != 0)
         {
-            MovementComp.ApplyState(state.MoveState, delta);
+            MovementComp.ApplyAuthoritativeState(state.MoveState, delta);
         }
 
         if ((state.Flags & CharacterStateFlags.HEALTH_STATE_CHANGED) != 0)

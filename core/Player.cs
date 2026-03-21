@@ -194,7 +194,7 @@ public class Player
             return;
         }
 
-        // Player State 
+        // Player AuthoritativeState 
         if ((snapshot.Flags & PlayerFlags.PLAYER_STATE_CHANGED) != 0)
         {
             if ((snapshot.PlayerState.Flags & PlayerStateFlags.PING_CHANGED) != 0)

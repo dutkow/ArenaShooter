@@ -102,7 +102,7 @@ public class SpawnManager : Singleton<SpawnManager>
 
     public Character LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation, float pitch = 0.0f)
     {
-        GD.Print($"spawning local player on {NetworkManager.Instance.NetworkMode}");
+        GD.Print($"spawning local player on {NetworkManager.Instance.NetworkMode}. spawn position: {spawnPosition}");
 
         var spawnedCharacter = (Character)GameRules.Instance.DefaultPawnScene.Instantiate();
 
@@ -124,11 +124,9 @@ public class SpawnManager : Singleton<SpawnManager>
         if (playerID == ClientGame.Instance.LocalPlayerID)
         {
             ClientGame.Instance.LocalPlayerController.Possess(spawnedCharacter);
-            GD.Print($"running POSSESS on player id: {playerID} on {NetworkManager.Instance.NetworkMode}");
         }
         else
         {
-            GD.Print($"handling remote spawn on {NetworkManager.Instance.NetworkMode}");
             spawnedCharacter.HandleRemoteSpawn(playerID);
         }
 

@@ -84,7 +84,7 @@ public partial class InputManager : Node
     // Generic navigation events
     public event Action NavigateBackPressed;
 
-    // State management flags
+    // AuthoritativeState management flags
     public bool IsDragMoving;
 
     public event Action<InputMappingProfile> DefaultInputMappingsRestored;

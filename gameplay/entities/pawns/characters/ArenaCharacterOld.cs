@@ -34,7 +34,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
     public NetworkedComponent NetworkedComponent { get; private set; } = new();
 
     // ----------------------
-    // State
+    // AuthoritativeState
     // ----------------------
     public PlayerStateOld State { get; private set; }
 
@@ -95,7 +95,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
         }
 
         State = state;
-        //State.Character = pawn;
+        //AuthoritativeState.Character = pawn;
 
         MovementComp.SetCharacter(this);
 

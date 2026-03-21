@@ -6,6 +6,11 @@ using System.Diagnostics;
 using System.Resources;
 using static Godot.WebSocketPeer;
 
+public enum StateType : byte
+{
+    AUTHORITATIVE,
+    PREDICTED,
+}
 public enum CharacterMovementMode : byte
 {
     GROUNDED,
@@ -65,7 +70,7 @@ public struct CharacterMoveState
 
 public class CharacterMovement
 {
-    public CharacterMoveState State;
+    public CharacterMoveState AuthoritativeState;
     public CharacterMoveState PredictedState;
 
     private bool _isSkippingReconciliation;
@@ -119,14 +124,16 @@ public class CharacterMovement
             _characterCollisionRids.Add(_mainCollisionShape.GetRid());
         }
 
-        SetPosition(Character.GlobalPosition);
-        SetVelocity(Vector3.Zero);
-        SetRotation(Character.GlobalRotation.Y, 0.0f);
+        StateType stateType = Character.IsLocal && !Character.IsAuthority ? StateType.PREDICTED : StateType.AUTHORITATIVE;
+
+        SetPosition(Character.GlobalPosition, stateType);
+        SetVelocity(Vector3.Zero, stateType);
+        SetRotation(Character.GlobalRotation.Y, 0.0f, stateType);
     }
 
     public void ServerProcessNextClientInput(ClientInputCommand cmd, float delta)
     {
-        Step(ref State, cmd, delta);
+        Step(ref AuthoritativeState, cmd, delta);
     }
 
     public void Step(ref CharacterMoveState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
@@ -625,58 +632,63 @@ public class CharacterMovement
         return state;
     }
 
-    public void OnSpawned()
+    public void SetPosition(Vector3 position, StateType stateType)
     {
-
+        if(stateType == StateType.AUTHORITATIVE)
+        {
+            AuthoritativeState.Position = position;
+            AuthoritativeState.Flags |= CharacterMoveStateFlags.POSITION_CHANGED;
+        }
+        else
+        {
+            PredictedState.Position = position;
+        }
+ 
     }
 
-
-    public void SetPosition(Vector3 position, bool markDirty = true)
+    public void SetVelocity(Vector3 velocity, StateType stateType)
     {
-        State.Position = position;
-
-        if (markDirty)
+        if (stateType == StateType.AUTHORITATIVE)
         {
-            State.Flags |= CharacterMoveStateFlags.POSITION_CHANGED;
+            AuthoritativeState.Velocity = velocity;
+            AuthoritativeState.Flags |= CharacterMoveStateFlags.VELOCITY_CHANGED;
+        }
+        else
+        {
+            PredictedState.Velocity = velocity;
         }
     }
 
-    public void SetVelocity(Vector3 velocity, bool markDirty = true)
+    public void SetRotation(float yaw, float pitch, StateType stateType)
     {
-        State.Velocity = velocity;
-
-        if (markDirty)
+        if (stateType == StateType.AUTHORITATIVE)
         {
-            State.Flags |= CharacterMoveStateFlags.VELOCITY_CHANGED;
+            AuthoritativeState.Yaw = yaw;
+            AuthoritativeState.Pitch = pitch;
+            AuthoritativeState.Flags |= CharacterMoveStateFlags.ROTATION_CHANGED;
+        }
+        else
+        {
+            PredictedState.Yaw = yaw;
+            PredictedState.Pitch = pitch;
         }
     }
 
-    public void SetRotation(float yaw, float pitch, bool markDirty = true)
-    {
-        State.Yaw = yaw;
-        State.Pitch = pitch;
-
-        if (markDirty)
-        {
-            State.Flags |= CharacterMoveStateFlags.ROTATION_CHANGED;
-        }
-    }
-
-    public void ApplyState(CharacterMoveState state, float delta, bool markDirty = true)
+    public void ApplyAuthoritativeState(CharacterMoveState state, float delta, bool markDirty = true)
     {
         if ((state.Flags & CharacterMoveStateFlags.POSITION_CHANGED) != 0)
         {
-            SetPosition(state.Position, false);
+            SetPosition(state.Position, StateType.AUTHORITATIVE);
         }
 
         if ((state.Flags & CharacterMoveStateFlags.VELOCITY_CHANGED) != 0)
         {
-            SetVelocity(state.Velocity, false);
+            SetVelocity(state.Velocity, StateType.AUTHORITATIVE);
         }
 
         if ((state.Flags & CharacterMoveStateFlags.ROTATION_CHANGED) != 0)
         {
-            SetRotation(state.Yaw, state.Pitch, false);
+            SetRotation(state.Yaw, state.Pitch, StateType.AUTHORITATIVE);
         }
 
         
@@ -700,7 +712,7 @@ public class CharacterMovement
 
     public void ReconcileState()
     {
-        Vector3 delta = PredictedState.Position - State.Position;
+        Vector3 delta = PredictedState.Position - AuthoritativeState.Position;
 
         // Thresholds
         const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
@@ -712,7 +724,7 @@ public class CharacterMovement
         const float INTERP_SPEED_H = 0.25f;
         const float INTERP_SPEED_V = 0.25f;
 
-        Vector3 targetPos = State.Position;
+        Vector3 targetPos = AuthoritativeState.Position;
         Vector3 currentPos = PredictedState.Position;
 
         Vector2 deltaXZ = new Vector2(delta.X, delta.Z);
@@ -749,7 +761,7 @@ public class CharacterMovement
         }
     
         PredictedState.Position = currentPos;
-        PredictedState.Velocity = State.Velocity;
+        PredictedState.Velocity = AuthoritativeState.Velocity;
     }
 
     public void HandlePredictedInput(ClientInputCommand cmd, float delta)

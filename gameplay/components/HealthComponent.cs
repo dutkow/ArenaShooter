@@ -84,7 +84,7 @@ public class HealthComponent : Component
     public event Action ArmorRechargeStopped;
 
     /// <summary>
-    /// State related variables
+    /// AuthoritativeState related variables
     /// </summary>
 
     private bool _isHealthFull => Health == MaxHealth;

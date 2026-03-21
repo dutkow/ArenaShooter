@@ -86,7 +86,7 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
         PrivateState.Flags |= CharacterPrivateFlags.MAX_ARMOR_CHANGED;
     }
 
-    // Public State Changes
+    // Public AuthoritativeState Changes
     public void OnPositionChanged(Vector3 position)
     {
         PublicState.Position = position;
