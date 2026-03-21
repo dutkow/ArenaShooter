@@ -96,7 +96,7 @@ public class CharacterMovement
     public CharacterPublicState Step(CharacterPublicState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
         ApplyInput(state, cmd, delta);
-        MoveAndSlide(state, delta);
+        MoveAndSlide(state, cmd, delta);
 
         Vector3 deltaPos = state.Position - _lastPosition;
 
@@ -155,7 +155,7 @@ public class CharacterMovement
         }
     }
 
-    public CharacterPublicState MoveAndSlide(CharacterPublicState state, float delta)
+    public CharacterPublicState MoveAndSlide(CharacterPublicState state, ClientInputCommand cmd, float delta)
     {
         var space = _character.GetWorld3D().DirectSpaceState;
 
@@ -163,11 +163,11 @@ public class CharacterMovement
 
         if (state.IsGrounded)
         {
-            MoveAndSlideGrounded(state, space, delta);
+            MoveAndSlideGrounded(state, cmd, space, delta);
         }
         else
         {
-            MoveAndSlideAir(state, space, delta);
+            MoveAndSlideAir(state, cmd,space, delta);
         }
 
         state.ticksRemainingBeforeJump--;
@@ -175,12 +175,12 @@ public class CharacterMovement
         return state;
     }
 
-    public CharacterPublicState MoveAndSlideGrounded(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta)
+    public CharacterPublicState MoveAndSlideGrounded(CharacterPublicState state, ClientInputCommand cmd, PhysicsDirectSpaceState3D space, float delta)
     {
-        if (state.WantsToJump && state.ticksRemainingBeforeJump <= 0)
+        if ((cmd.Flags & InputFlags.JUMP) != 0 && state.ticksRemainingBeforeJump <= 0)
         {
             Jump(state);
-            MoveAndSlideAir(state, space, delta);
+            MoveAndSlideAir(state, cmd, space, delta);
             return state;
         }
 
@@ -406,7 +406,7 @@ public class CharacterMovement
     }
 
 
-    public CharacterPublicState MoveAndSlideAir(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta)
+    public CharacterPublicState MoveAndSlideAir(CharacterPublicState state, ClientInputCommand cmd, PhysicsDirectSpaceState3D space, float delta)
     {
         ApplyAcceleration(state, _airAcceleration, _airDeceleration, delta);
         ApplyGravity(state, delta);
@@ -424,12 +424,10 @@ public class CharacterMovement
     public void ApplyInput(CharacterPublicState state, ClientInputCommand cmd, float delta)
     {
         Vector3 move = Vector3.Zero;
-        if (cmd.Flags.HasFlag(InputFlags.FORWARD)) move.Z -= 1;
-        if (cmd.Flags.HasFlag(InputFlags.BACKWARD)) move.Z += 1;
-        if (cmd.Flags.HasFlag(InputFlags.STRAFE_LEFT)) move.X -= 1;
-        if (cmd.Flags.HasFlag(InputFlags.STRAFE_RIGHT)) move.X += 1;
-
-        state.WantsToJump = cmd.Flags.HasFlag(InputFlags.JUMP);
+        if ((cmd.Flags & InputFlags.FORWARD) != 0) move.Z -= 1;
+        if ((cmd.Flags & InputFlags.BACKWARD) != 0) move.Z += 1;
+        if ((cmd.Flags & InputFlags.STRAFE_LEFT) != 0) move.X -= 1;
+        if ((cmd.Flags & InputFlags.STRAFE_RIGHT) != 0) move.X += 1;
 
         state.Yaw -= cmd.Look.X;
         state.Pitch -= cmd.Look.Y;
@@ -610,42 +608,52 @@ public class CharacterMovement
         State.Pitch = 0.0f;
     }
 
-    public void ApplyState(CharacterMoveState state)
+    public void ApplyState(CharacterMoveState state, bool markDirty = true)
     {
         if ((state.Flags & CharacterMoveStateFlags.POSITION_CHANGED) != 0)
         {
-            SetPosition(state.Position);
+            SetPosition(state.Position, false);
         }
 
         if ((state.Flags & CharacterMoveStateFlags.VELOCITY_CHANGED) != 0)
         {
-            SetVelocity(state.Velocity);
+            SetVelocity(state.Velocity, false);
         }
 
         if ((state.Flags & CharacterMoveStateFlags.ROTATION_CHANGED) != 0)
         {
-            SetYaw(state.Yaw);
-            SetPitch(state.Pitch);
+            SetRotation(state.Yaw, state.Pitch, false);
         }
     }
 
-    public void SetPosition(Vector3 position)
+    public void SetPosition(Vector3 position, bool markDirty = true)
     {
         State.Position = position;
+
+        if(markDirty)
+        {
+            State.Flags |= CharacterMoveStateFlags.POSITION_CHANGED;
+        }
     }
 
-    public void SetVelocity(Vector3 velocity)
+    public void SetVelocity(Vector3 velocity, bool markDirty = true)
     {
         State.Velocity = velocity;
+
+        if (markDirty)
+        {
+            State.Flags |= CharacterMoveStateFlags.VELOCITY_CHANGED;
+        }
     }
 
-    public void SetYaw(float yaw)
+    public void SetRotation(float yaw, float pitch, bool markDirty = true)
     {
         State.Yaw = yaw;
-    }
-
-    public void SetPitch(float pitch)
-    {
         State.Pitch = pitch;
+
+        if (markDirty)
+        {
+            State.Flags |= CharacterMoveStateFlags.ROTATION_CHANGED;
+        }
     }
 }

@@ -125,12 +125,18 @@ public class Player
         SetKills(State.Stats.Kills - 1);
     }
 
-    public void SetKills(int kills)
+    public void SetKills(int kills, bool markDirty = true)
     {
         if(State.Stats.Kills != (byte)kills)
         {
             State.Stats.Kills = (byte)kills;
             KillsChanged?.Invoke(State.Stats.Kills);
+
+            if(markDirty)
+            {
+                State.Flags |= PlayerStateFlags.STATS_CHANGED;
+                State.StatFlags |= PlayerStatFlags.KILLS_CHANGED;
+            }
         }
     }
 
@@ -139,12 +145,18 @@ public class Player
         SetDeaths(State.Stats.Deaths + 1);
     }
 
-    public void SetDeaths(int deaths)
+    public void SetDeaths(int deaths, bool markDirty = true)
     {
         if (State.Stats.Deaths != (byte)deaths)
         {
             State.Stats.Deaths = (byte)deaths;
             DeathsChanged?.Invoke(State.Stats.Deaths);
+
+            if (markDirty)
+            {
+                State.Flags |= PlayerStateFlags.STATS_CHANGED;
+                State.StatFlags |= PlayerStatFlags.DEATHS_CHANGED;
+            }
         }
     }
 
@@ -207,12 +219,12 @@ public class Player
             {
                 if ((snapshot.PlayerState.StatFlags & PlayerStatFlags.KILLS_CHANGED) != 0)
                 {
-                    SetKills(snapshot.PlayerState.Stats.Kills);
+                    SetKills(snapshot.PlayerState.Stats.Kills, false);
                 }
 
                 if ((snapshot.PlayerState.StatFlags & PlayerStatFlags.DEATHS_CHANGED) != 0)
                 {
-                    SetDeaths(snapshot.PlayerState.Stats.Deaths);
+                    SetDeaths(snapshot.PlayerState.Stats.Deaths, false);
                 }
             }
         }

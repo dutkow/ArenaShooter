@@ -277,7 +277,7 @@ public class HealthComponent : Component
         }
     }
 
-    public void SetHealth(int health)
+    public void SetHealth(int health, bool markDirty = true)
     {
         health = Math.Clamp(health, 0, MaxHealth);
 
@@ -316,9 +316,14 @@ public class HealthComponent : Component
                 HealthPartiallyRestored?.Invoke();
             }
         }
+
+        if(markDirty)
+        {
+            State.Flags |= HealthStateFlags.HEALTH_CHANGED;
+        }
     }
 
-    public void SetMaxHealth(int maxHealth)
+    public void SetMaxHealth(int maxHealth, bool markDirty = true)
     {
         maxHealth = Math.Max(0, maxHealth);
 
@@ -326,10 +331,15 @@ public class HealthComponent : Component
         {
             MaxHealth = maxHealth;
             MaxHealthChanged?.Invoke(maxHealth);
+
+            if (markDirty)
+            {
+                State.Flags |= HealthStateFlags.MAX_HEALTH_CHANGED;
+            }
         }
     }
 
-    public void SetArmor(int armor)
+    public void SetArmor(int armor, bool markDirty = true)
     {
         armor = Math.Clamp(armor, 0, MaxArmor);
 
@@ -366,9 +376,14 @@ public class HealthComponent : Component
                 ArmorPartiallyRestored?.Invoke();
             }
         }
+
+        if (markDirty)
+        {
+            State.Flags |= HealthStateFlags.ARMOR_CHANGED;
+        }
     }
 
-    public void SetMaxArmor(int maxArmor)
+    public void SetMaxArmor(int maxArmor, bool markDirty = true)
     {
         maxArmor = Math.Max(0, maxArmor);
 
@@ -376,6 +391,12 @@ public class HealthComponent : Component
         {
             MaxArmor = maxArmor;
             MaxArmorChanged?.Invoke(maxArmor);
+
+
+            if (markDirty)
+            {
+                State.Flags |= HealthStateFlags.MAX_ARMOR_CHANGED;
+            }
         }
     }
 
@@ -392,22 +413,22 @@ public class HealthComponent : Component
     {
         if ((state.Flags & HealthStateFlags.HEALTH_CHANGED) != 0)
         {
-            SetHealth(state.Health);
+            SetHealth(state.Health, false);
         }
 
         if ((state.Flags & HealthStateFlags.MAX_HEALTH_CHANGED) != 0)
         {
-            SetMaxHealth(state.MaxHealth);
+            SetMaxHealth(state.MaxHealth, false);
         }
 
         if ((state.Flags & HealthStateFlags.ARMOR_CHANGED) != 0)
         {
-            SetArmor(state.Armor);
+            SetArmor(state.Armor, false);
         }
 
         if ((state.Flags & HealthStateFlags.MAX_ARMOR_CHANGED) != 0)
         {
-            SetMaxArmor(state.MaxArmor);
+            SetMaxArmor(state.MaxArmor, false);
         }
     }
 }
