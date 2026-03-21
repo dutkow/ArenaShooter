@@ -3,6 +3,6 @@ using System;
 
 public interface ICharacterCollidable
 {
-    void OnCollidedWith(Character character, CharacterPublicState state, bool isSimulating);
+    void OnCollidedWith(Character character, CharacterMoveState state, bool isSimulating);
 
 }

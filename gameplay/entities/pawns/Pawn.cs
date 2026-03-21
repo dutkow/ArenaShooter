@@ -10,7 +10,7 @@ public partial class Pawn : Entity
 
     public bool InputActive => IsLocal && !_inputEnabled;
 
-    public PlayerStateOld PlayerState;
+   // public PlayerStateOld PlayerState;
 
     public override void _Ready()
     {
@@ -51,14 +51,14 @@ public partial class Pawn : Entity
 
     public virtual void Initialize(PlayerStateOld playerState)
     {
-        PlayerState = playerState;
+        //PlayerState = playerState;
     }
 
     public virtual void OnDeath() { }
 
-    public virtual ClientPredictionTick GetClientPredictionTick(ClientPredictionTick clientPredictionTick)
+    public virtual ClientInputCommand GetClientInputCommand(ClientInputCommand clientInputCommand)
     {
-        return clientPredictionTick;
+        return clientInputCommand;
     }
 
     public virtual void ServerProcessNextClientInput(ClientInputCommand cmd, float delta) { }

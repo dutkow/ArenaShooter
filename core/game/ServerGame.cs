@@ -56,11 +56,11 @@ public class ServerGame : Singleton<ServerGame>
 
     public void ProcessNextClientInputCommands(float delta)
     {
-        foreach (var kvp in MatchState.Instance.ConnectedPlayers)
+        foreach (var kvp in MatchState.Instance.Players)
         {
             byte playerID = kvp.Key;
-            var playerState = kvp.Value;
-            var character = playerState.Character;
+            var playerState = kvp.Value.State;
+            var character = kvp.Value.Character;
 
             if (character == null)
             {
@@ -74,7 +74,6 @@ public class ServerGame : Singleton<ServerGame>
 
             ClientInputCommand nextInputCommand = new();
             
-
             if (queue.Count > 0)
             {
                 ushort clientTickOfNextInputCommand = queue.Keys.Min();

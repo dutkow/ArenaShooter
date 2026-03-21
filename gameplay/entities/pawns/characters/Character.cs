@@ -29,7 +29,7 @@ public partial class Character : Pawn, IDamageable
 {
     public CharacterState State;
 
-    CharacterMoveMode _mode;
+    CharacterMovementMode _mode;
 
 
     [Export] public Area3D Area;
@@ -75,7 +75,7 @@ public partial class Character : Pawn, IDamageable
 
     private bool _lookDirty;
 
-    public CharacterPublicState PredictedPublicState = new();
+    //public CharacterPublicState PredictedPublicState = new();
 
     private InventoryManager InventoryManager;
 
@@ -103,7 +103,7 @@ public partial class Character : Pawn, IDamageable
         InventoryManager = new();
         InventoryManager.Initialize(this);
 
-        InventoryManager.EquipWeapon(PlayerState.CharacterPublicState.EquippedWeaponIndex);
+        //InventoryManager.EquipWeapon(PlayerState.CharacterPublicState.EquippedWeaponIndex);
     }
 
     public void ApplyDamage(int damage)
@@ -127,7 +127,7 @@ public partial class Character : Pawn, IDamageable
     {
         base.ServerProcessNextClientInput(cmd, delta);
 
-        PlayerState.CharacterPublicState = MovementComp.Step(PlayerState.CharacterPublicState, cmd, delta);
+        MovementComp.ServerProcessNextClientInput(cmd, delta);
         InventoryManager?.ProcessClientInput(cmd.Flags);
     }
 
@@ -159,11 +159,11 @@ public partial class Character : Pawn, IDamageable
         if (_useInterpolation)
         {
             InterpolatePosition(10.0f, delta);
-            GlobalPosition = PlayerState.CharacterPublicState.Position;
+            GlobalPosition = MovementComp.State.Position;
         }
         else
         {
-            GlobalPosition = PlayerState.CharacterPublicState.Position;
+            GlobalPosition = MovementComp.State.Position;
         }
     }
 
@@ -176,7 +176,7 @@ public partial class Character : Pawn, IDamageable
         }
         else
         {
-            GlobalPosition = PredictedPublicState.Position;
+            //GlobalPosition = PredictedPublicState.Position;
         }
     }
 
@@ -190,9 +190,9 @@ public partial class Character : Pawn, IDamageable
         }
         else
         {
-            GlobalPosition = PlayerState.CharacterPublicState.Position;
-            GlobalRotation = new Vector3(0.0f, PlayerState.CharacterPublicState.Yaw, 0.0f);
-            WeaponSocketTP.Rotation = new Vector3(PlayerState.CharacterPublicState.Pitch, 0.0f, 0.0f);
+            GlobalPosition = MovementComp.State.Position;
+            GlobalRotation = new Vector3(0.0f, MovementComp.State.Yaw, 0.0f);
+            WeaponSocketTP.Rotation = new Vector3(MovementComp.State.Pitch, 0.0f, 0.0f);
         }
     }
 
@@ -210,7 +210,7 @@ public partial class Character : Pawn, IDamageable
     public void InterpolateYaw(float interpSpeed)
     {
         Vector3 rot = GlobalRotation;
-        rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Yaw, interpSpeed);
+        //rot.Y = Mathf.LerpAngle(rot.Y, PlayerState.CharacterPublicState.Yaw, interpSpeed);
         GlobalRotation = rot;
     }
 
@@ -241,7 +241,7 @@ public partial class Character : Pawn, IDamageable
 
         if(MatchState.Instance.ConnectedPlayers.TryGetValue(ClientGame.Instance.LocalPlayerID, out var foundPlayerState))
         {
-            PlayerState = foundPlayerState;
+            //PlayerState = foundPlayerState;
         }
         else
         {
@@ -255,12 +255,12 @@ public partial class Character : Pawn, IDamageable
 
         if(!IsAuthority)
         {
-            PredictedPublicState = PlayerState.CharacterPublicState.Copy();
-            PredictedPublicState.Yaw = GlobalRotation.Y;
+            //PredictedPublicState = PlayerState.CharacterPublicState.Copy();
+            //PredictedPublicState.Yaw = GlobalRotation.Y;
             GD.Print($"client copied pub state");
         }
 
-        EquipStartingWeapon();
+        //EquipStartingWeapon();
     }
 
 
@@ -271,20 +271,15 @@ public partial class Character : Pawn, IDamageable
         {
             //GD.Print($"Num unprocessed inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
 
-            foreach (var clientPredictionTick in ClientGame.Instance.UnprocessedPredictionTicks)
+            foreach (var clientPredictionTick in ClientGame.Instance.UnprocessedClientInputCommands)
             {
-                publicState.NewlyOverlappedCollidables = clientPredictionTick.CollisionEnteredCollidables;
-                if(clientPredictionTick.CollisionEnteredCollidables.Count > 0)
-                {
-                    GD.Print("client prediction tick in replay loop has count > 0");
-                }
-                publicState = MovementComp.Step(publicState, clientPredictionTick.InputCommand, delta, true);
+                //publicState = MovementComp.Step(publicState, cmd.InputCommand, delta, true);
 
             }
 
             if(!_skipReconciliation)
             {
-                ReconcileMoveState(publicState);
+                //ReconcileMoveState(publicState);
             }
             else
             {
@@ -294,7 +289,7 @@ public partial class Character : Pawn, IDamageable
         }
         else
         {
-            PlayerState.CharacterPublicState = publicState;
+            //PlayerState.CharacterPublicState = publicState;
         }
 
         _lastSimulatedState = publicState.Copy();
@@ -302,6 +297,7 @@ public partial class Character : Pawn, IDamageable
 
     private CharacterPublicState _lastSimulatedState = new();
 
+    /*
     public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)
     {
         CharacterPrivateFlags flags = privateState.Flags;
@@ -344,8 +340,9 @@ public partial class Character : Pawn, IDamageable
             }
             PlayerState.CharacterPrivateState.AmmoChangedFlags = privateState.AmmoChangedFlags;
         }
-    }
+    }*/
 
+    /*
     public void EquipStartingWeapon()
     {
         var weaponDataArray = GameRules.Instance.Weapons;
@@ -361,7 +358,7 @@ public partial class Character : Pawn, IDamageable
 
             GD.Print($"weapon flags on spawn: {PlayerState.CharacterPrivateState.HeldWeaponsFlags}. Equipped weapon: {PlayerState.CharacterPublicState.EquippedWeaponIndex}");
         }
-    }
+    }*/
 
     public override void OnUnpossessed()
     {
@@ -401,6 +398,7 @@ public partial class Character : Pawn, IDamageable
     }
 
 
+    /*
     public void ReconcileMoveState(CharacterPublicState authoritativeState)
     {
         Vector3 delta = PredictedPublicState.Position - authoritativeState.Position;
@@ -455,20 +453,20 @@ public partial class Character : Pawn, IDamageable
         PredictedPublicState.Position = currentPos;
         PredictedPublicState.Velocity = authoritativeState.Velocity;
     }
+    */
 
-
-    public override ClientPredictionTick GetClientPredictionTick(ClientPredictionTick clientPredictionTick)
+    public override ClientInputCommand GetClientInputCommand(ClientInputCommand cmd)
     {
-        base.GetClientPredictionTick(clientPredictionTick);
+        base.GetClientInputCommand(cmd);
 
         if (_inputEnabled)
         {
-            if (Input.IsActionPressed("move_forward")) clientPredictionTick.InputCommand.Flags |= InputFlags.FORWARD;
-            if (Input.IsActionPressed("move_back")) clientPredictionTick.InputCommand.Flags |= InputFlags.BACKWARD;
-            if (Input.IsActionPressed("move_left")) clientPredictionTick.InputCommand.Flags |= InputFlags.STRAFE_LEFT;
-            if (Input.IsActionPressed("move_right")) clientPredictionTick.InputCommand.Flags |= InputFlags.STRAFE_RIGHT;
-            if (Input.IsActionPressed("jump")) clientPredictionTick.InputCommand.Flags |= InputFlags.JUMP;
-            if (Input.IsActionPressed("primary_fire")) clientPredictionTick.InputCommand.Flags |= InputFlags.FIRE_PRIMARY;
+            if (Input.IsActionPressed("move_forward")) cmd.Flags |= InputFlags.FORWARD;
+            if (Input.IsActionPressed("move_back")) cmd.Flags |= InputFlags.BACKWARD;
+            if (Input.IsActionPressed("move_left")) cmd.Flags |= InputFlags.STRAFE_LEFT;
+            if (Input.IsActionPressed("move_right")) cmd.Flags |= InputFlags.STRAFE_RIGHT;
+            if (Input.IsActionPressed("jump")) cmd.Flags |= InputFlags.JUMP;
+            if (Input.IsActionPressed("primary_fire")) cmd.Flags |= InputFlags.FIRE_PRIMARY;
         }
 
         /*
@@ -482,29 +480,21 @@ public partial class Character : Pawn, IDamageable
 
         if(_accumulatedLookDelta != Vector2.Zero)
         {
-            clientPredictionTick.InputCommand.Look = _accumulatedLookDelta;
-            clientPredictionTick.InputCommand.Flags |= InputFlags.LOOK;
+            cmd.Look = _accumulatedLookDelta;
+            cmd.Flags |= InputFlags.LOOK;
         }
 
         if (!IsAuthority)
         {
-            PredictedPublicState = MovementComp.Step(PredictedPublicState, clientPredictionTick.InputCommand, (float)TickManager.Instance.ServerTickInterval);
-
-
-            clientPredictionTick.CollisionEnteredCollidables = PredictedPublicState.NewlyOverlappedCollidables.ToList();
-
-            if (clientPredictionTick.CollisionEnteredCollidables.Count > 0)
-            {
-                GD.Print($"saving prediction tick where entered collidables > 0");
-
-            }
+            float delta = (float)TickManager.Instance.ServerTickInterval;
+            MovementComp.HandlePredictedInput(cmd, delta);
         }
 
-        InventoryManager.HandleInput(clientPredictionTick.InputCommand.Flags);
+        InventoryManager.HandleInput(cmd.Flags);
 
         _accumulatedLookDelta = Vector2.Zero;
 
-        return clientPredictionTick;
+        return cmd;
     }
 
     private Vector2 _accumulatedLookDelta;
@@ -567,11 +557,11 @@ public partial class Character : Pawn, IDamageable
     int _ticksToSkipReconiliationPostLaunch = 10;
     int _ticksUntilReconciliationResume = 10;
     int _accumulatedSkipReconiliationTicks;
-    public void Launch(Vector3 velocity, CharacterPublicState state, bool isSimulating)
+    public void Launch(Vector3 velocity, CharacterMoveState state, bool isSimulating)
     {
         if(IsAuthority)
         {
-            PlayerState.CharacterPublicState = MovementComp.QueueLaunch(PlayerState.CharacterPublicState, velocity);
+            MovementComp.State = MovementComp.QueueLaunch(MovementComp.State, velocity);
         }
         else if(IsLocal)
         {
@@ -581,6 +571,7 @@ public partial class Character : Pawn, IDamageable
         }
     }
 
+    /*
     public void Teleport(Vector3 position, float yawRotation)
     {
         PlayerState.CharacterPublicState.Position = position;
@@ -661,7 +652,7 @@ public partial class Character : Pawn, IDamageable
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
     }
 
-    public void OnMovementModeChanged(CharacterMoveMode movementMode)
+    public void OnMovementModeChanged(CharacterMovementMode movementMode)
     {
         PlayerState.CharacterPublicState.MovementMode = movementMode;
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.MOVEMENT_MODE_CHANGED;
@@ -706,7 +697,7 @@ public partial class Character : Pawn, IDamageable
     {
         PlayerState.CharacterPublicState.ClearFlags();
         PlayerState.CharacterPrivateState.ClearFlags();
-    }
+    }    */
 
 
     public void HandleDeath()
@@ -749,7 +740,7 @@ public partial class Character : Pawn, IDamageable
         return state;
     }
 
-    public void ApplyState(CharacterState state)
+    public void ApplyState(CharacterState state, float delta)
     {
         if (state.Flags == 0)
         {
@@ -758,7 +749,7 @@ public partial class Character : Pawn, IDamageable
 
         if ((state.Flags & CharacterStateFlags.MOVE_STATE_CHANGED) != 0)
         {
-            MovementComp.ApplyState(state.MoveState);
+            MovementComp.ApplyState(state.MoveState, delta);
         }
 
         if ((state.Flags & CharacterStateFlags.HEALTH_STATE_CHANGED) != 0)

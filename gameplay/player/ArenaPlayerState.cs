@@ -103,7 +103,7 @@ public partial class PublicPlayerState
     public Vector3 Velocity;
     public float Yaw;
     public float Pitch;
-    public CharacterMoveMode MoveMode;
+    public CharacterMovementMode MoveMode;
 
 
     public WeaponType EquippedWeapon;

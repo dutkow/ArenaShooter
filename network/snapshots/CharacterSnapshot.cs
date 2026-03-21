@@ -32,13 +32,13 @@ public struct CharacterSnapshot
     public Vector3 Velocity;
     public float Yaw;
     public float Pitch;
-    public CharacterMoveMode MoveMode;
+    public CharacterMovementMode MoveMode;
     public byte Health;
     public byte Armor;
 
 
     public CharacterSnapshot(byte playerID, Vector3 position, Vector3 velocity,
-                             float yaw, float pitch, CharacterMoveMode moveMode,
+                             float yaw, float pitch, CharacterMovementMode moveMode,
                              byte health, byte shield,
                              CharacterSnapshotFlags dirtyFlags)
     {

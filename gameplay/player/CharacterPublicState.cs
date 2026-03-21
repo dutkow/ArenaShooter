@@ -11,7 +11,7 @@ public class CharacterPublicState
     public float Yaw;
     public float Pitch;
     public Vector3 Velocity;
-    public CharacterMoveMode MovementMode;
+    public CharacterMovementMode MovementMode;
     public byte EquippedWeaponIndex;
 
     // not replicated - derivable (A LOT OF THESE WILL BE DELETED

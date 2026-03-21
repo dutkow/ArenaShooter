@@ -105,7 +105,7 @@ public partial class ArenaCharacter : Node3D, ILifeEntity
         PublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
     }
 
-    public void OnMovementModeChanged(CharacterMoveMode movementMode)
+    public void OnMovementModeChanged(CharacterMovementMode movementMode)
     {
         PublicState.MovementMode = movementMode;
         PublicState.Flags |= CharacterPublicFlags.MOVEMENT_MODE_CHANGED;

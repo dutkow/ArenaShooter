@@ -28,12 +28,6 @@ public struct ClientInputCommand
 
 }
 
-public struct ClientPredictionTick
-{
-    public ClientInputCommand InputCommand;
-    public List<ICharacterCollidable> CollisionEnteredCollidables;
-}
-
 public class ClientCommand : Message
 {
     public ushort ClientTick;

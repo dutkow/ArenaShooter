@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Resources;
 using static Godot.WebSocketPeer;
 
-public enum CharacterMoveMode : byte
+public enum CharacterMovementMode : byte
 {
     GROUNDED,
     FALLING,
@@ -36,9 +36,47 @@ public enum CollisionType
     CEILING,
 }
 
+
+
+[Flags]
+public enum CharacterMoveStateFlags : byte
+{
+    POSITION_CHANGED,
+    VELOCITY_CHANGED,
+    ROTATION_CHANGED,
+}
+public struct CharacterMoveState
+{
+    // Replicated
+    public CharacterMoveStateFlags Flags;
+    public Vector3 Position;
+    public Vector3 Velocity;
+    public float Yaw;
+    public float Pitch;
+
+    // Non-replicated, internal state simulation
+    public bool IsGrounded;
+    public Vector3 GroundNormal;
+    public int TicksRemainingBeforeJump;
+    public Vector3 LastUnstuckPosition;
+    public Vector3 DesiredDirection;
+    public float DesiredSpeed;
+    public CharacterMovementMode Mode;
+    public List<ICharacterCollidable> NewlyOverlappedCollidables;
+    public List<ICharacterCollidable> CurrentCollidables;
+    public bool WasLaunched;
+    public Vector3 LaunchVelocity;
+}
+
+
+
 public class CharacterMovement
 {
     public CharacterMoveState State;
+    public CharacterMoveState PredictedState;
+
+    private bool _isSkippingReconciliation;
+    private int _ticksUntilReconciliationResume;
 
     private Character _character;
 
@@ -91,11 +129,16 @@ public class CharacterMovement
         }
     }
 
+    public void ServerProcessNextClientInput(ClientInputCommand cmd, float delta)
+    {
+        State = Step(State, cmd, delta);
+    }
+    
  
     // Step function now takes CharacterPublicState and returns it
-    public CharacterPublicState Step(CharacterPublicState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
+    public CharacterMoveState Step(CharacterMoveState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
-        ApplyInput(state, cmd, delta);
+        ProcessInput(state, cmd, delta);
         MoveAndSlide(state, cmd, delta);
 
         Vector3 deltaPos = state.Position - _lastPosition;
@@ -109,7 +152,7 @@ public class CharacterMovement
         return state;
     }
 
-    public void CheckGround(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
+    public void CheckGround(CharacterMoveState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
     {
         state.IsGrounded = false;
 
@@ -155,7 +198,7 @@ public class CharacterMovement
         }
     }
 
-    public CharacterPublicState MoveAndSlide(CharacterPublicState state, ClientInputCommand cmd, float delta)
+    public CharacterMoveState MoveAndSlide(CharacterMoveState state, ClientInputCommand cmd, float delta)
     {
         var space = _character.GetWorld3D().DirectSpaceState;
 
@@ -170,14 +213,14 @@ public class CharacterMovement
             MoveAndSlideAir(state, cmd,space, delta);
         }
 
-        state.ticksRemainingBeforeJump--;
+        state.TicksRemainingBeforeJump--;
 
         return state;
     }
 
-    public CharacterPublicState MoveAndSlideGrounded(CharacterPublicState state, ClientInputCommand cmd, PhysicsDirectSpaceState3D space, float delta)
+    public CharacterMoveState MoveAndSlideGrounded(CharacterMoveState state, ClientInputCommand cmd, PhysicsDirectSpaceState3D space, float delta)
     {
-        if ((cmd.Flags & InputFlags.JUMP) != 0 && state.ticksRemainingBeforeJump <= 0)
+        if ((cmd.Flags & InputFlags.JUMP) != 0 && state.TicksRemainingBeforeJump <= 0)
         {
             Jump(state);
             MoveAndSlideAir(state, cmd, space, delta);
@@ -198,7 +241,7 @@ public class CharacterMovement
         return state;
     }
 
-    public void StepAndSlide(CharacterPublicState state, PhysicsDirectSpaceState3D space, float delta, bool groundedMove)
+    public void StepAndSlide(CharacterMoveState state, PhysicsDirectSpaceState3D space, float delta, bool groundedMove)
     {
 
         Vector3 remainingMotion = state.Velocity * delta;
@@ -327,7 +370,7 @@ public class CharacterMovement
         }
     }
 
-    public void CheckStuck(CharacterPublicState state, PhysicsDirectSpaceState3D space)
+    public void CheckStuck(CharacterMoveState state, PhysicsDirectSpaceState3D space)
     {
         PhysicsShapeQueryParameters3D query = new()
         {
@@ -347,7 +390,7 @@ public class CharacterMovement
         }
     }
 
-    public SweepResult Sweep(CharacterPublicState state, Vector3 startPosition, PhysicsDirectSpaceState3D space, Vector3 motion)
+    public SweepResult Sweep(CharacterMoveState state, Vector3 startPosition, PhysicsDirectSpaceState3D space, Vector3 motion)
     {
 
         PhysicsShapeQueryParameters3D motionQuery = new()
@@ -406,7 +449,7 @@ public class CharacterMovement
     }
 
 
-    public CharacterPublicState MoveAndSlideAir(CharacterPublicState state, ClientInputCommand cmd, PhysicsDirectSpaceState3D space, float delta)
+    public CharacterMoveState MoveAndSlideAir(CharacterMoveState state, ClientInputCommand cmd, PhysicsDirectSpaceState3D space, float delta)
     {
         ApplyAcceleration(state, _airAcceleration, _airDeceleration, delta);
         ApplyGravity(state, delta);
@@ -421,7 +464,7 @@ public class CharacterMovement
         return state;
     }
 
-    public void ApplyInput(CharacterPublicState state, ClientInputCommand cmd, float delta)
+    public void ProcessInput(CharacterMoveState state, ClientInputCommand cmd, float delta)
     {
         Vector3 move = Vector3.Zero;
         if ((cmd.Flags & InputFlags.FORWARD) != 0) move.Z -= 1;
@@ -452,7 +495,7 @@ public class CharacterMovement
 
 
 
-    public void ApplyAcceleration(CharacterPublicState state, float acceleration, float deceleration, float delta)
+    public void ApplyAcceleration(CharacterMoveState state, float acceleration, float deceleration, float delta)
     {
         // Correctly clamped acceleration
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
@@ -498,23 +541,23 @@ public class CharacterMovement
 
     const int MinTicksBetweenJumps = 20;
 
-    private void Jump(CharacterPublicState state)
+    private void Jump(CharacterMoveState state)
     {
         state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpStrength;
-        state.MovementMode = CharacterMoveMode.FALLING;
+        state.Mode = CharacterMovementMode.FALLING;
         state.IsGrounded = false;
-        state.ticksRemainingBeforeJump = MinTicksBetweenJumps;
+        state.TicksRemainingBeforeJump = MinTicksBetweenJumps;
         GD.Print($"JUMP");
     }
 
-    public void ApplyGravity(CharacterPublicState state, float delta)
+    public void ApplyGravity(CharacterMoveState state, float delta)
     {
         state.Velocity += _gravityVector * delta;
     }
 
     const float SAFE_MOTION_PADDING = 0.05f;
    
-    private void CheckCollidables(CharacterPublicState state, bool isSimulating)
+    private void CheckCollidables(CharacterMoveState state, bool isSimulating)
     {
 
         if(isSimulating)
@@ -566,7 +609,7 @@ public class CharacterMovement
     }
 
 
-    public CharacterPublicState QueueLaunch(CharacterPublicState state, Vector3 launchVelocity)
+    public CharacterMoveState QueueLaunch(CharacterMoveState state, Vector3 launchVelocity)
     {
         state.WasLaunched = true;
         state.LaunchVelocity = launchVelocity;
@@ -582,7 +625,7 @@ public class CharacterMovement
 
 
             state.Velocity += state.LaunchVelocity;
-            state.MovementMode = CharacterMoveMode.FALLING;
+            state.MovementMode = CharacterMovementMode.FALLING;
 
             state.WasLaunched = false;
             state.IsGrounded = false;
@@ -608,29 +651,12 @@ public class CharacterMovement
         State.Pitch = 0.0f;
     }
 
-    public void ApplyState(CharacterMoveState state, bool markDirty = true)
-    {
-        if ((state.Flags & CharacterMoveStateFlags.POSITION_CHANGED) != 0)
-        {
-            SetPosition(state.Position, false);
-        }
-
-        if ((state.Flags & CharacterMoveStateFlags.VELOCITY_CHANGED) != 0)
-        {
-            SetVelocity(state.Velocity, false);
-        }
-
-        if ((state.Flags & CharacterMoveStateFlags.ROTATION_CHANGED) != 0)
-        {
-            SetRotation(state.Yaw, state.Pitch, false);
-        }
-    }
 
     public void SetPosition(Vector3 position, bool markDirty = true)
     {
         State.Position = position;
 
-        if(markDirty)
+        if (markDirty)
         {
             State.Flags |= CharacterMoveStateFlags.POSITION_CHANGED;
         }
@@ -655,5 +681,100 @@ public class CharacterMovement
         {
             State.Flags |= CharacterMoveStateFlags.ROTATION_CHANGED;
         }
+    }
+
+    public void ApplyState(CharacterMoveState state, float delta, bool markDirty = true)
+    {
+        if ((state.Flags & CharacterMoveStateFlags.POSITION_CHANGED) != 0)
+        {
+            SetPosition(state.Position, false);
+        }
+
+        if ((state.Flags & CharacterMoveStateFlags.VELOCITY_CHANGED) != 0)
+        {
+            SetVelocity(state.Velocity, false);
+        }
+
+        if ((state.Flags & CharacterMoveStateFlags.ROTATION_CHANGED) != 0)
+        {
+            SetRotation(state.Yaw, state.Pitch, false);
+        }
+
+        
+        if(_character.IsLocal)
+        {
+            foreach (var clientInputCommand in ClientGame.Instance.UnprocessedClientInputCommands)
+            {
+                PredictedState = Step(PredictedState, clientInputCommand, delta, true);
+            }
+
+            if (_isSkippingReconciliation)
+            {
+                _ticksUntilReconciliationResume--;
+            }
+            else
+            {
+                ReconcileState();
+            }
+        }
+    }
+
+    public void ReconcileState()
+    {
+        Vector3 delta = PredictedState.Position - State.Position;
+
+        // Thresholds
+        const float SNAP_THRESHOLD_H = 2.0f;        // Horizontal snap (X/Z)
+        const float SNAP_THRESHOLD_V = 2.0f;        // Vertical snap (Y)
+        const float INTERP_THRESHOLD_H = 0.01f;      // Horizontal lerp start
+        const float INTERP_THRESHOLD_V = 0.01f;     // Vertical lerp start
+
+        // Lerp speeds
+        const float INTERP_SPEED_H = 0.25f;
+        const float INTERP_SPEED_V = 0.25f;
+
+        Vector3 targetPos = State.Position;
+        Vector3 currentPos = PredictedState.Position;
+
+        Vector2 deltaXZ = new Vector2(delta.X, delta.Z);
+        float distXZ = deltaXZ.Length();
+
+        float deltaY = Math.Abs(delta.Y);
+
+        //GD.Print($"horizontal error: {distXZ}.");
+
+        // --- Horizontal correction ---
+        if (distXZ > SNAP_THRESHOLD_H)
+        {
+            //GD.Print($"snap correction horizontal, error {distXZ}");
+            currentPos.X = targetPos.X;
+            currentPos.Z = targetPos.Z;
+        }
+        else if (distXZ > INTERP_THRESHOLD_H)
+        {
+            //GD.Print($"horizontal error: {distXZ}.");
+            currentPos.X = Mathf.Lerp(currentPos.X, targetPos.X, INTERP_SPEED_H);
+            currentPos.Z = Mathf.Lerp(currentPos.Z, targetPos.Z, INTERP_SPEED_H);
+        }
+
+        // --- Vertical correction ---
+        if (deltaY > SNAP_THRESHOLD_V)
+        {
+            //GD.Print($"snap correction vertical, error {deltaY}");
+            currentPos.Y = targetPos.Y;
+        }
+        else if (deltaY > INTERP_THRESHOLD_V)
+        {
+            //GD.Print($"lerp correction vertical, error {deltaY}");
+            currentPos.Y = Mathf.Lerp(currentPos.Y, targetPos.Y, INTERP_SPEED_V);
+        }
+    
+        PredictedState.Position = currentPos;
+        PredictedState.Velocity = State.Velocity;
+    }
+
+    public void HandlePredictedInput(ClientInputCommand cmd, float delta)
+    {
+        PredictedState = Step(PredictedState, cmd, delta);
     }
 }

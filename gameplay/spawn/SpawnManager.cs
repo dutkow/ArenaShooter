@@ -26,8 +26,9 @@ public class SpawnManager : Singleton<SpawnManager>
     public Character ServerSpawnPlayer(byte playerID)
     {
         var spawnPoint = GetSpawnPoint();
-        if(MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var player))
+        if(MatchState.Instance.Players.TryGetValue(playerID, out var player))
         {
+            /*
             player.IsSpawned = true;
 
             player.CharacterPrivateState.HeldWeaponsFlags = 0;
@@ -62,21 +63,24 @@ public class SpawnManager : Singleton<SpawnManager>
                 }
             }
             player.CharacterPublicState.EquippedWeaponIndex = (byte)largestIndex;
-
+            */
         }
 
         // Set max values first to avoid weirdness with UI failing to update values due to them being out of bounds if max is uninitialized
+        
+        /*
         player.SetMaxHealth(GameRules.Instance.MaxHealth);
         player.SetMaxArmor(GameRules.Instance.MaxArmor);
 
         player.SetHealth(GameRules.Instance.StartingHealth);
         player.SetArmor(GameRules.Instance.StartingArmor);
-
+        */
 
 
         Character spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
         //player.Flags |= PlayerStateFlags.IS_ALIVE_CHANGED;
+        /*
         player.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
         player.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
         player.CharacterPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;
@@ -84,7 +88,7 @@ public class SpawnManager : Singleton<SpawnManager>
 
         player.CharacterPublicState.Position = spawnPoint.GlobalPosition;
         player.CharacterPublicState.Yaw = spawnPoint.GlobalRotation.Y;
-
+        */
        
 
         return spawnedPlayer;
@@ -97,33 +101,33 @@ public class SpawnManager : Singleton<SpawnManager>
         {
             GD.Print($"client game is null");
         }
-        var spawnedPlayer = (Character)GameRules.Instance.DefaultPawnScene.Instantiate();
+        var spawnedCharacter = (Character)GameRules.Instance.DefaultPawnScene.Instantiate();
 
-        if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
+        if (MatchState.Instance.Players.TryGetValue(playerID, out var player))
         {
-            playerState.Character = spawnedPlayer;
-            spawnedPlayer.PlayerState = playerState;
+            player.HandleSpawn(spawnedCharacter);
+            //playerState.Character = spawnedCharacter;
+            //spawnedCharacter.PlayerState = playerState;
         }
 
-        Level.Instance.AddChild(spawnedPlayer);
+        Level.Instance.AddChild(spawnedCharacter);
 
-        spawnedPlayer.HandleSpawn(spawnPosition, yRotation, 0.0f);
-        spawnedPlayer.SetIsAuthority(NetworkManager.Instance.IsServer);
+        spawnedCharacter.HandleSpawn(spawnPosition, yRotation, 0.0f);
+        spawnedCharacter.SetIsAuthority(NetworkManager.Instance.IsServer);
 
         if (playerID == ClientGame.Instance.LocalPlayerID)
         {
-            ClientGame.Instance.LocalPlayerController.Possess(spawnedPlayer);
+            ClientGame.Instance.LocalPlayerController.Possess(spawnedCharacter);
             GD.Print($"running POSSESS on player id: {playerID} on {NetworkManager.Instance.NetworkMode}");
         }
         else
         {
             GD.Print($"handling remote spawn on {NetworkManager.Instance.NetworkMode}");
-            spawnedPlayer.HandleRemoteSpawn(playerID);
+            spawnedCharacter.HandleRemoteSpawn(playerID);
         }
 
-        spawnedPlayer.Initialize(playerState);
+        //spawnedCharacter.Initialize(playerState);
 
-
-        return spawnedPlayer;
+        return spawnedCharacter;
     }
 }

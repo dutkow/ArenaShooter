@@ -21,7 +21,7 @@ public class ClientGame : Singleton<ClientGame>
     // Client-server synchronization
     public ushort LastServerTickProcessedByClient;
     public ushort LastClientTickProcessedByServer;
-    public List<ClientPredictionTick> UnprocessedPredictionTicks = new();
+    public List<ClientInputCommand> UnprocessedClientInputCommands = new();
     const int REDUNDANT_INPUTS = 4;
 
     private bool _hasReceivedInitialState;
@@ -77,21 +77,17 @@ public class ClientGame : Singleton<ClientGame>
 
     public void SendCommand()
     {
-        var predictionTick = GetClientPredictionTick();
+        var clientInputCommand = GetClientInputCommand();
 
         if(NetworkManager.Instance.IsListenServer)
         {
-            SendListenServerCommand(predictionTick.InputCommand);
+            SendListenServerCommand(clientInputCommand);
         }
         else
         {
-            UnprocessedPredictionTicks.Add(predictionTick);
+            UnprocessedClientInputCommands.Add(clientInputCommand);
 
-            if(predictionTick.CollisionEnteredCollidables.Count > 0)
-            {
-                GD.Print($"added a prediction tick w/ collison entered collidables");
-            }
-            SendClientCommand(predictionTick.InputCommand);
+            SendClientCommand(clientInputCommand);
         }
     }
 
@@ -109,26 +105,22 @@ public class ClientGame : Singleton<ClientGame>
 
     public void SendClientCommand(ClientInputCommand cmd)
     {
-        var commandsToSend = UnprocessedPredictionTicks.Skip(Math.Max(0, UnprocessedPredictionTicks.Count - REDUNDANT_INPUTS)).Select(t => t.InputCommand).ToArray();
+        var commandsToSend = UnprocessedClientInputCommands.Skip(Math.Max(0, UnprocessedClientInputCommands.Count - REDUNDANT_INPUTS)).ToArray();
         ClientCommand.Send(commandsToSend);
     }
 
-    public ClientPredictionTick GetClientPredictionTick()
+    public ClientInputCommand GetClientInputCommand()
     {
-        var clientPredictionTick = new ClientPredictionTick();
+        ClientInputCommand clientInputCommand = new();
 
         if (LocalPlayerPawn != null)
         {
-            clientPredictionTick = LocalPlayerPawn.GetClientPredictionTick(clientPredictionTick);
-        }
-        else
-        {
-            GD.Print($"local player pawn is null");
+            clientInputCommand = LocalPlayerPawn.GetClientInputCommand(clientInputCommand);
         }
 
-        clientPredictionTick.InputCommand.ClientTick = MatchState.Instance.CurrentTick;
+        clientInputCommand.ClientTick = MatchState.Instance.CurrentTick;
 
-        return clientPredictionTick;
+        return clientInputCommand;
     }
 
     public void HandleWorldSnapshot(WorldSnapshot snapshot)
@@ -138,37 +130,23 @@ public class ClientGame : Singleton<ClientGame>
             return;
         }
 
+
+
         LastClientTickProcessedByServer = snapshot.LastProcessedClientTick;
         LastServerTickProcessedByClient = snapshot.ServerTick;
 
-        UnprocessedPredictionTicks.RemoveAll(cmd => cmd.InputCommand.ClientTick <= LastClientTickProcessedByServer);
+        UnprocessedClientInputCommands.RemoveAll(cmd => cmd.ClientTick <= LastClientTickProcessedByServer);
 
 
         PickupManager.Instance.ApplyPickupMask(snapshot.PickupMask);
 
-        foreach (var playerState in snapshot.PlayerStates)
+        float delta = (float)TickManager.Instance.ServerTickInterval;
+
+        foreach (var playerSnapshot in snapshot.PlayerSnapshots)
         {
-            if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerState.PlayerInfo.PlayerID, out var foundPlayerState))
+            if (MatchState.Instance.Players.TryGetValue(playerSnapshot.PlayerState.ID, out var player))
             {
-                //GD.Print($"num unacked inputs: {ClientGame.Instance.UnprocessedClientInputs.Count}");
-                // Client already has an instance of this character, apply snapshot, which could also kill it if it's not alive
-                Character character = foundPlayerState.Character;
-                if (character != null)
-                {
-                    character.ApplyAuthoritativePublicState(playerState.CharacterPublicState, (float)TickManager.Instance.ServerTickInterval);
-
-                    if(playerState.PlayerInfo.PlayerID == ClientGame.Instance.LocalPlayerID)
-                    {
-                        character.ApplyAuthoritativePrivateState(playerState.CharacterPrivateState);
-                    }
-                }
-                // Client doesn't know about this character but it's alive, spawn it
-                else if(playerState.IsSpawned)
-                {
-                    SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Yaw);
-
-                    GD.Print($"spawning player on client w/ yaw: {playerState.CharacterPublicState.Yaw}");
-                }
+                player.ApplySnapshot(playerSnapshot, delta);
             }
         }
 

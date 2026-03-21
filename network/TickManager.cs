@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 /// <summary>
 /// Handles server-side ticking and snapshot sending for the match.

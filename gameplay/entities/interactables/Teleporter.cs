@@ -8,13 +8,13 @@ public partial class Teleporter : Entity, ICharacterCollidable
 
     [Export] private Node3D _targetDestination;
 
-    public void OnCollidedWith(Character character, CharacterPublicState state, bool isSimulating)
+    public void OnCollidedWith(Character character, CharacterMoveState state, bool isSimulating)
     {
         Teleport(character);
     }
 
     public void Teleport(Character character)
     {
-        character.Teleport(_targetDestination.GlobalPosition, _targetDestination.GlobalRotation.Y);
+        //character.Teleport(_targetDestination.GlobalPosition, _targetDestination.GlobalRotation.Y);
     }
 }

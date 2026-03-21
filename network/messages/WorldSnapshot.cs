@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// Sent from Server → Client to sync the current tick’s player states
+/// Sent from Server → Client to sync the current tick’s playerSnapshot states
 /// </summary>
 public class WorldSnapshot : Message
 {
@@ -17,7 +17,7 @@ public class WorldSnapshot : Message
     public ushort LastProcessedClientTick;
     public ulong PickupMask;
 
-    public PlayerStateOld[] PlayerStates;
+    public PlayerSnapshot[] PlayerSnapshots;
     byte ReceivingPlayerID;
 
     public ProjectileSpawnData[] UnacknowledgedSpawnedProjectiles;
@@ -32,13 +32,13 @@ public class WorldSnapshot : Message
         Add(PickupMask);
 
         // Player States
-        byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
-        Add(playerStatesCount);
-        if (playerStatesCount > 0)
+        byte playerCount = (byte)(PlayerSnapshots?.Length ?? 0);
+        Add(playerCount);
+        if (playerCount > 0)
         {
-            foreach(var playerState in PlayerStates)
+            foreach(var playerSnapshot in PlayerSnapshots)
             {
-                playerState.Add(this, ReceivingPlayerID, true);
+                //playerSnapshot.Add(this, ReceivingPlayerID, true);
             }
         }    
 
@@ -78,14 +78,14 @@ public class WorldSnapshot : Message
         Write(PickupMask);
 
         // Player States
-        byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
-        Write(playerStatesCount);
+        byte playerCount = (byte)(PlayerSnapshots?.Length ?? 0);
+        Write(playerCount);
 
-        if (playerStatesCount > 0)
+        if (playerCount > 0)
         {
-            foreach (var playerState in PlayerStates)
+            foreach (var playerSnapshot in PlayerSnapshots)
             {
-                playerState.Write(this, ReceivingPlayerID);
+                //playerSnapshot.Write(this, ReceivingPlayerID);
             }
         }
 
@@ -126,18 +126,18 @@ public class WorldSnapshot : Message
         Read(out PickupMask);
 
         // Player States
-        byte playerStatesCount;
-        Read(out playerStatesCount);
+        byte playerCount;
+        Read(out playerCount);
 
-        if (playerStatesCount > 0)
+        if (playerCount > 0)
         {
-            PlayerStates = new PlayerStateOld[playerStatesCount];
+            PlayerSnapshots = new PlayerSnapshot[playerCount];
 
-            for(int i = 0; i < playerStatesCount; ++i)
+            for(int i = 0; i < playerCount; ++i)
             {
-                PlayerStateOld playerState = new();
-                PlayerStates[i] = playerState;
-                playerState.Read(this, ReceivingPlayerID);
+                PlayerSnapshot playerSnapshot = new();
+                PlayerSnapshots[i] = playerSnapshot;
+                //playerSnapshot.Read(this, ReceivingPlayerID);
             }
         }
 
@@ -185,7 +185,13 @@ public class WorldSnapshot : Message
         newSnapshot.LastProcessedClientTick = 0;
         newSnapshot.PickupMask = PickupManager.Instance.PickupMask;
 
-        newSnapshot.PlayerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray();
+        newSnapshot.PlayerSnapshots = new PlayerSnapshot[MatchState.Instance.Players.Count];
+
+        int i = 0;
+        foreach (var player in MatchState.Instance.Players.Values)
+        {
+            newSnapshot.PlayerSnapshots[i++] = player.GetPlayerSnapshot();
+        }
 
 
         return newSnapshot;
@@ -201,9 +207,9 @@ public class WorldSnapshot : Message
 
         var deltaList = new List<PlayerStateOld>();
 
-        var prevDict = previous.PlayerStates.ToDictionary(p => p.PlayerID);
+        var prevDict = previous.Players.ToDictionary(p => p.PlayerID);
 
-        foreach (var current in PlayerStates)
+        foreach (var current in Players)
         {
             if (prevDict.TryGetValue(current.PlayerID, out var old))
             {
@@ -238,7 +244,7 @@ public class WorldSnapshot : Message
             }
             else
             {
-                // new player → send full state
+                // new playerSnapshot → send full state
                 var delta = new PlayerStateOld()
                 {
                     Flags =
@@ -264,7 +270,7 @@ public class WorldSnapshot : Message
             ServerTick = ServerTick,
             LastProcessedClientTick = LastProcessedClientTick,
             PickupMask = PickupMask,
-            PlayerStates = deltaList.ToArray(),
+            Players = deltaList.ToArray(),
             MessageType = Msg.S2C_WORLD_SNAPSHOT
         };*/
     }

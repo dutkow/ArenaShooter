@@ -393,16 +393,6 @@ public class PlayerStateOld()
 
 
 
-
-    public void ClearFlags()
-    {
-        Flags = 0;
-        if (Character != null)
-        {
-            Character.ClearFlags();
-        }
-    }
-
     internal void Add(Message msg, byte clientPlayerID, bool forceFull = false)
     {
         msg.Add(PlayerInfo.PlayerID);

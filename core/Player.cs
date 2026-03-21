@@ -54,8 +54,8 @@ public struct PlayerState
 
 public class Player
 {
-    PlayerState State;
-    Character Character;
+    public PlayerState State;
+    public Character Character;
 
     public Action<string> NameChanged;
     public Action<int> PingChanged;
@@ -194,7 +194,7 @@ public class Player
         return snapshot;
     }
 
-    public void ApplyPlayerSnapshot(PlayerSnapshot snapshot)
+    public void ApplySnapshot(PlayerSnapshot snapshot, float delta)
     {
         if (snapshot.Flags == 0)
         {
@@ -233,7 +233,7 @@ public class Player
         {
             if ((snapshot.Flags & PlayerFlags.CHARACTER_STATE_CHANGED) != 0)
             {
-                Character.ApplyState(snapshot.CharacterState);
+                Character.ApplyState(snapshot.CharacterState, delta);
             }
         }
     }

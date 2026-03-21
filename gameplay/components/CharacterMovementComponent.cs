@@ -2,23 +2,6 @@ using Godot;
 using System;
 using static Godot.WebSocketPeer;
 
-[Flags]
-public enum CharacterMoveStateFlags : byte
-{
-    POSITION_CHANGED,
-    VELOCITY_CHANGED,
-    ROTATION_CHANGED,
-}
-public struct CharacterMoveState
-{
-    public CharacterMoveStateFlags Flags;
-
-    public Vector3 Position;
-    public Vector3 Velocity;
-    public float Yaw;
-    public float Pitch;
-}
-
 public class CharacterMovementComponent
 {
     public CharacterMoveState State;
