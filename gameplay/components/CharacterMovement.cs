@@ -6,11 +6,6 @@ using System.Diagnostics;
 using System.Resources;
 using static Godot.WebSocketPeer;
 
-public enum StateType : byte
-{
-    AUTHORITATIVE,
-    PREDICTED,
-}
 public enum CharacterMovementMode : byte
 {
     GROUNDED,
@@ -124,22 +119,31 @@ public class CharacterMovement
             _characterCollisionRids.Add(_mainCollisionShape.GetRid());
         }
 
-        StateType stateType = Character.IsLocal && !Character.IsAuthority ? StateType.PREDICTED : StateType.AUTHORITATIVE;
+        bool isAuthority = Character.IsAuthority;
 
-        SetPosition(Character.GlobalPosition, stateType);
-        SetVelocity(Vector3.Zero, stateType);
-        SetRotation(Character.GlobalRotation.Y, 0.0f, stateType);
+        SetPosition(Character.GlobalPosition, isAuthority);
+        SetVelocity(Vector3.Zero, isAuthority);
+        SetRotation(Character.GlobalRotation.Y, 0.0f, isAuthority);
     }
 
-    public void ServerProcessNextClientInput(ClientInputCommand cmd, float delta)
+    private CharacterMoveState _lastAuthoritativeState;
+
+    public void ServerProcessNextClientInput(ClientInputCommand cmd, bool isAuthority, float delta)
     {
-        Step(ref AuthoritativeState, cmd, delta);
+        Step(ref AuthoritativeState, true, cmd, delta);
     }
 
-    public void Step(ref CharacterMoveState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
+    public void Step(ref CharacterMoveState state, bool isAuthority, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
+        if (isAuthority)
+        {
+            _lastAuthoritativeState = state;
+        }
+
+
         ProcessInput(ref state, cmd, delta);
         MoveAndSlide(ref state, cmd, delta);
+
 
         Vector3 deltaPos = state.Position - _lastPosition;
 
@@ -149,6 +153,26 @@ public class CharacterMovement
         _lastPosition = state.Position;
 
         state.LastUnstuckPosition = state.Position;
+
+
+        if(isAuthority)
+        {
+            if ((state.Position - _lastAuthoritativeState.Position).LengthSquared() > 0.0001f)
+            {
+                state.Flags |= CharacterMoveStateFlags.POSITION_CHANGED;
+            }
+
+            if ((state.Velocity - _lastAuthoritativeState.Velocity).LengthSquared() > 0.0001f)
+            {
+                state.Flags |= CharacterMoveStateFlags.VELOCITY_CHANGED;
+            }
+
+            if (Mathf.Abs(state.Yaw - _lastAuthoritativeState.Yaw) > 0.0001f || Mathf.Abs(state.Pitch - _lastAuthoritativeState.Pitch) > 0.0001f)
+            {
+                state.Flags |= CharacterMoveStateFlags.ROTATION_CHANGED;
+            }
+        }
+
     }
 
     public void CheckGround(ref CharacterMoveState state, Vector3 startPosition)
@@ -632,9 +656,9 @@ public class CharacterMovement
         return state;
     }
 
-    public void SetPosition(Vector3 position, StateType stateType)
+    public void SetPosition(Vector3 position, bool isAuthority)
     {
-        if(stateType == StateType.AUTHORITATIVE)
+        if(isAuthority)
         {
             AuthoritativeState.Position = position;
             AuthoritativeState.Flags |= CharacterMoveStateFlags.POSITION_CHANGED;
@@ -646,9 +670,9 @@ public class CharacterMovement
  
     }
 
-    public void SetVelocity(Vector3 velocity, StateType stateType)
+    public void SetVelocity(Vector3 velocity, bool isAuthority)
     {
-        if (stateType == StateType.AUTHORITATIVE)
+        if (isAuthority)
         {
             AuthoritativeState.Velocity = velocity;
             AuthoritativeState.Flags |= CharacterMoveStateFlags.VELOCITY_CHANGED;
@@ -659,9 +683,9 @@ public class CharacterMovement
         }
     }
 
-    public void SetRotation(float yaw, float pitch, StateType stateType)
+    public void SetRotation(float yaw, float pitch, bool isAuthority)
     {
-        if (stateType == StateType.AUTHORITATIVE)
+        if (isAuthority)
         {
             AuthoritativeState.Yaw = yaw;
             AuthoritativeState.Pitch = pitch;
@@ -678,17 +702,17 @@ public class CharacterMovement
     {
         if ((state.Flags & CharacterMoveStateFlags.POSITION_CHANGED) != 0)
         {
-            SetPosition(state.Position, StateType.AUTHORITATIVE);
+            SetPosition(state.Position, true);
         }
 
         if ((state.Flags & CharacterMoveStateFlags.VELOCITY_CHANGED) != 0)
         {
-            SetVelocity(state.Velocity, StateType.AUTHORITATIVE);
+            SetVelocity(state.Velocity, true);
         }
 
         if ((state.Flags & CharacterMoveStateFlags.ROTATION_CHANGED) != 0)
         {
-            SetRotation(state.Yaw, state.Pitch, StateType.AUTHORITATIVE);
+            SetRotation(state.Yaw, state.Pitch, true);
         }
 
         
@@ -696,7 +720,7 @@ public class CharacterMovement
         {
             foreach (var clientInputCommand in ClientGame.Instance.UnprocessedClientInputCommands)
             {
-                Step(ref PredictedState, clientInputCommand, delta, true);
+                Step(ref PredictedState, false, clientInputCommand, delta, true);
             }
 
             if (_isSkippingReconciliation)
@@ -766,6 +790,6 @@ public class CharacterMovement
 
     public void HandlePredictedInput(ClientInputCommand cmd, float delta)
     {
-        Step(ref PredictedState, cmd, delta);
+        Step(ref PredictedState, false, cmd, delta);
     }
 }

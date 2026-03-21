@@ -119,7 +119,7 @@ public partial class Character : Pawn, IDamageable
     {
         base.TickWithNextClientCommand(cmd, delta);
 
-        MovementComp.ServerProcessNextClientInput(cmd, delta);
+        MovementComp.ServerProcessNextClientInput(cmd, true, delta);
         InventoryManager?.ProcessClientInput(cmd.Flags);
     }
 
