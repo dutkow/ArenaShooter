@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 
 [Flags]
@@ -44,6 +43,8 @@ public partial class Character : Pawn, IDamageable
 
     const int REDUNDANT_INPUTS = 4;
 
+
+    public Player Player;
 
     public float Yaw => GlobalRotation.Y;
     public float Pitch { get; private set; }
@@ -230,9 +231,10 @@ public partial class Character : Pawn, IDamageable
         SetRole(NetworkRole.LOCAL);
         UIRoot.Instance.OnPossessedCharacter(this);
 
-        if(MatchState.Instance.ConnectedPlayers.TryGetValue(ClientGame.Instance.LocalPlayerID, out var foundPlayerState))
+        if(MatchState.Instance.Players.TryGetValue(ClientGame.Instance.LocalPlayerID, out var player))
         {
-            //PlayerState = foundPlayerState;
+            Player = player;
+            //PlayerState = player;
         }
         else
         {

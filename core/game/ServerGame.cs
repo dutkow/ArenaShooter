@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 public class ServerGame : Singleton<ServerGame>
 {
     const int MAX_PLAYERS = 16;
-    private bool _isServerFull => MatchState.Instance.ConnectedPlayers.Count >= MAX_PLAYERS;
+    private bool _isServerFull => MatchState.Instance.Players.Count >= MAX_PLAYERS;
 
     public bool IsListenServer => NetworkManager.Instance.NetworkMode == NetworkMode.LISTEN_SERVER;
 
@@ -240,7 +240,7 @@ public class ServerGame : Singleton<ServerGame>
 
     public void ApplyClientLoaded(PlayerInfo playerInfo)
     {
-        Player.Create(playerInfo);
+        MatchState.Instance.AddPlayer(playerInfo);
         //MatchState.Instance.AddPlayer(playerInfo);
     }
 
@@ -258,20 +258,15 @@ public class ServerGame : Singleton<ServerGame>
 
     public byte GetNextAvailablePlayerID()
     {
-        var connectedPlayerIDs = MatchState.Instance.ConnectedPlayers.Keys.ToHashSet();
+        var connectedPlayerIDs = MatchState.Instance.Players.Keys.ToHashSet();
 
-        GD.Print($"get next available player id ran");
         for (byte b = 0; b < byte.MaxValue; ++b)
         {
-            GD.Print($"get next available player id iterated");
 
             if (!connectedPlayerIDs.Contains(b))
             {
-                GD.Print($"next available player id = {b}");
                 return b;
             }
-            GD.Print($"connected player ids already contains {b}");
-
         }
         return byte.MaxValue;
     }
@@ -299,9 +294,9 @@ public class ServerGame : Singleton<ServerGame>
 
     public void ApplyPlayerNameChange(byte playerID, string name)
     {
-        if (MatchState.Instance.ConnectedPlayers.TryGetValue(playerID, out var playerState))
+        if (MatchState.Instance.Players.TryGetValue(playerID, out var player))
         {
-            playerState.SetName(name);
+            player.SetName(name);
         }
 
         PlayerNameChanged.Send(playerID, name);

@@ -10,7 +10,7 @@ public class InitialMatchState : Message
 {
     public int ServerTickRate;
 
-    public PlayerStateOld[] PlayerStates;
+    public PlayerSnapshot[] PlayerSnapshots;
 
     // ----------------------
     // Serialization
@@ -22,14 +22,14 @@ public class InitialMatchState : Message
 
         Add(ServerTickRate);
 
-        byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
-        Add(playerStatesCount);
+        byte playerCount = (byte)(PlayerSnapshots?.Length ?? 0);
+        Add(playerCount);
 
-        if (playerStatesCount > 0)
+        if (playerCount > 0)
         {
-            foreach (var playerState in PlayerStates)
+            foreach (var playerSnapshot in PlayerSnapshots)
             {
-                playerState.Add(this, 0, true);
+                playerSnapshot.Add(this, 0, true);
             }
         }
 
@@ -43,14 +43,14 @@ public class InitialMatchState : Message
         Write(ServerTickRate);
 
         // Player States
-        byte playerStatesCount = (byte)(PlayerStates?.Length ?? 0);
-        Write(playerStatesCount);
+        byte playerCount = (byte)(PlayerSnapshots?.Length ?? 0);
+        Write(playerCount);
 
-        if (playerStatesCount > 0)
+        if (playerCount > 0)
         {
-            foreach (var playerState in PlayerStates)
+            foreach (var playerSnapshot in PlayerSnapshots)
             {
-                playerState.Write(this, 0);
+                playerSnapshot.Write(this, 0);
             }
         }
 
@@ -64,19 +64,19 @@ public class InitialMatchState : Message
         Read(out ServerTickRate);
         // Read the number of players
 
-        byte playerStatesCount;
-        Read(out playerStatesCount);
+        byte playerCount;
+        Read(out playerCount);
 
-        GD.Print($"num received players: {playerStatesCount}");
+        GD.Print($"num received players: {playerCount}");
 
-        if (playerStatesCount > 0)
+        if (playerCount > 0)
         {
-            PlayerStates = new PlayerStateOld[playerStatesCount];
+            PlayerSnapshots = new PlayerSnapshot[playerCount];
 
-            for (int i = 0; i < playerStatesCount; i++)
+            for (int i = 0; i < playerCount; i++)
             {
-                PlayerStates[i] = new PlayerStateOld(); // ✅ important!
-                PlayerStates[i].Read(this, 0);
+                PlayerSnapshots[i] = new PlayerSnapshot();
+                PlayerSnapshots[i].Read(this, 0);
             }
         }
     }
@@ -86,11 +86,19 @@ public class InitialMatchState : Message
     // ----------------------
     public static void Send(ENetPacketPeer client)
     {
+        int playerCount = MatchState.Instance.Players.Count;
+        var playerSnapshots = new PlayerSnapshot[playerCount];
+
+        for(byte i = 0; i < playerCount; ++i)
+        {
+            playerSnapshots[i] = MatchState.Instance.Players[i].GetPlayerSnapshot();
+        }
+
         var msg = new InitialMatchState
         {
             MessageType = Msg.S2C_INITIAL_MATCH_STATE,
             ENetFlags = ENetPacketFlags.Reliable,
-            PlayerStates = MatchState.Instance.ConnectedPlayers.Values.ToArray(),
+            PlayerSnapshots = playerSnapshots,
             ServerTickRate = NetworkServer.Instance.ServerInfo.TickRate
         };
 

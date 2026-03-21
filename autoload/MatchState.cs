@@ -62,13 +62,12 @@ public class MatchState : ITickable
     // ----------------------
     // Player management
     // ----------------------
-    public Dictionary<byte, PlayerStateOld> ConnectedPlayers = new();
 
     public Dictionary<byte, Player> Players = new();
 
-    public event Action<PlayerStateOld>? PlayerJoined;
+    public event Action<Player>? PlayerJoined;
 
-    public event Action<int, PlayerStateOld>? PlayerLeft;
+    public event Action<int, Player>? PlayerLeft;
 
     // base tick
     public ushort CurrentTick { get; private set; } = 0;
@@ -117,16 +116,16 @@ public class MatchState : ITickable
 
     public void OnReceivedInitialMatchState(InitialMatchState initialMatchState)
     {
-        if(initialMatchState.PlayerStates == null)
+        if(initialMatchState.PlayerSnapshots == null)
         {
             GD.Print($"initial match state player states are null");
             return;
 
         }
-        for(int i = 0; i < initialMatchState.PlayerStates.Length; ++i)
+        for(int i = 0; i < initialMatchState.PlayerSnapshots.Length; ++i)
         {
             GD.Print($"add existing player on client joined ran");
-            AddExistingPlayerOnClientJoined(initialMatchState.PlayerStates[i]);
+            AddExistingPlayerOnClientJoined(initialMatchState.PlayerSnapshots[i]);
         }
 
         ClientGame.Instance?.LocalPlayerController.Initialize(); // TODO. rethink this execution flow
@@ -196,50 +195,47 @@ public class MatchState : ITickable
     public void AddPlayer(PlayerInfo playerInfo)
     {
         GD.Print($"add player running on {NetworkManager.Instance.NetworkMode}. player id: {playerInfo.PlayerID}");
-        if (ConnectedPlayers.ContainsKey(playerInfo.PlayerID))
+        if (Players.ContainsKey(playerInfo.PlayerID))
         {
             return; // Already added
         }
 
-        var playerState = new PlayerStateOld();
-        playerState.PlayerInfo = playerInfo;
+        var player = Player.Create(playerInfo);
 
-  
-        ConnectedPlayers[playerInfo.PlayerID] = playerState;
+        Players[playerInfo.PlayerID] = player;
 
-        PlayerJoined?.Invoke(playerState);
+        PlayerJoined?.Invoke(player);
 
 
         if (ClientGame.Instance != null && playerInfo.PlayerID == ClientGame.Instance.LocalPlayerID)
         {
-            ClientGame.Instance.AssignPlayerState(playerState);
+            ClientGame.Instance.AssignPlayer(player);
         }
     }
 
-    public void AddExistingPlayerOnClientJoined(PlayerStateOld playerState)
+    public void AddExistingPlayerOnClientJoined(PlayerSnapshot playerSnapshot)
     {
-        ConnectedPlayers[playerState.PlayerInfo.PlayerID] = playerState;
+        Player player = new();
+        player.SetID(playerSnapshot.PlayerState.ID);
+            
+        Players[playerSnapshot.PlayerState.ID] = player;
 
-        if(playerState.IsSpawned)
+        if(playerSnapshot.PlayerState.IsSpawned)
         {
-
-            SpawnManager.Instance.LocalSpawnPlayer(playerState.PlayerInfo.PlayerID, playerState.CharacterPublicState.Position, playerState.CharacterPublicState.Yaw);
-
-            GD.Print($"client is spawning {playerState.PlayerInfo.PlayerID} at position {playerState.CharacterPublicState.Position}");
-
+            SpawnManager.Instance.LocalSpawnPlayer(playerSnapshot.PlayerState.ID, playerSnapshot.CharacterState.MoveState.Position, playerSnapshot.CharacterState.MoveState.Yaw);
         }
     }
 
     public void HandlePlayerLeft(byte playerID)
     {
-        if(ConnectedPlayers.TryGetValue(playerID, out var playerState))
+        if(Players.TryGetValue(playerID, out var player))
         {
-            playerState.PlayerLeft?.Invoke();
-            ConnectedPlayers.Remove(playerID);
+            player.Left?.Invoke();
+            Players.Remove(playerID);
 
-            if (playerState.Character != null)
+            if (player.Character != null)
             {
-                playerState.Character.HandleDeath();
+                player.Character.HandleDeath();
             }
         }
     }

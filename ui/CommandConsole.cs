@@ -190,9 +190,9 @@ public partial class CommandConsole : Control
     {
         AddConsoleLogEntry($"--- Connected players ---");
 
-        foreach (var player in MatchState.Instance.ConnectedPlayers.Values.OrderBy(p => p.PlayerInfo.PlayerName, StringComparer.OrdinalIgnoreCase))
+        foreach (var player in MatchState.Instance.Players.Values.OrderBy(player => player.State.Name, StringComparer.OrdinalIgnoreCase))
         {
-            AddConsoleLogEntry($"-{player.PlayerInfo.PlayerName}, Player ID: {player.PlayerInfo.PlayerID}");
+            AddConsoleLogEntry($"-{player.State.Name}, Player ID: {player.State.ID}");
         }
     }
 

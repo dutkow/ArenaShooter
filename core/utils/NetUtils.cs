@@ -58,7 +58,7 @@ public static class NetUtils
         string baseName = requestedName;
         int counter = 1;
 
-        while (MatchState.Instance.ConnectedPlayers.Values.Any(p => p.PlayerInfo.PlayerName == requestedName))
+        while (MatchState.Instance.Players.Values.Any(p => p.State.Name == requestedName))
         {
             requestedName = $"{baseName} ({counter})";
             counter++;

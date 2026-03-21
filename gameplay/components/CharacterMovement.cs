@@ -63,8 +63,6 @@ public struct CharacterMoveState
     public Vector3 LaunchVelocity;
 }
 
-
-
 public class CharacterMovement
 {
     public CharacterMoveState State;

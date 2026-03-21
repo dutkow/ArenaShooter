@@ -9,14 +9,14 @@ public partial class PlayerScoreboardEntry : Control
 
     [Export] Color _playerOwnerColor = Colors.Gold;
 
-    public void Initialize(PlayerStateOld playerState)
+    public void Initialize(Player player)
     {
-        _playerNameLabel.Text = playerState.PlayerInfo.PlayerName;
+        _playerNameLabel.Text = player.State.Name;
 
-        playerState.PlayerNameChanged += OnPlayerNameChanged;
-        playerState.PlayerLeft += OnPlayerLeft;
+        player.NameChanged += OnPlayerNameChanged;
+        player.Left += OnPlayerLeft;
 
-        if(playerState.PlayerInfo.PlayerID == ClientGame.Instance.LocalPlayerID)
+        if(player.State.ID == ClientGame.Instance.LocalPlayerID)
         {
             Highlight();
         }

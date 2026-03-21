@@ -20,7 +20,7 @@ public partial class Scoreboard : Control
 
     public void PopulateInitialPlayerList()
     {
-        foreach (var kvp in MatchState.Instance.ConnectedPlayers)
+        foreach (var kvp in MatchState.Instance.Players)
         {
             AddPlayerToList(kvp.Value);
         }
@@ -34,10 +34,10 @@ public partial class Scoreboard : Control
             child.QueueFree();
         }
     }
-    public void AddPlayerToList(PlayerStateOld playerState)
+    public void AddPlayerToList(Player player)
     {
         var playerListEntry = (PlayerScoreboardEntry)_playerScoreboardEntry.Instantiate();
-        playerListEntry.Initialize(playerState);
+        playerListEntry.Initialize(player);
         _playerListContainer.AddChild(playerListEntry);
     }
 

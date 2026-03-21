@@ -32,7 +32,6 @@ public enum PlayerStatFlags : byte // 8 values
     DEATHS_CHANGED = 1 << 1,
 }
 
-
 public struct PlayerState
 {
     public byte ID; // not changed
@@ -58,14 +57,17 @@ public class Player
     public Action<int> KillsChanged;
     public Action<int> DeathsChanged;
 
-    public static void Create(PlayerInfo playerInfo)
+    public Action Joined;
+    public Action Left;
+
+    public static Player Create(PlayerInfo playerInfo)
     {
         Player player = new();
         player.State.ID = playerInfo.PlayerID;
         player.SetID(playerInfo.PlayerID);
         player.SetName(playerInfo.PlayerName);
 
-        MatchState.Instance.Players.Add(playerInfo.PlayerID, player);
+        return player;
     }
 
     public void SetID(byte id)

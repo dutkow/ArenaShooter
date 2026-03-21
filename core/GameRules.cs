@@ -103,7 +103,7 @@ public partial class GameRules : Node
         GD.Print("Pre-match: teleport and freeze players");
 
 
-        foreach (var kvp in MatchState.Instance.ConnectedPlayers)
+        foreach (var kvp in MatchState.Instance.Players)
         {
             var playerCharacter = kvp.Value.Character;
 
