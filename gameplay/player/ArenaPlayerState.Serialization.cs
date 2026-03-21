@@ -1,4 +1,5 @@
 
+/*
 using System;
 
 [Flags]
@@ -217,4 +218,4 @@ public partial class PrivatePlayerState
 
         return priv;
     }
-}
+}*/

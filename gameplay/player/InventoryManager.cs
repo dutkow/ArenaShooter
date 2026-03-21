@@ -9,6 +9,22 @@ public enum InventoryStateFlags : byte
     EQUIPPED_WEAPON_CHANGED,
 }
 
+public enum WeaponFlags : ushort
+{
+    NONE = 0,
+
+    WEAPON_1 = 1 << 0,
+    WEAPON_2 = 1 << 1,
+    WEAPON_3 = 1 << 2,
+    WEAPON_4 = 1 << 3,
+    WEAPON_5 = 1 << 4,
+    WEAPON_6 = 1 << 5,
+    WEAPON_7 = 1 << 6,
+    WEAPON_8 = 1 << 7,
+    WEAPON_9 = 1 << 8,
+    WEAPON_10 = 1 << 9,
+}
+
 public struct InventoryState
 {
     public InventoryStateFlags Flags;

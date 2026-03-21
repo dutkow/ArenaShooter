@@ -2,6 +2,7 @@ using Godot;
 
 using System.Collections.Generic;
 
+/*
 public class CharacterPublicState
 {
     // Replicated variables
@@ -80,4 +81,4 @@ public class CharacterPublicState
 
 
     }
-}
+}*/

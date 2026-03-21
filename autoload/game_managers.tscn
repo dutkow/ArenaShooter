@@ -1,8 +1,29 @@
-[gd_scene load_steps=3 format=3 uid="uid://ltpmrgawfeer"]
+[gd_scene format=3 uid="uid://ltpmrgawfeer"]
 
-[ext_resource type="Script" uid="uid://8cpgwa40w10f" path="res://autoload/GameManagers.cs" id="1_2t3dy"]
 [ext_resource type="PackedScene" uid="uid://b24468yqhkorc" path="res://gameplay/spawn/projectile_manager.tscn" id="2_vjrvq"]
 
-[node name="GameManagers" type="Node"]
-script = ExtResource("1_2t3dy")
+[sub_resource type="CSharpScript" id="CSharpScript_uc6ym"]
+script/source = "using Godot;
+using System;
+
+public partial class GameManagers : Node
+{
+    public static GameManagers Instance;
+
+    [Export] private PackedScene _projectileManagerScene;
+
+    public override void _Ready()
+    {
+        base._Ready();
+
+        Instance = this;
+
+        ProjectileManager projectileManager = (ProjectileManager)_projectileManagerScene.Instantiate();
+        AddChild(projectileManager);
+    }
+}
+"
+
+[node name="GameManagers" type="Node" unique_id=83478970]
+script = SubResource("CSharpScript_uc6ym")
 _projectileManagerScene = ExtResource("2_vjrvq")

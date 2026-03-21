@@ -25,16 +25,6 @@ public partial class UIRoot : Control
         ShowPlayerHud();*/
     }
 
-    public void OnPossessedArenaCharacter(ArenaCharacterOld character)
-    {
-        /*
-        EnsurePlayerHud();
-
-        _playerHud.AssignToArenaCharacter(character);
-
-        ShowPlayerHud();*/
-    }
-
     public void EnsurePlayerHud()
     {
         /*

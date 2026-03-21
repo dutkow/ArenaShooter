@@ -258,7 +258,7 @@ public partial class Character : Pawn, IDamageable
 
 
     // Apply Replicated States
-    public void ApplyAuthoritativePublicState(CharacterPublicState publicState, float delta)
+    public void ApplyAuthoritativePublicState(CharacterMoveState publicState, float delta)
     {
         if (IsLocal)
         {
@@ -285,10 +285,10 @@ public partial class Character : Pawn, IDamageable
             //PlayerState.CharacterPublicState = publicState;
         }
 
-        _lastSimulatedState = publicState.Copy();
+        //_lastSimulatedState = publicState.Copy();
     }
 
-    private CharacterPublicState _lastSimulatedState = new();
+    private CharacterMoveState _lastSimulatedState = new();
 
     /*
     public void ApplyAuthoritativePrivateState(CharacterPrivateState privateState)
@@ -554,11 +554,11 @@ public partial class Character : Pawn, IDamageable
     {
         if(IsAuthority)
         {
-            MovementComp.AuthoritativeState = MovementComp.QueueLaunch(MovementComp.AuthoritativeState, velocity);
+            MovementComp.QueueLaunch(ref MovementComp.AuthoritativeState, velocity);
         }
         else if(IsLocal)
         {
-            state = MovementComp.QueueLaunch(state, velocity);
+            MovementComp.QueueLaunch(ref state, velocity);
             _ticksUntilReconciliationResume = _ticksToSkipReconiliationPostLaunch;
             GD.Print($"launch queued on client. is simulating: {isSimulating}");
         }

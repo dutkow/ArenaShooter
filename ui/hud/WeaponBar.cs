@@ -8,9 +8,9 @@ public partial class WeaponBar : BoxContainer
 
     public Dictionary<int, WeaponBarEntry> _weaponBarEntries = new();
 
-    public void AssignToPlayerState(PlayerStateOld playerState)
+    public void AssignToInventoryManager(InventoryManager inventoryManager)
     {
-        playerState.GainedWeapon += OnGainedWeapon;
+        inventoryManager.GainedWeapon += OnGainedWeapon;
     }
 
     public void AddWeaponBarEntry()

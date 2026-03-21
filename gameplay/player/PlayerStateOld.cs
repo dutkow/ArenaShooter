@@ -15,7 +15,7 @@ public struct PlayerStats
 
 
 
-
+/*
 
 
 
@@ -443,4 +443,4 @@ public class PlayerStateOld()
         CharacterPublicState.Read(msg);
         CharacterPrivateState.Read(msg);
     }
-}
+}*/

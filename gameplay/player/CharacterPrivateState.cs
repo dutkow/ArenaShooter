@@ -1,3 +1,5 @@
+
+/*
 public class CharacterPrivateState
 {
     public CharacterPrivateFlags Flags;
@@ -106,4 +108,4 @@ public class CharacterPrivateState
                 msg.Read(out Ammo[i]);
         }
     }
-}
+}*/

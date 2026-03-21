@@ -49,11 +49,6 @@ public partial class Pawn : Entity
 
     public virtual void HandleRemoteSpawn(byte playerID) { }
 
-    public virtual void Initialize(PlayerStateOld playerState)
-    {
-        //PlayerState = playerState;
-    }
-
     public virtual void OnDeath() { }
 
     public virtual ClientInputCommand GetClientInputCommand(ClientInputCommand clientInputCommand)

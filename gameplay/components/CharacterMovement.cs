@@ -622,15 +622,13 @@ public class CharacterMovement
     }
 
 
-    public CharacterMoveState QueueLaunch(CharacterMoveState state, Vector3 launchVelocity)
+    public void QueueLaunch(ref CharacterMoveState state, Vector3 launchVelocity)
     {
         state.WasLaunched = true;
         state.LaunchVelocity = launchVelocity;
-
-        return state;
     }
 
-    public bool CheckLaunch(CharacterPublicState state, bool isSimulating)
+    public bool CheckLaunch(ref CharacterMoveState state, bool isSimulating)
     {
         if (state.WasLaunched)
         {
@@ -638,7 +636,7 @@ public class CharacterMovement
 
 
             state.Velocity += state.LaunchVelocity;
-            state.MovementMode = CharacterMovementMode.FALLING;
+            state.Mode = CharacterMovementMode.FALLING;
 
             state.WasLaunched = false;
             state.IsGrounded = false;
@@ -648,12 +646,10 @@ public class CharacterMovement
         return false;
     }
 
-    public CharacterPublicState PreReconciliationReset(CharacterPublicState state)
+    public void PreReconciliationReset(ref CharacterMoveState state)
     {
         state.WasLaunched = false;
         state.CurrentCollidables.Clear();
-
-        return state;
     }
 
     public void SetPosition(Vector3 position, bool isAuthority)
