@@ -9,7 +9,7 @@ public partial class PlayerScoreboardEntry : Control
 
     [Export] Color _playerOwnerColor = Colors.Gold;
 
-    public void Initialize(PlayerState playerState)
+    public void Initialize(PlayerStateOld playerState)
     {
         _playerNameLabel.Text = playerState.PlayerInfo.PlayerName;
 

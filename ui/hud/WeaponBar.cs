@@ -8,7 +8,7 @@ public partial class WeaponBar : BoxContainer
 
     public Dictionary<int, WeaponBarEntry> _weaponBarEntries = new();
 
-    public void AssignToPlayerState(PlayerState playerState)
+    public void AssignToPlayerState(PlayerStateOld playerState)
     {
         playerState.GainedWeapon += OnGainedWeapon;
     }

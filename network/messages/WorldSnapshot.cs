@@ -17,7 +17,7 @@ public class WorldSnapshot : Message
     public ushort LastProcessedClientTick;
     public ulong PickupMask;
 
-    public PlayerState[] PlayerStates;
+    public PlayerStateOld[] PlayerStates;
     byte ReceivingPlayerID;
 
     public ProjectileSpawnData[] UnacknowledgedSpawnedProjectiles;
@@ -131,11 +131,11 @@ public class WorldSnapshot : Message
 
         if (playerStatesCount > 0)
         {
-            PlayerStates = new PlayerState[playerStatesCount];
+            PlayerStates = new PlayerStateOld[playerStatesCount];
 
             for(int i = 0; i < playerStatesCount; ++i)
             {
-                PlayerState playerState = new();
+                PlayerStateOld playerState = new();
                 PlayerStates[i] = playerState;
                 playerState.Read(this, ReceivingPlayerID);
             }
@@ -199,7 +199,7 @@ public class WorldSnapshot : Message
         if (previous == null)
             return this;
 
-        var deltaList = new List<PlayerState>();
+        var deltaList = new List<PlayerStateOld>();
 
         var prevDict = previous.PlayerStates.ToDictionary(p => p.PlayerID);
 
@@ -223,7 +223,7 @@ public class WorldSnapshot : Message
 
                 if (flags != 0)
                 {
-                    var delta = new PlayerState()
+                    var delta = new PlayerStateOld()
                     {
                         PlayerID = current.PlayerID,
                         Flags = flags,
@@ -239,7 +239,7 @@ public class WorldSnapshot : Message
             else
             {
                 // new player → send full state
-                var delta = new PlayerState()
+                var delta = new PlayerStateOld()
                 {
                     Flags =
                         PlayerStateFlags.KILLS_CHANGED |

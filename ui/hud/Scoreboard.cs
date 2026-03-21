@@ -34,7 +34,7 @@ public partial class Scoreboard : Control
             child.QueueFree();
         }
     }
-    public void AddPlayerToList(PlayerState playerState)
+    public void AddPlayerToList(PlayerStateOld playerState)
     {
         var playerListEntry = (PlayerScoreboardEntry)_playerScoreboardEntry.Instantiate();
         playerListEntry.Initialize(playerState);

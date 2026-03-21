@@ -9,7 +9,7 @@ public enum HealthStat
 
 public partial class HealthStatBar : ProgressBar
 {
-    public void Initialize(PlayerState playerState, HealthStat healthStatType)
+    public void Initialize(PlayerStateOld playerState, HealthStat healthStatType)
     {
         if(healthStatType == HealthStat.HEALTH)
         {

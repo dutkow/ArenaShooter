@@ -10,7 +10,7 @@ public partial class Pawn : Entity
 
     public bool InputActive => IsLocal && !_inputEnabled;
 
-    public PlayerState PlayerState;
+    public PlayerStateOld PlayerState;
 
     public override void _Ready()
     {
@@ -49,7 +49,7 @@ public partial class Pawn : Entity
 
     public virtual void HandleRemoteSpawn(byte playerID) { }
 
-    public virtual void Initialize(PlayerState playerState)
+    public virtual void Initialize(PlayerStateOld playerState)
     {
         PlayerState = playerState;
     }

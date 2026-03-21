@@ -1,13 +1,32 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
-using System.Diagnostics;
 using System.Linq;
 
 
+[Flags]
+public enum CharacterStateFlags : byte
+{
+    MOVE_STATE_CHANGED,
+    HEALTH_STATE_CHANGED,
+    INVENTORY_STATE_CHANGED,
+}
+
+public struct CharacterState
+{
+    public CharacterStateFlags Flags;
+
+    public CharacterMoveState MoveState;
+
+    public HealthState HealthState;
+
+    public InventoryState InventoryState;
+}
+
 public partial class Character : Pawn, IDamageable
 {
+    public CharacterState State;
+
     CharacterMoveMode _mode;
 
 
@@ -56,7 +75,7 @@ public partial class Character : Pawn, IDamageable
 
     public CharacterPublicState PredictedPublicState = new();
 
-    private WeaponManager _weaponManager;
+    private InventoryManager _weaponManager;
 
     public override void _Ready()
     {
@@ -229,7 +248,7 @@ public partial class Character : Pawn, IDamageable
 
 
 
-        //_weapon.OwnerPlayerID = PlayerState.PlayerInfo.PlayerID;
+        //_weapon.OwnerPlayerID = PlayerStateOld.PlayerInfo.PlayerID;
         //_weapon.SetIsAuthority(IsAuthority);
 
         if(!IsAuthority)
@@ -630,7 +649,7 @@ public partial class Character : Pawn, IDamageable
 
     public void UpdateRotationState(Vector2 look)
     {
-        //PlayerState.CharacterPublicState.Yaw = new Vector2(look.X, look.Y);
+        //PlayerStateOld.CharacterPublicState.Yaw = new Vector2(look.X, look.Y);
         PlayerState.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
     }
 

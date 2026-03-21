@@ -9,14 +9,14 @@ public class ClientGame : Singleton<ClientGame>
 
     // Player elements
     public PlayerController LocalPlayerController { get; private set; }
-    public PlayerState LocalPlayerState { get; private set; }
+    public PlayerStateOld LocalPlayerState { get; private set; }
 
     public Pawn LocalPlayerPawn => LocalPlayerController.PossessedPawn;
 
     public byte LocalPlayerID;
 
     // Events
-    public event Action<PlayerState>? PlayerJoined;
+    public event Action<PlayerStateOld>? PlayerJoined;
 
     // Client-server synchronization
     public ushort LastServerTickProcessedByClient;
@@ -70,7 +70,7 @@ public class ClientGame : Singleton<ClientGame>
         }
     }
 
-    public void AssignPlayerState(PlayerState playerState)
+    public void AssignPlayerState(PlayerStateOld playerState)
     {
         LocalPlayerState = playerState;
     }

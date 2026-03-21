@@ -1,9 +1,29 @@
 using Godot;
 using System;
 
-public class WeaponManager
+[Flags]
+public enum InventoryStateFlags : byte
 {
-    Inventory Inventory;
+    HELD_WEAPONS_CHANGED,
+    AMMO_CHANGED,
+    EQUIPPED_WEAPON_CHANGED,
+}
+
+public struct InventoryState
+{
+    public InventoryStateFlags Flags;
+
+    public WeaponFlags HeldWeaponsFlags;
+    public WeaponFlags AmmoChangedFlags;
+    public byte[] Ammo;
+    public byte EquippedWeaponIndex;
+
+    public byte[] MaxAmmo; // not replicated
+}
+
+public class InventoryManager
+{
+    InventoryState State;
 
     private Character _character;
 
@@ -127,17 +147,17 @@ public class WeaponManager
 
     public void AddAmmo(int weaponIndex, int amount)
     {
-        if (Inventory.Ammo.Length > weaponIndex)
+        if (State.Ammo.Length > weaponIndex)
         {
-            SetAmmo(weaponIndex, Inventory.Ammo[weaponIndex] + amount);
+            SetAmmo(weaponIndex, State.Ammo[weaponIndex] + amount);
         }
     }
 
     public void SubtractAmmo(int weaponIndex, int amount)
     {
-        if (Inventory.Ammo.Length > weaponIndex)
+        if (State.Ammo.Length > weaponIndex)
         {
-            SetAmmo(weaponIndex, Inventory.Ammo[weaponIndex] - amount);
+            SetAmmo(weaponIndex, State.Ammo[weaponIndex] - amount);
         }
     }
 
@@ -145,25 +165,25 @@ public class WeaponManager
     {
         if (amount >= 0)
         {
-            Inventory.Ammo[weaponIndex] = (byte)amount;
+            State.Ammo[weaponIndex] = (byte)amount;
             AmmoChanged?.Invoke(weaponIndex, amount);
         }
     }
 
     public void SetMaxAmmo(int weaponIndex, int amount)
     {
-        if (amount >= 0 && Inventory.MaxAmmo.Length > weaponIndex)
+        if (amount >= 0 && State.MaxAmmo.Length > weaponIndex)
         {
-            Inventory.MaxAmmo[weaponIndex] = (byte)amount;
+            State.MaxAmmo[weaponIndex] = (byte)amount;
             MaxAmmoChanged?.Invoke(weaponIndex, amount);
         }
     }
 
     public void SetEquippedWeapon(int weaponIndex)
     {
-        if (Inventory.EquippedWeaponIndex != weaponIndex)
+        if (State.EquippedWeaponIndex != weaponIndex)
         {
-            Inventory.EquippedWeaponIndex = (byte)weaponIndex;
+            State.EquippedWeaponIndex = (byte)weaponIndex;
             EquippedWeaponChanged?.Invoke(weaponIndex);
         }
     }

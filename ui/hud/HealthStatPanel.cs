@@ -8,7 +8,7 @@ public partial class HealthStatPanel : Control
     [Export] HealthStatBar _healthStatBar;
 
 
-    public void Initialize(PlayerState playerState)
+    public void Initialize(PlayerStateOld playerState)
     {
         _healthStatDisplay.Initialize(playerState, _healthStatType);
         _healthStatBar.Initialize(playerState, _healthStatType);

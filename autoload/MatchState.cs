@@ -62,13 +62,13 @@ public class MatchState : ITickable
     // ----------------------
     // Player management
     // ----------------------
-    public Dictionary<byte, PlayerState> ConnectedPlayers = new();
+    public Dictionary<byte, PlayerStateOld> ConnectedPlayers = new();
 
     public Dictionary<byte, Player> Players = new();
 
-    public event Action<PlayerState>? PlayerJoined;
+    public event Action<PlayerStateOld>? PlayerJoined;
 
-    public event Action<int, PlayerState>? PlayerLeft;
+    public event Action<int, PlayerStateOld>? PlayerLeft;
 
     // base tick
     public ushort CurrentTick { get; private set; } = 0;
@@ -201,7 +201,7 @@ public class MatchState : ITickable
             return; // Already added
         }
 
-        var playerState = new PlayerState();
+        var playerState = new PlayerStateOld();
         playerState.PlayerInfo = playerInfo;
   
         ConnectedPlayers[playerInfo.PlayerID] = playerState;
@@ -215,7 +215,7 @@ public class MatchState : ITickable
         }
     }
 
-    public void AddExistingPlayerOnClientJoined(PlayerState playerState)
+    public void AddExistingPlayerOnClientJoined(PlayerStateOld playerState)
     {
         ConnectedPlayers[playerState.PlayerInfo.PlayerID] = playerState;
 

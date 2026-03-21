@@ -6,14 +6,14 @@ public partial class PlayerManager : Node
 {
     public static PlayerManager Instance { get; private set; }
 
-    private readonly List<PlayerState> _playerStates = new();
+    private readonly List<PlayerStateOld> _playerStates = new();
 
     public override void _Ready()
     {
         Instance = this;
     }
 
-    public void RegisterPlayer(PlayerState state)
+    public void RegisterPlayer(PlayerStateOld state)
     {
         if (!_playerStates.Contains(state))
         {
@@ -21,7 +21,7 @@ public partial class PlayerManager : Node
         }
     }
 
-    public void UnregisterPlayer(PlayerState state)
+    public void UnregisterPlayer(PlayerStateOld state)
     {
         _playerStates.Remove(state);
     }

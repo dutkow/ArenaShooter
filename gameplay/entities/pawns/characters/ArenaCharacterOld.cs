@@ -36,7 +36,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
     // ----------------------
     // State
     // ----------------------
-    public PlayerState State { get; private set; }
+    public PlayerStateOld State { get; private set; }
 
     private bool _weaponsEnabled = true;
 
@@ -86,7 +86,7 @@ public partial class ArenaCharacterOld : CharacterBody3D, IPossessable, INetwork
     // Initialization
     // ----------------------
 
-    public void Initialize(PlayerState state)
+    public void Initialize(PlayerStateOld state)
     {
         if (state == null)
         {

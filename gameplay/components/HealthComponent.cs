@@ -1,9 +1,28 @@
 using Godot;
 using System;
 
+[Flags]
+public enum HealthStateFlags : byte
+{
+    HEALTH_CHANGED,
+    MAX_HEALTH_CHANGED,
+    ARMOR_CHANGED,
+    MAX_ARMOR_CHANGED,
+}
+
+public struct HealthState
+{
+    public HealthStateFlags Flags;
+
+    public byte Health;
+    public byte MaxHealth;
+    public byte Armor;
+    public byte MaxArmor;
+}
+
 public class HealthComponent : Component
 {
-    public CharacterHealthState HealthState;
+    public HealthState HealthState;
 
     /// <summary>
     /// Base health and armor stats

@@ -10,124 +10,21 @@ public struct PlayerStats
     public ushort Deaths;
 }
 
-[Flags]
-public enum PlayerStateFlags : byte // 8 values
-{
-    NONE = 0,
-
-    IS_SPAWNED = 1 << 0,
-    PING_CHANGED = 1 << 1,
-    STATS_CHANGED = 1 << 2,
-}
-
-[Flags]
-public enum PlayerStatFlags : byte // 8 values
-{
-    NONE = 0,
-
-    KILLS_CHANGED = 1 << 0,
-    DEATHS_CHANGED = 1 << 1,
-}
 
 
-public struct PlayerStateNew
-{
-    public PlayerStateFlags Flags;
-    public string Name;
-    public byte ID;
-
-    public ushort Ping;
-    public bool IsSpawned;
-
-    public PlayerStats Stats;
-
-}
-
-[Flags]
-public enum CharacterHealthFlags : byte
-{
-    HEALTH_CHANGED,
-    MAX_HEALTH_CHANGED,
-    ARMOR_CHANGED,
-    MAX_ARMOR_CHANGED,
-}
-public struct CharacterHealthState
-{
-    public CharacterHealthFlags Flags;
-    public byte Health;
-    public byte MaxHealth;
-    public byte Armor;
-    public byte MaxArmor;
-}
 
 
-public struct CharacterState
-{
-    public CharacterMoveState MoveState;
 
-    public CharacterHealthState HealthState;
 
-    public Inventory InventoryState;
-}
 
-[Flags]
-public enum CharacterMoveStateFlags : byte
-{
-    POSITION_CHANGED,
-    VELOCITY_CHANGED,
-    ROTATION_CHANGED,
-}
 
-public struct CharacterMoveState
-{
-    public Vector3 Position;
-    public Vector3 Velocity;
-    public float Yaw;
-    public float Pitch;
 
-    public void SetPosition(Vector3 position)
-    {
-        Position = position;
-    }
 
-    public void SetVelocity(Vector3 position)
-    {
-        Position = position;
-    }
-
-    public void SetYaw(float yaw)
-    {
-        Yaw = yaw;
-    }
-
-    public void SetPitch(float pitch)
-    {
-        Pitch = pitch;
-    }
-}
-
-[Flags]
-public enum InventoryStateFlags : byte
-{
-    HELD_WEAPONS_CHANGED,
-    AMMO_CHANGED,
-    EQUIPPED_WEAPON_CHANGED,
-}
-
-public struct Inventory
-{
-    public WeaponFlags HeldWeaponsFlags;
-    public WeaponFlags AmmoChangedFlags;
-    public byte[] Ammo;
-    public byte EquippedWeaponIndex;
-
-    public byte[] MaxAmmo; // not replicated
-}
 
 /// <summary>
 /// Contains replicated player data
 /// </summary>
-public class PlayerState()
+public class PlayerStateOld()
 {
     // PERSISTENT PLAYER DATA
 

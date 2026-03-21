@@ -1,11 +1,63 @@
 using Godot;
 using System;
 
+
+[Flags]
+public enum PlayerFlags : byte // 8 values
+{
+    NONE = 0,
+
+    PLAYER_STATE_CHANGED = 1 << 0,
+    MOVE_STATE_CHANGED = 1 << 1,
+    HEALTH_STATE_CHANGED = 1 << 2,
+    INVENTORY_STATE_CHANGED = 1 << 3,
+}
+
+public struct PlayerSnapshot
+{
+    public PlayerState PlayerState;
+    public CharacterMoveState CharacterMoveState;
+    public HealthState HealthState;
+    public InventoryState InventoryState;
+}
+
+[Flags]
+public enum PlayerStateFlags : byte // 8 values
+{
+    NONE = 0,
+
+    PING_CHANGED = 1 << 0,
+    IS_SPAWNED_CHANGED = 1 << 1,
+    STATS_CHANGED = 1 << 2,
+}
+
+[Flags]
+public enum PlayerStatFlags : byte // 8 values
+{
+    NONE = 0,
+
+    KILLS_CHANGED = 1 << 0,
+    DEATHS_CHANGED = 1 << 1,
+}
+
+public struct PlayerState
+{
+    public byte ID; // not changed
+    public string Name; // only changed via reliable updates outside of state transmission
+
+    public PlayerStateFlags Flags;
+    public ushort Ping;
+    public bool IsSpawned;
+
+    public PlayerStatFlags StatFlags;
+    public PlayerStats Stats;
+}
+
 public class Player
 {
     PlayerState State;
     Character Character;
-    WeaponManager WeaponManager;
+    InventoryManager InventoryManager;
 
     public Action<string> NameChanged;
     public Action<int> PingChanged;
@@ -17,16 +69,14 @@ public class Player
     public static void Create(PlayerInfo playerInfo)
     {
         Player player = new();
+        player.State.ID = playerInfo.PlayerID;
         player.SetID(playerInfo.PlayerID);
         MatchState.Instance.AddPlayer(playerInfo);
     }
 
     public void SetID(byte id)
     {
-        if (State.ID != id)
-        {
-            State.ID = id;
-        }
+        State.ID = id; // not dynamic, no != check needed
     }
 
     public void SetName(string name)
@@ -58,11 +108,11 @@ public class Player
 
             if (isSpawned)
             {
-                State.Flags |= PlayerStateFlags.IS_SPAWNED;
+                State.Flags |= PlayerStateFlags.IS_SPAWNED_CHANGED;
             }
             else
             {
-                State.Flags &= ~PlayerStateFlags.IS_SPAWNED;
+                State.Flags &= ~PlayerStateFlags.IS_SPAWNED_CHANGED;
             }
         }
     }
@@ -95,12 +145,28 @@ public class Player
         Character = character;
         Character.OnSpawned();
 
-        WeaponManager.OnSpawned();
+        InventoryManager.OnSpawned();
     }
 
     public void OnDeath()
     {
         SetIsSpawned(false);
         Character = null;
+    }
+
+    public PlayerSnapshot GetPlayerSnapshot()
+    {
+        PlayerSnapshot snapshot = new();
+
+        if(State.Flags != 0)
+        {
+            snapshot.PlayerState = State;
+        }
+
+        if(Character != null)
+        {
+        }
+
+        return default;
     }
 }

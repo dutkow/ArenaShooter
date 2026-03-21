@@ -10,7 +10,7 @@ public class InitialMatchState : Message
 {
     public int ServerTickRate;
 
-    public PlayerState[] PlayerStates;
+    public PlayerStateOld[] PlayerStates;
 
     // ----------------------
     // Serialization
@@ -71,11 +71,11 @@ public class InitialMatchState : Message
 
         if (playerStatesCount > 0)
         {
-            PlayerStates = new PlayerState[playerStatesCount];
+            PlayerStates = new PlayerStateOld[playerStatesCount];
 
             for (int i = 0; i < playerStatesCount; i++)
             {
-                PlayerStates[i] = new PlayerState(); // ✅ important!
+                PlayerStates[i] = new PlayerStateOld(); // ✅ important!
                 PlayerStates[i].Read(this, 0);
             }
         }

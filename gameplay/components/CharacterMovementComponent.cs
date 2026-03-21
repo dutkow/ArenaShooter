@@ -1,7 +1,28 @@
 using Godot;
+using System;
+using static Godot.WebSocketPeer;
+
+[Flags]
+public enum CharacterMoveStateFlags : byte
+{
+    POSITION_CHANGED,
+    VELOCITY_CHANGED,
+    ROTATION_CHANGED,
+}
+public struct CharacterMoveState
+{
+    public CharacterMoveStateFlags Flags;
+
+    public Vector3 Position;
+    public Vector3 Velocity;
+    public float Yaw;
+    public float Pitch;
+}
 
 public class CharacterMovementComponent
 {
+    public CharacterMoveState State;
+
     private ArenaCharacterOld _character;
 
     public Vector3 Velocity;
@@ -111,5 +132,23 @@ public class CharacterMovementComponent
             _character.Velocity = Vector3.Zero;
     }
 
+    public void SetPosition(Vector3 position)
+    {
+        State.Position = position;
+    }
 
+    public void SetVelocity(Vector3 position)
+    {
+        State.Position = position;
+    }
+
+    public void SetYaw(float yaw)
+    {
+        State.Yaw = yaw;
+    }
+
+    public void SetPitch(float pitch)
+    {
+        State.Pitch = pitch;
+    }
 }
