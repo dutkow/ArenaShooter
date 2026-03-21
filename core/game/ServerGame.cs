@@ -88,7 +88,7 @@ public class ServerGame : Singleton<ServerGame>
                 nextInputCommand = lastCommand;
             }
 
-            character.ServerProcessNextClientInput(nextInputCommand, delta);
+            character.TickWithNextClientCommand(nextInputCommand, delta);
             _unprocessedClientInputs[playerID] = queue;
         }
     }

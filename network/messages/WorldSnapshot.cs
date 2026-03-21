@@ -267,7 +267,7 @@ public class WorldSnapshot : Message
         return new WorldSnapshot
         {
             ENetFlags = ENetPacketFlags.UnreliableFragment,
-            ServerTick = ServerTick,
+            TickWithNextClientCommand = TickWithNextClientCommand,
             LastProcessedClientTick = LastProcessedClientTick,
             PickupMask = PickupMask,
             Players = deltaList.ToArray(),

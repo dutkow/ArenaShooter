@@ -161,7 +161,7 @@ public class CharacterMovement
         state.LastUnstuckPosition = state.Position;
     }
 
-    public void CheckGround(CharacterMoveState state, Vector3 startPosition)
+    public void CheckGround(ref CharacterMoveState state, Vector3 startPosition)
     {
         state.IsGrounded = false;
 
@@ -209,8 +209,7 @@ public class CharacterMovement
 
     public void MoveAndSlide(ref CharacterMoveState state, ClientInputCommand cmd, float delta)
     {
-
-        CheckGround(state, state.Position);
+        CheckGround(ref state, state.Position);
 
         if (state.IsGrounded)
         {
@@ -228,7 +227,7 @@ public class CharacterMovement
     {
         if ((cmd.Flags & InputFlags.JUMP) != 0 && state.TicksRemainingBeforeJump <= 0)
         {
-            Jump(state);
+            Jump(ref state);
             MoveAndSlideAir(ref state, cmd, delta);
             return;
         }
@@ -254,7 +253,6 @@ public class CharacterMovement
         float remainingDistance = remainingMotion.Length();
         Vector3 direction = remainingMotion.Normalized();
 
-
         bool moveComplete = false;
         int maxSlides = 4;
         for (int i = 0; i < maxSlides; ++i)
@@ -266,7 +264,7 @@ public class CharacterMovement
 
             Vector3 targetMotion = direction * remainingDistance;
 
-            var sweepResult = Sweep(state, state.Position, targetMotion);
+            var sweepResult = Sweep(ref state, state.Position, targetMotion);
 
             if (sweepResult.SafePercent >= 1.0f)
             {
@@ -304,7 +302,7 @@ public class CharacterMovement
 
 
                         Vector3 upMotion = new Vector3(0.0f, MAX_STEP_HEIGHT, 0.0f);
-                        var upSweep = Sweep(state, stepPosition, upMotion);
+                        var upSweep = Sweep(ref state, stepPosition, upMotion);
 
                         GD.Print($"up sweep safe motion length = {upSweep.SafeMotion.Length()}");
 
@@ -320,7 +318,7 @@ public class CharacterMovement
                                 targetMotion = targetMotion.Normalized() * minForwardStep;
                             }
 
-                            var forwardSweep = Sweep(state, stepPosition, targetMotion);
+                            var forwardSweep = Sweep(ref state, stepPosition, targetMotion);
 
                             GD.Print($"forward sweep safe percent= {forwardSweep.SafePercent}");
 
@@ -331,7 +329,7 @@ public class CharacterMovement
 
                                 // Finally, sweep back down to floor
                                 var downMotion = new Vector3(0.0f, -MAX_STEP_HEIGHT, 0.0f);
-                                var downSweep = Sweep(state, stepPosition, downMotion);
+                                var downSweep = Sweep(ref state, stepPosition, downMotion);
 
 
                                 state.Position += upSweep.SafeMotion + forwardSweep.SafeMotion + downSweep.SafeMotion + new Vector3(0.0f, GROUND_CLEARANCE * 2.0f, 0.0f);
@@ -364,7 +362,7 @@ public class CharacterMovement
 
                     }
 
-                    CheckStuck(state);
+                    CheckStuck(ref state);
 
                 }
             }
@@ -376,7 +374,7 @@ public class CharacterMovement
         }
     }
 
-    public void CheckStuck(CharacterMoveState state)
+    public void CheckStuck(ref CharacterMoveState state)
     {
         PhysicsShapeQueryParameters3D query = new()
         {
@@ -396,7 +394,7 @@ public class CharacterMovement
         }
     }
 
-    public SweepResult Sweep(CharacterMoveState state, Vector3 startPosition, Vector3 motion)
+    public SweepResult Sweep(ref CharacterMoveState state, Vector3 startPosition, Vector3 motion)
     {
 
         PhysicsShapeQueryParameters3D motionQuery = new()
@@ -547,7 +545,7 @@ public class CharacterMovement
 
     const int MinTicksBetweenJumps = 20;
 
-    private void Jump(CharacterMoveState state)
+    private void Jump(ref CharacterMoveState state)
     {
         state.Velocity.Y = Math.Max(state.Velocity.Y, 0f) + JumpStrength;
         state.Mode = CharacterMovementMode.FALLING;

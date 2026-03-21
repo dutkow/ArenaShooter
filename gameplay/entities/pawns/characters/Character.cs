@@ -114,9 +114,9 @@ public partial class Character : Pawn, IDamageable
 
 
 
-    public override void ServerProcessNextClientInput(ClientInputCommand cmd, float delta)
+    public override void TickWithNextClientCommand(ClientInputCommand cmd, float delta)
     {
-        base.ServerProcessNextClientInput(cmd, delta);
+        base.TickWithNextClientCommand(cmd, delta);
 
         MovementComp.ServerProcessNextClientInput(cmd, delta);
         InventoryManager?.ProcessClientInput(cmd.Flags);
