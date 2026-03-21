@@ -78,7 +78,7 @@ public class CharacterMovement
     private bool _isSkippingReconciliation;
     private int _ticksUntilReconciliationResume;
 
-    private Character _character;
+    public Character Character;
 
     // Movement parameters
     public float MaxGroundSpeed = 10.0f;
@@ -112,13 +112,12 @@ public class CharacterMovement
 
     private bool _justJumped;
 
-    public void Initialize(Character character)
+    public void Initialize()
     {
-        _character = character;
 
-        _characterCollisionRids.Add(_character.Area.GetRid());
+        _characterCollisionRids.Add(Character.Area.GetRid());
 
-        if (_character.CollisionShape.Shape is CapsuleShape3D collisionShape)
+        if (Character.CollisionShape.Shape is CapsuleShape3D collisionShape)
         {
             _mainCollisionShape = collisionShape;
             _characterCollisionRids.Add(_mainCollisionShape.GetRid());
@@ -127,6 +126,15 @@ public class CharacterMovement
         {
             GD.PushError("Character does not have a CapsuleShape3D set as its collision shape.");
         }
+    }
+
+    public void OnCharacterSpawned(Character character)
+    {
+        Character = character;
+
+        SetPosition(Character.GlobalPosition);
+        SetVelocity(Vector3.Zero);
+        SetRotation(Character.GlobalRotation.Y, 0.0f);
     }
 
     public void ServerProcessNextClientInput(ClientInputCommand cmd, float delta)
@@ -200,7 +208,7 @@ public class CharacterMovement
 
     public CharacterMoveState MoveAndSlide(CharacterMoveState state, ClientInputCommand cmd, float delta)
     {
-        var space = _character.GetWorld3D().DirectSpaceState;
+        var space = Character.GetWorld3D().DirectSpaceState;
 
         CheckGround(state, state.Position, space);
 
@@ -564,14 +572,14 @@ public class CharacterMovement
         {
             foreach (var collidable in state.NewlyOverlappedCollidables)
             {
-                collidable.OnCollidedWith(_character, state, true);
+                collidable.OnCollidedWith(Character, state, true);
             }
         }
         else
         {
             state.NewlyOverlappedCollidables.Clear();
 
-            var space = _character.GetWorld3D().DirectSpaceState;
+            var space = Character.GetWorld3D().DirectSpaceState;
 
             PhysicsShapeQueryParameters3D query = new()
             {
@@ -598,7 +606,7 @@ public class CharacterMovement
 
                         if (!state.CurrentCollidables.Contains(collidable))
                         {
-                            collidable.OnCollidedWith(_character, state, isSimulating);
+                            collidable.OnCollidedWith(Character, state, isSimulating);
                             state.NewlyOverlappedCollidables.Add(collidable);
                         }
                     }
@@ -645,10 +653,7 @@ public class CharacterMovement
 
     public void OnSpawned()
     {
-        State.Position = _character.GlobalPosition;
-        State.Velocity = Vector3.Zero;
-        State.Yaw = _character.GlobalRotation.Y;
-        State.Pitch = 0.0f;
+
     }
 
 
@@ -701,7 +706,7 @@ public class CharacterMovement
         }
 
         
-        if(_character.IsLocal)
+        if(Character.IsLocal)
         {
             foreach (var clientInputCommand in ClientGame.Instance.UnprocessedClientInputCommands)
             {

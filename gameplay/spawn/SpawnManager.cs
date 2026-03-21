@@ -26,8 +26,13 @@ public class SpawnManager : Singleton<SpawnManager>
     public Character ServerSpawnPlayer(byte playerID)
     {
         var spawnPoint = GetSpawnPoint();
+
+
+
+
         if(MatchState.Instance.Players.TryGetValue(playerID, out var player))
         {
+
             /*
             player.IsSpawned = true;
 
@@ -103,6 +108,11 @@ public class SpawnManager : Singleton<SpawnManager>
         }
         var spawnedCharacter = (Character)GameRules.Instance.DefaultPawnScene.Instantiate();
 
+        Level.Instance.AddChild(spawnedCharacter);
+
+        spawnedCharacter.GlobalPosition = spawnPosition;
+        spawnedCharacter.GlobalRotation = new Vector3(0.0f, spawnedCharacter.GlobalRotation.Y, 0.0f);
+
         if (MatchState.Instance.Players.TryGetValue(playerID, out var player))
         {
             player.HandleSpawn(spawnedCharacter);
@@ -110,9 +120,7 @@ public class SpawnManager : Singleton<SpawnManager>
             //spawnedCharacter.PlayerState = playerState;
         }
 
-        Level.Instance.AddChild(spawnedCharacter);
 
-        spawnedCharacter.HandleSpawn(spawnPosition, yRotation, 0.0f);
         spawnedCharacter.SetIsAuthority(NetworkManager.Instance.IsServer);
 
         if (playerID == ClientGame.Instance.LocalPlayerID)

@@ -240,7 +240,8 @@ public class ServerGame : Singleton<ServerGame>
 
     public void ApplyClientLoaded(PlayerInfo playerInfo)
     {
-        MatchState.Instance.AddPlayer(playerInfo);
+        Player.Create(playerInfo);
+        //MatchState.Instance.AddPlayer(playerInfo);
     }
 
     public void HandleClientCommand(ENetPacketPeer peer, ClientCommand clientCommand)
@@ -281,9 +282,9 @@ public class ServerGame : Singleton<ServerGame>
 
         if (NetworkManager.Instance.IsServer)
         {
-            foreach (var player in MatchState.Instance.ConnectedPlayers.Values)
+            foreach (var playerID in MatchState.Instance.Players.Keys)
             {
-                var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(player.PlayerInfo.PlayerID);
+                var spawnedPlayer = SpawnManager.Instance.ServerSpawnPlayer(playerID);
             }
         }
 
@@ -308,7 +309,7 @@ public class ServerGame : Singleton<ServerGame>
 
     public void HandleChatMessageRequest(ENetPacketPeer peer, ChatMessageRequest request)
     {
-        // Note: the incoming request contains the target player (if sending a private msg), but the outgoing info should contain the sender ID
+        // Note: the incoming request contains the target playerID (if sending a private msg), but the outgoing info should contain the sender ID
         byte playerID = NetUtils.GetPeerPlayerID(peer);
         var info = new ChatMessageInfo(request.Info.Channel, request.Info.Text, NetUtils.GetPeerPlayerID(peer));
 

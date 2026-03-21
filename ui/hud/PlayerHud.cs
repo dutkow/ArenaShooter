@@ -11,10 +11,10 @@ public partial class PlayerHud : Control
         base._Ready();
 
 
-        var playerState = ClientGame.Instance.LocalPlayerState;
+        //var playerState = ClientGame.Instance.LocalPlayerState;
 
-        _armorPanel.Initialize(playerState);
-        _healthPanel.Initialize(playerState);
+        //_armorPanel.Initialize(playerState);
+        //_healthPanel.Initialize(playerState);
 
     }
 

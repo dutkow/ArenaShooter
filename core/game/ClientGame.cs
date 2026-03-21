@@ -6,6 +6,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class ClientGame : Singleton<ClientGame>
 {
+    public Player LocalPlayer;
 
     // Player elements
     public PlayerController LocalPlayerController { get; private set; }

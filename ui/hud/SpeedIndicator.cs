@@ -14,7 +14,7 @@ public partial class SpeedIndicator : Control
     {
         base._Ready();
 
-        //_character = ClientGame.Instance.LocalPlayerPawn as Character; // should make on possession or something
+        //Character = ClientGame.Instance.LocalPlayerPawn as Character; // should make on possession or something
     }
 
     /*
@@ -22,7 +22,7 @@ public partial class SpeedIndicator : Control
     {
         base._Process(delta);
 
-        HorizontalSpeedLabel.Text = UnitConversion.ToQuake(Mathf.RoundToInt(_character.MovementComp.HorizontalVelocity)).ToString();
-        VerticalSpeedLabel.Text = UnitConversion.ToQuake(Mathf.RoundToInt(_character.MovementComp.VerticalVelocity)).ToString();
+        HorizontalSpeedLabel.Text = UnitConversion.ToQuake(Mathf.RoundToInt(Character.MovementComp.HorizontalVelocity)).ToString();
+        VerticalSpeedLabel.Text = UnitConversion.ToQuake(Mathf.RoundToInt(Character.MovementComp.VerticalVelocity)).ToString();
     }*/
 }

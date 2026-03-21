@@ -63,7 +63,9 @@ public class Player
         Player player = new();
         player.State.ID = playerInfo.PlayerID;
         player.SetID(playerInfo.PlayerID);
-        MatchState.Instance.AddPlayer(playerInfo);
+        player.SetName(playerInfo.PlayerName);
+
+        MatchState.Instance.Players.Add(playerInfo.PlayerID, player);
     }
 
     public void SetID(byte id)

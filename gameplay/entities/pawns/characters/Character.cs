@@ -100,26 +100,17 @@ public partial class Character : Pawn, IDamageable
 
         Area.Owner = this;
 
-        InventoryManager = new();
-        InventoryManager.Initialize(this);
 
         //InventoryManager.EquipWeapon(PlayerState.CharacterPublicState.EquippedWeaponIndex);
     }
+
 
     public void ApplyDamage(int damage)
     {
         HealthComp.ApplyDamage(damage);
     }
 
-    public void HandleSpawn(Vector3 spawnPosition, float yaw, float pitch)
-    {
-        GlobalPosition = spawnPosition;
-        GlobalRotation = new Vector3(0.0f, yaw, 0.0f);
-
-
-        MovementComp.Initialize(this);
-
-    }
+ 
 
 
 
@@ -135,6 +126,8 @@ public partial class Character : Pawn, IDamageable
     public override void _Process(double delta)
     {
         base._Process(delta);
+
+        GD.Print($"character global pos = {GlobalPosition}");
 
         if (IsLocal)
         {
@@ -708,8 +701,10 @@ public partial class Character : Pawn, IDamageable
 
     public void OnSpawned()
     {
-        MovementComp.OnSpawned();
-        HealthComp.OnSpawned();
+        MovementComp.OnCharacterSpawned(this);
+
+        InventoryManager = new();
+        InventoryManager.Initialize(this);
     }
 
 
