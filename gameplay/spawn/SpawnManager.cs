@@ -76,7 +76,7 @@ public class SpawnManager : Singleton<SpawnManager>
 
         Character spawnedPlayer = LocalSpawnPlayer(playerID, spawnPoint.GlobalPosition, spawnPoint.GlobalRotation.Y);
 
-        player.Flags |= PlayerStateFlags.IS_ALIVE_CHANGED;
+        //player.Flags |= PlayerStateFlags.IS_ALIVE_CHANGED;
         player.CharacterPublicState.Flags |= CharacterPublicFlags.POSITION_CHANGED;
         player.CharacterPublicState.Flags |= CharacterPublicFlags.ROTATION_CHANGED;
         player.CharacterPublicState.Flags |= CharacterPublicFlags.VELOCITY_CHANGED;

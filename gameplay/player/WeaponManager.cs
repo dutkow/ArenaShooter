@@ -3,6 +3,8 @@ using System;
 
 public class WeaponManager
 {
+    Inventory Inventory;
+
     private Character _character;
 
     public WeaponFlags HeldWeaponsFlags;
@@ -12,6 +14,15 @@ public class WeaponManager
     public Weapon[] Weapons = new Weapon[GameRules.Instance.Weapons.Count];
 
     private Weapon _currentWeapon;
+
+    public Action<int> GainedWeapon;
+    public Action<int> LostWeapon;
+
+    public Action<int, int> AmmoChanged;
+    public Action<int, int> MaxAmmoChanged;
+
+    public Action<int> EquippedWeaponChanged;
+
 
     public void Initialize(Character character)
     {
@@ -67,5 +78,93 @@ public class WeaponManager
 
         // else show third person
         _equippedWeaponIndex = weaponIndex;
+    }
+
+    public void OnSpawned()
+    {
+        foreach (var startingWeaponData in GameRules.Instance.StartingWeapons)
+        {
+            AddWeapon(startingWeaponData.WeaponIndex);
+
+            if (startingWeaponData.AmmoOverride >= 0)
+            {
+                SetAmmo(startingWeaponData.WeaponIndex, startingWeaponData.AmmoOverride);
+            }
+            else
+            {
+                if (GameRules.Instance.Weapons.Count > startingWeaponData.WeaponIndex)
+                {
+                    var weaponData = GameRules.Instance.Weapons[startingWeaponData.WeaponIndex];
+                    if (weaponData != null)
+                    {
+                        SetAmmo(startingWeaponData.WeaponIndex, weaponData.DefaultStartingAmmo);
+                    }
+                }
+            }
+        }
+
+        SetEquippedWeapon(GameRules.Instance.StartingWeaponIndex);
+    }
+
+    public void AddWeapon(int weaponIndex)
+    {
+        if ((HeldWeaponsFlags & (WeaponFlags)(1 << weaponIndex)) == 0)
+        {
+            HeldWeaponsFlags |= (WeaponFlags)(1 << weaponIndex);
+            GainedWeapon?.Invoke(weaponIndex);
+        }
+    }
+
+    public void RemoveWeapon(int weaponIndex)
+    {
+        if ((HeldWeaponsFlags & (WeaponFlags)(1 << weaponIndex)) != 0)
+        {
+            HeldWeaponsFlags &= ~(WeaponFlags)(1 << weaponIndex);
+
+            LostWeapon?.Invoke(weaponIndex);
+        }
+    }
+
+    public void AddAmmo(int weaponIndex, int amount)
+    {
+        if (Inventory.Ammo.Length > weaponIndex)
+        {
+            SetAmmo(weaponIndex, Inventory.Ammo[weaponIndex] + amount);
+        }
+    }
+
+    public void SubtractAmmo(int weaponIndex, int amount)
+    {
+        if (Inventory.Ammo.Length > weaponIndex)
+        {
+            SetAmmo(weaponIndex, Inventory.Ammo[weaponIndex] - amount);
+        }
+    }
+
+    public void SetAmmo(int weaponIndex, int amount)
+    {
+        if (amount >= 0)
+        {
+            Inventory.Ammo[weaponIndex] = (byte)amount;
+            AmmoChanged?.Invoke(weaponIndex, amount);
+        }
+    }
+
+    public void SetMaxAmmo(int weaponIndex, int amount)
+    {
+        if (amount >= 0 && Inventory.MaxAmmo.Length > weaponIndex)
+        {
+            Inventory.MaxAmmo[weaponIndex] = (byte)amount;
+            MaxAmmoChanged?.Invoke(weaponIndex, amount);
+        }
+    }
+
+    public void SetEquippedWeapon(int weaponIndex)
+    {
+        if (Inventory.EquippedWeaponIndex != weaponIndex)
+        {
+            Inventory.EquippedWeaponIndex = (byte)weaponIndex;
+            EquippedWeaponChanged?.Invoke(weaponIndex);
+        }
     }
 }

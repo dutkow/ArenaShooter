@@ -64,6 +64,8 @@ public class MatchState : ITickable
     // ----------------------
     public Dictionary<byte, PlayerState> ConnectedPlayers = new();
 
+    public Dictionary<byte, Player> Players = new();
+
     public event Action<PlayerState>? PlayerJoined;
 
     public event Action<int, PlayerState>? PlayerLeft;

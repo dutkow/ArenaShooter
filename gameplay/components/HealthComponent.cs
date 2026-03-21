@@ -3,6 +3,8 @@ using System;
 
 public class HealthComponent : Component
 {
+    public CharacterHealthState HealthState;
+
     /// <summary>
     /// Base health and armor stats
     /// </summary>
@@ -334,5 +336,14 @@ public class HealthComponent : Component
                 ArmorPartiallyRestored?.Invoke();
             }
         }
+    }
+
+    public void OnSpawned()
+    {
+        //SetMaxHealth(GameRules.Instance.MaxHealth);
+        SetHealth(GameRules.Instance.StartingHealth);
+
+        //SetMaxArmor(GameRules.Instance.MaxArmor);
+        SetArmor(GameRules.Instance.MaxArmor);
     }
 }

@@ -38,6 +38,8 @@ public enum CollisionType
 
 public class CharacterMovement
 {
+    public CharacterMoveState State;
+
     private Character _character;
 
     // Movement parameters
@@ -598,5 +600,13 @@ public class CharacterMovement
         state.CurrentCollidables.Clear();
 
         return state;
+    }
+
+    public void OnSpawned()
+    {
+        State.Position = _character.GlobalPosition;
+        State.Velocity = Vector3.Zero;
+        State.Yaw = _character.GlobalRotation.Y;
+        State.Pitch = 0.0f;
     }
 }

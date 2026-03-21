@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 
 
 public partial class Character : Pawn, IDamageable
@@ -694,4 +693,10 @@ public partial class Character : Pawn, IDamageable
         QueueFree();
     }
 
+
+    public void OnSpawned()
+    {
+        MovementComp.OnSpawned();
+        HealthComp.OnSpawned();
+    }
 }

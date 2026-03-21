@@ -43,16 +43,6 @@ public enum WeaponFlags : ushort
     WEAPON_10 = 1 << 9,
 }
 
-[Flags]
-public enum PlayerStateFlags : byte
-{
-    NONE = 0,
-
-    KILLS_CHANGED = 1 << 0,
-    DEATHS_CHANGED = 1 << 1,
-    PING_CHANGED = 1 << 2,
-    IS_ALIVE_CHANGED = 1 << 3,
-}
 
 public static class FlagStatics
 {
@@ -93,26 +83,6 @@ public class ArenaPlayerState
     }
 } 
 
-
-
-public partial class PlayerStateNew
-{
-    byte PlayerID;
-    string PlayerName = string.Empty;
-
-
-
-
-
-
-
-
-
-    public PublicPlayerState PublicState = new();
-    public PrivatePlayerState PrivateState = new();
-
-
-}
 
 public partial class PublicPlayerState
 {
