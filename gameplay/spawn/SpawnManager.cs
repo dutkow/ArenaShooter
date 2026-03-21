@@ -100,12 +100,10 @@ public class SpawnManager : Singleton<SpawnManager>
     }
 
 
-    public Character LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation)
+    public Character LocalSpawnPlayer(byte playerID, Vector3 spawnPosition, float yRotation, float pitch = 0.0f)
     {
-        if(ClientGame.Instance == null)
-        {
-            GD.Print($"client game is null");
-        }
+        GD.Print($"spawning local player on {NetworkManager.Instance.NetworkMode}");
+
         var spawnedCharacter = (Character)GameRules.Instance.DefaultPawnScene.Instantiate();
 
         Level.Instance.AddChild(spawnedCharacter);

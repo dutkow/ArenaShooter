@@ -50,7 +50,7 @@ public class InitialMatchState : Message
         {
             foreach (var playerSnapshot in PlayerSnapshots)
             {
-                playerSnapshot.Write(this, 0);
+                playerSnapshot.Write(this, 0, true);
             }
         }
 
@@ -76,7 +76,7 @@ public class InitialMatchState : Message
             for (int i = 0; i < playerCount; i++)
             {
                 PlayerSnapshots[i] = new PlayerSnapshot();
-                PlayerSnapshots[i].Read(this, 0);
+                PlayerSnapshots[i].Read(this, 0, true);
             }
         }
     }

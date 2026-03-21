@@ -102,15 +102,10 @@ public class Player
             State.IsSpawned = isSpawned;
             IsSpawnedChanged?.Invoke(isSpawned);
 
-            if (isSpawned)
-            {
-                State.Flags |= PlayerStateFlags.IS_SPAWNED_CHANGED;
-            }
-            else
-            {
-                State.Flags &= ~PlayerStateFlags.IS_SPAWNED_CHANGED;
-            }
+            State.Flags |= PlayerStateFlags.IS_SPAWNED_CHANGED;
         }
+
+        GD.Print($" set is spawned ran, and now is spawned = {isSpawned}");
     }
 
     public void AddKill()

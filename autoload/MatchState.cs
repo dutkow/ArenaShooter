@@ -220,7 +220,7 @@ public class MatchState : ITickable
             
         Players[playerSnapshot.PlayerState.ID] = player;
 
-        if(playerSnapshot.PlayerState.IsSpawned)
+        if (playerSnapshot.PlayerState.IsSpawned)
         {
             SpawnManager.Instance.LocalSpawnPlayer(playerSnapshot.PlayerState.ID, playerSnapshot.CharacterState.MoveState.Position, playerSnapshot.CharacterState.MoveState.Yaw);
         }

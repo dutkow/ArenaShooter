@@ -14,7 +14,31 @@ public struct PlayerSnapshot
 
         msg.AddEnum(Flags);
 
-        if(Flags != PlayerFlags.NONE)
+        if (forceFull)
+        {
+            msg.Add(PlayerState.Ping);
+            msg.Add(PlayerState.IsSpawned);
+            msg.Add(PlayerState.Stats.Kills);
+            msg.Add(PlayerState.Stats.Deaths);
+
+            msg.Add(CharacterState.MoveState.Position);
+            msg.Add(CharacterState.MoveState.Velocity);
+            msg.Add(CharacterState.MoveState.Yaw);
+            msg.Add(CharacterState.MoveState.Pitch);
+
+            msg.Add(CharacterState.HealthState.Health);
+            msg.Add(CharacterState.HealthState.MaxHealth);
+            msg.Add(CharacterState.HealthState.Armor);
+            msg.Add(CharacterState.HealthState.MaxArmor);
+
+            msg.Add(CharacterState.InventoryState.EquippedWeaponIndex);
+            msg.AddEnum(CharacterState.InventoryState.HeldWeaponsFlags);
+            msg.AddEnum(CharacterState.InventoryState.AmmoChangedFlags);
+
+            return;
+        }
+
+        if (Flags != PlayerFlags.NONE)
         {
             if((Flags & PlayerFlags.PLAYER_STATE_CHANGED) != 0)
             {
@@ -107,11 +131,35 @@ public struct PlayerSnapshot
         }
     }
 
-    internal void Write(Message msg, byte clientPlayerID)
+    internal void Write(Message msg, byte clientPlayerID, bool forceFull = false)
     {
         msg.Write(PlayerState.ID);
 
         msg.WriteEnum(Flags);
+
+        if (forceFull)
+        {
+            msg.Write(PlayerState.Ping);
+            msg.Write(PlayerState.IsSpawned);
+            msg.Write(PlayerState.Stats.Kills);
+            msg.Write(PlayerState.Stats.Deaths);
+
+            msg.Write(CharacterState.MoveState.Position);
+            msg.Write(CharacterState.MoveState.Velocity);
+            msg.Write(CharacterState.MoveState.Yaw);
+            msg.Write(CharacterState.MoveState.Pitch);
+
+            msg.Write(CharacterState.HealthState.Health);
+            msg.Write(CharacterState.HealthState.MaxHealth);
+            msg.Write(CharacterState.HealthState.Armor);
+            msg.Write(CharacterState.HealthState.MaxArmor);
+
+            msg.Write(CharacterState.InventoryState.EquippedWeaponIndex);
+            msg.WriteEnum(CharacterState.InventoryState.HeldWeaponsFlags);
+            msg.WriteEnum(CharacterState.InventoryState.AmmoChangedFlags);
+
+            return;
+        }
 
         if (Flags != PlayerFlags.NONE)
         {
@@ -206,11 +254,37 @@ public struct PlayerSnapshot
         }
     }
 
-    internal void Read(Message msg, byte clientPlayerID)
+    internal void Read(Message msg, byte clientPlayerID, bool forceFull = false)
     {
         msg.Read(out PlayerState.ID);
 
         msg.ReadEnum(out Flags);
+
+        if (forceFull)
+        {
+            // Player State
+            msg.Read(out PlayerState.Ping);
+            msg.Read(out PlayerState.IsSpawned);
+            msg.Read(out PlayerState.Stats.Kills);
+            msg.Read(out PlayerState.Stats.Deaths);
+
+            // Character State
+            msg.Read(out CharacterState.MoveState.Position);
+            msg.Read(out CharacterState.MoveState.Velocity);
+            msg.Read(out CharacterState.MoveState.Yaw);
+            msg.Read(out CharacterState.MoveState.Pitch);
+
+            msg.Read(out CharacterState.HealthState.Health);
+            msg.Read(out CharacterState.HealthState.MaxHealth);
+            msg.Read(out CharacterState.HealthState.Armor);
+            msg.Read(out CharacterState.HealthState.MaxArmor);
+
+            msg.Read(out CharacterState.InventoryState.EquippedWeaponIndex);
+            msg.ReadEnum(out CharacterState.InventoryState.HeldWeaponsFlags);
+            msg.ReadEnum(out CharacterState.InventoryState.AmmoChangedFlags);
+
+            return;
+        }
 
         if (Flags != PlayerFlags.NONE)
         {
