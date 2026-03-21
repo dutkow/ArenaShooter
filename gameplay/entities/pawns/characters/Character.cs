@@ -127,8 +127,6 @@ public partial class Character : Pawn, IDamageable
     {
         base._Process(delta);
 
-        GD.Print($"character global pos = {GlobalPosition}");
-
         if (IsLocal)
         {
             if (IsAuthority)
@@ -151,8 +149,8 @@ public partial class Character : Pawn, IDamageable
     {
         if (_useInterpolation)
         {
-            InterpolatePosition(10.0f, delta);
-            GlobalPosition = MovementComp.State.Position;
+            //InterpolatePosition(10.0f, delta);
+            //GlobalPosition = MovementComp.State.Position;
         }
         else
         {
@@ -169,7 +167,7 @@ public partial class Character : Pawn, IDamageable
         }
         else
         {
-            //GlobalPosition = PredictedPublicState.Position;
+            GlobalPosition = MovementComp.PredictedState.Position;
         }
     }
 

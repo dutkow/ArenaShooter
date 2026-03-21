@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Resources;
 using static Godot.WebSocketPeer;
 
@@ -79,6 +80,7 @@ public class CharacterMovement
     private int _ticksUntilReconciliationResume;
 
     public Character Character;
+    private PhysicsDirectSpaceState3D _space;
 
     // Movement parameters
     public float MaxGroundSpeed = 10.0f;
@@ -132,6 +134,8 @@ public class CharacterMovement
     {
         Character = character;
 
+        _space = Character.GetWorld3D().DirectSpaceState;
+
         SetPosition(Character.GlobalPosition);
         SetVelocity(Vector3.Zero);
         SetRotation(Character.GlobalRotation.Y, 0.0f);
@@ -139,15 +143,13 @@ public class CharacterMovement
 
     public void ServerProcessNextClientInput(ClientInputCommand cmd, float delta)
     {
-        State = Step(State, cmd, delta);
+        Step(ref State, cmd, delta);
     }
-    
- 
-    // Step function now takes CharacterPublicState and returns it
-    public CharacterMoveState Step(CharacterMoveState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
+
+    public void Step(ref CharacterMoveState state, ClientInputCommand cmd, float delta, bool isSimulating = false)
     {
-        ProcessInput(state, cmd, delta);
-        MoveAndSlide(state, cmd, delta);
+        ProcessInput(ref state, cmd, delta);
+        MoveAndSlide(ref state, cmd, delta);
 
         Vector3 deltaPos = state.Position - _lastPosition;
 
@@ -157,10 +159,9 @@ public class CharacterMovement
         _lastPosition = state.Position;
 
         state.LastUnstuckPosition = state.Position;
-        return state;
     }
 
-    public void CheckGround(CharacterMoveState state, Vector3 startPosition, PhysicsDirectSpaceState3D space)
+    public void CheckGround(CharacterMoveState state, Vector3 startPosition)
     {
         state.IsGrounded = false;
 
@@ -176,7 +177,7 @@ public class CharacterMovement
         };
         motionQuery.SetExclude(_characterCollisionRids);
 
-        var motionQueryResult = space.CastMotion(motionQuery);
+        var motionQueryResult = _space.CastMotion(motionQuery);
 
         var unsafeMotionPercent = motionQueryResult[1];
 
@@ -193,7 +194,7 @@ public class CharacterMovement
             };
             collisionQuery.SetExclude(_characterCollisionRids);
 
-            var restInfo = space.GetRestInfo(collisionQuery);
+            var restInfo = _space.GetRestInfo(collisionQuery);
             if (restInfo.TryGetValue("normal", out var normal))
             {
                 state.GroundNormal = (Vector3)normal;
@@ -206,50 +207,47 @@ public class CharacterMovement
         }
     }
 
-    public CharacterMoveState MoveAndSlide(CharacterMoveState state, ClientInputCommand cmd, float delta)
+    public void MoveAndSlide(ref CharacterMoveState state, ClientInputCommand cmd, float delta)
     {
-        var space = Character.GetWorld3D().DirectSpaceState;
 
-        CheckGround(state, state.Position, space);
+        CheckGround(state, state.Position);
 
         if (state.IsGrounded)
         {
-            MoveAndSlideGrounded(state, cmd, space, delta);
+            MoveAndSlideGrounded(ref state, cmd, delta);
         }
         else
         {
-            MoveAndSlideAir(state, cmd,space, delta);
+            MoveAndSlideAir(ref state, cmd, delta);
         }
 
         state.TicksRemainingBeforeJump--;
-
-        return state;
     }
 
-    public CharacterMoveState MoveAndSlideGrounded(CharacterMoveState state, ClientInputCommand cmd, PhysicsDirectSpaceState3D space, float delta)
+    public void MoveAndSlideGrounded(ref CharacterMoveState state, ClientInputCommand cmd, float delta)
     {
         if ((cmd.Flags & InputFlags.JUMP) != 0 && state.TicksRemainingBeforeJump <= 0)
         {
             Jump(state);
-            MoveAndSlideAir(state, cmd, space, delta);
-            return state;
+            MoveAndSlideAir(ref state, cmd, delta);
+            return;
         }
 
-        ApplyAcceleration(state, _walkAcceleration, _walkDeceleration, delta);
+        ApplyAcceleration(ref state, _walkAcceleration, _walkDeceleration, delta);
 
         if (state.Velocity == Vector3.Zero)
         {
-            return state;
+            return;
         }
 
         state.Velocity = state.Velocity.Slide(state.GroundNormal);
 
-        StepAndSlide(state, space, delta, true);
+        StepAndSlide(ref state, delta, true);
 
-        return state;
+        return;
     }
 
-    public void StepAndSlide(CharacterMoveState state, PhysicsDirectSpaceState3D space, float delta, bool groundedMove)
+    public void StepAndSlide(ref CharacterMoveState state, float delta, bool groundedMove)
     {
 
         Vector3 remainingMotion = state.Velocity * delta;
@@ -268,7 +266,7 @@ public class CharacterMovement
 
             Vector3 targetMotion = direction * remainingDistance;
 
-            var sweepResult = Sweep(state, state.Position, space, targetMotion);
+            var sweepResult = Sweep(state, state.Position, targetMotion);
 
             if (sweepResult.SafePercent >= 1.0f)
             {
@@ -306,7 +304,7 @@ public class CharacterMovement
 
 
                         Vector3 upMotion = new Vector3(0.0f, MAX_STEP_HEIGHT, 0.0f);
-                        var upSweep = Sweep(state, stepPosition, space, upMotion);
+                        var upSweep = Sweep(state, stepPosition, upMotion);
 
                         GD.Print($"up sweep safe motion length = {upSweep.SafeMotion.Length()}");
 
@@ -322,7 +320,7 @@ public class CharacterMovement
                                 targetMotion = targetMotion.Normalized() * minForwardStep;
                             }
 
-                            var forwardSweep = Sweep(state, stepPosition, space, targetMotion);
+                            var forwardSweep = Sweep(state, stepPosition, targetMotion);
 
                             GD.Print($"forward sweep safe percent= {forwardSweep.SafePercent}");
 
@@ -333,7 +331,7 @@ public class CharacterMovement
 
                                 // Finally, sweep back down to floor
                                 var downMotion = new Vector3(0.0f, -MAX_STEP_HEIGHT, 0.0f);
-                                var downSweep = Sweep(state, stepPosition, space, downMotion);
+                                var downSweep = Sweep(state, stepPosition, downMotion);
 
 
                                 state.Position += upSweep.SafeMotion + forwardSweep.SafeMotion + downSweep.SafeMotion + new Vector3(0.0f, GROUND_CLEARANCE * 2.0f, 0.0f);
@@ -366,7 +364,7 @@ public class CharacterMovement
 
                     }
 
-                    CheckStuck(state, space);
+                    CheckStuck(state);
 
                 }
             }
@@ -378,7 +376,7 @@ public class CharacterMovement
         }
     }
 
-    public void CheckStuck(CharacterMoveState state, PhysicsDirectSpaceState3D space)
+    public void CheckStuck(CharacterMoveState state)
     {
         PhysicsShapeQueryParameters3D query = new()
         {
@@ -389,7 +387,7 @@ public class CharacterMovement
         };
         query.SetExclude(_characterCollisionRids);
 
-        var trappedResult = space.GetRestInfo(query);
+        var trappedResult = _space.GetRestInfo(query);
 
         if (trappedResult.Count > 0)
         {
@@ -398,7 +396,7 @@ public class CharacterMovement
         }
     }
 
-    public SweepResult Sweep(CharacterMoveState state, Vector3 startPosition, PhysicsDirectSpaceState3D space, Vector3 motion)
+    public SweepResult Sweep(CharacterMoveState state, Vector3 startPosition, Vector3 motion)
     {
 
         PhysicsShapeQueryParameters3D motionQuery = new()
@@ -413,7 +411,7 @@ public class CharacterMovement
 
         SweepResult sweepResult = new();
 
-        var queryResult = space.CastMotion(motionQuery);
+        var queryResult = _space.CastMotion(motionQuery);
 
         sweepResult.SafePercent = queryResult[0];
         sweepResult.SafeMotion = motion * sweepResult.SafePercent;
@@ -433,7 +431,7 @@ public class CharacterMovement
             };
             collisionQuery.SetExclude(_characterCollisionRids);
 
-            var restInfo = space.GetRestInfo(collisionQuery);
+            var restInfo = _space.GetRestInfo(collisionQuery);
             if (restInfo.TryGetValue("normal", out var normal))
             {
                 sweepResult.CollisionNormal = (Vector3)normal;
@@ -457,22 +455,22 @@ public class CharacterMovement
     }
 
 
-    public CharacterMoveState MoveAndSlideAir(CharacterMoveState state, ClientInputCommand cmd, PhysicsDirectSpaceState3D space, float delta)
+    public void MoveAndSlideAir(ref CharacterMoveState state, ClientInputCommand cmd, float delta)
     {
-        ApplyAcceleration(state, _airAcceleration, _airDeceleration, delta);
-        ApplyGravity(state, delta);
+        ApplyAcceleration(ref state, _airAcceleration, _airDeceleration, delta);
+        ApplyGravity(ref state, delta);
 
         if (state.Velocity == Vector3.Zero)
         {
-            return state;
+            return;
         }
 
-        StepAndSlide(state, space, delta, false);
+        StepAndSlide(ref state, delta, false);
 
-        return state;
+        return;
     }
 
-    public void ProcessInput(CharacterMoveState state, ClientInputCommand cmd, float delta)
+    public void ProcessInput(ref CharacterMoveState state, ClientInputCommand cmd, float delta)
     {
         Vector3 move = Vector3.Zero;
         if ((cmd.Flags & InputFlags.FORWARD) != 0) move.Z -= 1;
@@ -503,7 +501,7 @@ public class CharacterMovement
 
 
 
-    public void ApplyAcceleration(CharacterMoveState state, float acceleration, float deceleration, float delta)
+    public void ApplyAcceleration(ref CharacterMoveState state, float acceleration, float deceleration, float delta)
     {
         // Correctly clamped acceleration
         Vector3 horizontalVel = new Vector3(state.Velocity.X, 0, state.Velocity.Z);
@@ -558,14 +556,14 @@ public class CharacterMovement
         GD.Print($"JUMP");
     }
 
-    public void ApplyGravity(CharacterMoveState state, float delta)
+    public void ApplyGravity(ref CharacterMoveState state, float delta)
     {
         state.Velocity += _gravityVector * delta;
     }
 
     const float SAFE_MOTION_PADDING = 0.05f;
    
-    private void CheckCollidables(CharacterMoveState state, bool isSimulating)
+    private void CheckCollidables(ref CharacterMoveState state, bool isSimulating)
     {
 
         if(isSimulating)
@@ -579,8 +577,6 @@ public class CharacterMovement
         {
             state.NewlyOverlappedCollidables.Clear();
 
-            var space = Character.GetWorld3D().DirectSpaceState;
-
             PhysicsShapeQueryParameters3D query = new()
             {
                 Shape = _mainCollisionShape,
@@ -590,7 +586,7 @@ public class CharacterMovement
                 CollisionMask = PhysicsConstants.CHARACTER_COLLIDABLES_MASK
             };
 
-            var results = space.IntersectShape(query, 8);
+            var results = _space.IntersectShape(query, 8);
 
             List<ICharacterCollidable> newCollidables = new();
 
@@ -710,7 +706,7 @@ public class CharacterMovement
         {
             foreach (var clientInputCommand in ClientGame.Instance.UnprocessedClientInputCommands)
             {
-                PredictedState = Step(PredictedState, clientInputCommand, delta, true);
+                Step(ref PredictedState, clientInputCommand, delta, true);
             }
 
             if (_isSkippingReconciliation)
@@ -780,6 +776,6 @@ public class CharacterMovement
 
     public void HandlePredictedInput(ClientInputCommand cmd, float delta)
     {
-        PredictedState = Step(PredictedState, cmd, delta);
+        Step(ref PredictedState, cmd, delta);
     }
 }
